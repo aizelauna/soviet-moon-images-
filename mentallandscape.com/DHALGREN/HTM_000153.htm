@@ -1,0 +1,304 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Scorpion Player Class</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Scorpion Player Class (#153)</H3>
+(an instance of <A HREF="HTM_000099.htm">Useful Utilitarian PC</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a generic scorpion player, the basic Dhalgren-themed class, who can integrate worn messages and do a few other tricks.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Scorpion Player Class (GSPC) implements some basic themely features for 
+players on Dhalgren MOO.  "Scorpions" are members of youth gangs who wear holographic 
+light shields (in Delaney's book).  Features include:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp - look notification
+&nbsp&nbsp&nbsp&nbsp&nbsp - carried objects with worn_msgs are integrated into the player's desc.
+&nbsp&nbsp&nbsp&nbsp&nbsp - movable_msg == NO makes player unmovable by others.
+&nbsp&nbsp&nbsp&nbsp&nbsp - remote_see_msg == YES allows players not in the same room to look at you.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+look_self:
+<pre>
+if ((player.location != this.location) && (this.remote_see_msg != "YES"))
+    player:tell("You are too far away to see that player.");
+    return;
+endif
+pass(@args);
+if (player != this)
+    this:tell("[", player.name, " looks in your direction!]");
+endif
+.
+
+</pre>
+<BR>
+description:
+<pre>
+if ((player.location != this.location) && (this.remote_see_msg != "YES"))
+    return "You are too far away to see this player.";
+endif
+desc = pass(@args);
+if (worn = this:get_worn())
+    wmsgs = "";
+    for w in (worn)
+        wmsgs = (wmsgs + "  ") + $string_utils:pronoun_sub(this:is_wearable(w), this, 
+w);
+    endfor
+    if (typeof(desc) == STR)
+        return desc + wmsgs;
+    elseif (typeof(desc) == LIST)
+        return {@desc, wmsgs[3..length(wmsgs)]};
+    else
+        return wmsgs;
+    endif
+else
+    return desc;
+endif
+.
+
+</pre>
+<BR>
+home:
+<pre>
+"Copied from generic player (#6):home by The_Mayor (#2) Sun Feb  6 17:47:03 1994 
+EST";
+"modifed to use the usual player teleport messages like @go or @join";
+start = this.location;
+if (start == this.home)
+    player:tell("You're already home!");
+    return;
+elseif (typeof(this.home) != OBJ)
+    player:tell("You've got a weird home, pal.  I've reset it to the default one.");
+    this.home = $player_start;
+elseif (!valid(this.home))
+    player:tell("Oh no!  Your home's been recycled.  Time to look around for a new 
+one.");
+    this.home = $player_start;
+endif
+this:moveto(this.home);
+if (!valid(start))
+elseif (start == this.location)
+    start:announce(player.name, " learns that you can never go home...");
+else
+    start:announce(player:oself_port_msg(this.home));
+endif
+if (this.location == this.home)
+    if (msg = this:self_port_msg(this.home))
+        player:tell(msg);
+    endif
+    this.location:announce(player:oself_arrive_msg(this.home));
+elseif (this.location == start)
+    player:tell("Either home doesn't want you, or you don't really want to go.");
+else
+    player:tell("Wait a minute!  This isn't your home...");
+    if (valid(this.location))
+        this.location:announce(player.name, " arrives, looking quite bewildered.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+moveto:
+<pre>
+if ((player != this) && (this.movable_msg == "NO"))
+    this:tell(player.name, " tried to move you.");
+    player:tell(E_PERM);
+else
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+spoof:
+<pre>
+this.location:announce_all("(", argstr, ")");
+.
+
+</pre>
+<BR>
+get_worn:
+<pre>
+"simply returns what's being worn. Children can customize";
+return this.worn;
+.
+
+</pre>
+<BR>
+set_worn:
+<pre>
+"given a list of objects, sets in .worn. Does check that they have a worn_msg associated, 
+and remove those that don't. Returning the list of those that were successfully added 
+so calling verbs can check discrepencies.";
+"Does NOT add to existing .worn. Simply replaces it. Calling verbs should use :et_worn 
+to get the list and modify, then call :set_worn";
+if ((!$perm_utils:controls(caller_perms(), this)) && (caller != this))
+    return E_PERM;
+elseif (typeof(wornlist = args[1]) != LIST)
+    return E_TYPE;
+else
+    for d in (wornlist)
+        if (!this:is_wearable(d))
+            wornlist = setremove(wornlist, d);
+        endif
+    endfor
+    return this.worn = wornlist;
+endif
+.
+
+</pre>
+<BR>
+contents:
+<pre>
+if ($set_utils:intersection($list_utils:slice(callers(), 2), {"look_self", "description"}))
+    return $set_utils:xor(this.contents, this:get_worn());
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+wear:
+<pre>
+"Allows the player to put on an object. The object must have a .worn_msg or a :worn_msg.";
+"This verb calls :pre_dress_efects before putting it on and :post_dress_effects afterwards 
+on the object if it exists to display messages or whatever the object desires";
+target = player:my_match_object(dobjstr);
+if (!$command_utils:object_match_failed(target, dobjstr))
+    if (!player:is_wearable(target))
+        player:tell("You can't seem to put ", target.name, " on.");
+    elseif (target in (wear_now = player:get_worn()))
+        player:tell("You are already wearing ", target.name, ".");
+    else
+        if ($object_utils:has_callable_verb(target, "pre_dress_effects"))
+            target:pre_dress_effects();
+        else
+            player:tell("You put on ", target:title(), ".");
+        endif
+        if (target.location != player)
+            target:moveto(player);
+        endif
+        this:set_worn(setadd(wear_now, target));
+        if ($object_utils:has_callable_verb(target, "post_dress_effects"))
+            target:post_dress_effects();
+        else
+            player:room_announce(player:titlec(), " puts on ", target:title(), ".");
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+is_wearable:
+<pre>
+return $code_utils:verb_or_property(args[1], "worn_msg");
+.
+
+</pre>
+<BR>
+remove:
+<pre>
+"Allows the player to remove on an object s/he is wearing.";
+"This verb calls :pre_undress_efects before removing it on and :post_undress_effects 
+afterwards on the object if it exists to display messages or whatever the object 
+desires";
+target = player:my_match_object(dobjstr);
+worn = player:get_worn();
+target = valid(target) ? target | $string_utils:match(dobjstr, worn, {"name", "aliases"});
+if (!$command_utils:object_match_failed(target, dobjstr))
+    if (!(target in worn))
+        player:tell("You aren't wearing ", target.name, ".");
+    else
+        if ($object_utils:has_callable_verb(target, "pre_undress_effects"))
+            target:pre_undress_effects();
+        else
+            player:tell("You remove ", target:title(), ".");
+        endif
+        this:set_worn(setremove(worn, target));
+        if ($object_utils:has_callable_verb(target, "post_undress_effects"))
+            target:post_undress_effects();
+        else
+            player:room_announce(player:titlec(), " removes ", target:title(), ".");
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+exitfunc:
+<pre>
+if ((target = args[1]) == caller)
+    if (args[1] in (worn = this:get_worn()))
+        if ($object_utils:has_callable_verb(target, "pre_undress_effects"))
+            target:pre_undress_effects();
+        else
+            player:tell("You remove ", target:title(), ".");
+        endif
+        this:set_worn(setremove(worn, target));
+        if ($object_utils:has_callable_verb(target, "post_undress_effects"))
+            target:post_undress_effects();
+        else
+            player:room_announce(player:titlec(), " removes ", target:title(), ".");
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+@map:
+<pre>
+player:tell_lines(#406:text());
+.
+
+</pre>
+<BR>
+tell:
+<pre>
+"Copied from Patroclus (#78):tell Sat Nov 19 01:51:28 1994 EST";
+notify(this, tostr(@args));
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp movable_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp remote_see_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp worn
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000195.htm">Sadao</A> <A HREF="HTM_000150.htm">Calkins</A> <A HREF="HTM_000215.htm">Kashka</A> <A HREF="HTM_000241.htm">Pierce</A> <A HREF="HTM_000095.htm">legba</A> <A HREF="HTM_000277.htm">Amber-Jessica</A> <A HREF="HTM_000258.htm">Quentin</A> <A HREF="HTM_000078.htm">Patroclus</A> <A HREF="HTM_000293.htm">Kidd</A> <A HREF="HTM_000296.htm">Valis</A> <A HREF="HTM_000300.htm">Steve</A> <A HREF="HTM_000302.htm">Osiris</A> <A HREF="HTM_000352.htm">genna</A> <A HREF="HTM_000103.htm">Zon</A> <A HREF="HTM_000407.htm">Tom</A> <A HREF="HTM_000409.htm">Bow</A> <A HREF="HTM_000301.htm">cinnamon</A> <A HREF="HTM_000429.htm">99</A> <A HREF="HTM_000445.htm">Tarquin</A> <A HREF="HTM_000446.htm">Salome</A> <A HREF="HTM_000448.htm">Snap</A> <A HREF="HTM_000463.htm">Malquist</A> <A HREF="HTM_000479.htm">Prometheus</A> <A HREF="HTM_000477.htm">Anriliselle</A> <A HREF="HTM_000464.htm">Armand</A> <A HREF="HTM_000486.htm">bEnD_siNIsTer</A> <A HREF="HTM_000118.htm">Vampy</A> <A HREF="HTM_000509.htm">Ox</A> <A HREF="HTM_000478.htm">coyote</A> <A HREF="HTM_000510.htm">Saffron</A> <A HREF="HTM_000543.htm">Ari</A> <A HREF="HTM_000549.htm">Felix</A> <A HREF="HTM_000533.htm">Moss</A> <A HREF="HTM_000565.htm">Jon</A> <A HREF="HTM_000615.htm">Stellah</A> <A HREF="HTM_000212.htm">MrSpell</A> <A HREF="HTM_000198.htm">Hilshire</A> <A HREF="HTM_000715.htm">Rhys</A> <A HREF="HTM_000794.htm">Faber</A> <A HREF="HTM_000806.htm">Jander</A> <A HREF="HTM_000813.htm">Phantom</A> <A HREF="HTM_000861.htm">Sai</A> <A HREF="HTM_000875.htm">Rebis</A> <A HREF="HTM_000905.htm">polyhymnia</A> <A HREF="HTM_000907.htm">melusina</A> <A HREF="HTM_000908.htm">Mosaica</A> <A HREF="HTM_000487.htm">Loree</A> <A HREF="HTM_000886.htm">Chianti</A> <A HREF="HTM_000963.htm">katiemur</A> <A HREF="HTM_000381.htm">Gru</A> <A HREF="HTM_001009.htm">Burton</A> <A HREF="HTM_000513.htm">Obvious</A> <A HREF="HTM_001059.htm">Butch_Stetson</A> <A HREF="HTM_000515.htm">emma</A> <A HREF="HTM_001149.htm">Maelstrom</A> <A HREF="HTM_001140.htm">Jeannie</A> <A HREF="HTM_000885.htm">Gwendo</A> <A HREF="HTM_001008.htm">Wes</A> <A HREF="HTM_001186.htm">Tonya</A> <A HREF="HTM_001185.htm">Michele</A> <A HREF="HTM_000835.htm">Marinetti</A> <A HREF="HTM_001011.htm">Ibn_Khaldun</A> <A HREF="HTM_000585.htm">kp</A> <A HREF="HTM_001205.htm">Orlando</A> <A HREF="HTM_001228.htm">Wizard</A> <A HREF="HTM_001237.htm">Trees_Beatnik</A> <A HREF="HTM_001139.htm">Caitlin</A> <A HREF="HTM_001286.htm">Drummer</A> <A HREF="HTM_001358.htm">Johnathon</A> <A HREF="HTM_001381.htm">Mike</A> <A HREF="HTM_001279.htm">Brian</A> <A HREF="HTM_001399.htm">Cypher</A> <A HREF="HTM_001412.htm">johnle</A> <A HREF="HTM_001061.htm">Cody</A> <A HREF="HTM_001445.htm">Gunther</A> <A HREF="HTM_001454.htm">antichrist(ina)</A> <A HREF="HTM_001473.htm">Gilmore</A> <A HREF="HTM_001511.htm">Spaz</A> <A HREF="HTM_001431.htm">Rob</A> <A HREF="HTM_001474.htm">Sjourney</A> <A HREF="HTM_000558.htm">Silk</A> <A HREF="HTM_001541.htm">Joshua</A> <A HREF="HTM_001552.htm">PB</A> <A HREF="HTM_001223.htm">Generic Lycanthropic Thespian PC</A> <A HREF="HTM_001549.htm">Redlance</A> <A HREF="HTM_001617.htm">Ozymandias</A> <A HREF="HTM_000276.htm">DrBenway</A> <A HREF="HTM_002020.htm">Linnea</A> <A HREF="HTM_002145.htm">Arc</A> <A HREF="HTM_002231.htm">Generic Dung Beetle Player Class</A> <A HREF="HTM_002239.htm">Amy</A> <A HREF="HTM_002238.htm">Jay</A> <A HREF="HTM_002240.htm">Gordon</A> <A HREF="HTM_002241.htm">Gayatri</A> <A HREF="HTM_002291.htm">CASaNova</A> <A HREF="HTM_002287.htm">Nan</A> <A HREF="HTM_002298.htm">Amethyst</A> <A HREF="HTM_002308.htm">Buddy</A> <A HREF="HTM_002297.htm">Losira</A> <A HREF="HTM_002316.htm">Defargegrrl</A> <A HREF="HTM_001249.htm">Jo</A> <A HREF="HTM_002317.htm">Rainglowgrrl</A> <A HREF="HTM_002318.htm">whirlpool</A> <A HREF="HTM_000299.htm">No_El</A> <A HREF="HTM_002331.htm">angelfang</A> <A HREF="HTM_002296.htm">Cass</A> <A HREF="HTM_001142.htm">Magister_Luddite</A> <A HREF="HTM_002360.htm">Mack-the-Knife</A> <A HREF="HTM_002253.htm">arianne</A> <A HREF="HTM_002372.htm">flat</A> <A HREF="HTM_002387.htm">subjectivity</A> <A HREF="HTM_000539.htm">Sick</A> <A HREF="HTM_002390.htm">Figment</A> <A HREF="HTM_002355.htm">Qrs</A> <A HREF="HTM_002377.htm">Lanya</A> <A HREF="HTM_002401.htm">Omelas</A> <A HREF="HTM_002397.htm">tuc</A> <A HREF="HTM_001080.htm">Random</A> <A HREF="HTM_002429.htm">linx</A> <A HREF="HTM_002403.htm">Amani</A> <A HREF="HTM_002436.htm">Shana</A> <A HREF="HTM_002438.htm">triffid</A> <A HREF="HTM_002432.htm">Rotifer</A> <A HREF="HTM_002440.htm">Mystery</A> <A HREF="HTM_002441.htm">Stetson</A> <A HREF="HTM_002443.htm">chloe</A> <A HREF="HTM_002021.htm">Ice</A> <A HREF="HTM_002452.htm">iggy</A> <A HREF="HTM_002405.htm">cybunny</A> <A HREF="HTM_002412.htm">Babeuf</A> <A HREF="HTM_002458.htm">Shallott</A> <A HREF="HTM_002482.htm">tend</A> <A HREF="HTM_002483.htm">summer</A> <A HREF="HTM_002404.htm">feh</A> <A HREF="HTM_002485.htm">Pertinax</A> <A HREF="HTM_002504.htm">Narvus</A> <A HREF="HTM_002530.htm">Beaker</A> <A HREF="HTM_002376.htm">Booga</A> <A HREF="HTM_002562.htm">Brit</A> <A HREF="HTM_002567.htm">Prism</A> <A HREF="HTM_002576.htm">YjAzU</A> <A HREF="HTM_002583.htm">Liokke</A> <A HREF="HTM_002233.htm">elhajj</A> <A HREF="HTM_002607.htm">cling_wrap</A> <A HREF="HTM_002528.htm">Calder</A> <A HREF="HTM_002329.htm">Thack</A> <A HREF="HTM_002641.htm">Bedai</A> <A HREF="HTM_002657.htm">Zola</A> <A HREF="HTM_002658.htm">Ledtrad</A> <A HREF="HTM_000797.htm">Pokey</A> <A HREF="HTM_002510.htm">Sakana</A> <A HREF="HTM_002642.htm">Andovar</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

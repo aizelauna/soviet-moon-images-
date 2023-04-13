@@ -1,0 +1,80 @@
+<HTML>
+<HEAD>
+<TITLE>a small desk</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a small desk (#1406)</H3>
+(an instance of <A HREF="HTM_000008.htm">generic container</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAn old roll-top desk:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cherry wood beaten up 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  through several moves
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  still gleams & shines
+<BR>
+<BR>
+a small desk contains <A HREF="HTM_001261.htm">Entry</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001043.htm">flutterby's whimsy</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+tell_contents:
+<pre>
+player:tell_lines(this.inside_desc);
+if (this.contents)
+    player:tell(" Inside the desk: ", $string_utils:title_list(this.contents));
+elseif (msg = this:empty_msg())
+    player:tell(msg);
+endif
+.
+
+</pre>
+<BR>
+open:
+<pre>
+this.opened ? wasclosed = 0 | (wasclosed = 1);
+pass(@args);
+if (this.opened && wasclosed)
+    player:tell_lines(this.opening);
+endif
+.
+
+</pre>
+<BR>
+consult enter:
+<pre>
+if (!this.opened)
+    player:tell("The desk, closed, remains inscrutable.");
+else
+    player:moveto(this.dest);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp inside_desc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp opening
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dest
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

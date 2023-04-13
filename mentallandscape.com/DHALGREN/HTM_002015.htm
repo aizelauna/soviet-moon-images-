@@ -1,0 +1,101 @@
+<HTML>
+<HEAD>
+<TITLE>a plastic sign</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a plastic sign (#2015)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_001457.htm">Trismegistos</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspOne of those portable yellow plastic roadside signs with black movable letters, which 
+you can read ...
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_001603.htm">Filling Station</A>.
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspTOSS MISTER GI
+</pre>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+spell:
+<pre>
+if (typeof(args[1]) != STR)
+    player:tell("I don't understand. Try enclosing what you are trying to spell in 
+\"quotes\".");
+    return;
+else
+    textlist = {};
+    for n in [1..length(this.text)]
+        textlist = listinsert(textlist, this.text[n]);
+    endfor
+    fits = 1;
+    for n in [1..length(args[1])]
+        if (args[1][n] != " ")
+            if (loc = match($string_utils:from_list(textlist), args[1][n], 1))
+                textlist = listdelete(textlist, loc[1]);
+            else
+                fits = 0;
+            endif
+        endif
+    endfor
+    if (fits)
+        leftover = $string_utils:from_list($list_utils:reverse(textlist));
+        this.text = $string_utils:trim((args[1] + " ") + leftover);
+        player:tell(this.name, " now reads: ", this.text);
+        player.location:announce(player.name, " rearranges the letters on ", this.name, 
+".");
+    else
+        player:tell("Sorry, ", args[1], " cannot be made out of the letters in ", 
+this.text, ". (remember, case and punctuation do count.)");
+    endif
+endif
+.
+
+</pre>
+<BR>
+@setletters:
+<pre>
+if (player != this.owner)
+    player:tell("Only the owner may set the letters on ", this.name);
+    return;
+else
+    this.text = $command_utils:read();
+    player:tell("Text set to '", this.text, "'.");
+endif
+.
+
+</pre>
+<BR>
+r*ead:
+<pre>
+this:look_self();
+player:tell();
+player:tell_lines(this.text);
+player:tell();
+player:tell("(You finish reading.)");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp text
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp look_msg
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

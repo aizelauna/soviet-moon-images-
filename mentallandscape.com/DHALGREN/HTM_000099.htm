@@ -1,0 +1,664 @@
+<HTML>
+<HEAD>
+<TITLE>Useful Utilitarian PC</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Useful Utilitarian PC (#99)</H3>
+(an instance of <A HREF="HTM_000059.htm">generic programmer</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis player class provides some very basic tools and advanced functions that most players will want to have. Especially if they are into serious building and programming. Once you @chparent to #99, type: `help UUPC-Index'
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000179.htm">Cluttered Closet</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@verbs @lverbs:
+<pre>
+"Syntax: @verbs <object> - Short display of verbs";
+"       @lverbs <object> - see below";
+"";
+"An informative listing of verbs on <object>. Shows the name (concatenated if too 
+long), the owner (Also concatenated), and the flags for each verb. If the verb name 
+is too long, a `>' will appear at the end of the name. If the verb is not programmed, 
+a `*' will appear at the beginning of the name.";
+set_task_perms(player);
+target = player:my_match_object(dobjstr);
+if ($command_utils:object_match_failed(target, dobjstr))
+    return;
+endif
+if (verblist = player:get_verbs(target))
+    if (verb[2] == "l")
+        totell = {};
+        for vrb in (verblist)
+            vn = player:parse_verb_name(vrb);
+            if ((typeof(vrb) == ERR) || (typeof(verb_info(target, vn)) == ERR))
+                totell = {@totell, " E_PERM............[-------------] !!!!"};
+            else
+                $command_utils:suspend_if_needed(0);
+                vinfo = verb_info(target, vn);
+                totell = {@totell, (((player:verb_vname(vinfo[3], target, vn) + "[") 
++ player:verb_oname(vinfo[1])) + "] ") + vinfo[2]};
+            endif
+        endfor
+        player:tell_lines($string_utils:columnize(totell, 2));
+        player:tell("-- Finished");
+    else
+        player:tell(";verbs(", target, ") => ", $string_utils:print(verblist));
+    endif
+else
+    player:tell("No verbs found on: ", $string_utils:nn(target), ".");
+endif
+.
+
+</pre>
+<BR>
+verb_vname:
+<pre>
+set_task_perms(caller_perms());
+vrb = args[1];
+if (typeof(prog = verb_code(args[2], args[3]) ? " " | "*") == ERR)
+    return "";
+endif
+if (length(vrb) > 17)
+    return (prog + vrb[1..17]) + ">";
+else
+    stf = ".....................";
+    return (prog + vrb) + stf[1..18 - length(vrb)];
+endif
+.
+
+</pre>
+<BR>
+parse_verb_name:
+<pre>
+"gets usable verb name in case of wildcards or aliases";
+vrb = args[1];
+if (ind = index(vrb, " "))
+    nvrb = vrb[1..ind - 1];
+else
+    nvrb = vrb;
+endif
+return strsub(nvrb, "*", "");
+.
+
+</pre>
+<BR>
+verb_oname:
+<pre>
+"Puts owner name in a nice string";
+own = args[1];
+ownnum = " " + tostr(own);
+nam = own.name + ownnum;
+if (length(nam) > 13)
+    return own.name[1..13 - length(ownnum)] + ownnum;
+else
+    srf = ".............";
+    return nam + srf[1..13 - length(nam)];
+endif
+.
+
+</pre>
+<BR>
+@props @lprops:
+<pre>
+"Syntax: @props <object> - Short listing of properties";
+"      @lprops <object> - see below";
+"";
+"An informative listing of properties on <object>. Shows the name (concatenated if 
+too long), the owner (also concatenated), and the flags for each verb. Please note 
+that this will only work for +r objects.";
+set_task_perms(player);
+target = player:my_match_object(dobjstr);
+if ($command_utils:object_match_failed(target, dobjstr))
+    return;
+endif
+if (typeof(proplist = properties(target)) == ERR)
+    player:tell(proplist);
+    return;
+endif
+if (proplist)
+    if (verb[2] == "l")
+        totell = {};
+        for prp in (proplist)
+            $command_utils:suspend_if_needed(0);
+            pinfo = property_info(target, prp);
+            if (pinfo == E_PERM)
+                totell = {@totell, "E_PERM...........[-------------] !!! -"};
+            else
+                totell = {@totell, (((this:prop_pname(prp) + "[") + this:verb_oname(pinfo[1])) 
++ "] ") + this:prop_type(typeof(target.(prp)), pinfo[2])};
+            endif
+        endfor
+        player:tell_lines($string_utils:columnize(totell, 2));
+        player:tell("-- Finished");
+    else
+        player:tell(";properties(", target, ") => ", $string_utils:print(proplist));
+    endif
+else
+    player:tell("No properties defined on: ", $string_utils:nn(target), ".");
+endif
+.
+
+</pre>
+<BR>
+prop_pname:
+<pre>
+"Puts property name in nice string";
+prp = args[1];
+if ((lp = length(prp)) > 16)
+    return prp[1..16] + ">";
+else
+    stf = "....................";
+    return prp + stf[1..17 - lp];
+endif
+.
+
+</pre>
+<BR>
+prop_type:
+<pre>
+"Puts prop vitals in nice string";
+typ = args[1];
+flags = args[2];
+if (typ == LIST)
+    typ = "L";
+elseif (typ == STR)
+    typ = "S";
+elseif (typ == OBJ)
+    typ = "O";
+else
+    typ = "N";
+endif
+return (tostr(flags, "...")[1..3] + " ") + typ;
+.
+
+</pre>
+<BR>
+@find:
+<pre>
+"'@find #<object>', '@find <player>', '@find :<verb>' '@find .<property>' - Attempt 
+to locate things. Verbs and properties are found on any object in the player's vicinity, 
+and some other places.";
+if (!dobjstr)
+    player:tell("Syntax: '@find #<object>' or '@find <player>' or '@find :<verb>' 
+or '@find .<property>'.");
+    return;
+endif
+if (dobjstr[1] == ":")
+    name = dobjstr[2..length(dobjstr)];
+    this:find_verb(name);
+    return;
+elseif (dobjstr[1] == ".")
+    name = dobjstr[2..length(dobjstr)];
+    this:find_property(name);
+    return;
+elseif (dobjstr[1] == "#")
+    target = toobj(dobjstr);
+    if (!valid(target))
+        player:tell(target, " does not exist.");
+    endif
+else
+    target = $string_utils:match_player(dobjstr);
+    $command_utils:player_match_result(target, dobjstr);
+endif
+if (valid(target))
+    player:tell(target.name, " (", target, ") is at ", valid(target.location) ? target.location.name 
+| "Nowhere", " (", target.location, ").");
+endif
+.
+
+</pre>
+<BR>
+find_verb:
+<pre>
+"'find_verb (<name>)' - Search for a verb with the given name. The objects searched 
+are those returned by this:find_verbs_on(). The printing order relies on $list_utils:remove_duplicates 
+to leave the *first* copy of each duplicated element in a list; for example, {1, 
+2, 1} -> {1, 2}, not to {2, 1}.";
+name = args[1];
+results = "";
+objects = $list_utils:remove_duplicates(this:find_verbs_on());
+for thing in (objects)
+    if (valid(thing) && (mom = $object_utils:has_verb(thing, name)))
+        results = ((((results + "   ") + thing.name) + "(") + tostr(thing)) + ")";
+        mom = mom[1];
+        if (thing != mom)
+            results = ((((results + "--") + mom.name) + "(") + tostr(mom)) + ")";
+        endif
+    endif
+endfor
+if (results)
+    this:tell("The verb :", name, " is on", results);
+else
+    this:tell("The verb :", name, " is nowhere to be found.");
+endif
+.
+
+</pre>
+<BR>
+find_property:
+<pre>
+"'find_property (<name>)' - Search for a property with the given name. The objects 
+searched are those returned by this:find_properties_on(). The printing order relies 
+on $list_utils:remove_duplicates to leave the *first* copy of each duplicated element 
+in a list; for example, {1, 2, 1} -> {1, 2}, not to {2, 1}.";
+name = args[1];
+results = "";
+objects = $list_utils:remove_duplicates(this:find_properties_on());
+for thing in (objects)
+    if (valid(thing) && (mom = $object_utils:has_property(thing, name)))
+        results = ((((results + "   ") + thing.name) + "(") + tostr(thing)) + ")";
+        mom = this:property_inherited_from(thing, name);
+        if (thing != mom)
+            if (valid(mom))
+                results = ((((results + "--") + mom.name) + "(") + tostr(mom)) + 
+")";
+            else
+                results = results + "--built-in";
+            endif
+        endif
+    endif
+endfor
+if (results)
+    this:tell("The property .", name, " is on", results);
+else
+    this:tell("The property .", name, " is nowhere to be found.");
+endif
+.
+
+</pre>
+<BR>
+find_verbs_on:
+<pre>
+"'find_verbs_on ()' -> list of objects - Return the objects that @find searches when 
+looking for a verb. The objects are searched (and the results printed) in the order 
+returned. Feature objects are included in the search. Duplicate entries are removed 
+by the caller.";
+return {this, this.location, @valid(this.location) ? this.location:contents() | {}, 
+@this:contents(), @this.features};
+.
+
+</pre>
+<BR>
+find_properties_on:
+<pre>
+"'find_properties_on ()' -> list of objects - Return the objects that @find searches 
+when looking for a property. The objects are searched (and the results printed) in 
+the order returned. Feature objects are *not* included in the search. Duplicate entries 
+are removed by the caller.";
+return {this, this.location, @valid(this.location) ? this.location:contents() | {}, 
+@this:contents()};
+.
+
+</pre>
+<BR>
++*:
+<pre>
+"Syntax: +<player> <emote>  or  ++<player> <emote>";
+"        + <emote> or ++ <emote)";
+"";
+"A distance emote, which can be sent to any player. Like a normal emote, a double 
+++ (::) will remove the space in between your name and the emote. If you leave out 
+<player>, then the last player you paged or who paged you will receive the emote.";
+"Your remote-emote will be prefixed by your page_emote_prefix message. You can set 
+this by `@page_emote_prefix me is \"...\"'. It defaults to `(from %l)', and uses 
+normal pronoun substitutions.";
+nargs = length(args);
+if (nargs < 1)
+    player:tell("Usage: +<player> <emote>  or  ++<player> <emote>");
+    return;
+endif
+if ((length(verb) > 1) && (verb[2] == "+"))
+    search = verb[3..length(verb)];
+    nspc = 1;
+else
+    search = verb[2..length(verb)];
+    nspc = 0;
+endif
+if (search)
+    who = $string_utils:match_player(search);
+    if ($command_utils:player_match_result(who, search)[1])
+        return;
+    endif
+elseif (valid(who = this:get_respond()))
+else
+    player:tell("Who do you want to emote remotely to?");
+    return;
+endif
+this:set_respond(who.name);
+dobj = who;
+iobj = player;
+header = player:page_origin_msg();
+if (nspc)
+    text = tostr(((player:page_emote_prefix_msg() + " ") + player.name) + argstr);
+else
+    text = tostr((((player:page_emote_prefix_msg() + " ") + player.name) + " ") + 
+argstr);
+endif
+result = text ? who:receive_page(header, text) | who:receive_page(header);
+if (result == 2)
+    player:tell(tostr($string_utils:pronoun_sub((typeof(msg = who:page_absent_msg()) 
+== STR) ? msg | "%n is not currently logged in.", who)));
+else
+    player:tell(tostr(who:page_echo_msg()));
+endif
+.
+
+</pre>
+<BR>
+'*:
+<pre>
+"Syntax: '<player> <text>";
+"        ' <text>";
+"";
+"A shorter version of page, easier to use. If no <player> is specified, pages the 
+last player who paged you or who you paged.";
+whoto = verb[2..length(verb)];
+if (whoto)
+    mess = argstr;
+else
+    who = this:get_respond();
+    if ($recycler:valid(who) && is_player(who))
+        mess = argstr;
+        whoto = who.name;
+    else
+        player:tell("I don't know who to respond to.");
+        return;
+    endif
+endif
+this:page(whoto, "with", argstr);
+this:set_respond(whoto);
+.
+
+</pre>
+<BR>
+page_emote_prefix_msg:
+<pre>
+"set_task_perms(this.owner)";
+return (msg = this.(verb)) ? $string_utils:pronoun_sub(this.(verb), this) | "";
+.
+
+</pre>
+<BR>
+mu*rmur:
+<pre>
+"Syntax: mu*rmur <player> <message>";
+"";
+"A simpler form of whisper.";
+if (length(args) < 2)
+    player:tell("Usage: mu*rmur <player> <message>");
+    return;
+endif
+who = this.location:match_object(args[1]);
+if (!valid(who))
+    player:tell("\"", args[1], "\" is either ambiguous, or is not here.");
+    return;
+endif
+dobjstr = argstr[index(argstr, " ") + 1..length(argstr)];
+iobj = who;
+who:whisper(argstr);
+.
+
+</pre>
+<BR>
+@todo:
+<pre>
+"Syntax: @todo";
+"        @todo <thing-to-do>";
+"";
+"With the argument, the new item is added to your list of things to do. Without, 
+your list is displayed with line numbers. The numbers are used in the `@done' command 
+to remove them from your list.";
+if (argstr)
+    player.todo_list = {@player.todo_list, argstr};
+    player:tell("Added: \"", argstr, "\" to your things to do list.");
+else
+    if (player.todo_list)
+        player:tell("Things to do:");
+        for thing in [1..length(player.todo_list)]
+            player:tell("  ", thing, " - ", player.todo_list[thing]);
+        endfor
+        player:tell("End of list.");
+    else
+        player:tell("You have nothing on your things to do list.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+@done:
+<pre>
+"Syntax: @done <item number>";
+"";
+"Use the @done command to remove an item from your things to do list. You'll need 
+the line number of the item as it is seen when you type `@todo'.";
+if (argstr)
+    if ((d = tonum(dobjstr)) && (d <= length(player.todo_list)))
+        player:tell("Removed \"", player.todo_list[d], "\" from your things to do 
+list.");
+        player.todo_list = listdelete(player.todo_list, d);
+    else
+        player:tell("Invalid line number.");
+    endif
+else
+    player:tell("You'll need to supply a line number. See `@todo'");
+endif
+.
+
+</pre>
+<BR>
+@tree:
+<pre>
+"Syntax: @tree <object>";
+"";
+"This verb will display in a nice formatted way the parents of <object>. Also displayed 
+are the owners. Object numbers for each will always be shown.";
+"Inspired by a verb of the same name by APHiD@LambdaMOO";
+set_task_perms(player);
+if (!dobjstr)
+    player:tell("Syntax: ", verb, " <object>");
+    return;
+endif
+target = player:my_match_object(dobjstr);
+if (!$command_utils:object_match_failed(target, dobjstr))
+    for anc in [1..length(ances = {@$list_utils:reverse($object_utils:ancestors(target)), 
+target})]
+        player:tell(this:obj_name(anc, ances[anc]), this:obj_oname(ances[anc]));
+    endfor
+endif
+.
+
+</pre>
+<BR>
+obj_oname:
+<pre>
+what = args[1];
+if (length($string_utils:nn(what.owner)) > 16)
+    obnum = (" (" + tostr(what.owner)) + ")";
+    return (": " + what.name[1..16 - length(obnum)]) + obnum;
+else
+    return ": " + $string_utils:nn(what.owner);
+endif
+.
+
+</pre>
+<BR>
+obj_name:
+<pre>
+pref = $string_utils:space((args[1] - 1) * 2);
+len = abs(player.linelen) - 18;
+what = args[2];
+stf = "...............................................................................";
+if (length(pref + $string_utils:nn(what)) > len)
+    obnum = (" (" + tostr(what)) + ")";
+    mess = (pref + what.name[1..len - length(pref + obnum)]) + obnum;
+    return mess;
+else
+    mess = pref + $string_utils:nn(what);
+    return mess + stf[1..len - length(mess)];
+endif
+.
+
+</pre>
+<BR>
+get_verbs:
+<pre>
+set_task_perms(caller_perms());
+if (typeof(vbs = verbs(object = args[1])) != ERR)
+else
+    vbs = {};
+    i = 0;
+    while ((vi = verb_info(object, tostr(i))) != E_VERBNF)
+        vbs = {@vbs, vi ? vi[3] | vi};
+        i = i + 1;
+    endwhile
+endif
+return vbs;
+.
+
+</pre>
+<BR>
+@owner:
+<pre>
+"Usage: @owner [object]";
+"";
+"If no object is given, tells you the name and object number of your location. Otherwise, 
+the same information of the [object] is given.";
+if (player == this)
+    if (!dobjstr)
+        player:tell($string_utils:nn(player.location), " is owned by ", $string_utils:nn(player.location.owner));
+    else
+        target = player:my_match_object(dobjstr);
+        if (!$command_utils:object_match_failed(target, dobjstr))
+            player:tell($string_utils:nn(target), " is owned by ", $string_utils:nn(target.owner));
+        endif
+    endif
+else
+    player:tell("Sorry..no dice.");
+endif
+.
+
+</pre>
+<BR>
+@exit:
+<pre>
+"Usage: @exit <direction>";
+"";
+"Attempts to find an exit in that direction and if found, tells you the name and 
+object number of the exit and its owner.";
+if (player == this)
+    if (dobjstr)
+        target = player.location:match_exit(dobjstr);
+        if (!$command_utils:object_match_failed(target, dobjstr))
+            player:tell($string_utils:nn(target), " is owned by ", $string_utils:nn(target.owner));
+        endif
+    else
+        player:tell("What exit?");
+    endif
+else
+    player:tell("Sorry...no dice.");
+endif
+.
+
+</pre>
+<BR>
+get_respond:
+<pre>
+if (caller == this)
+    return this.last_paged;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+set_respond:
+<pre>
+if (caller == this)
+    who = $string_utils:match_player(args[1]);
+    if (valid(who))
+        this.last_paged = who;
+        return 1;
+    else
+        return 0;
+    endif
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+res*pond =:
+<pre>
+"Syntax:  respond <message>";
+"         = <message)";
+"Sends <message> to the last player who paged you, or the last player you paged. 
+Whichever was the most recent.";
+if (valid(who = this:get_respond()))
+    mess = argstr;
+    this:page(who.name, "with", argstr);
+    this:set_respond(who.name);
+else
+    player:tell("I don't know who to respond to.");
+endif
+.
+
+</pre>
+<BR>
+receive_page:
+<pre>
+"Notifies all people in the :notify_list that this person is getting paged. Very 
+useful for multibuffering people, group chars and so on.";
+if (val = pass(@args))
+    people = this:notify_list();
+    for who in (people)
+        who:tell(player.name, " is paging ", this.name, ".");
+    endfor
+endif
+this:set_respond(player.name);
+return val;
+.
+
+</pre>
+<BR>
+notify_list:
+<pre>
+"Returns the list of people to notify when a page arrives. Good for multibuffering, 
+or for corporate players and such.";
+return setremove({@this.mail_forward, @this.mail_notify, @this.page_notify}, player);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp page_emote_prefix_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp todo_list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp last_paged
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp page_notify
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000058.htm">generic wizard</A> <A HREF="HTM_000100.htm">Dred</A> <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> <A HREF="HTM_000213.htm">Deleuze</A> <A HREF="HTM_000482.htm">Starsinger</A> <A HREF="HTM_000498.htm">Yib</A> <A HREF="HTM_000778.htm">Doug</A> <A HREF="HTM_000628.htm">Lumper</A> <A HREF="HTM_001170.htm">Defender</A> <A HREF="HTM_001258.htm">Flip</A> <A HREF="HTM_001380.htm">Karina</A> <A HREF="HTM_000888.htm">Ska</A> <A HREF="HTM_000856.htm">PostModern Player Class</A> <A HREF="HTM_000883.htm">Soma</A> <A HREF="HTM_001986.htm">Generic PC with Integrated Contents</A> <A HREF="HTM_000521.htm">Ben</A> <A HREF="HTM_002378.htm">Lumiere</A> <A HREF="HTM_000458.htm">Jafaar</A> <A HREF="HTM_002552.htm">Cyrus</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

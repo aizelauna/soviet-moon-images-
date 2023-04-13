@@ -1,0 +1,175 @@
+<HTML>
+<HEAD>
+<TITLE>Error Generator</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Error Generator (#69)</H3>
+(an instance of <A HREF="HTM_000001.htm">Root Class</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspObject to automatically generate errors.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspraise(error) actually raises the error.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+raise:
+<pre>
+this:(this.names[tonum(args[1]) + 1])();
+.
+
+</pre>
+<BR>
+E_NONE:
+<pre>
+"... hmmm... don't know how to raise E_NONE...";
+return E_NONE;
+.
+
+</pre>
+<BR>
+E_TYPE:
+<pre>
+"...raise E_TYPE ...";
+1[2];
+.
+
+</pre>
+<BR>
+E_DIV:
+<pre>
+"...raise E_DIV ...";
+1 / 0;
+.
+
+</pre>
+<BR>
+E_PERM:
+<pre>
+"...raise E_PERM ...";
+this.owner.password;
+.
+
+</pre>
+<BR>
+E_PROPNF:
+<pre>
+"...raise E_PROPNF ...";
+this.a;
+.
+
+</pre>
+<BR>
+E_VERBNF:
+<pre>
+"...raise E_VERBNF ...";
+this:a();
+.
+
+</pre>
+<BR>
+E_VARNF:
+<pre>
+"...raise E_VARNF ...";
+a;
+.
+
+</pre>
+<BR>
+E_INVIND:
+<pre>
+"...raise E_INVIND ...";
+#-1.a;
+.
+
+</pre>
+<BR>
+E_RECMOVE:
+<pre>
+move(this, this);
+.
+
+</pre>
+<BR>
+E_MAXREC:
+<pre>
+"...raise E_MAXREC ...";
+this:(verb)();
+.
+
+</pre>
+<BR>
+E_RANGE:
+<pre>
+"...raise E_RANGE ...";
+{}[1];
+.
+
+</pre>
+<BR>
+E_ARGS:
+<pre>
+"...raise E_ARGS ...";
+tonum();
+.
+
+</pre>
+<BR>
+E_NACC:
+<pre>
+"...raise E_NACC ...";
+move($hacker, this);
+.
+
+</pre>
+<BR>
+E_INVARG:
+<pre>
+"...raise E_INVARG ...";
+parent(#-1);
+.
+
+</pre>
+<BR>
+E_QUOTA:
+<pre>
+set_task_perms($no_one);
+"...raise E_QUOTA ...";
+create($thing);
+.
+
+</pre>
+<BR>
+acceptable:
+<pre>
+return 0;
+.
+
+</pre>
+<BR>
+name:
+<pre>
+return this.names[tonum(args[1]) + 1];
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp names
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

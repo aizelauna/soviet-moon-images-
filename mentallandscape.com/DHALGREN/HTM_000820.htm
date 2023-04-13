@@ -1,0 +1,305 @@
+<HTML>
+<HEAD>
+<TITLE>Stage</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Stage (#820)</H3>
+(an instance of <A HREF="HTM_000262.htm">Generic Secured Post-Apocalypse Room</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Stage is wide. Up here it's easy to feel
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp          all eyes are on you.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspFrom here you can go down to the theater, or
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp    east past the wings to go backstage.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+<BR>
+You see <A HREF="HTM_000876.htm">feather boa</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp The curtains are closed. You can squeeze through them and descend to the theater.
+[ theater ] <A HREF="HTM_000819.htm">O.o.f. Theater</A>.
+You slide past a curtain, down the steps and into the ruined theater.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp West from here you can go back behind ratty curtains.
+[ backstage ] <A HREF="HTM_000823.htm">Backstage</A>.
+Parting the dusty, cruddy curtains, you come backstage.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+lights house*lights:
+<pre>
+" Toggles the .dark property on #819, the theater, and makes appropriate announcements";
+dark = #819.dark;
+#823:announce_all("You hear the chunk of a relay.");
+if (!dark)
+    if (!#820.curtain)
+        for onstage in (#820:contents())
+            onstage:tell("The houselights are going down. The theater grows quiet.");
+            onstage:tell("All eyes are on you.");
+        endfor
+    endif
+    #819:announce_all("The lights are dimming.");
+    suspend(3);
+    #819:announce_all("As the theater darkens it gets quieter.");
+    suspend(3);
+else
+    if (!#820.curtain)
+        for onstage in (#820:contents())
+            onstage:tell("The houselights are coming up.");
+        endfor
+    endif
+    #819:announce_anyway("The house lights are coming up in the theater.");
+    suspend(2);
+    #819:announce_anyway("You can talk again...");
+endif
+#819.dark = !#819.dark;
+.
+
+</pre>
+<BR>
+cur*tains:
+<pre>
+if (this.curtain)
+    #823:announce_all("The curtains on stage sweep open.");
+    this:announce_all("The curtains draw open to reveal the house.");
+    for audience in (#819:contents())
+        audience:tell("With a scrape and a rush the curtains open on stage.");
+        audience:tell_lines(#821.description);
+        audience:tell_lines(#820.stageset);
+    endfor
+    for onstage in (this:contents())
+        onstage:tell_lines(#822.house_desc);
+    endfor
+    if (#819.dark)
+        this:announce_all("Is there an audience out there? it's watching you.");
+    else
+        this:announce_all("The house lights are on.");
+    endif
+else
+    #823:announce_all("The curtains on stage sweep closed.");
+    for onstage in (this:contents())
+        onstage:tell("The curtains are closing -- they close.");
+    endfor
+    #819:announce_anyway("With a jerk and a squeak the curtains on stage sweep closed.");
+endif
+this.curtain = !this.curtain;
+.
+
+</pre>
+<BR>
+announce:
+<pre>
+pass(@args);
+if (!#820.curtain)
+    for audience in (#819:contents())
+        audience:tell("[On Stage]: ", @args);
+    endfor
+endif
+.
+
+</pre>
+<BR>
+announce_all:
+<pre>
+pass(@args);
+if (!#820.curtain)
+    for audience in (#819:contents())
+        audience:tell("[On Stage]: ", @args);
+    endfor
+endif
+.
+
+</pre>
+<BR>
+announce_all_but:
+<pre>
+pass(@args);
+if (!#820.curtain)
+    for audience in (#819:contents())
+        audience:tell("[On Stage]: ", @args[2..length(args)]);
+    endfor
+endif
+.
+
+</pre>
+<BR>
+look_self:
+<pre>
+pass(@args);
+player:tell_lines(this.stageset);
+.
+
+</pre>
+<BR>
+find_script:
+<pre>
+"looks at the stuff on the stage. The first thing with a :play_script verb is presumed 
+to be playable; it's returned";
+for item in (#820:contents())
+    scripted = $object_utils:has_verb(item, "play_script");
+    if (scripted)
+        return item;
+    endif
+endfor
+return #-1;
+.
+
+</pre>
+<BR>
+play:
+<pre>
+if (#820.playing)
+    if (player.location == #820)
+        player:tell("A performance is running!  You're spoiling it!  Get off the 
+stage!");
+    else
+        player:tell("A performance is already running...you can grab a seat in the 
+back of the theater...");
+    endif
+else
+    #820.playing = 1;
+    playable = #820:find_script();
+    if (valid(playable))
+        #819:announce_anyway("There seems to be some action.  A show is going to 
+start...");
+        suspend(5);
+        #819:announce_anyway("There's a distinct sense of expectation on the stage...");
+        suspend(4);
+        if (!#819.dark)
+            #820:lights();
+        endif
+        if (#820.curtain)
+            #820:curtains();
+        endif
+        suspend(5);
+        playable:play_script();
+        while (playable.playing)
+            suspend(playable.delay);
+        endwhile
+        suspend(5);
+        #820:curtains();
+        suspend(3);
+        #820:lights();
+        #820.playing = 0;
+    else
+        player:tell("The house is quiet.  There's nothing doing.");
+        #820.playing = 0;
+    endif
+endif
+.
+
+</pre>
+<BR>
+quiet:
+<pre>
+" interrupts the script in mid-performance... ";
+playable = #820:find_script();
+if (valid(playable))
+    if (playable.playing)
+        kill_task(playable.runtask);
+        playable.playing = 0;
+        this.playing = 0;
+    endif
+    #819:announce_anyway("Whatever's on the stage seems to have stopped abruptly 
+in the middle...");
+endif
+.
+
+</pre>
+<BR>
+emote:
+<pre>
+name = this:get_name(player);
+if ((argstr != "") && (argstr[1] == ":"))
+    this:announce_all(name, argstr[2..length(argstr)]);
+else
+    this:announce_all(name, " ", argstr);
+endif
+.
+
+</pre>
+<BR>
+get_name:
+<pre>
+who = args[1];
+name = who.name;
+if ($object_utils:has_property(who, "costume"))
+    costume = who.costume;
+    if ($object_utils:has_property(costume, "role_msg"))
+        name = costume.role_msg;
+    endif
+endif
+return name;
+.
+
+</pre>
+<BR>
+`*:
+<pre>
+" Hacked from the stage-feature object, #112. ";
+name = verb[2..length(verb)];
+who = player.location:match_object(name);
+if ($command_utils:object_match_failed(who, name))
+    return;
+endif
+player.location:announce_all(this:get_name(player), " [to ", this:get_name(who), 
+"]: ", argstr);
+.
+
+</pre>
+<BR>
+[*:
+<pre>
+" hacked from #112, the Stage-talk FO. ";
+player.location:announce_all((((this:get_name(player) + " ") + verb) + " ") + argstr);
+.
+
+</pre>
+<BR>
+]*:
+<pre>
+" Hacked from #112, the Stage-talk FO. ";
+player.location:announce_all("[", (((this:get_name(player) + " ") + verb[2..length(verb)]) 
++ (argstr ? " " + argstr | "")) + "]");
+.
+
+</pre>
+<BR>
+say:
+<pre>
+player:tell("You say, \"", argstr, "\"");
+this:announce(this:get_name(player), " says, \"", argstr, "\"");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp curtain
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp stageset
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp playing
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

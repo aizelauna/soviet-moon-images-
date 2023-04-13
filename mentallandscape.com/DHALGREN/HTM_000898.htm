@@ -1,0 +1,101 @@
+<HTML>
+<HEAD>
+<TITLE>Stage Manager's Office</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Stage Manager's Office (#898)</H3>
+(an instance of <A HREF="HTM_000955.htm">Generic Room with Seats</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIn here is a little office. A desk is piled high
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp with an aging electric typewriter, stolen books
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp and a mess of lists and typescripts all overdue
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp for rejection letters. Posters announcing shows
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp in productions long past are peeling from walls
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp and doors. In a corner is a spot laid out, with
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp a cushion on a rug, just to sit down in.
+<BR>
+<BR>
+You sit down on a cushion in the corner.
+<BR>
+<BR>
+You see <A HREF="HTM_001154.htm">a stage trunk</A> and <A HREF="HTM_000878.htm">Diogenes</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp A door leads out.
+[ out ] <A HREF="HTM_000823.htm">Backstage</A>.
+You go out through the door.
+<BR>
+<BR>
+This place has a certain ambiance...
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp 1. First, train in the preliminaries.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp 2. Regard all dharmas as dreams.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp 3. Examine the nature of unborn awareness.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp 4. Self-liberate even the antidote.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp 5. Rest in the nature of alaya, the essence.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp 6. In postmeditation, be a child of illusion.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp 7. Sending and taking should be practiced alternately. These two should ride the breath.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp 8. Three objects, three poisons, and three seeds of virtue.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp 9. In all activities, train with slogans.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp10. Begin the sequence of sending and taking with yourself.
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+do_sit do_stand:
+<pre>
+pass(@args);
+if (verb == "do_sit")
+    if (!$code_utils:task_valid(this.amb_task))
+        this.active = 1;
+        this:start_amb();
+        player:tell("You begin to get some notion of what you should be doing.");
+    endif
+else
+    this:stop_amb();
+endif
+.
+
+</pre>
+<BR>
+enterfunc confunc:
+<pre>
+pass(@args);
+this.sitting[1] ? this.active = 1 | (this.active = 0);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

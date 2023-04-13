@@ -1,0 +1,192 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Breakable Exit</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Breakable Exit (#322)</H3>
+(an instance of <A HREF="HTM_000007.htm">generic exit</A> made by <A HREF="HTM_000213.htm">Deleuze</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000116.htm">Bakunin</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThis is where help for the generic breakable exit should go.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspBut it isn't done yet.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@revert_interval:
+<pre>
+if (player != this.owner)
+    player:tell("You must be the owner of the ", this.name, " to set the revert interval.");
+    return;
+endif
+i = tonum(iobjstr);
+if ((i == 0) || (i == ""))
+    player:tell("Please specify a number. Current interval is ", this.revert_interval, 
+".");
+    return;
+endif
+this.revert_interval = i;
+player:tell(this.name, " revert interval set to ", this.revert_interval, ".");
+.
+
+</pre>
+<BR>
+move:
+<pre>
+if (this.broken_state != this.BROKEN)
+    player:tell($string_utils:pronoun_sub(this.not_broken_msg, player, this));
+    this.source:announce($string_utils:pronoun_sub(this.onot_broken_msg));
+    return;
+else
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+@reset:
+<pre>
+if (this.owner != player)
+    player:tell("You have to be the owner to do that.");
+    return;
+endif
+this.broken_state = this.INTACT;
+player:tell("You reset the ", this.name, " to an intact state.");
+if (!valid(this.other_exit))
+    player:tell(this.name, " has no valid other_exit defined. Please set one with 
+@other-exit ", tostr(this), " is ", "#exit-number.");
+    return;
+endif
+this.other_exit.broken_state = this.INTACT;
+.
+
+</pre>
+<BR>
+break_self:
+<pre>
+if (this.broken_state == this.BROKEN)
+    player:tell("The ", this.name, " is already broken.");
+    return;
+endif
+if (this.source != player.location)
+    player:tell("You can't ", verb, " the ", this.name, " from there.");
+    return;
+endif
+if (!valid(this.other_exit))
+    player:tell(this.name, " has no valid other_exit defined. Please set one with 
+@other-exit ", tostr(this), " is ", "#exit-number.");
+    return;
+endif
+this.broken_state = this.BROKEN;
+player:tell($string_utils:pronoun_sub(this.break_action_msg));
+this.source:announce($string_utils:pronoun_sub(this.obreak_action_msg));
+this.other_exit.broken_state = this.BROKEN;
+this.other_exit.source:announce_all($string_utils:pronoun_sub(this.other_exit.obreak_action_msg));
+suspend(this.revert_interval);
+this.broken_state = this.INTACT;
+this.other_exit.broken_state = this.INTACT;
+this.source:announce_all($string_utils:pronoun_sub(this.orevert_action_msg));
+this.other_exit.source:announce_all($string_utils:pronoun_sub(this.other_exit.orevert_action_msg));
+.
+
+</pre>
+<BR>
+@other-exit:
+<pre>
+if (!valid(iobj))
+    player:tell(iobjstr, " isn't a valid object.");
+    return;
+endif
+if ((this.owner != player) || (iobj.owner != player))
+    player:tell("You aren't the owner of the exit.");
+    return;
+endif
+if (!($exit in $object_utils:ancestors(iobj)))
+    player:tell(iobj.name, " (", tostr(iobj), ") doesn't appear to be an exit.");
+    return;
+endif
+if (parent(this) != parent(iobj))
+    player:tell(iobj.name, " isn't a child of ", parent(this).name, ". Please change 
+its parent first, by typing:");
+    player:tell(" @chparent ", iobj, " to ", parent(this));
+    return;
+endif
+this.other_exit = iobj;
+player:tell(this.name, "'s other exit has been set to ", iobj.name, "(", tostr(iobj), 
+").");
+.
+
+</pre>
+<BR>
+look_msg:
+<pre>
+"Copied from generic exit (#7):look_msg by Dredful (#96) Sun Feb 13 23:13:51 1994 
+EST";
+"returns .look_msg with this additional substitutions besides regular pronouns:";
+"  %dest - substituted for the exit's destination name";
+"  %source - substituted for the exit's source name";
+"stupid hack to get around look_msg always being +c in kids";
+if (this.broken_state == this.BROKEN)
+    look_msg = this.broken_msg;
+else
+    look_msg = this.intact_msg;
+endif
+return $string_utils:pronoun_sub($string_utils:substitute(look_msg, {{"%source", 
+this.source:title()}, {"%dest", this.dest:title()}}));
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp intact_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp broken_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp broken_state
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp revert_interval
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp BROKEN
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp INTACT
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp break_action_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp obreak_action_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp orevert_action_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp not_broken_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp onot_broken_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp other_exit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000397.htm">window</A> <A HREF="HTM_000404.htm">window</A> <A HREF="HTM_000207.htm">window</A> <A HREF="HTM_000399.htm">window</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

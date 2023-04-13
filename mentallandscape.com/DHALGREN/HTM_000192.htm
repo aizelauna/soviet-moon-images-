@@ -1,0 +1,551 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Automaton</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Automaton (#192)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a perfect copy of Rotwang's art-deco robot from _Metropolis_.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Automaton is an easy-to-program robot which responds to simple commands. 
+ It can have multiple MOODS, each one of which has a different description and set 
+of RESPONSES.  Commands trigger an announced response and can also trigger a TRANSITION 
+to another mood. For example, a trivial robot might be made as follows:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   @create #192 named robot
+&nbsp&nbsp&nbsp&nbsp&nbsp   @describe robot as "A crash-test dummy."
+&nbsp&nbsp&nbsp&nbsp&nbsp   @setresponse robot with hug,kiss: heckles the Generic Automaton.  It smiles.
+&nbsp&nbsp&nbsp&nbsp&nbsp   @setresponse robot with hit,kick: heckles the Generic Automaton.  It frowns.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe pattern heckle will be substituted with the verb name, and heckles will be substituted 
+with the third-person form of the verb.  So, if Calkins types "kiss robot" or "hit 
+robot", we will see:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   Calkins kisses the robot.  It smiles.
+&nbsp&nbsp&nbsp&nbsp&nbsp   Calkins hits the robot.  It smiles.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThis trivial automaton has only one mood (called "initial"), but things don't really 
+get interesting until multiple moods are created.  Moods and transitions between 
+moods form a sort of MENTAL LANDSCAPE or personality which other players can explore, 
+somewhat like rooms and exits.  To make a new mood (or switch to an existing mood), 
+use @setmood.  For example, we can make our trivial robot slightly more interesting:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   @setmood robot to initial
+&nbsp&nbsp&nbsp&nbsp&nbsp   @transition robot with hit,kick:angry
+&nbsp&nbsp&nbsp&nbsp&nbsp   @setmood robot to angry
+&nbsp&nbsp&nbsp&nbsp&nbsp   @describe robot as "A very angry test dummy."
+&nbsp&nbsp&nbsp&nbsp&nbsp   @setresponse robot with hug,kiss: heckles the Generic Automaton.  It relaxes.
+&nbsp&nbsp&nbsp&nbsp&nbsp   @transition robot with hug,kiss:initial
+&nbsp&nbsp&nbsp&nbsp&nbsp   @setresponse robot with hit,kick: heckles the Generic Automaton.  It heckles visitor!
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNow kicking the robot will make it mad, and when it's mad it will react more violently 
+to being kicked again.  Kissing or hugging it will calm it down (transition to initial 
+mood).  If an automaton is left alone in a room, it automatically returns to the 
+"initial" mood, if it has one.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspTo design an automaton think of what moods or states it should have. Pick a set of 
+basic commands to trigger responses and mood transitions. Draw a TRANSITION DIAGRAM! 
+ Complex automatons have over a dozen moods and are impossible to design without 
+making a diagram. Here is the diagram of a three-mood stray dog:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp               +-------<---------------<---------------+
+&nbsp&nbsp&nbsp&nbsp&nbsp               |                                       |
+&nbsp&nbsp&nbsp&nbsp&nbsp  feed +---+   V        +-->--+        +---+           |
+&nbsp&nbsp&nbsp&nbsp&nbsp   pet |   |   |        | pet |        |   | kick      |
+&nbsp&nbsp&nbsp&nbsp&nbsp       \   V   |        \     V   pet  \   V           |
+&nbsp&nbsp&nbsp&nbsp&nbsp       HAPPY---+        INITIAL<---<---ANGRY------>----+
+&nbsp&nbsp&nbsp&nbsp&nbsp       |   ^            |     |        ^   ^     feed
+&nbsp&nbsp&nbsp&nbsp&nbsp       |   |   feed     |     |  kick  |   |
+&nbsp&nbsp&nbsp&nbsp&nbsp       |   +---<-----<--+     +--->----+   |
+&nbsp&nbsp&nbsp&nbsp&nbsp       +------->------->------->------->---+
+&nbsp&nbsp&nbsp&nbsp&nbsp                       kick
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspBesides setting responses and transitions, you can use @rminputs to erase a response 
+and @actions <robot> to review the programming of a given mood. @rmmoods will erase 
+whole moods, and @cpmood will copy the responses and transisions of another mood 
+to the current mood (sometimes a convenient starting point for a mood that is similar). 
+ Once the basic logic of an automaton is finished, @alias can be used to beef up 
+the number of verbs the robot will respond to:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   @alias robot with slug,punch,slap=hit
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAliases apply to all moods, but are overridden by any set responses in any particular 
+mood. Useful tip: if you are using @notedit, beware that the automaton will return 
+to its "initial" mood when you depart to the note editor.  So it is a good idea to 
+be carrying the robot while you are programming it.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+bonk kick kiss feed pet harass annoy punch hit cuddle hug kill tip pay buy slap bind 
+tie cuff flirt chat smile wink grin goose molest grab tickle wrestle massage strip 
+fondle unbind dress play proposition attack fight handcuff untie uncuff release talk 
+caress undress club wake wave heckle fuck suck blow pinch squeeze twist boo screw 
+lick stroke speak whisper drugs drug slug unveil veil strike touch hiss with scare 
+threaten grope rim french sigh laugh giggle smirk chuckle snicker love like adore 
+comfort look peer mock ignore poke milk fellate swallow unzip open-fly-for kneel 
+lick-my-ass lick-my-feet blow-me lick-my-fuck THIS-SHOULD-NOT-BE-A-VERB-ON-#192 polish 
+fuel tease surrender bore whack sock rub burnish shine calm stupefy provoke bother 
+bug hassle joke insult dis tweak beg plead submit bow sodomize bugger hump mount 
+fill oil slam smack capitulate praise flatter pacify worship respect mercy slurp 
+hold nuzzle grovel whimper pat feel finger glare whine pout on off worshop squash 
+pester crush step stomp woo seduce court sobs smiles sings push sing eat hum growl 
+curse scowl tempt rob beat swat belt shtup knee bully to make dance kic soothe whisper_to 
+murmur_to pets huge bite spank pull tail call scold yell injure:
+<pre>
+if ((player.location != this.location) && (player != this.location))
+    player:tell("You aren't close enough to ", verb, " ", this.name, ".");
+    return;
+endif
+if (!this:accept_input(verb))
+    player:tell(this.name, " doesn't respond to that.");
+endif
+.
+
+</pre>
+<BR>
+@setm*ood:
+<pre>
+if (player == this.owner)
+    if (this:create_state(iobjstr))
+        player:tell("New mood created.");
+    endif
+    this:change_state(iobjstr);
+    player:tell(this.name, " is now ", iobjstr, ".");
+    this:look_self();
+else
+    player:tell(E_PERM);
+endif
+.
+
+</pre>
+<BR>
+@moods:
+<pre>
+if (player == this.owner)
+    player:tell(this.name, "'s moods are ", $string_utils:print(this.states));
+else
+    player:tell("Only the owner of ", this.name, " can list the moods.");
+endif
+.
+
+</pre>
+<BR>
+@act*ions:
+<pre>
+if (player != this.owner)
+    player:tell("You may not do that.");
+    return;
+endif
+player:tell("In ", this.state, " mood, ", this.name, " does:");
+if (this.input)
+    for i in (this.input)
+        n = i in this.input;
+        player:tell(i, ": ", player.name, this.response[n]);
+        player:tell("        and then has mood ", this.transition[n]);
+    endfor
+else
+    player:tell("Nothing.");
+endif
+.
+
+</pre>
+<BR>
+audience:
+<pre>
+if ($object_utils:connected(this.location))
+    return 1;
+else
+    for c in (this.location.contents)
+        if ($object_utils:connected(c))
+            return 1;
+        endif
+    endfor
+endif
+return 0;
+.
+
+</pre>
+<BR>
+change_state:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+if ((new = args[1] in this.states) && ((old = this.state in this.states) != new))
+    if (old)
+        this.descriptions[old] = this.description;
+        this.inputs[old] = this.input;
+        this.responses[old] = this.response;
+        this.transitions[old] = this.transition;
+    endif
+    this.state = this.states[new];
+    this:set_description(this.descriptions[new]);
+    this.input = this.inputs[new];
+    this.response = this.responses[new];
+    this.transition = this.transitions[new];
+endif
+.
+
+</pre>
+<BR>
+tell:
+<pre>
+if (!this:audience())
+    this:change_state("initial");
+endif
+.
+
+</pre>
+<BR>
+@rmi*nputs:
+<pre>
+if (player != this.owner)
+    player:tell("You may not remove inputs form this.");
+    return;
+endif
+del = $string_utils:explode(strsub(dobjstr, ",", " "));
+for i in (del)
+    if (n = i in this.input)
+        this.input = listdelete(this.input, n);
+        this.response = listdelete(this.response, n);
+        this.transition = listdelete(this.transition, n);
+    endif
+endfor
+player:tell(this.name, " now can respond to ", $string_utils:print(this.input));
+.
+
+</pre>
+<BR>
+@rmmoods:
+<pre>
+if (player != this.owner)
+    player:tell("You may not remove moods form this.");
+    return;
+endif
+del = $string_utils:explode(strsub(dobjstr, ",", " "));
+for i in (del)
+    if (n = i in this.states)
+        this.inputs = listdelete(this.inputs, n);
+        this.responses = listdelete(this.responses, n);
+        this.transitions = listdelete(this.transitions, n);
+        this.descriptions = listdelete(this.descriptions, n);
+        this.states = listdelete(this.states, n);
+    endif
+endfor
+player:tell(this.name, " now has states: ", $string_utils:print(this.states));
+if (!(this.state in this.states))
+    if (this.states)
+        this:change_state(this.states[1]);
+        player:tell(this.name, " is now in ", this.state, " mood.");
+    else
+        this.state = 0;
+        this.input = {};
+        this.response = {};
+        this.transition = {};
+        player:tell(this.name, " has no moods now.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+@setr*esponse:
+<pre>
+if (player != this.owner)
+    player:tell("You may not set the responses of this.");
+    return;
+endif
+if (i = index(iobjstr, ":"))
+    cmdstr = iobjstr[1..i - 1];
+    resp = iobjstr[i + 1..length(iobjstr)];
+else
+    player:tell("Try @setr <robot> with <verblist>:<announced response>");
+    return;
+endif
+cmds = $string_utils:explode(strsub(cmdstr, ",", " "));
+if (!this:install_inputs(cmds))
+    player:tell("spaces in commands or same name as some verb: ", cmdstr);
+    return;
+endif
+for c in (cmds)
+    if (n = c in this.input)
+        this.response[n] = resp;
+    endif
+endfor
+resp = this:subst_verb(resp, c);
+player:tell("Will now respond: ", player.name, $string_utils:pronoun_sub(resp));
+.
+
+</pre>
+<BR>
+@trans*ition:
+<pre>
+if (player != this.owner)
+    player:tell("You may not set the transitions of this.");
+    return;
+endif
+if (i = index(iobjstr, ":"))
+    cmdstr = iobjstr[1..i - 1];
+    trans = iobjstr[i + 1..length(iobjstr)];
+else
+    player:tell("Try @trans <robot> with <verblist>:<mood>");
+    return;
+endif
+cmds = $string_utils:explode(strsub(cmdstr, ",", " "));
+if (!this:install_inputs(cmds))
+    player:tell("Spaces in a command or same as some verb: ", cmdstr);
+    return;
+endif
+for c in (cmds)
+    if (n = c in this.input)
+        this.transition[n] = trans;
+    endif
+endfor
+player:tell(c, " will now change ", this.name, "'s mood to ", trans, ".");
+.
+
+</pre>
+<BR>
+install_inputs:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+new = {};
+for i in (args[1])
+    if (!(i in this.input))
+        new = {@new, i};
+    endif
+endfor
+if (new)
+    this:new_verb(new);
+    this.input = {@this.input, @new};
+    for i in (new)
+        this.response = {@this.response, " responds to " + i};
+        this.transition = {@this.transition, this.state};
+    endfor
+endif
+return 1;
+.
+
+</pre>
+<BR>
+subst_verb:
+<pre>
+s = args[1];
+v = args[2];
+lv = length(v);
+if (v[lv] in {"s", "x", "o", "u", "i"})
+    vs = v + "es";
+elseif ((lv >= 2) && (v[lv - 1..lv] in {"ch", "sh"}))
+    vs = v + "es";
+elseif ((lv >= 2) && (v[lv - 1..lv] in {"ay", "ey", "oy", "uy"}))
+    vs = v + "s";
+elseif (v[lv] == "y")
+    vs = v[1..lv - 1] + "ies";
+elseif (i = v in {"be", "have"})
+    vs = {"is", "has"}[i];
+else
+    vs = v + "s";
+endif
+s = strsub(s, "%vs", vs);
+return strsub(s, "%v", v);
+.
+
+</pre>
+<BR>
+create_state:
+<pre>
+mood = args[1];
+if ((mood in this.states) || (caller != this))
+    return E_PERM;
+else
+    this.states = {@this.states, mood};
+    this.descriptions = {@this.descriptions, this.description};
+    this.inputs = {@this.inputs, {}};
+    this.responses = {@this.responses, {}};
+    this.transitions = {@this.transitions, {}};
+    return mood;
+endif
+.
+
+</pre>
+<BR>
+@cpmood:
+<pre>
+if (player != this.owner)
+    player:tell(E_PERM);
+    return;
+endif
+if (this.input)
+    player:tell("The current state, ", this.state, " is not empty.  Do an @rmmoods 
+and @setmood if you really want to overwrite it with a @cpmood.");
+    return;
+endif
+if (i = iobjstr in this.states)
+    this.input = this.inputs[i];
+    this.response = this.responses[i];
+    this.transition = this.transitions[i];
+    for it in [1..length(this.transition)]
+        if (this.transition[it] == this.states[i])
+            this.transition[it] = this.state;
+        endif
+    endfor
+    this:set_description(this.descriptions[i]);
+    player:tell(iobjstr, " mood copied to ", this.state, ".");
+    this:look_self();
+else
+    player:tell(this.name, " doesn't have a mood of ", iobjstr, ".");
+endif
+.
+
+</pre>
+<BR>
+look_self:
+<pre>
+if (this.title_msg)
+    player:tell($string_utils:pronoun_sub(this.title_msg));
+endif
+pass(@args);
+if (this.append_msg)
+    player:tell($string_utils:pronoun_sub(this.append_msg));
+endif
+.
+
+</pre>
+<BR>
+@alias:
+<pre>
+if (player != this.owner)
+    player:tell(E_PERM);
+    return;
+endif
+if (i = index(iobjstr, "="))
+    dststr = iobjstr[1..i - 1];
+    src = iobjstr[i + 1..length(iobjstr)];
+else
+    player:tell("Usage: @alias <robot> with input1,input2...inputN=frominput");
+    return;
+endif
+dsts = $string_utils:explode(strsub(dststr, ",", " "));
+dsts = setremove(dsts, src);
+this:new_verb(dsts);
+for dst in (dsts)
+    if (idst = dst in this.alias_names)
+        this.alias_values[idst] = src;
+    else
+        this.alias_names = {@this.alias_names, dst};
+        this.alias_values = {@this.alias_values, src};
+    endif
+endfor
+player:tell($string_utils:print(dsts), " are now aliases of ", src, ".");
+.
+
+</pre>
+<BR>
+new_verb:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+new = args[1];
+info = verb_info(#192, "bonk");
+bonks = $string_utils:explode(info[3]);
+for i in (new)
+    if (index(i, " ") || ($object_utils:has_verb(this, i) && (!(i in bonks))))
+        return 0;
+    endif
+endfor
+bonks = $list_utils:remove_duplicates({@bonks, @new});
+info = listset(info, $string_utils:from_list(bonks, " "), 3);
+set_verb_info(#192, "bonk", info);
+.
+
+</pre>
+<BR>
+accept_input:
+<pre>
+input = args[1];
+if (input in this.input)
+    cmd = input;
+elseif (i = input in this.alias_names)
+    cmd = this.alias_values[i];
+else
+    cmd = "huh";
+endif
+if (i = cmd in this.input)
+    resp = player.name + this.response[i];
+    resp = $string_utils:pronoun_sub(this:subst_verb(resp, input));
+    this.location:announce_all(resp);
+    this:change_state(this.transition[i]);
+    if (this.autolook_msg == "ON")
+        this:look_self();
+    endif
+    return 1;
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp states
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp state
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp descriptions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp input
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp response
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp transition
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp inputs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp responses
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp transitions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp append_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp title_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp autolook_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp alias_names
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp alias_values
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000197.htm">the monkey</A> <A HREF="HTM_000157.htm">Sal</A> <A HREF="HTM_000356.htm">Caveman</A> <A HREF="HTM_000398.htm">love slave</A> <A HREF="HTM_000430.htm">Mazakeen</A> <A HREF="HTM_000453.htm">sailor</A> <A HREF="HTM_000499.htm">The Table Of Doom</A> <A HREF="HTM_000502.htm">Generic Wandering Automaton</A> <A HREF="HTM_000511.htm">Luce</A> <A HREF="HTM_000526.htm">Aurora</A> <A HREF="HTM_000534.htm">statue</A> <A HREF="HTM_000597.htm">Generic Interzone Boy</A> <A HREF="HTM_000666.htm">Grim Reaper</A> <A HREF="HTM_000940.htm">Tattooed Lady</A> <A HREF="HTM_001352.htm">Snake Charmer</A> <A HREF="HTM_001411.htm">Snake</A> <A HREF="HTM_001421.htm">L</A> <A HREF="HTM_002118.htm">The Savior</A> <A HREF="HTM_002069.htm">Holy Mother</A> <A HREF="HTM_002146.htm">Kathleen</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

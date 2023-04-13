@@ -1,0 +1,52 @@
+<HTML>
+<HEAD>
+<TITLE>Square of Ruins</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Square of Ruins (#1218)</H3>
+(an instance of <A HREF="HTM_000003.htm">generic room</A> made by <A HREF="HTM_000585.htm">kp</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA small town square of some ancient city.  The ruins and rubble of old concrete buildings are scattered about, plastered in plastic bags and broken beer bottles.  Old iron foundation bars, ripped from their cement homes, lay bent over like wilting flowers, seemingly praying to pavement floor.  An old marble fountain full of fallen leaves and ancient newspapers sits in the centre of the square, dry and cracking with age.
+<BR>
+<BR>
+You see <A HREF="HTM_001219.htm">an ancient statue of Icarus</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp An old cracking chunk of marble, moulded into the tragic shape of Icarus, the man who dared to touch the sky.  His form is noble and smooth, with one leg off the ground as if he was about the leap into the air.  The wings on his arms are outstretched as his fingers point high into the sky, pointing at some unseen object which only he can see.  The ends of his right hand is, however, limp and folded, as if he was melting before he even left the ground.  Cut into the base of the statue, in a deep serif typeface, is an inscription: "The will cannot will backward."  A thick dark space under the statue gives you the distinct feeling that you could move the statue away from its location.
+[ an ancient statue of Icarus ] <A HREF="HTM_001042.htm">Under the Ruins</A>.
+You climb down through the dark hole in the ground, grabbing onto the steel ladder that you find there.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+description:
+<pre>
+if (this.statue.key == 0)
+    return {this.description, "There is a dark, wide, hole in the middle of a clear 
+spot inside the fountain, beside the statue of Icarus."};
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp statue
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

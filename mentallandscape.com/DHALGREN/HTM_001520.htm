@@ -1,0 +1,68 @@
+<HTML>
+<HEAD>
+<TITLE>Shuffling Peon</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Shuffling Peon (#1520)</H3>
+(an instance of <A HREF="HTM_001044.htm">Generic Speaking Wandering Automaton</A> made by <A HREF="HTM_001460.htm">Gaijin</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a pale, helpless soul who has been shuffling papers since the dawn of time.
+<BR>
+<BR>
+Shuffling Peon has some things to say:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp I've got to get this to Information Storage.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp I've got to get this to Information Retrieval.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Could you help me find the Change of Forms form from the Forms Department?
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp No time. No time.  Hustle, bustle!
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Here. Fill out this 1099 stroke D dash 42 Rev E.  File it in Information Storage.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001493.htm">The Ministry Of Information</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+act:
+<pre>
+if (this.should_act && ($object_utils:has_property(this.location, "exits") || is_player(this.location)))
+    exits = this:find_exits();
+    #1460:tell("Here!  Found some!");
+    if (length(exits))
+        destination = exits[random(length(exits))];
+        room = this:this_room();
+        room:announce_all("Peon decides to head ", destination);
+        destination:move(this);
+        if (destination.name == "elevator")
+            button = this:find_button();
+            #1460:tell("Button is ", button);
+            button:push();
+            #1460:tell("Peon is waiting for the elevator!");
+        endif
+    endif
+else
+    this.should_act = 1;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,69 @@
+<HTML>
+<HEAD>
+<TITLE>Random</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Random (#1080)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_001080.htm">Random</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspBlond, arrogant, curious, and coiled.
+<BR>
+<BR>
+Random is carrying <A HREF="HTM_001216.htm">Random Features Maybe Useful</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001213.htm">Randomhaus</A>.
+<BR>
+<BR>
+<BR>
+Random owns <A HREF="HTM_001080.htm">Random</A> <A HREF="HTM_001213.htm">Randomhaus</A> <A HREF="HTM_001216.htm">Random Features Maybe Useful</A> <A HREF="HTM_002364.htm">Test</A> <A HREF="HTM_002394.htm">booger</A> <A HREF="HTM_002409.htm">Candle</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+smell:
+<pre>
+if (player.location != this.location)
+    player:tell("Your nose isn't that long, you need to be in the same room.");
+else
+    this:tell(player.name, " leans over and sniffs at you.");
+    player.location:announce_all(player.name, " leans over and sniffs suspiciously 
+at ", this.name);
+    player:tell(this.name, " smells like ", this.smell);
+endif
+.
+
+</pre>
+<BR>
+description:
+<pre>
+desc = ((pass(@args) + this.word_msg) + " ") + this.words[random(length(this.words))];
+return desc;
+me:tell(player.name, " is looking at you.  Whoopie.");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp smell
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp words
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp word
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp word_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp bad_pun
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

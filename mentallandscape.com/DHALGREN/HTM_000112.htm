@@ -1,0 +1,141 @@
+<HTML>
+<HEAD>
+<TITLE>Stage Talk FO</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Stage Talk FO (#112)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis feature contains various verbs used in stage talk, which allows players to describe their actions in terms of stage directions instead of prose.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000111.htm">Features Feature Object</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThis feature contains various verbs used in stage talk, which allows players to describe 
+their actions in terms of stage directions instead of prose.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+`*:
+<pre>
+"Say something out loud, directed at someone or something.";
+"Usage:";
+"  `target message";
+"Example:";
+"  Munchkin is talking to Kenneth, who's in the same room with him.  He types:";
+"      `kenneth What is the frequency?";
+"  The room sees:";
+"       Munchkin [to Kenneth]: What is the frequency?";
+name = verb[2..length(verb)];
+who = player.location:match_object(name);
+if ($command_utils:object_match_failed(who, name))
+    return;
+endif
+player.location:announce_all(player.name, " [to ", who.name, "]: ", argstr);
+.
+
+</pre>
+<BR>
+[*:
+<pre>
+"Say something out loud, in some specific way.";
+"Usage:";
+"  [how]: message";
+"Example:";
+"  Munchkin decideds to sing some lyrics.  He types:";
+"      [sings]: I am the eggman";
+"  The room sees:";
+"      Munchkin [sings]: I am the eggman";
+player.location:announce_all((((player.name + " ") + verb) + " ") + argstr);
+.
+
+</pre>
+<BR>
+]*:
+<pre>
+"Perform some physical, non-verbal, action.";
+"Usage:";
+"  ]third person action";
+"Example:";
+"  Munchkin has annoyed some would-be tough guy.  He types:";
+"      ]hides behind the reactor.";
+"  The room sees:";
+"      [Munchkin hides behind the reactor.]";
+player.location:announce_all("[", (((player.name + " ") + verb[2..length(verb)]) 
++ (argstr ? " " + argstr | "")) + "]");
+.
+
+</pre>
+<BR>
+-*:
+<pre>
+name = verb[2..length(verb)];
+who = player.location:match_object(name);
+argstr = $code_utils:argstr(verb, args, argstr);
+if (!valid(who))
+    player.location:announce_all(player.name, " [", name, "]: ", argstr);
+else
+    player.location:announce_all(player.name, " [to ", who.name, "]: ", argstr);
+endif
+.
+
+</pre>
+<BR>
+<*:
+<pre>
+"Point to yourself with some adjective.";
+"Usage:";
+"  <message";
+"Example:";
+"  Munchkin decides to indicate he's a weirdo. He types:";
+"    <a weirdo";
+"  The room sees:";
+"    Munchkin <- a weirdo";
+player.location:announce_all((((player.name + " <- ") + verb[2..length(verb)]) + 
+" ") + argstr);
+.
+
+</pre>
+<BR>
+to:
+<pre>
+"Say something out loud, directed at someone or something.";
+"Usage:";
+"  to target message";
+"Example:";
+"  Munchkin is talking to Kenneth, who's in the same room with him.  He types:";
+"       to kenneth What is the frequency?";
+"  The room sees:";
+"       Munchkin [to Kenneth]: What is the frequency?";
+name = args[1];
+who = player.location:match_object(name);
+if ($command_utils:object_match_failed(who, name))
+    return;
+endif
+message = $string_utils:from_list(listdelete(args, 1), " ");
+player.location:announce_all(player.name, " [to ", who.name, "]: ", message);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

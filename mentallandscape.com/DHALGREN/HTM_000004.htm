@@ -1,0 +1,890 @@
+<HTML>
+<HEAD>
+<TITLE>generic builder</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> generic builder (#4)</H3>
+(an instance of <A HREF="HTM_000396.htm">Refusals Player Class</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a player who should type '@describe me as ...'.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@quota:
+<pre>
+set_task_perms(player);
+if (dobjstr == "")
+    dobj = player;
+else
+    dobj = $string_utils:match_player(dobjstr);
+endif
+if (!valid(dobj))
+    player:notify("Show whose quota?");
+    return;
+endif
+$quota_utils:display_quota(dobj);
+.
+
+</pre>
+<BR>
+@create:
+<pre>
+set_task_perms(player);
+nargs = length(args);
+pos = "named" in args;
+if ((pos <= 1) || (pos == nargs))
+    pos = "called" in args;
+endif
+if ((pos <= 1) || (pos == nargs))
+    player:notify("Usage:  @create <parent-class> named [name:]alias,...,alias");
+    player:notify("   or:  @create <parent-class> named name-and-alias,alias,...,alias");
+    player:notify("");
+    player:notify("where <parent-class> is one of the standard classes ($note, $letter, 
+$thing, or $container) or an object number (e.g., #999), or the name of some object 
+in the current room.");
+    player:notify("You can use \"called\" instead of \"named\"");
+    return;
+endif
+parentstr = $string_utils:from_list(args[1..pos - 1], " ");
+namestr = $string_utils:from_list(args[pos + 1..nargs], " ");
+if (parentstr[1] == "$")
+    parent = #0.(parentstr[2..length(parentstr)]);
+    if (typeof(parent) != OBJ)
+        player:notify(tostr("\"", parentstr, "\" does not name an object."));
+        return;
+    endif
+else
+    parent = player:my_match_object(parentstr);
+    if ($command_utils:object_match_failed(parent, parentstr))
+        return;
+    endif
+endif
+object = player:_create(parent);
+if (typeof(object) == ERR)
+    player:notify(tostr(object));
+    return;
+endif
+for f in ($string_utils:char_list(player:build_option("create_flags") || ""))
+    object.(f) = 1;
+endfor
+move(object, player);
+$building_utils:set_names(object, namestr);
+if ((other_names = setremove(object.aliases, object.name)) != {})
+    aka = (" (aka " + $string_utils:english_list(other_names)) + ")";
+else
+    aka = "";
+endif
+player:notify(tostr("You now have ", object.name, aka, " with object number ", object, 
+" and parent ", parent.name, " (", parent, ")."));
+.
+
+</pre>
+<BR>
+@recycle:
+<pre>
+set_task_perms(player);
+dobj = player:my_match_object(dobjstr);
+if (dobj == $nothing)
+    player:notify(tostr("Usage:  ", verb, " <object>"));
+elseif ($command_utils:object_match_failed(dobj, dobjstr))
+    "...bogus object...";
+elseif (player == dobj)
+    player:notify("You don't *really* want to commit suicide, do you?");
+else
+    name = dobj.name;
+    result = player:_recycle(dobj);
+    if (typeof(result) == ERR)
+        player:notify(tostr(result));
+    else
+        player:notify(tostr(name, " (", dobj, ") recycled."));
+    endif
+endif
+.
+
+</pre>
+<BR>
+@recreate:
+<pre>
+"@recreate <object> as <parent-class> named [name:]alias,alias,...";
+"  effectively recycles and creates <object> all over again.";
+set_task_perms(player);
+named = "named" in args;
+as = prepstr in args;
+if ((named <= (as + 1)) || (named == length(args)))
+    player:notify_lines({tostr("Usage:  ", verb, " <object> as <parent-class> named 
+[name:]alias,...,alias"), "", "where <parent-class> is one of the standard classes 
+($note, $letter, $thing, or $container) or an object number (e.g., #999), or the 
+name of some object in the current room.  The [name:]alias... specification is as 
+in @create."});
+    return;
+elseif ($command_utils:object_match_failed(dobj = player:my_match_object(dobjstr), 
+dobjstr))
+    return;
+elseif (is_player(dobj))
+    player:notify("You really *don't* want to do that!");
+    return;
+endif
+parentstr = $string_utils:from_list(args[as + 1..named - 1], " ");
+namestr = $string_utils:from_list(args[named + 1..length(args)], " ");
+if (parentstr[1] == "$")
+    parent = #0.(parentstr[2..length(parentstr)]);
+    if (typeof(parent) != OBJ)
+        player:notify(tostr("\"", parentstr, "\" does not name an object."));
+        return;
+    endif
+else
+    parent = player:my_match_object(parentstr);
+    if ($command_utils:object_match_failed(parent, parentstr))
+        return;
+    endif
+endif
+if (!(e = $building_utils:recreate(dobj, parent)))
+    player:notify(tostr(e));
+    return;
+endif
+for f in ($string_utils:char_list(player:build_option("create_flags") || ""))
+    dobj.(f) = 1;
+endfor
+move(dobj, player);
+$building_utils:set_names(dobj, namestr);
+if ((other_names = setremove(dobj.aliases, dobj.name)) != {})
+    aka = (" (aka " + $string_utils:english_list(other_names)) + ")";
+else
+    aka = "";
+endif
+player:notify(tostr("Object number ", dobj, " is now ", dobj.name, aka, " with parent 
+", parent.name, " (", parent, ")."));
+.
+
+</pre>
+<BR>
+@dig:
+<pre>
+set_task_perms(player);
+nargs = length(args);
+if (nargs == 1)
+    room = args[1];
+    exit_spec = "";
+elseif ((nargs >= 3) && (args[2] == "to"))
+    exit_spec = args[1];
+    room = $string_utils:from_list(args[3..nargs], " ");
+elseif (!prepstr)
+    room = argstr;
+    exit_spec = "";
+else
+    player:notify(tostr("Usage:  ", verb, " <new-room-name>"));
+    player:notify(tostr("    or  ", verb, " <exit-description> to <new-room-name-or-old-room-object-number>"));
+    return;
+endif
+if (room != tostr(other_room = toobj(room)))
+    room_kind = player:build_option("dig_room");
+    if (room_kind == 0)
+        room_kind = $room;
+    endif
+    other_room = player:_create(room_kind);
+    if (typeof(other_room) == ERR)
+        player:notify(tostr("Cannot create new room as a child of ", $string_utils:nn(room_kind), 
+": ", other_room, ".  See `help @build-options' for information on how to specify 
+the kind of room this command tries to create."));
+        return;
+    endif
+    other_room.name = room;
+    other_room.aliases = {room};
+    move(other_room, $nothing);
+    player:notify(tostr(other_room.name, " (", other_room, ") created."));
+elseif (nargs == 1)
+    player:notify("You can't dig a room that already exists!");
+    return;
+elseif ((!valid(player.location)) || (!($room in $object_utils:ancestors(player.location))))
+    player:notify(tostr("You may only use the ", verb, " command from inside a room."));
+    return;
+elseif ((!valid(other_room)) || (!($room in $object_utils:ancestors(other_room))))
+    player:notify(tostr(other_room, " doesn't look like a room to me..."));
+    return;
+endif
+if (exit_spec)
+    exit_kind = player:build_option("dig_exit");
+    if (exit_kind == 0)
+        exit_kind = $exit;
+    endif
+    exits = $string_utils:explode(exit_spec, "|");
+    if ((length(exits) < 1) || (length(exits) > 2))
+        player:notify("The exit-description must have the form");
+        player:notify("     [name:]alias,...,alias");
+        player:notify("or   [name:]alias,...,alias|[name:]alias,...,alias");
+        return;
+    endif
+    do_recreate = !player:build_option("bi_create");
+    to_ok = $building_utils:make_exit(exits[1], player.location, other_room, do_recreate, 
+exit_kind);
+    if (to_ok && (length(exits) == 2))
+        $building_utils:make_exit(exits[2], other_room, player.location, do_recreate, 
+exit_kind);
+    endif
+endif
+.
+
+</pre>
+<BR>
+@audit:
+<pre>
+"Usage:  @audit [player] [from <start>] [to <end>] [for <matching string>]";
+dobj = $string_utils:match_player(dobjstr);
+if (!dobjstr)
+    dobj = player;
+elseif ($command_utils:player_match_result(dobj, dobjstr)[1])
+    return;
+endif
+dobjwords = $string_utils:words(dobjstr);
+if (args[1..length(dobjwords)] == dobjwords)
+    args = args[length(dobjwords) + 1..length(args)];
+endif
+if (!(parse_result = $code_utils:_parse_audit_args(@args)))
+    player:notify(tostr("Usage:  ", verb, " [player] [from <start>] [to <end>] [for 
+<match>]"));
+    return;
+endif
+return $building_utils:do_audit(dobj, @parse_result);
+.
+
+</pre>
+<BR>
+@count:
+<pre>
+if (!dobjstr)
+    dobj = player;
+elseif ($command_utils:player_match_result(dobj = $string_utils:match_player(dobjstr), 
+dobjstr)[1])
+    return;
+endif
+set_task_perms(player);
+if (typeof(dobj.owned_objects) == LIST)
+    count = length(dobj.owned_objects);
+    player:notify(tostr(dobj.name, " currently owns ", count, " object", (count == 
+1) ? "." | "s."));
+else
+    player:notify(tostr(dobj.name, " is not enrolled in the object ownership system. 
+ Use @countDB instead."));
+endif
+.
+
+</pre>
+<BR>
+@countDB:
+<pre>
+if (!dobjstr)
+    dobj = player;
+elseif ($command_utils:player_match_result(dobj = $string_utils:match_player(dobjstr), 
+dobjstr)[1])
+    return;
+endif
+set_task_perms(player);
+count = 0;
+for i in [1..tonum(max_object())]
+    if ($command_utils:running_out_of_time())
+        player:notify("Counting...");
+        suspend(5);
+    endif
+    o = toobj(i);
+    if (valid(o) && (o.owner == dobj))
+        count = count + 1;
+    endif
+endfor
+player:notify(tostr(dobj.name, " currently owns ", count, " object", (count == 1) 
+? "." | "s."));
+.
+
+</pre>
+<BR>
+@sort-owned*-objects:
+<pre>
+"$player:owned_objects -- sorts a players .owned_objects property in ascending";
+"order so it looks nice on @audit.";
+if (player != this)
+    return E_PERM;
+endif
+if (typeof(player.owned_objects) == LIST)
+    set_task_perms(player);
+    if ((!dobjstr) || (index("object", dobjstr) == 1))
+        ret = $list_utils:sort_suspended(0, player.owned_objects);
+    elseif (index("size", dobjstr) == 1)
+        ret = $list_utils:reverse_suspended($list_utils:sort_suspended(0, player.owned_objects, 
+$list_utils:slice($list_utils:map_prop(player.owned_objects, "object_size"))));
+    endif
+    if (typeof(ret) == LIST)
+        player:set_owned_objects(ret);
+        player:tell("Your .owned_objects list has been sorted.");
+        return 1;
+    else
+        player:tell("Something went wrong. .owned_objects not sorted.");
+        return 0;
+    endif
+else
+    player:tell("You are not enrolled in .owned_objects scheme, sorry.");
+endif
+.
+
+</pre>
+<BR>
+@add-owned:
+<pre>
+if (player != this)
+    player:tell("Permission Denied");
+    return E_PERM;
+endif
+if (!valid(dobj))
+    player:tell("Don't understand `", dobjstr, "' as an object to add.");
+elseif (dobj.owner != player)
+    player:tell("You don't own ", dobj.name, ".");
+elseif (dobj in player.owned_objects)
+    player:tell(dobj.name, " is already recorded in your .owned_objects.");
+else
+    player.owned_objects = setadd(player.owned_objects, dobj);
+    player:tell("Added ", dobj, " to your .owned_objects.");
+endif
+.
+
+</pre>
+<BR>
+@verify-owned:
+<pre>
+for x in (player.owned_objects)
+    if ((!valid(x)) || (x.owner != player))
+        player.owned_objects = setremove(player.owned_objects, x);
+        if (valid(x))
+            player:tell("Removing ", x.name, "(", x, "), owned by ", valid(x.owner) 
+? x.owner.name | "<recycled player>", " from your .owned_objects property.");
+        else
+            player:tell("Removing invalid object ", x, " from your .owned_objects 
+property.");
+        endif
+    endif
+endfor
+player:tell(".owned_objects property verified.");
+.
+
+</pre>
+<BR>
+@unlock:
+<pre>
+set_task_perms(player);
+dobj = player:my_match_object(dobjstr);
+if ($command_utils:object_match_failed(dobj, dobjstr))
+    return;
+endif
+res = dobj.key = 0;
+if (typeof(res) == ERR)
+    player:notify(tostr(res, "."));
+else
+    player:notify(tostr("Unlocked ", dobj.name, "."));
+endif
+.
+
+</pre>
+<BR>
+@lock:
+<pre>
+set_task_perms(player);
+dobj = player:my_match_object(dobjstr);
+if ($command_utils:object_match_failed(dobj, dobjstr))
+    return;
+endif
+key = $lock_utils:parse_keyexp(iobjstr, player);
+if (typeof(key) == STR)
+    player:notify("That key expression is malformed:");
+    player:notify(tostr("  ", key));
+else
+    res = dobj.key = key;
+    if (typeof(res) == ERR)
+        player:notify(tostr(res, "."));
+    else
+        player:notify(tostr("Locked ", dobj.name, " to this key:"));
+        player:notify(tostr("  ", $lock_utils:unparse_key(key)));
+    endif
+endif
+.
+
+</pre>
+<BR>
+@newmess*age:
+<pre>
+"Usage:  @message <message-name> [<message>] [on <object>]";
+"Add a message property to an object (default is player), and optionally";
+"set its value.  For use by non-programmers, who aren't allowed to add";
+"properties generally.";
+"To undo the effects of this, use @unmessage.";
+set_task_perms(player);
+dobjwords = $string_utils:words(dobjstr);
+if (!dobjwords)
+    player:notify(tostr("Usage:  ", verb, " <message-name> [<message>] [on <object>]"));
+    return;
+endif
+object = valid(iobj) ? iobj | player;
+name = this:_messagify(dobjwords[1]);
+value = dobjstr[length(dobjwords[1]) + 2..length(dobjstr)];
+nickname = "@" + name[1..length(name) - 4];
+e = add_property(object, name, value, {player, "rc"});
+if (typeof(e) != ERR)
+    player:notify(tostr(nickname, " on ", object.name, " is now \"", object.(name), 
+"\"."));
+elseif (e != E_INVARG)
+    player:notify(tostr(e));
+elseif ($object_utils:has_property(object, name))
+    "object already has property";
+    player:notify(tostr(object.name, " already has a ", nickname, " message."));
+else
+    player:notify(tostr("Unable to add ", nickname, " message to ", object.name, 
+": ", e));
+endif
+.
+
+</pre>
+<BR>
+@unmess*age:
+<pre>
+"Usage:  @unmessage <message-name> [from <object>]";
+"Remove a message property from an object (default is player).";
+set_task_perms(player);
+if ((!dobjstr) || (length($string_utils:words(dobjstr)) > 1))
+    player:notify(tostr("Usage:  ", verb, " <message-name> [from <object>]"));
+    return;
+endif
+object = valid(iobj) ? iobj | player;
+name = this:_messagify(dobjstr);
+nickname = "@" + name[1..length(name) - 4];
+e = delete_property(object, name);
+if (e == E_PROPNF)
+    player:notify(tostr("No ", nickname, " message found on ", object.name, "."));
+elseif (typeof(e) == ERR)
+    player:notify(tostr(e));
+else
+    player:notify(tostr(nickname, " message removed from ", object.name, "."));
+endif
+.
+
+</pre>
+<BR>
+_messagify:
+<pre>
+"Given any of several formats people are likely to use for a @message";
+"property, return the canonical form (\"foobar_msg\").";
+name = args[1];
+if (name[1] == "@")
+    name = name[2..length(name)];
+endif
+if ((length(name) < 4) || (name[length(name) - 3..length(name)] != "_msg"))
+    name = name + "_msg";
+endif
+return name;
+.
+
+</pre>
+<BR>
+@kids:
+<pre>
+"'@kids <obj>' - List the children of an object. This is handy for seeing whether 
+anybody's actually using your carefully-wrought public objects.";
+thing = player:my_match_object(dobjstr);
+if (!$command_utils:object_match_failed(thing, dobjstr))
+    kids = children(thing);
+    if (kids)
+        player:notify(tostr(thing:title(), "(", thing, ") has ", length(kids), " 
+kid", (length(kids) == 1) ? "" | "s", "."));
+        player:notify(tostr($string_utils:names_of(kids)));
+    else
+        player:notify(tostr(thing:title(), "(", thing, ") has no kids."));
+    endif
+endif
+.
+
+</pre>
+<BR>
+@contents:
+<pre>
+"'@contents <obj> - list the contents of an object, with object numbers. This verb 
+is by yduJ.";
+set_task_perms(player);
+if (!dobjstr)
+    dobj = player.location;
+else
+    dobj = player:my_match_object(dobjstr);
+endif
+if ($command_utils:object_match_failed(dobj, dobjstr))
+else
+    if ($object_utils:has_verb(dobj, "contents"))
+        contents = dobj:contents();
+    else
+        contents = dobj.contents;
+    endif
+    if (contents)
+        player:notify(tostr(dobj:title(), "(", dobj, ") contains:"));
+        player:notify(tostr($string_utils:names_of(contents)));
+    else
+        player:notify(tostr(dobj:title(), "(", dobj, ") contains nothing."));
+    endif
+endif
+.
+
+</pre>
+<BR>
+@par*ents:
+<pre>
+"'@parents <thing>' - List <thing> and its ancestors, all the way back to the Root 
+Class (#1).";
+set_task_perms(player);
+if (!dobjstr)
+    player:notify(tostr("Usage:  ", verb, " <object>"));
+    return;
+else
+    o = player:my_match_object(dobjstr);
+endif
+if (!$command_utils:object_match_failed(o, dobjstr))
+    player:notify($string_utils:names_of({o, @$object_utils:ancestors(o)}));
+endif
+.
+
+</pre>
+<BR>
+@location*s:
+<pre>
+"@locations <thing> - List <thing> and its containers, all the way back to the outermost 
+one.";
+set_task_perms(player);
+if (!dobjstr)
+    what = player;
+elseif ((!valid(what = player:my_match_object(dobjstr))) && (!valid(what = $string_utils:match_player(dobjstr))))
+    $command_utils:object_match_failed(dobj, dobjstr);
+    return;
+endif
+player:notify($string_utils:names_of({what, @$object_utils:locations(what)}));
+.
+
+</pre>
+<BR>
+@cl*asses:
+<pre>
+"$class_registry is in the following format:";
+"        { {name, description, members}, ... }";
+"where `name' is the name of a particular class of objects, `description' is a one-sentence 
+description of the membership of the class, and `members' is a list of object numbers, 
+the members of the class.";
+"";
+if (args)
+    members = {};
+    for name in (args)
+        class = $list_utils:assoc_prefix(name, $class_registry);
+        if (class)
+            for o in (class[3])
+                members = setadd(members, o);
+            endfor
+        else
+            player:tell("There is no defined class of objects named `", name, "'; 
+type `@classes' to see a complete list of defined classes.");
+            return;
+        endif
+    endfor
+    printed = {};
+    for o in (members)
+        what = o;
+        while (valid(what))
+            printed = setadd(printed, what);
+            what = parent(what);
+        endwhile
+    endfor
+    player:tell("Members of the class", (length(args) > 1) ? "es" | "", " named ", 
+$string_utils:english_list(args), ":");
+    player:tell();
+    set_task_perms(player);
+    this:classes_2($root_class, "", members, printed);
+    player:tell();
+else
+    "List all class names and descriptions";
+    player:tell("The following classes of objects have been defined:");
+    for class in ($class_registry)
+        name = class[1];
+        description = class[2];
+        player:tell();
+        player:tell("-- ", name, ": ", description);
+    endfor
+    player:tell();
+    player:tell("Type `@classes <name>' to see the members of the class with the 
+given <name>.");
+endif
+.
+
+</pre>
+<BR>
+classes_2:
+<pre>
+root = args[1];
+indent = args[2];
+members = args[3];
+printed = args[4];
+if (root in members)
+    player:tell(indent, root.name, " (", root, ")");
+else
+    player:tell(indent, "<", root.name, " (", root, ")>");
+endif
+indent = indent + "  ";
+set_task_perms(caller_perms());
+for c in (children(root))
+    $command_utils:suspend_if_needed(10);
+    if (c in printed)
+        this:classes_2(c, indent, members, printed);
+    endif
+endfor
+.
+
+</pre>
+<BR>
+_create:
+<pre>
+set_task_perms(caller_perms());
+if (this:build_option("bi_create"))
+    return $quota_utils:bi_create(@args);
+else
+    return $recycler:(verb)(@args);
+endif
+.
+
+</pre>
+<BR>
+_recycle:
+<pre>
+set_task_perms(caller_perms());
+if (this:build_option("bi_create"))
+    return recycle(@args);
+else
+    return $recycler:(verb)(@args);
+endif
+.
+
+</pre>
+<BR>
+@chparent:
+<pre>
+set_task_perms(player);
+if ($command_utils:object_match_failed(object = player:my_match_object(dobjstr), 
+dobjstr))
+    "...bogus object...";
+elseif ($command_utils:object_match_failed(parent = player:my_match_object(iobjstr), 
+iobjstr))
+    "...bogus new parent...";
+elseif ((this != player) && (!$object_utils:isa(player, $player)))
+    "...They chparented to #1 and want to chparent back to $prog.  Probably for some 
+nefarious purpose...";
+    player:notify("You don't seem to already be a valid player class.  Perhaps chparenting 
+away from the $player hierarchy was not such a good idea.  Permission denied.");
+elseif (is_player(object) && (!$object_utils:isa(parent, $player)))
+    player:notify(tostr(object, " is a player and ", parent, " is not a player class."));
+    player:notify("You really *don't* want to do this.  Trust me.");
+elseif (typeof(result = player:_chparent(object, parent)) != ERR)
+    player:notify("Parent changed.");
+elseif ((result == E_INVARG) && (valid(object) && valid(parent)))
+    player:notify(tostr("Some property existing on ", parent, " is defined on ", 
+object, " or one of its descendants."));
+    player:notify(tostr("Try @check-chparent ", dobjstr, " to ", iobjstr));
+else
+    player:notify(tostr(result));
+endif
+.
+
+</pre>
+<BR>
+@check-chp*arent:
+<pre>
+"Copied from generic programmer (#217):@check-chparent by ur-Rog (#6349) Sun Nov 
+ 8 22:13:53 1992 PST";
+"@check-chparent object to newparent";
+"checks for property name conflicts that would make @chparent bomb.";
+set_task_perms(player);
+if (!(dobjstr && iobjstr))
+    player:notify(tostr("Usage:  ", verb, " <object> to <newparent>"));
+elseif ($command_utils:object_match_failed(object = player:my_match_object(dobjstr), 
+dobjstr))
+    "...bogus object...";
+elseif ($command_utils:object_match_failed(parent = player:my_match_object(iobjstr), 
+iobjstr))
+    "...bogus new parent...";
+elseif (player != this)
+    player:notify(tostr(E_PERM));
+elseif (typeof(result = $object_utils:property_conflicts(object, parent)) == ERR)
+    player:notify(tostr(result));
+elseif (result)
+    su = $string_utils;
+    player:notify("");
+    player:notify(su:left("Property", 30) + "Also Defined on");
+    player:notify(su:left("--------", 30) + "---------------");
+    for r in (result)
+        player:notify(su:left(tostr(parent, ".", r[1]), 30) + su:from_list(listdelete(r, 
+1), " "));
+        $command_utils:suspend_if_needed(0);
+    endfor
+else
+    player:notify("No property conflicts found.");
+endif
+.
+
+</pre>
+<BR>
+@set*prop:
+<pre>
+"Syntax:  @set <object>.<prop-name> to <value>";
+"";
+"Changes the value of the specified object's property to the given value.";
+"You must have permission to modify the property, either because you own the property 
+or if it is writable.";
+set_task_perms(player);
+if (this != player)
+    return player:tell(E_PERM);
+endif
+l = $code_utils:parse_propref(dobjstr);
+if (l)
+    dobj = player:my_match_object(l[1], player.location);
+    if ($command_utils:object_match_failed(dobj, l[1]))
+        return;
+    endif
+    prop = l[2];
+    to_i = "to" in args;
+    at_i = "at" in args;
+    i = (to_i && at_i) ? min(to_i, at_i) | (to_i || at_i);
+    iobjstr = argstr[$string_utils:word_start(argstr)[i][2] + 1..length(argstr)];
+    iobjstr = $string_utils:trim(iobjstr);
+    if (!iobjstr)
+        val = dobj.(prop) = "";
+        iobjstr = "\"\"";
+        "elseif (iobjstr[1] == \"\\\"\")";
+        "val = dobj.(prop) = iobjstr;";
+        "iobjstr = \"\\\"\" + iobjstr + \"\\\"\";";
+    else
+        val = $string_utils:to_value(iobjstr);
+        if (!val[1])
+            player:tell("Could not parse: ", iobjstr);
+            return;
+        endif
+        val = dobj.(prop) = val[2];
+    endif
+    player:tell("Property ", dobj, ".", prop, " set to ", $string_utils:print(val), 
+".");
+else
+    player:tell("Property ", dobjstr, " not found.");
+endif
+.
+
+</pre>
+<BR>
+build_option:
+<pre>
+":build_option(name)";
+"Returns the value of the specified builder option";
+if ((caller == this) || $perm_utils:controls(caller_perms(), this))
+    return $build_options:get(this.build_options, args[1]);
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+set_build_option:
+<pre>
+":set_build_option(oname,value)";
+"Changes the value of the named option.";
+"Returns a string error if something goes wrong.";
+if (!((caller == this) || $perm_utils:controls(caller_perms(), this)))
+    return tostr(E_PERM);
+endif
+"...this is kludgy, but it saves me from writing the same verb n times.";
+"...there's got to be a better way to do this...";
+verb[1..4] = "";
+foo_options = verb + "s";
+"...";
+if (typeof(s = #0.(foo_options):set(this.(foo_options), @args)) == STR)
+    return s;
+elseif (s == this.(foo_options))
+    return 0;
+else
+    this.(foo_options) = s;
+    return 1;
+endif
+.
+
+</pre>
+<BR>
+@build-o*ptions @buildo*ptions @builder-o*ptions @buildero*ptions:
+<pre>
+"@<what>-option <option> [is] <value>   sets <option> to <value>";
+"@<what>-option <option>=<value>        sets <option> to <value>";
+"@<what>-option +<option>     sets <option>   (usually equiv. to <option>=1";
+"@<what>-option -<option>     resets <option> (equiv. to <option>=0)";
+"@<what>-option !<option>     resets <option> (equiv. to <option>=0)";
+"@<what>-option <option>      displays value of <option>";
+set_task_perms(player);
+what = "build";
+options = what + "_options";
+option_pkg = #0.(options);
+set_option = ("set_" + what) + "_option";
+if (!args)
+    player:notify_lines({("Current " + what) + " options:", "", @option_pkg:show(this.(options), 
+option_pkg.names)});
+    return;
+elseif (typeof(presult = option_pkg:parse(args)) == STR)
+    player:notify(presult);
+    return;
+else
+    if (length(presult) > 1)
+        if (typeof(sresult = this:(set_option)(@presult)) == STR)
+            player:notify(sresult);
+            return;
+        elseif (!sresult)
+            player:notify("No change.");
+            return;
+        endif
+    endif
+    player:notify_lines(option_pkg:show(this.(options), presult[1]));
+endif
+.
+
+</pre>
+<BR>
+set_owned_objects:
+<pre>
+if ((caller == this) || $perm_utils:controls(caller_perms(), this))
+    this.owned_objects = args[1];
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+_chparent:
+<pre>
+set_task_perms(caller_perms());
+return chparent(@args);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp build_options
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000059.htm">generic programmer</A> <A HREF="HTM_000119.htm">Q2</A> <A HREF="HTM_000199.htm">Frea</A> <A HREF="HTM_000214.htm">raspy</A> <A HREF="HTM_000474.htm">Horselover</A> <A HREF="HTM_000476.htm">Abraxas</A> <A HREF="HTM_000494.htm">Marquis</A> <A HREF="HTM_000531.htm">Vibeke</A> <A HREF="HTM_000547.htm">Wolf</A> <A HREF="HTM_000575.htm">Paul</A> <A HREF="HTM_000629.htm">Juan</A> <A HREF="HTM_000681.htm">Tock_WatchDog</A> <A HREF="HTM_000714.htm">spizz</A> <A HREF="HTM_000795.htm">Siri</A> <A HREF="HTM_000807.htm">Arakasi</A> <A HREF="HTM_000836.htm">Akala</A> <A HREF="HTM_000862.htm">stitch</A> <A HREF="HTM_000879.htm">completemadness</A> <A HREF="HTM_001148.htm">Urizen</A> <A HREF="HTM_001189.htm">evangeline</A> <A HREF="HTM_001190.htm">Bezoar</A> <A HREF="HTM_001206.htm">RodRandom</A> <A HREF="HTM_001214.htm">Kane</A> <A HREF="HTM_001215.htm">Wildfire</A> <A HREF="HTM_001240.htm">JayPup</A> <A HREF="HTM_001242.htm">Roderick</A> <A HREF="HTM_001243.htm">Keats</A> <A HREF="HTM_001247.htm">mango</A> <A HREF="HTM_001253.htm">Note</A> <A HREF="HTM_001266.htm">gonz</A> <A HREF="HTM_001267.htm">caulk</A> <A HREF="HTM_001268.htm">Dj-CJ</A> <A HREF="HTM_001280.htm">Wysperwynde</A> <A HREF="HTM_001292.htm">Goliath</A> <A HREF="HTM_001302.htm">Strap</A> <A HREF="HTM_001432.htm">Heather</A> <A HREF="HTM_001458.htm">Larks</A> <A HREF="HTM_001461.htm">Cyborg</A> <A HREF="HTM_001475.htm">Lar</A> <A HREF="HTM_001540.htm">Enigma</A> <A HREF="HTM_001547.htm">Mack</A> <A HREF="HTM_001548.htm">pulse</A> <A HREF="HTM_001550.htm">Flame</A> <A HREF="HTM_001619.htm">cubbard</A> <A HREF="HTM_001620.htm">Shockwave-Rider</A> <A HREF="HTM_001980.htm">Harry</A> <A HREF="HTM_001981.htm">Medved</A> <A HREF="HTM_002111.htm">Mina</A> <A HREF="HTM_002139.htm">Eleni</A> <A HREF="HTM_002173.htm">Syr</A> <A HREF="HTM_002176.htm">Monday</A> <A HREF="HTM_002178.htm">Church_In_Hell</A> <A HREF="HTM_002207.htm">Gowan</A> <A HREF="HTM_002216.htm">cjp</A> <A HREF="HTM_002217.htm">Snark</A> <A HREF="HTM_002218.htm">MrW</A> <A HREF="HTM_002220.htm">cpj</A> <A HREF="HTM_002228.htm">Marney</A> <A HREF="HTM_002234.htm">Tremaine</A> <A HREF="HTM_002235.htm">tabitha</A> <A HREF="HTM_002236.htm">Blackangel</A> <A HREF="HTM_002237.htm">tabitha</A> <A HREF="HTM_002242.htm">Woodnymph</A> <A HREF="HTM_002243.htm">mananda</A> <A HREF="HTM_002244.htm">Tigress</A> <A HREF="HTM_002252.htm">Alden</A> <A HREF="HTM_002286.htm">Rich</A> <A HREF="HTM_002288.htm">Violet</A> <A HREF="HTM_002290.htm">DNA</A> <A HREF="HTM_002299.htm">irena</A> <A HREF="HTM_002300.htm">grifter</A> <A HREF="HTM_002320.htm">NrrdGrrl</A> <A HREF="HTM_002321.htm">hypatiagrrl</A> <A HREF="HTM_002328.htm">Exegetical_Hell</A> <A HREF="HTM_002330.htm">Lulu</A> <A HREF="HTM_002348.htm">Tali</A> <A HREF="HTM_002349.htm">Wolverine</A> <A HREF="HTM_002350.htm">Wolverine</A> <A HREF="HTM_002354.htm">Sheila</A> <A HREF="HTM_002358.htm">Bernie</A> <A HREF="HTM_002359.htm">Godot</A> <A HREF="HTM_002361.htm">Phlod_Firefly</A> <A HREF="HTM_002365.htm">moira</A> <A HREF="HTM_002366.htm">Raelen</A> <A HREF="HTM_002367.htm">java</A> <A HREF="HTM_002370.htm">Hank</A> <A HREF="HTM_002371.htm">keneto</A> <A HREF="HTM_002373.htm">beckit</A> <A HREF="HTM_002374.htm">Lestat</A> <A HREF="HTM_002375.htm">Arkay</A> <A HREF="HTM_002400.htm">Felicia</A> <A HREF="HTM_002415.htm">JungleBoy</A> <A HREF="HTM_002422.htm">Misery</A> <A HREF="HTM_002430.htm">Chameleon</A> <A HREF="HTM_002431.htm">letang</A> <A HREF="HTM_002437.htm">Klly</A> <A HREF="HTM_002442.htm">Kenny</A> <A HREF="HTM_002444.htm">beast</A> <A HREF="HTM_002445.htm">Goat</A> <A HREF="HTM_002446.htm">Captain_Midnite</A> <A HREF="HTM_002457.htm">Death's_Dance</A> <A HREF="HTM_002481.htm">Scudder</A> <A HREF="HTM_002486.htm">Erol</A> <A HREF="HTM_002501.htm">Bluerue</A> <A HREF="HTM_002502.htm">Nightspore</A> <A HREF="HTM_002503.htm">Incubus</A> <A HREF="HTM_002507.htm">nemo</A> <A HREF="HTM_002511.htm">Nox</A> <A HREF="HTM_002512.htm">Tallulah</A> <A HREF="HTM_002513.htm">dwarf</A> <A HREF="HTM_002527.htm">Rufinnej</A> <A HREF="HTM_002539.htm">nextDude</A> <A HREF="HTM_002551.htm">SarahBeth</A> <A HREF="HTM_002554.htm">Princess_Tinymeat</A> <A HREF="HTM_002561.htm">Fasteddie</A> <A HREF="HTM_002563.htm">Fate</A> <A HREF="HTM_002564.htm">panther</A> <A HREF="HTM_002566.htm">mistleford</A> <A HREF="HTM_002577.htm">Trib</A> <A HREF="HTM_002581.htm">The_Necromancer</A> <A HREF="HTM_002582.htm">steven</A> <A HREF="HTM_002590.htm">mayan</A> <A HREF="HTM_002591.htm">devotee</A> <A HREF="HTM_002594.htm">Hunt_Goddess</A> <A HREF="HTM_002610.htm">molly</A> <A HREF="HTM_002617.htm">Quark</A> <A HREF="HTM_002621.htm">Umber</A> <A HREF="HTM_002623.htm">Siren</A> <A HREF="HTM_002626.htm">Corpse</A> <A HREF="HTM_002627.htm">uwiz</A> <A HREF="HTM_002628.htm">hydepark</A> <A HREF="HTM_002629.htm">Aquitaine</A> <A HREF="HTM_002630.htm">Kephren</A> <A HREF="HTM_002631.htm">wildthing</A> <A HREF="HTM_002632.htm">Moorishmaiden</A> <A HREF="HTM_002633.htm">Trent</A> <A HREF="HTM_002638.htm">Kalki</A> <A HREF="HTM_002639.htm">Hermine</A> <A HREF="HTM_002640.htm">%</A> <A HREF="HTM_002649.htm">Cire</A> <A HREF="HTM_002661.htm">Xorin</A> <A HREF="HTM_002662.htm">gromit</A> <A HREF="HTM_002666.htm">Pagen</A> <A HREF="HTM_002676.htm">Quest</A> <A HREF="HTM_002677.htm">Eliud</A> <A HREF="HTM_002678.htm">true</A> <A HREF="HTM_002679.htm">White-Wolf</A> <A HREF="HTM_002683.htm">Tizarin</A> <A HREF="HTM_002686.htm">Jason</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

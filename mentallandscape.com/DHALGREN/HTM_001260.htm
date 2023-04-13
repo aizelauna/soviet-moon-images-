@@ -1,0 +1,61 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Elevator Call Button</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Elevator Call Button (#1260)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_001460.htm">Gaijin</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe button is a simple push-button set in a metal plate on the wall.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_001460.htm">Gaijin</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspFor help on the Generic Elevator Call Button see the help on the Generic Elevator 
+#1543.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+push:
+<pre>
+player:tell("You reach out and push the button.");
+this.location:announce("You see ", player.name, " reach out and press a button.");
+this.elevator:call_elevator(this.floor_name);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp elevator
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp floor_name
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp look_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_001508.htm">an elevator call button</A> <A HREF="HTM_001501.htm">an elevator call button</A> <A HREF="HTM_001512.htm">an elevator call button</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

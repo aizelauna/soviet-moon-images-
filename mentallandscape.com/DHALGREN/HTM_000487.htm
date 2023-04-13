@@ -1,0 +1,55 @@
+<HTML>
+<HEAD>
+<TITLE>Loree</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Loree (#487)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_000487.htm">Loree</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspJeans battered and torn, shirt two sizes too large, shoes comfortable if slightly mismatched. Nondescript (for a street-dweller), and not likely to change. The only adornment she wears is a sliver of green glass on a chrome choke collar draped around her neck. Don't bother asking; she probably won't tell.
+<BR>
+<BR>
+Loree is carrying <A HREF="HTM_000916.htm">salt</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000913.htm">Juxtaposition</A>.
+<BR>
+<BR>
+<BR>
+Loree owns <A HREF="HTM_000487.htm">Loree</A> <A HREF="HTM_000913.htm">Juxtaposition</A> <A HREF="HTM_000915.htm">south</A> <A HREF="HTM_000917.htm">certified freeze-dried badger repellent</A> <A HREF="HTM_000918.htm">weirdness magnet</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+moveto:
+<pre>
+"Copied from Carrot's Rosette Feature Object (#126):moveto by Snap (#448) Sat Feb 
+26 19:31:55 1994 EST";
+pass(@args);
+if ($object_utils:has_property(this, "features") && (#126 in this.features))
+    used = $list_utils:assoc(player, #126.read);
+    if ((used != {}) && ("a" in used[3]))
+        rose = #126:genrose(player.location, used[3]);
+        if (typeof(rose) == LIST)
+            player:tell_lines(rose);
+        endif
+    endif
+endif
+return;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

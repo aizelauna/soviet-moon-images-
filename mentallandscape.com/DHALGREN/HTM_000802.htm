@@ -1,0 +1,46 @@
+<HTML>
+<HEAD>
+<TITLE>palm frond</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> palm frond (#802)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000793.htm">Gannef</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA spiked shovel made of milky green silk.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000800.htm">the shade</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+wave:
+<pre>
+target = iobj;
+subject = target;
+target:tell("Cool stirs around your sweaty face as ", player.name, " gently fans 
+you with a silken palm frond.  The scent of cut grass reminds you of your first kiss.");
+player.location:announce_all_but({target}, "Absent-mindedly, languidly, ", player.name, 
+" fans ", target.name, " with a silky, milky-green palm frond. ", target.name, "'s 
+gaze relaxes into the middle distance.  In fact,   ", target.name, " seems to be 
+thinking of something else altogether.");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

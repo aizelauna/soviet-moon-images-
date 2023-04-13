@@ -1,0 +1,103 @@
+<HTML>
+<HEAD>
+<TITLE>peepshow</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> peepshow (#1122)</H3>
+(an instance of <A HREF="HTM_000008.htm">generic container</A> made by <A HREF="HTM_000095.htm">legba</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIt looks like some weird shrine constructed for the cathode gods. Standing about 6 feet high, the top half is the chunky, wooden console of an early 1960s Quasar television, its gold-plated, elongated star logo gleaming dully.  The chunky on/off knob usually to be found on the lower right has been replaced by a coin return cup.  The channel changer on the lower left has also been removed, leaving a round, black hole about three inches in diameter.  A coin slot large enough to accomodate a quarter has been bolted to the upper right hand side.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe majestic bulk of the vintage tv balances upon what appears to have once been a 21" Sony Trinitron Monitor, whose screen now seems entirely dedicated to showing nothing but incessant reruns of "Ren and Stimpy."
+<BR>
+<BR>
+peepshow contains <A HREF="HTM_001023.htm">quarter</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001376.htm">Backroom</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+p*ut in*sert d*rop:
+<pre>
+"Copied from generic container (#8):put by The_Mayor (#2) Fri Jul 22 04:21:25 1994 
+EDT";
+if ((this.location != player) && (this.location != player.location))
+    player:tell("You can't get at ", this.name, ".");
+elseif (dobj == $nothing)
+    player:tell("What do you want to put ", prepstr, " ", this.name, "?");
+elseif ($command_utils:object_match_failed(dobj, dobjstr))
+elseif ((dobj.location != player) && (dobj.location != player.location))
+    player:tell("You don't have ", dobj.name, ".");
+elseif (!this.opened)
+    player:tell(this.name, " is closed.");
+else
+    dobj:moveto(this);
+    if (dobj.location == this)
+        player:tell(this:put_msg());
+        if (dobj.name == "quarter")
+            this.location:announce_all("You hear the clickthunk of a quarter falling 
+into the machine.  The black screen glows suddenly with a steady, bluish light.");
+            suspend(5);
+            this.state = 1;
+            movies = {};
+            for n in (this.contents)
+                if (parent(n) == #826)
+                    movies = listappend(movies, n);
+                endif
+            endfor
+            if (movies)
+                len = length(movies);
+                movies[random(len)]:play_script();
+            else
+                player:tell("The machine seems to not be working at the moment");
+            endif
+            this.state = 0;
+        endif
+        if (msg = this:oput_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    else
+        player:tell(this:put_fail_msg());
+        if (msg = this:oput_fail_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+description:
+<pre>
+if (this.state)
+    return listappend(this.description, this.on_text);
+else
+    return listappend(this.description, this.off_text);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp on_text
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp off_text
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp state
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,138 @@
+<HTML>
+<HEAD>
+<TITLE>a seed</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a seed (#1500)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA seed, a pip a pit,
+&nbsp&nbsp&nbsp&nbsp&nbspincipient of what?
+&nbsp&nbsp&nbsp&nbsp&nbsp"Plant me" says the seed,
+&nbsp&nbsp&nbsp&nbsp&nbsp"Plant my need."
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000812.htm">Marcus</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+grow:
+<pre>
+this.growing = 1;
+stage = this.aliases in this.alias_list;
+for line in (this.grow_lines[stage])
+    suspend(((2 * stage) + random(this.delay)) + random(this.delay));
+    this.location:announce_all($string_utils:pronoun_sub(line));
+endfor
+(stage < 8) ? stage = stage + 1 | (stage = 1);
+this.aliases = this.alias_list[stage];
+this.name = this.aliases[1];
+this.description = this.descriptions[stage];
+if (this.name == "a fruit")
+    this.planted = 0;
+    if (player.location == this.location)
+        player:tell("The fruit falls out of the tree, and into your hands.");
+        this.location:announce("The golden fruit falls out of the tree into ", player.name, 
+"'s hands.");
+        this.key = 0;
+        this:moveto(player);
+    else
+        this.location:announce_all("Out of the tree, the fruit falls to the ground.");
+    endif
+    suspend(3);
+    this.location:announce_all("Where the tree stood before, stands nothing. Was 
+it a tree, or only a dream of a tree?");
+endif
+this.growing = 0;
+.
+
+</pre>
+<BR>
+plant:
+<pre>
+if (this.planted)
+    player:tell(this:titlec(), " is already planted rather nicely.");
+elseif (this.name == "a fruit")
+    player:tell("You try to plant the fruit.");
+    if (this.location == player)
+        this:drop();
+    endif
+    if (this.location == player.location)
+        player:tell("The fruit sits there, without seeming to take root very well.");
+    endif
+elseif (!$object_utils:isa(this.location, $room))
+    player:tell("To plant the seed, first set it on the ground someplace.");
+else
+    player:tell("You dig a little hole and plant the seed.");
+    this.location:announce(player.name, " finds a spot and plants a seed in the ground.");
+    this.planted = 1;
+    this.key = this.location;
+    this:grow();
+endif
+.
+
+</pre>
+<BR>
+water:
+<pre>
+if (!this.planted)
+    player:tell("You water ", this:title(), " without doing much more than getting 
+it wet.");
+else
+    player:tell("You water the ", this.aliases[2], ".");
+    this.location:announce(player:titlec(), " waters the ", this.aliases[2], ". Getting 
+it nice and wet.");
+    if (!this.growing)
+        this:grow();
+    endif
+endif
+.
+
+</pre>
+<BR>
+eat:
+<pre>
+if (this.name != "a fruit")
+    player:tell("You nibble on the ", this.aliases[2], ". Mm, tasty. It doesn't seem 
+to do much of anything though.");
+elseif (this.location != player)
+    player:tell("The fruit might be easier to eat if you picked it up.");
+elseif (this.growing)
+    player:tell("The fruit is delicious. Mmmmmm.");
+else
+    player:tell("You take a bite of the fruit. It's so good you take another.");
+    this:grow();
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp descriptions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp grow_lines
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp delay
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp planted
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp growing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp alias_list
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

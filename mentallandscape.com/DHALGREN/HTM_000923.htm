@@ -1,0 +1,135 @@
+<HTML>
+<HEAD>
+<TITLE>The House of Freaks</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> The House of Freaks (#923)</H3>
+(an instance of <A HREF="HTM_000459.htm">generic integrating room</A> made by <A HREF="HTM_000907.htm">melusina</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe inside of The House of Freaks holds true to the shabby promise of the exterior.  It's spartan, but for the various freaks.
+<BR>
+<BR>
+You see <A HREF="HTM_000940.htm">Tattooed Lady</A> and <A HREF="HTM_001482.htm">The Critic</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ southeast ] <A HREF="HTM_000919.htm">Dying Moon Carnival</A>.
+You've ogled the freaks to your heart's content...what else does the carnival have in store for you?
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ northwest ] <A HREF="HTM_000950.htm">The Tank</A>.
+You push aside the tattered silver streamers and enter The Tank.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ south ] <A HREF="HTM_001310.htm">Le Cafe' Fetish</A>.
+You squeeze through the rip in the canvas, squinting against the harsh glow.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ east ] <A HREF="HTM_001499.htm">The Hermaphrodite</A>.
+Drawn by the garish doorway, you lift one of the flaps and cross the threshold.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ southwest ] <A HREF="HTM_002016.htm">Behind the Fetish</A>.
+You crouch down and slip through the gap in the southwest corner of the tent.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@details:
+<pre>
+"Copied from Generic Post-Apocalypse Room (#110):@details by Calkins (#150) Wed Sep 
+28 12:26:31 1994 EDT";
+if (player != this.owner)
+    player:tell(E_PERM);
+    return;
+endif
+player:tell("Details here are: ", $string_utils:print(this.detail_names));
+.
+
+</pre>
+<BR>
+@det*ail:
+<pre>
+"Copied from Generic Post-Apocalypse Room (#110):@det by Calkins (#150) Wed Sep 28 
+12:27:02 1994 EDT";
+if (player != this.owner)
+    player:tell(E_PERM);
+    return;
+endif
+name = dobjstr;
+desc = iobjstr;
+if (i = name in this.detail_names)
+    this.detail_descriptions = listset(this.detail_descriptions, desc, i);
+    player:tell("Detail ", name, " replaced.");
+else
+    this.detail_names = {@this.detail_names, name};
+    this.detail_descriptions = {@this.detail_descriptions, desc};
+    player:tell("Detail ", name, " added.");
+endif
+.
+
+</pre>
+<BR>
+@rmd*etail:
+<pre>
+"Copied from Generic Post-Apocalypse Room (#110):@rmd by Calkins (#150) Wed Sep 28 
+12:27:27 1994 EDT";
+if (player != this.owner)
+    player:tell(E_PERM);
+    return;
+endif
+if (i = dobjstr in this.detail_names)
+    this.detail_names = listdelete(this.detail_names, i);
+    this.detail_descriptions = listdelete(this.detail_descriptions, i);
+    player:tell("Detail ", dobjstr, " deleted.");
+else
+    player:tell("Detail ", dobjstr, " not found.");
+endif
+.
+
+</pre>
+<BR>
+l*ook:
+<pre>
+"Copied from Generic Post-Apocalypse Room (#110):l by Calkins (#150) Wed Sep 28 12:27:37 
+1994 EDT";
+if ((length(args) != 1) || valid($string_utils:match_object(dobjstr, this)))
+    pass(@args);
+elseif (i = $string_utils:match_stringlist(dobjstr, this.detail_names))
+    player:tell(this:weather_daytime(this.detail_descriptions[i]));
+else
+    player:tell("I see no \"", dobjstr, "\" here.");
+endif
+.
+
+</pre>
+<BR>
+set_detail_descriptions set_detail_names:
+<pre>
+"Copied from Generic Post-Apocalypse Room (#110):set_detail_names by Calkins (#150) 
+Wed Sep 28 12:28:03 1994 EDT";
+"Allows note editors to set these props. Doesn't check for proper value";
+if ((!$perm_utils:controls(caller_perms(), this)) && (caller != this))
+    return E_PERM;
+elseif (args)
+    which = verb[5..length(verb)];
+    return this.(which) = args[1];
+else
+    return E_INVARG;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

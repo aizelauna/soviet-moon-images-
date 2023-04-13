@@ -1,0 +1,406 @@
+<HTML>
+<HEAD>
+<TITLE>The System Object</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> The System Object (#0)</H3>
+(an instance of <A HREF="HTM_000001.htm">Root Class</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe known universe.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+do_login_command:
+<pre>
+"...This code should only be run as a server task...";
+if (callers())
+    return E_PERM;
+endif
+if (typeof(h = $network:incoming_connection(player)) == OBJ)
+    "connected to an object";
+    return h;
+elseif (h)
+    return 0;
+endif
+host = $string_utils:connection_hostname(connection_name(player));
+if ($login:redlisted(host))
+    boot_player(player);
+    server_log(tostr("REDLISTED: ", player, " from ", host));
+    return 0;
+endif
+args = $login:parse_command(@args);
+return $login:(args[1])(@listdelete(args, 1));
+.
+
+</pre>
+<BR>
+server_started:
+<pre>
+if (callers())
+    "This code should only be run as a server task.";
+    return E_PERM;
+endif
+$network:server_started();
+$last_restart_time = time();
+"... suitable prefix for server log messages...";
+preamble = "STARTUP: [#0:server_started]  ";
+if ($dump_interval > 3600)
+    "...Setting dump time to 3am:";
+    "...10 or 11 hours offset from GMT midnight plus now until GMT midnight.";
+    dumptime = (((ctime()[27] == "D") ? 10 | 11) * 60) * 60;
+    desired_interval = (24 * 60) * 60;
+    $dump_interval = (dumptime - time()) % desired_interval;
+    if ($dump_interval <= 0)
+        $dump_interval = $dump_interval + desired_interval;
+    endif
+    server_log(tostr(preamble, "Checkpoint scheduled for ", ctime(time() + $dump_interval), 
+"."));
+    "...Now, the system starts up, and schedules the first checkpoint.";
+    "...The second one will be scheduled at some random time if we don't reset it";
+    "...to 24 hours.  Any time between now and the first checkpoint time will do.";
+    fork (1)
+        $dump_interval = desired_interval;
+    endfork
+else
+    server_log(tostr(preamble, "Checkpoint scheduled every ", $dump_interval / 60, 
+" minutes."));
+endif
+"...do some basic sanity checks for $maxint and $minint...";
+if (((($maxint + 1) != $minint) || ($minint >= 0)) || ($maxint <= 0))
+    server_log(preamble + "Warning:  $maxint and $minint look incorrect.");
+endif
+.
+
+</pre>
+<BR>
+core_objects:
+<pre>
+saved = {#0};
+for p in (properties(#0))
+    v = #0.(p);
+    if ((typeof(v) == OBJ) && valid(v))
+        saved = setadd(saved, v);
+    endif
+endfor
+for o in (saved)
+    p = parent(o);
+    while (valid(p))
+        saved = setadd(saved, p);
+        p = parent(p);
+    endwhile
+endfor
+return $list_utils:sort(saved);
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    pass();
+    if ("server_started" in verbs(this))
+        code = {"callers() || ($last_restart_time = time());"};
+        set_verb_code(this, "server_started", code);
+    endif
+    $shutdown_message = "";
+    $shutdown_time = 0;
+    $dump_interval = 3600;
+    $gripe_recipients = {player};
+    $class_registry = {{"generics", "Generic objects intended for use as the parents 
+of new objects", {$room, $exit, $thing, $note, $letter, $container, $root_class, 
+$player, $prog, $wiz, $generic_editor, $mail_recipient, $mail_agent}}, {"utilities", 
+"Objects holding useful general-purpose verbs", {$string_utils, $gender_utils, $trig_utils, 
+$time_utils, $match_utils, $object_utils, $lock_utils, $list_utils, $command_utils, 
+$code_utils, $perm_utils, $building_utils}}};
+endif
+.
+
+</pre>
+<BR>
+user_created user_connected:
+<pre>
+"Added callers() security and login watcher Dredful 1/24/94";
+if (callers())
+    return E_PERM;
+endif
+user = args[1];
+set_task_perms(user);
+fork (0)
+    user:confunc();
+endfork
+user.location:confunc(user);
+$local.watcher:tell_connect(user);
+.
+
+</pre>
+<BR>
+user_disconnected user_client_disconnected:
+<pre>
+"Added callers() security and login watcher functionality. Dredful 1/24/94";
+if (callers())
+    return E_PERM;
+endif
+user = args[1];
+user.last_disconnect_time = time();
+set_task_perms(user);
+fork (0)
+    user.location:disfunc(user);
+endfork
+user:disfunc();
+if (valid(user))
+    $local.watcher:tell_disconnect(user, verb == "user_disconnected");
+endif
+.
+
+</pre>
+<BR>
+checkpoint_started:
+<pre>
+if (callers())
+    return E_PERM;
+else
+    "for debugging until decide proper system of notification";
+    for dude in ($set_utils:intersection($wiz_utils:all_wizards(), connected_players()))
+        dude:notify("Message from server: checkpoint starting...");
+    endfor
+endif
+.
+
+</pre>
+<BR>
+checkpoint_finished:
+<pre>
+if (callers())
+    return E_PERM;
+else
+    "For debugging until decide on proper notification";
+    for dude in ($set_utils:intersection($wiz_utils:all_wizards(), connected_players()))
+        if (!args[1])
+            dude:notify("Message from server: checkpoint failed!");
+        else
+            dude:notify("Message from server: checkpoint completed successfully.");
+        endif
+    endfor
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp builder
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp login
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp last_huh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp guest_log
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp last_restart_time
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp biglist
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp big_mail_recipient
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp limbo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp registration_db
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp new_player_log
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp verb_help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp core_help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp prog_help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp wiz_help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp shutdown_task
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp wiz_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp site_db
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp math_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp set_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp builtin_function_help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp new_prog_log
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp generic_help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp guest
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp seq_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp quota_log
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp you
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp free_list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp max_seconds
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp max_ticks
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp hacker
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp generic_db
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp shutdown_message
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp shutdown_time
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp no_one
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp player_db
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp class_registry
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp player_class
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gender_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp trig_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp time_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp editor_help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail_recipient
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail_agent
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail_editor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp note_editor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp verb_editor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp generic_editor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp match_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp object_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp lock_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gripe_recipients
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp letter
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dump_interval
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp list_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp command_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp player
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp wiz
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp prog
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp code_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp nothing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp failed_match
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ambiguous_match
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp perm_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp building_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp string_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp news
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp note
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp container
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp thing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp exit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp room
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp player_start
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp root_class
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp recycler
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp garbage
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail_options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp edit_options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp display_options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp generic_options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp maxint
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp minint
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp error
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp newt_log
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp toad_log
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp site_log
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp housekeeper
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp network
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp generic_biglist_home
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp feature
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp local
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gopher
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp nntp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp build_options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp prog_options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail_name_db
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp generic_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp quota_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp alt_quota_utils
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp quota
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp paranoid_db
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

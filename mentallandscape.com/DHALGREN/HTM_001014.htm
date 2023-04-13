@@ -1,0 +1,91 @@
+<HTML>
+<HEAD>
+<TITLE>Sister Devi</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Sister Devi (#1014)</H3>
+(an instance of <A HREF="HTM_001044.htm">Generic Speaking Wandering Automaton</A> made by <A HREF="HTM_000538.htm">Eclipse</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSister Devi is a solitary woman, who doesn't seem to be the age she appears to be.  Her emerald eyes seem distantly focused, and she slowly rocks back and forth, humming softly.  Her thin face and bony hands are smudged with layers of dirt, and her long, unclipped fingernails are cracked and torn.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspHer moth-eaten, graying habit is too small, and rather tattered.  Her once-white collar and cuffs are a dingy grey, and her wimple is extremely battered and fairly dirty.  Her copper hair sticks out from underneath the wimple, and hangs in her face, tangled and dirty.  A cord that might have once been a rosary is wrapped around her waist, and only a few beads remain.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspOddly enough, she has a small jeweled ring in her nose, a small red dot on her forehead, and a charm of a dancing Siva hangs from a leather thong around her neck.  Her bare feet are brown with dirt, but faint decorative tattoos on the tops of her feet, reaching up to her ankles, are still barely visible.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSister Devi seems to be a few cards short of a full deck.  She mumbles and gibbers to herself, and her words are either nonsensical or completely foreign.  She seems to be perfectly healthy, but somehow lost her sanity, somewhere along the way.
+<BR>
+<BR>
+Sister Devi has some things to say:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp If he treats you horribly, he's probably a scorpio.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp I remember everything as though it happened years ago.  Probably it did, so I remember it.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp There's a dead man in your heart, and he takes up too much room.  And I know just what he's called - he's called Steve.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp I know who wrote the book of love.  It was an idiot.  It was a fool.  A slobbering fool with a speech defect and a shaking hand.  And he wrote my name next to yours.  But it should have been David Byrne or somebody.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Yesterday I saw the Devil in the nude.  It was embarassing; I turned away.  He was leering in the mirror when I looked again.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Yesterday I saw the Devil in a mood.  He wasn't angry, but he stood around biting off the legs of all his furry chums.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp I believe in coyotes, and time as an abstract.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Secrecy is the beginning of tyranny.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp I got a machine and I took over the world in one weekend.  I took over the world with my machine.  I did it because I was looking for a project, and it was either take over the world or learn French.  So I tool over the world, and next weekend, I can learn French.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Never underestimate the power of human stupidity.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002322.htm">Confession Booth</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+confess:
+<pre>
+(player.location != this.location) ? player:tell("You can't confess to ", this.name, 
+" from here.") | ((!this.talkative) ? $you:say_action("%N %<tries> to confess to 
+%t, but she doesn't seem to understand, and just stares at %n blankly.") | {$you:say_action("%N 
+%<asks> %t to forgive %o, and %<confesses/confess> to the Sister all %p sins."), 
+$you:say_action("%T listens to %p revealing confessions, and snickers to herself. 
+ In forgiveness, she bestows a mysterious blessing upon %n."), player.location:announce_all(this.name, 
+" ", this:says_msg(), ", \"", this:speak_msg(), "\""), $you:say_action("%T grins 
+madly at %n, and promptly starts gibbering to herself, waving %n away blithely.")});
+.
+
+</pre>
+<BR>
+ask:
+<pre>
+(player.location != this.location) ? player:tell("You can't ask ", this.name, " anything 
+from here.") | ((!this.talkative) ? $you:say_action("%N %<tries> to get a blessing 
+from %t, but %t doesn't seem to understand and just %<t:stares> at %n blankly.") 
+| ((iobjstr == "blessing") ? {$you:say_action("%N %<begs> %t for a blessing."), player.location:announce_all(this.name, 
+" ", this:says_msg(), ", \"", this:speak_msg(), "\""), $you:say_action("%T %<t:looks> 
+at %n with an insane gleam in her eye, and %<t:spits> on %p head."), player.location:announce_all(this.name, 
+" grins madly, and chuckles to herself.")} | ((iobjstr == "forgiveness") ? this:confess() 
+| {player:tell(this.name, " looks at you blankly.  Perhaps you should ask her for 
+something like a blessing, or forgiveness."), this.location:announce(player.name, 
+" asks ", this.name, " for something, but ", this.name, " just stares at ", player.name, 
+" uncomprehendingly.")})));
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

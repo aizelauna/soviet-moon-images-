@@ -1,0 +1,217 @@
+<HTML>
+<HEAD>
+<TITLE>Images of Venus</TITLE>
+<META name="author" content="Don P. Mitchell">
+<META name="keywords" content="Astronomy Venus Venera Soviet Russian Rockets">
+</HEAD>
+<BODY bgcolor=#000000 text=#FFCC33 link=#FF6600 vlink=#FFFF66 alink=#FFFF66>
+<FONT face="Calibri, Arial, Helvetica">
+<CENTER><FONT COLOR=#FFFFFF><H1>Images of Venus</H1></FONT></CENTER>
+<P>
+<CENTER>
+<TABLE BORDER="0" CELLSPACING="10" CELLPADDING="0">
+<TR><TD ALIGN="left" VALIGN="top" WIDTH="640">
+
+This is an old webpage.  You really want to look <A HREF="C_Catalog.htm">here</A>.
+
+<A NAME="Venera9"></A>
+<H3>Venera-9 (1975)</H3>
+Using cameras designed by A.S. Selivanov's team,
+Venera 9 sent image telemetry for 50 minutes. It scanned 174&deg;
+of the panorama from left to right, and then 124&deg; scanning right to left.
+</TD></TR></TABLE>
+<CENTER>
+<img src="Venera_9.jpg">
+<br>
+Venera 9 Panorama
+</CENTER>
+<P>
+<TABLE BORDER="0" CELLSPACING="10" CELLPADDING="0">
+<TR><TD ALIGN="left" VALIGN="top" WIDTH="640">
+The upper image is the raw 6-bit telemetry, about 115 by 512 pixels.
+Automatic gain control and logarithmic quantization were used to handle the
+unknown dynamic range of illumination.
+Previously published images from these probes suffered from severe analog generation loss, so it is fortunate that the original data was found.
+<P>
+The raw image was converted to
+optical density according to Russian calibration data, then to linear
+radiance for image processing. It was interpolated with windowed sinc
+filter to avoid post-aliasing (a "pixilated" appearance), and the modulation
+transfer function ("aperture") of the camera was corrected with a 1 +
+0.2*frequency**2 emphasis. This was then written out as 8-bit
+gamma-corrected values, using the sRGB standard gamma of 2.2. Some of the
+telemetry bars on the right were replaced with data from the 124&deg;
+panorama.
+<P>
+The bottom
+image is digitally in-painted, using Bertalmio's isophote-flow
+algorithm, to fill in missing data.
+<A NAME="Venera10">
+<H3>Venera-10 (1975)</H3>
+Venera 10 sent image telemetry for 44.5 minutes. It scanned a 17&deg;
+section, then 184&deg; and then 63&deg;.
+</TD></TR></TABLE>
+<CENTER>
+<img src="Venera_10.jpg">
+<br>
+Venera 10 Panorama
+</CENTER>
+<P>
+<TABLE BORDER="0" CELLSPACING="10" CELLPADDING="0">
+<TR><TD ALIGN="left" VALIGN="top" WIDTH="640">
+<A NAME="Venera13"></A>
+<H3>Venera-13 and Venera-14 (1982)</H3>
+</TD></TR></TABLE>
+<CENTER>
+<img src="V_V13bigimage.jpg">
+<br>
+Section of Reworked Venera-13 Image
+</CENTER>
+<P>
+<TABLE BORDER="0" CELLSPACING="10" CELLPADDING="0">
+<TR><TD ALIGN="left" VALIGN="top" WIDTH="640">
+The raw data from Venera-13 and 14 is currently being processed. The original data is 9 bits per pixels, logarithmically encoded with an additional 10th parity bit.
+To learn more about the camera, look <A HREF="V_Cameras.htm#Venera13">here</A>.
+Apparently the data was retransmitted from the spacecraft bus, or several independent recordings were made, and these recordings contain somewhat uncorrelated noise.
+A typical 252 &#215; 7000 pixel full transmission, reduced in size, looks like this:
+<P>
+<CENTER><img width=620 height=298 src="V_Panorama13a.jpg" alt="Venera-13 Camera 1 Raw Transmission">
+<br>
+Venera-13, Camera-1 Raw Transmission
+</CENTER>
+<P>
+The quality is remarkably good, and a nearly perfect transmission can be compiled by carefully merging the information from multiple transmissions.
+A few sections appear damaged by noise (see left side of Venera-14 Camera-2 below), but these are actually bit synchronization errors which can be repaired in software. For example:
+<P>
+<CENTER><img width=510 height=252 src="V_V14Repair.jpg" alt="Venera-14 Image Repair">
+<br>
+Original, Bit Sync Repair, Merged with Another Transmission, Bad-Pixel Removal
+</CENTER>
+<P>
+Work on this data set is in progress. Recovering the radiometric response function and balancing color are the next steps. Since the scene was scanned several times, it may be possible to calculate a superresolution image from multiple panoramas, as NASA has done with Mars Pathfinder images. Perhaps if the author did not spend so much time on this web site, these tasks would be done by now.
+<P>
+The images below are the original Russian digital images, with a little reprocessing. Not my upcoming versions. The original color images were darker and somewhat noisier than the b/w pictures scanned through the clear filter. In the image below, I combined the chroma signal from the color images with the luminance from the clear-filter images.
+The color chart, extended from the spacecraft was originally painted with gray, red, green and blue silicone enamel. On Venus, its color was shifted by effects of heat and pressure, and tinted by the orange sky.
+I adjusted the image colors slightly to match the calculated hues of the chart, but these pictures are not precisely color balanced:
+</TD></TR></TABLE>
+<P>
+<CENTER>
+<img src="Venera13Camera1.jpg">
+<br>
+Venera 13, Camera I
+</CENTER>
+<P>
+<CENTER>
+<img src="Venera13Camera2.jpg">
+<br>
+Venera 13, Camera II
+</CENTER>
+<P>
+<CENTER>
+<img src="Venera14Camera1.jpg">
+<br>
+Venera 14, Camera I
+</CENTER>
+<P>
+<CENTER>
+<img src="Venera14Camera2.jpg">
+<br>
+Venera 14, Camera II
+</CENTER>
+
+
+<TABLE BORDER="0" CELLSPACING="10" CELLPADDING="0">
+<TR><TD ALIGN="left" VALIGN="top" WIDTH="640">
+<H3>Venus From Radar</H3>
+The topography of Venus has only been seen by radar.  The best radar images of Venus are from the Soviet orbiters, Venera-15 and 16, and the American orbiter Magellan.
+</TD></TR></TABLE>
+<P>
+<CENTER><img width=1024 height=768 src="V_Ishtar.jpg" alt="Ishtar Terra">
+<br>
+Ishtar Terra
+</CENTER>
+<P>
+<TABLE BORDER="0" CELLSPACING="10" CELLPADDING="0">
+<TR><TD ALIGN="left" VALIGN="top" WIDTH="640">
+Seen above is a topographic map made by the author, from Venera and Magellan altimetry data.  It shows the continent-sized highlands of Ishtar Terra, near the north pole of Venus.
+
+
+<H3>Venus From Space</H3>
+In 1965, Venera-2 made the first attempt to photograph Venus from space.  It probably did so, but the final telemetry contact to download its experimental data was never established.
+After that, the only Soviet cameras to study Venus from space were on the first artificial satellites of Venus, Venera-9 and 10.  They did long-term high resolution cloud-dynamics studies, combined with linear photometric and spectrometric measurements.  The results of that analysis and a few pictures have been published, but the original data has never been seen by westerners.
+<A HREF="V_Cameras.htm#Venera9Orbiter">linear camera</A>
+was similar to the Venera-9 lander's cycloramic camera, but with twice the resolution.
+<P>
+<CENTER>
+<img width=640 height=200 src="V_Mariner10abc.jpg" alt="Mariner-10 Departing From Venus">
+</CENTER>
+<P>
+The best images of Venus ever taken were by Mariner-10 in 1973, during its gravity-assist flyby on the way to Mercury.  Galileo also photographed the planet during a flyby, and
+low-resolution cloud scans were taken over a long period of time by Pioneer-12.
+<P>
+Surprisingly, images of Venus taken from space are almost never colored or tone mapped accurately.  Close to the Sun and reflecting 70% of its light, Venus would be a dazzling sight to the naked eye, with subtle yellowish patterns and two white polar collars.  Patterns of circulating currents are most visible at violet and ultraviolet wavelengths.
+<P>
+<CENTER>
+<img width=640 height=100 src="Venus_Spectra.jpg" alt="Spectra of Venusian Clouds and Sky">
+</CENTER>
+<P>
+If a spectrum is known, an accurate color value can be computed.  This is accomplished by converting to CIE XYZ and then into standard sRGB which modern monitors are designed to display correctly.
+On the left is the spectrum of Venus as seen from space, measured by the Cassini probe.  On the right is the spectrum of the zenith sky, measured by V.I. Moroz from the Venera 11 lander.  Wavelengths plotted are 360 to 830 nm.
+<P>
+<CENTER>
+<img width=640 height=237 src="Venus_GalileoPair.jpg" alt="Image of Venus from Galileo">
+</CENTER>
+<P>
+Full spectral data is rarely available, and instead we must use views through color filters.  Above, the Galileo probe captured Venus through a clear filter (left) and through a 410 nm violet filter, which reveals the subtle yellow and white clouds.  Unfortunately, many different color images could result in the same two clear and violet signals above.
+Even when so-called red, green and blue filters are used, the problem is just as difficult, because the filters are not really the <I>right</I> red green and blue to just plug into the channels of a color display.
+Theoretically, information from the two images above and from the Cassini spectrum could be combined using <I>Bayesian decision theory</I>, to compute the most probable color image.
+<P>
+<CENTER>
+<img width=640 height=525 src="Venus_Galileo_Visible.jpg" alt="Venus from Space">
+</CENTER>
+<P>
+<CENTER><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR>
+<TD ALIGN="left" VALIGN="top" WIDTH="600">
+If colors are estimated correctly, there is a final issue of tone mapping.  How bright does the image appear to the eye in a given context.
+The image above is the best color image of Venus I've found, showing the planet as it would likely appear to a human observer in space.  It was made by Turkish astronomer A. Tayfun Oner, using the two color channels from the Galileo camera, and a third interpolated channel.
+<P>
+<CENTER>
+<img width=640 height=320 src="Venus_DamianPeach.jpg" alt="Damian Peach Telescopic Images of Venus">
+</CENTER>
+<P>
+<CENTER><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR>
+<TD ALIGN="left" VALIGN="top" WIDTH="600">
+The images above, by the talented amateur astronomer 
+Damian Peach, show the appearance of Venus through a high-quality telescope, at various points in its orbit.  When Venus is close, its diameter is almost visible to the naked eye (one minute of arc), but it is then lit from behind.
+<P>
+Don Davis has a fascinating set of pages dedicated to the issue of
+<A HREF="http://www.donaldedavis.com/2002_addons/SSYCOLRS.html">Color in the Solar System</A> and a special section devoted to <A HREF="http://www.donaldedavis.com/PARTS/MARSCLRS.html">The Colors of Mars</A>.
+
+<H3>Acknowledgements</H3>
+Thanks to Don Davis, Yuri Gektin, Jim Head, and Vladimir Kurt for their help.
+</TD></TR></TABLE>
+</CENTER>
+<P><CENTER><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH="640">
+<A HREF="Index.htm"><FONT COLOR=#FFFFFF>Home</FONT></A>,
+<A HREF="V_Venus.htm"><FONT COLOR=#FFFFFF>Back to Venus</A>
+</TD></TR></TABLE></CENTER>
+<script type="text/javascript"><!--
+google_ad_client = "pub-0055235515604002";
+google_ad_width = 468;
+google_ad_height = 60;
+google_ad_format = "468x60_as";
+google_ad_type = "text_image";
+google_ad_channel ="";
+google_color_border = "000000";
+google_color_bg = "000000";
+google_color_link = "FFCC33";
+google_color_text = "FFCC33";
+google_color_url = "FF6600";
+//--></script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+<P><BR><CENTER>Copyright &#169; 2003,2004 Don P. Mitchell. All rights reserved.</CENTER>
+</BODY>
+</HTML>

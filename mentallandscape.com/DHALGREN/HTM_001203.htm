@@ -1,0 +1,50 @@
+<HTML>
+<HEAD>
+<TITLE>broken pieces of stained glass</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> broken pieces of stained glass (#1203)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000585.htm">kp</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspSeveral shattered pieces of stained glass held together by an old shoelace woven 
+through holes drilled into each shard.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_001042.htm">Under the Ruins</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+tingle:
+<pre>
+this.location:announce_all("The ", this:title(), " make a tinkling sound as they 
+vibrate gently.");
+.
+
+</pre>
+<BR>
+shake tinkle:
+<pre>
+player:tell("You ", verb, " the ", this.name, " gently.");
+player.location:announce(player:title(), " ", verb, "s the ", this.name, " gently.");
+this:tingle();
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

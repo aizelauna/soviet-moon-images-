@@ -1,0 +1,351 @@
+<HTML>
+<HEAD>
+<TITLE>dbMeter</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> dbMeter (#122)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000096.htm">Dredful</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA big fat pig that likes to wallow in MOO rather than mud.  Its favorite food is 
+objects.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspUsage:  measure <object> with Moo Pig:  measures the object's storage.
+&nbsp&nbsp&nbsp&nbsp&nbsp        summarize <player> with Moo Pig:  summarizes a player's usage based
+&nbsp&nbsp&nbsp&nbsp&nbsp                        on stored data.  Tells you how out of date its data was
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspCallable:
+&nbsp&nbsp&nbsp&nbsp&nbsp #122:object_bytes(objnum) =>  bytes of memory this object consumes.
+&nbsp&nbsp&nbsp&nbsp&nbsp #122:value_bytes(datatype [usually a list])
+&nbsp&nbsp&nbsp&nbsp&nbsp =>  bytes of memory this list consumes.
+&nbsp&nbsp&nbsp&nbsp&nbsp #122:summarize_one_user(user,flag) => see verb help
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspProperties:
+&nbsp&nbsp&nbsp&nbsp&nbsp #122.owned
+&nbsp&nbsp&nbsp&nbsp&nbsp        #122.owners: Parallel lists of total size of all objects owned by various 
+users who own above a certain threshold (currently 100,000 bytes)
+&nbsp&nbsp&nbsp&nbsp&nbsp        #151.owner_summary_time: timestamp of when above data was created
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspProperties on everything: 
+&nbsp&nbsp&nbsp&nbsp&nbsp        #1.object_size: {bytes, measurement-time}
+&nbsp&nbsp&nbsp&nbsp&nbsp                        Updated by this:object_bytes().
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspWarning!  Some of these verbs take a *long time*, because in an effort to be nonspammy, 
+it suspends for 5 seconds at a time.  Also, if Dredful finds random tasks in his 
+queue, he might just kill them, so don't do this lightly.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000096.htm">Dredful</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+object_bytes:
+<pre>
+"set_task_perms(caller_perms())";
+o = args[1];
+b = ((13 * 4) + length(o.name)) + 1;
+vs = verbs(o);
+b = b + ((length(vs) * 5) * 4);
+for i in [0..length(vs) - 1]
+    $command_utils:suspend_if_needed(5);
+    vn = tostr(i);
+    info = verb_info(o, vn);
+    b = (b + length(info[3])) + 1;
+    if ($command_utils:running_out_of_time())
+        suspend(5);
+    endif
+    b = b + this:value_bytes(verb_code(o, vn));
+endfor
+"This is a cheat, but it's remarkably close to right...";
+b = (b + this:value_bytes(properties(o))) - 4;
+ps = $object_utils:all_properties_suspended(o);
+b = b + ((length(ps) * 4) * 4);
+for p in (ps)
+    if (!is_clear_property(o, p))
+        $command_utils:suspend_if_needed(5);
+        b = b + this:value_bytes(o.(p));
+    endif
+endfor
+if ($object_utils:has_property(o, "object_size"))
+    o.object_size = {b, time()};
+endif
+return b;
+.
+
+</pre>
+<BR>
+value_bytes:
+<pre>
+set_task_perms(caller_perms());
+suspend(0);
+v = args[1];
+t = typeof(v);
+if (t == LIST)
+    b = ((length(v) + 1) * 2) * 4;
+    for vv in (v)
+        if ($command_utils:running_out_of_time())
+            suspend(2);
+        endif
+        b = b + this:value_bytes(vv);
+    endfor
+    return b;
+elseif (t == STR)
+    return length(v) + 1;
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+measure:
+<pre>
+if (!valid(dobj))
+    return player:tell("Sorry, what's '", dobjstr, "'.");
+endif
+player:tell("Checking size of ", dobj.name, " (", dobj, ")...");
+player:tell("Size of ", dobj.name, " (", dobj, ") is ", this:object_bytes(dobj), 
+" bytes.");
+.
+
+</pre>
+<BR>
+survey-entire-db:
+<pre>
+if (!player.wizard)
+    player:tell("Sorry, you must be a wizard to do this.");
+else
+    starttime = time();
+    player:tell("Beginning survey of entire database now: ", ctime(starttime), ".");
+    n = 0;
+    total = 0;
+    while (n <= tonum(max_object()))
+        o = toobj(n);
+        if (valid(o))
+            this.working = o;
+            total = total + this:object_bytes(o);
+        endif
+        n = n + 1;
+        suspend(0);
+        "$command_utils:suspend_if_needed(0)";
+    endwhile
+    $mail_agent:send_message(player, player, "DB bloat survey", tostr(total, " bytes 
+of storage were measured in ", $time_utils:dhms(time() - starttime)));
+endif
+.
+
+</pre>
+<BR>
+summarize:
+<pre>
+if (!valid(who = $string_utils:match_player(dobjstr)))
+    player:tell("Sorry, unknown player: ", dobjstr);
+elseif (typeof(who.owned_objects) != LIST)
+    player:tell("Sorry, ", who.name, " isn't in the .owned_objects system.");
+else
+    results = this:summarize_one_user(who);
+    total = results[1];
+    nuncounted = results[2];
+    nzeros = results[3];
+    oldest = results[4];
+    player:tell(who.name, " statistics:");
+    player:tell("  ", $string_utils:group_number(total), " bytes of storage measured.");
+    player:tell("  Oldest measurement date ", ctime(oldest), " (", $string_utils:from_seconds(time() 
+- oldest), " ago)");
+    if (nzeros || nuncounted)
+        player:tell("  Number of objects with no statistics recorded:  ");
+        player:tell("      ", nzeros, " recently created, ", nuncounted, " not descendents 
+of #1");
+    endif
+endif
+.
+
+</pre>
+<BR>
+summarize_one_user:
+<pre>
+"Summarizes total space usage by one user (args[1]).  Optional second argument is 
+a flag to say whether to re-measure all objects for this user; specify the number 
+of seconds out of date you are willing to accept.  If negative, will only re-measure 
+objects which have no recorded data.";
+"Returns a list of four values:";
+"  total : total measured space in bytes";
+"  uncounted : Number of objects that were not counted because they aren't descendents 
+of #1";
+"  zeros : Number of objects which have been created too recently to have any measurement 
+data at all (presumably none if re-measuring)";
+"  most-out-of-date : the time() the oldest actual measurement was taken";
+who = args[1];
+if (length(args) == 2)
+    if (args[2] < 0)
+        earliest = 1;
+    else
+        earliest = time() - args[2];
+    endif
+else
+    earliest = 0;
+endif
+nzeros = 0;
+oldest = time();
+nuncounted = 0;
+ncounted = 1;
+total = 0;
+for x in ((typeof(who.owned_objects) == LIST) ? who.owned_objects | {})
+    if ($object_utils:has_property(x, "object_size"))
+        size = x.object_size[1];
+        time = x.object_size[2];
+        if (time < earliest)
+            "Re-measure.  This side-effects x.object_size.";
+            this:object_bytes(x);
+            size = x.object_size[1];
+            time = x.object_size[2];
+        endif
+        if (time)
+            oldest = min(oldest, time);
+        else
+            nzeros = nzeros + 1;
+        endif
+        total = total + size;
+        ncounted = ncounted + 1;
+    else
+        nuncounted = nuncounted + 1;
+    endif
+    $command_utils:suspend_if_needed(0);
+endfor
+return {total, nuncounted, nzeros, oldest};
+.
+
+</pre>
+<BR>
+summarize-all-owners:
+<pre>
+if (!player.wizard)
+    player:tell("Sorry, you must be a wizard to do this.");
+else
+    owned = owners = {};
+    for x in (players())
+        total = this:summarize_one_user(x, -1)[1];
+        if (total > this.noise)
+            loc = $list_utils:find_insert(owned, total);
+            owned = listinsert(owned, total, loc);
+            owners = listinsert(owners, x, loc);
+        endif
+        $command_utils:suspend_if_needed(0);
+    endfor
+    "These suspends will be for sure needed.";
+    suspend(0);
+    this.owned = $list_utils:reverse(owned);
+    suspend(0);
+    this.owners = $list_utils:reverse(owners);
+    this.owner_summary_time = time();
+    player:tell("Done; sorted lists stored.");
+endif
+.
+
+</pre>
+<BR>
+continuous:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+else
+    player:tell("Beginning continuous looping of the dbMeter.");
+    n = tonum(this.working) + 1;
+    day = (60 * 60) * 24;
+    stop = (time() + 3600) + 1800;
+    early = time() - (day * 7);
+    while ((n <= tonum(max_object())) && (time() < stop))
+        o = toobj(n);
+        if (valid(o))
+            this.working = o;
+            suspend(0);
+            if (o.object_size[2] < early)
+                this:object_bytes(o);
+            endif
+        endif
+        if ($command_utils:running_out_of_time())
+            suspend(3);
+        endif
+        n = n + 1;
+    endwhile
+    if (o == max_object())
+        this.working = #0;
+    endif
+    when = day - (time() % day);
+    fork ((((6 * 60) * 60) + day) - (time() % day))
+        this:continuous();
+    endfork
+endif
+.
+
+</pre>
+<BR>
+recent_object_bytes:
+<pre>
+":recent_object_bytes(x, n) -- return object size of x, guaranteed to be no more 
+than n days old.";
+OBJ = args[1];
+if (!valid(OBJ))
+    return 0;
+elseif (OBJ.object_size[2] > (time() - (((args[2] * 24) * 60) * 60)))
+    return OBJ.object_size[1];
+else
+    return this:object_bytes(OBJ);
+endif
+.
+
+</pre>
+<BR>
+survey-part-db:
+<pre>
+if (!player.wizard)
+    player:tell("Sorry, you must be a wizard to do this.");
+else
+    starttime = time();
+    n = tonum(this.working);
+    player:tell("Beginning survey of partial database, starting at ", n, " now: ", 
+ctime(starttime), ".");
+    total = 0;
+    while (n <= tonum(max_object()))
+        o = toobj(n);
+        if (valid(o))
+            this.working = o;
+            total = total + this:object_bytes(o);
+        endif
+        n = n + 1;
+        suspend(0);
+        "$command_utils:suspend_if_needed(0)";
+    endwhile
+    $mail_agent:send_message(player, player, "DB bloat survey", tostr(total, " bytes 
+of storage were measured in ", $time_utils:dhms(time() - starttime)));
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp working
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp owners
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp owned
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp owner_summary_time
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp noise
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

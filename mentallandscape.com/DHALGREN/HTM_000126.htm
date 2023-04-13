@@ -1,0 +1,654 @@
+<HTML>
+<HEAD>
+<TITLE>Carrot's Rosette Feature Object</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Carrot's Rosette Feature Object (#126)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000448.htm">Snap</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA handy compass utility.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000111.htm">Features Feature Object</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA handy compass utility.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@oldrose:
+<pre>
+"@rose*tte [room]";
+"A compass rosette that shows all the compass direction exits and obvious exits. 
+Exits that may be one way are marked with a *.";
+"Examples:";
+"@rose                  returns a rosette of the exits in the room you are in.";
+"@rose #11              returns a rosette of the Alpha Chamber.";
+"@rose Library          returns a rosette of the library, if it is in your .rooms";
+"@rose #17 -n           returns a rosette of the exits in the alpha chamber with 
+room numbers for each destination.";
+"@rose +n               locks room numbers on, so every time you use @rose you get 
+room numbers until you @rose -n.";
+" ";
+"Known bugs:";
+"Rooms with bad obvious_exit verbs may cause this to crash.";
+"Last modified: Carrot 09/03/92";
+used = $list_utils:assoc(player, this.read);
+if (used == {})
+    lastmsg = 0;
+    oldoptions = {};
+else
+    lastmsg = used[2];
+    oldoptions = used[3];
+endif
+while (lastmsg < length(this.memos))
+    used = {player, lastmsg, oldoptions};
+    lastmsg = lastmsg + 1;
+    player:tell_lines(this.memos[lastmsg]);
+    this.read = {@setremove(this.read, used), {player, lastmsg, oldoptions}};
+endwhile
+newopt = "";
+if (length(args) > 0)
+    newopt = args[length(args)];
+endif
+options = oldoptions;
+while (((length(newopt) == 2) && ((newopt[1] == "+") || (newopt[1] == "-"))) && (newopt[2] 
+in this.valid_options))
+    options = setadd(options, newopt[2]);
+    if (newopt[1] == "+")
+        oldoptions = setadd(oldoptions, newopt[2]);
+        this.read = {@setremove(this.read, used), {player, lastmsg, oldoptions}};
+        player:tell("Option ", newopt[2], " added.");
+    else
+        if (newopt[2] in oldoptions)
+            player:tell("Option ", newopt[2], " removed.");
+        endif
+        oldoptions = setremove(oldoptions, newopt[2]);
+        this.read = {@setremove(this.read, used), {player, lastmsg, oldoptions}};
+    endif
+    args = args[1..length(args) - 1];
+    newopt = "";
+    if (length(args) > 0)
+        newopt = args[length(args)];
+    endif
+endwhile
+if (length(args) > 0)
+    dobj = toobj(args[1]);
+    dobjstr = args[1];
+endif
+if (length(args) == 0)
+    location = player.location;
+elseif ($object_utils:isa(dobj, $room))
+    player:tell(dobj.name);
+    location = dobj;
+elseif ($object_utils:has_property(player, "rooms"))
+    testloc = player:lookup_room(dobjstr, player.rooms);
+    if (testloc != $failed_match)
+        location = testloc;
+        player:tell(location.name);
+    else
+        player:tell(this.usage);
+        return;
+    endif
+else
+    player:tell(this.usage);
+    return;
+endif
+if (location in this.bad_rooms)
+    player:tell("Your compass spins madly!");
+    return;
+endif
+ways = {};
+otherways = {};
+otherexits = this:my_obvious(location);
+for d in (this.check)
+    exit = location:match_exit(d);
+    if (exit != $failed_match)
+        if ("n" in options)
+            roomnum = tostr(exit.dest) + " ";
+        else
+            roomnum = "";
+        endif
+        if (location in $list_utils:map_prop(this:my_obvious(exit.dest), "dest"))
+            wayname = roomnum + exit.dest.name;
+        else
+            wayname = ("*" + roomnum) + exit.dest.name;
+        endif
+        otherexits = setremove(otherexits, exit);
+    else
+        wayname = "-----";
+    endif
+    if (((length(wayname) > 15) && (d != "n")) && (d != "s"))
+        wayname = this:abreviate(wayname, 15);
+    endif
+    ways = {@ways, {d, wayname}};
+endfor
+for i in (otherexits)
+    if ("n" in options)
+        roomnum = tostr(i.dest) + " ";
+    else
+        roomnum = "";
+    endif
+    if (location in $list_utils:map_prop(this:my_obvious(i.dest), "dest"))
+        otherways = {@otherways, ((i.name + ": ") + roomnum) + i.dest.name};
+    else
+        otherways = {@otherways, ((i.name + ": *") + roomnum) + i.dest.name};
+    endif
+endfor
+for i in [length(otherexits) + 1..5]
+    otherways = {@otherways, " "};
+endfor
+rosette = {" "};
+rosette = {@rosette, $string_utils:center($list_utils:assoc("n", ways)[2], 41) + 
+otherways[1]};
+rosette = {@rosette, (($string_utils:center($list_utils:assoc("nw", ways)[2], 20) 
++ "N") + $string_utils:center($list_utils:assoc("ne", ways)[2], 20)) + otherways[2]};
+rosette = {@rosette, (($string_utils:center($list_utils:assoc("w", ways)[2], 17) 
++ "W  *  E") + $string_utils:center($list_utils:assoc("e", ways)[2], 16)) + otherways[3]};
+rosette = {@rosette, (($string_utils:center($list_utils:assoc("sw", ways)[2], 20) 
++ "S") + $string_utils:center($list_utils:assoc("se", ways)[2], 20)) + otherways[4]};
+rosette = {@rosette, $string_utils:center($list_utils:assoc("s", ways)[2], 41) + 
+otherways[5]};
+player:tell_lines(rosette);
+return rosette;
+.
+
+</pre>
+<BR>
+my_obvious:
+<pre>
+location = args[1];
+if ($object_utils:has_verb(location, "obvious_exits") && (!(location in this.bad_rooms)))
+    exits = location:obvious_exits();
+else
+    exits = {};
+endif
+return exits;
+.
+
+</pre>
+<BR>
+abr*eviate:
+<pre>
+name = args[1];
+if (length(name) <= args[2])
+    return name;
+endif
+vowels = {{" a", "!1"}, {" e", "!2"}, {" i", "!3"}, {" o", "!4"}, {" u", "!5"}, {"a", 
+""}, {"e", ""}, {"i", ""}, {"o", ""}, {"u", ""}};
+unvowels = {{"!1", " a"}, {"!2", " e"}, {"!3", " i"}, {"!4", " o"}, {"!5", " u"}};
+name = $string_utils:trim($string_utils:substitute(" " + name, this.padabrv));
+if (length(name) <= args[2])
+    return name;
+endif
+name = $string_utils:trim($string_utils:substitute((" " + name) + " ", this.stdabrv));
+if (length(name) <= args[2])
+    return name;
+endif
+name = $string_utils:trim($string_utils:substitute(" " + name, vowels));
+name = $string_utils:trim($string_utils:substitute(name, unvowels));
+if (length(name) <= args[2])
+    return name;
+endif
+name = $string_utils:trim(name[1..args[2]]);
+return name;
+.
+
+</pre>
+<BR>
+@rose*tte @comp*ass @lost:
+<pre>
+"@rose*tte [room][(+ -) [m n a l]]";
+"A compass rosette that shows all the compass direction exits and obvious exits. 
+Exits that may be one way are marked with a *.";
+"Examples:";
+"@rose                  returns a rosette of the exits in the room you are in.";
+"@rose #11              returns a rosette of the Alpha Chamber.";
+"@rose Library          returns a rosette of the library, if it is in your .rooms";
+"@rose #11 -n           returns a rosette of the exits in the alpha chamber with 
+room numbers for each destination.";
+"@rose +n               locks room numbers on, so every time you use @rose you get 
+room numbers until you @rose -n.";
+"@rose 1 -m             shows the first memo.";
+"@rose +a               locks rosette on so every time you enter a room you get a 
+rosette.";
+"";
+"Note: To get the +a option to work you need to copy the moveto verb from this to 
+yourself. @copy #126:moveto to me. Remeber to be careful when you use @copy, only 
+do it if you know what the code does or you trust the programmer.";
+"";
+"Programmers note:";
+"If you would like to use a compass rosette in your own code, use #126:genrose. It 
+returns the rosette as a list of strings. For example, ;#126:genrose(#11,{\"n\"}) 
+will return a rosette of the Alpha Chamber with the room number option. ;#126:genrose(#11,{}) 
+will return the rosette without any options.";
+" ";
+"Known bugs:";
+"Rooms with bad obvious_exit verbs may cause this to crash.";
+"Last modified: Carrot 06/30/93";
+used = $list_utils:assoc(player, this.read);
+"Programmers note: This verb just does memos and options. The real work is in genrose()";
+if (used == {})
+    lastmsg = 0;
+    oldoptions = {};
+else
+    lastmsg = used[2];
+    oldoptions = used[3];
+endif
+while (lastmsg < length(this.memos))
+    used = {player, lastmsg, oldoptions};
+    lastmsg = lastmsg + 1;
+    player:tell("Memo ", lastmsg, ":");
+    player:tell_lines(this.memos[lastmsg]);
+    this.read = {@setremove(this.read, used), {player, lastmsg, oldoptions}};
+endwhile
+newopt = "";
+if (length(args) > 0)
+    newopt = args[length(args)];
+endif
+options = oldoptions;
+while (((length(newopt) == 2) && ((newopt[1] == "+") || (newopt[1] == "-"))) && (newopt[2] 
+in this.valid_options))
+    options = setadd(options, newopt[2]);
+    if (newopt[1] == "+")
+        oldoptions = setadd(oldoptions, newopt[2]);
+        this.read = {@setremove(this.read, used), {player, lastmsg, oldoptions}};
+        player:tell("Option ", newopt[2], " added.");
+        if ((newopt[2] == "a") && (!$object_utils:has_verb(player, "moveto")))
+            player:tell_lines("For this option to work, you need a special moveto 
+verb.", "You can get this by typing:", "@copy #126:moveto to me");
+        endif
+    else
+        if (newopt[2] in oldoptions)
+            player:tell("Option ", newopt[2], " removed.");
+        endif
+        oldoptions = setremove(oldoptions, newopt[2]);
+        this.read = {@setremove(this.read, used), {player, lastmsg, oldoptions}};
+    endif
+    args = args[1..length(args) - 1];
+    newopt = "";
+    if (length(args) > 0)
+        newopt = args[length(args)];
+    endif
+endwhile
+if (length(args) > 0)
+    dobj = toobj(args[1]);
+    dobjstr = args[1];
+endif
+if ("m" in options)
+    if (tonum(dobjstr) == 0)
+        n = 0;
+        for i in (this.memos)
+            n = n + 1;
+            player:tell("Memo ", n, ":");
+            player:tell_lines(i);
+        endfor
+        return;
+    else
+        if ((tonum(dobjstr) <= length(this.memos)) && (tonum(dobjstr) > 0))
+            player:tell("Memo ", dobjstr, ":");
+            player:tell_lines(this.memos[tonum(dobjstr)]);
+        else
+            player:tell("There's no memo with that number.");
+        endif
+        return;
+    endif
+endif
+if (length(args) == 0)
+    location = player.location;
+elseif ($object_utils:isa(dobj, $room))
+    player:tell(dobj.name);
+    location = dobj;
+elseif ($object_utils:has_property(player, "rooms"))
+    testloc = player:lookup_room(dobjstr, player.rooms);
+    if (testloc != $failed_match)
+        location = testloc;
+        player:tell(location.name);
+    else
+        player:tell(this.usage);
+        return;
+    endif
+else
+    player:tell(this.usage);
+    return;
+endif
+if (!$object_utils:isa(location, $room))
+    player:tell("That is not a room.");
+    return;
+endif
+if (parent(location) in this.bad_parents)
+    return;
+endif
+if ($object_utils:has_property(location, "norose"))
+    if (location.norose)
+        player:tell_lines(location.norose);
+    endif
+    return;
+endif
+this.trouble = setadd(this.trouble, location);
+rose = this:genrose(location, options);
+this.trouble = setremove(this.trouble, location);
+$command_utils:suspend_if_needed(1);
+if (typeof(rose) == LIST)
+    player:tell_lines(rose);
+endif
+.
+
+</pre>
+<BR>
+find_doors:
+<pre>
+$command_utils:suspend_if_needed(1);
+location = args[1];
+if (location in this.bad_rooms)
+    return {{}, {}, {}};
+endif
+options = args[2];
+compassways = {};
+otherways = {};
+allways = {};
+short = {};
+this.bad_rooms = $list_utils:remove_duplicates({@this.bad_rooms, @this.troubleloc});
+this.troubleloc = setadd(this.troubleloc, location);
+for d in (this.check)
+    exit = location:match_exit(d);
+    "adding && exit.obvious so that only obvious exits show up. Dredful 9/30/93";
+    if (valid(exit) && exit.obvious)
+        short = setadd(short, exit);
+        if ($object_utils:has_property(exit, "dest") && valid(exit.dest))
+            edest = exit.dest;
+            dname = exit.dest.name;
+        else
+            edest = #-1;
+            dname = "?";
+        endif
+        if ("n" in options)
+            dname = (tostr(edest) + " ") + dname;
+        endif
+        compassways = {@compassways, {d, dname, edest}};
+        allways = {@allways, {d, dname, edest}};
+    else
+        compassways = {@compassways, {d, "-----", #-1}};
+    endif
+endfor
+tryall = this.guess_doors;
+for i in (this:my_obvious(location))
+    tryall = setadd(tryall, i.name);
+endfor
+for d in (tryall)
+    exit = location:match_exit(d);
+    "adding && exit.obvious so that only obvious exits show up. Dredful 9/30/93";
+    if ((valid(exit) && (!(exit in short))) && exit.obvious)
+        short = setadd(short, exit);
+        if ($object_utils:has_property(exit, "dest") && valid(exit.dest))
+            edest = exit.dest;
+            dname = exit.dest.name;
+        else
+            edest = #-1;
+            dname = "?";
+        endif
+        if ("n" in options)
+            dname = (tostr(edest) + " ") + dname;
+        endif
+        otherways = {@otherways, {d, dname, edest}};
+        allways = {@allways, {d, dname, edest}};
+    endif
+endfor
+this.troubleloc = setremove(this.troubleloc, location);
+return {compassways, otherways, allways};
+.
+
+</pre>
+<BR>
+genrose*tte:
+<pre>
+"genrosette(location,options)";
+"This is the routine that generates the rosette, without messing with memos or options.";
+"You can use it from your own code too, it just returns the rosette as a list of 
+strings.";
+"Last modified: Carrot 09/07/92";
+location = args[1];
+options = args[2];
+rosette = {};
+"Bad rooms is really a to-do list of rooms that cause @rose to crash.";
+if ($object_utils:isa(location, $generic_editor) || $object_utils:has_property(location, 
+"norose"))
+    return;
+endif
+if (location in this.bad_rooms)
+    return {"Your compass spins madly!"};
+endif
+doors = this:find_doors(location, options);
+ways = doors[1];
+otherways = doors[2];
+"Find one-way doors and abreviate";
+for i in (ways)
+    if (i[3] != #-1)
+        name = i[2];
+        if ("l" in options)
+            backways = this:find_doors(i[3], options)[3];
+            if (!(location in $list_utils:slice(backways, 3)))
+                name = "*" + name;
+            endif
+        endif
+        name = this:abreviate(name, $list_utils:assoc(i[1], this.dirlength)[2]);
+        ways = {@setremove(ways, i), {i[1], name, i[3]}};
+    endif
+endfor
+otherdoors = {};
+for i in (otherways)
+    $command_utils:suspend_if_needed(1);
+    name = i[2];
+    if ("l" in options)
+        backways = this:find_doors(i[3], options)[3];
+        if (!(location in $list_utils:slice(backways, 3)))
+            name = "*" + name;
+        endif
+    endif
+    otherdoors = {@otherdoors, (i[1] + ": ") + this:abreviate(name, (39 - length(i[1])) 
+- 2)};
+endfor
+while (length(otherdoors) < 5)
+    otherdoors = {@otherdoors, ""};
+endwhile
+rosette = {@rosette, $string_utils:center($list_utils:assoc("n", ways)[2], 41) + 
+otherdoors[1]};
+rosette = {@rosette, (($string_utils:center($list_utils:assoc("nw", ways)[2], 19) 
++ " N ") + $string_utils:center($list_utils:assoc("ne", ways)[2], 19)) + otherdoors[2]};
+rosette = {@rosette, (($string_utils:center($list_utils:assoc("w", ways)[2], 17) 
++ "W  *  E") + $string_utils:center($list_utils:assoc("e", ways)[2], 17)) + otherdoors[3]};
+rosette = {@rosette, (($string_utils:center($list_utils:assoc("sw", ways)[2], 19) 
++ " S ") + $string_utils:center($list_utils:assoc("se", ways)[2], 19)) + otherdoors[4]};
+rosette = {@rosette, $string_utils:center($list_utils:assoc("s", ways)[2], 41) + 
+otherdoors[5]};
+for i in [6..length(otherdoors)]
+    rosette = {@rosette, $string_utils:space(41) + otherdoors[i]};
+endfor
+if (length(rosette) > 10)
+    suspend(1);
+endif
+return rosette;
+.
+
+</pre>
+<BR>
+nfind_doors:
+<pre>
+location = args[1];
+options = args[2];
+compassways = {};
+otherways = {};
+allways = {};
+short = {};
+this.bad_rooms = setadd(this.bad_rooms, this.troubleloc);
+this.troubleloc = location;
+for d in (this.check)
+    exit = location:match_exit(d);
+    if (valid(exit))
+        short = setadd(short, exit);
+        edest = exit.dest;
+        if (valid(edest))
+            dname = exit.dest.name;
+        else
+            edest = #-1;
+            dname = "BAD EXIT";
+        endif
+        if ("n" in options)
+            dname = (tostr(edest) + " ") + dname;
+        endif
+        compassways = {@compassways, {d, dname, edest}};
+        allways = {@allways, {d, dname, edest}};
+    else
+        compassways = {@compassways, {d, "-----", #-1}};
+    endif
+endfor
+tryall = this.guess_doors;
+for i in (this:my_obvious(location))
+    tryall = setadd(tryall, i.name);
+endfor
+for d in (tryall)
+    exit = location:match_exit(d);
+    if (valid(exit) && (!(exit in short)))
+        short = setadd(short, exit);
+        edest = exit.dest;
+        if (valid(edest))
+            dname = exit.dest.name;
+        else
+            edest = #-1;
+            dname = "BAD EXIT";
+        endif
+        if ("n" in options)
+            dname = (tostr(edest) + " ") + dname;
+        endif
+        otherways = {@otherways, {d, dname, edest}};
+        allways = {@allways, {d, dname, edest}};
+    endif
+endfor
+this.troubleloc = #-1;
+return {compassways, otherways, allways};
+.
+
+</pre>
+<BR>
+ngenrose*tte:
+<pre>
+"genrosette(location,options)";
+"This is the routine that generates the rosette, without messing with memos or options.";
+"You can use it from your own code too, it just returns the rosette as a list of 
+strings.";
+"Last modified: Carrot 09/07/92";
+location = args[1];
+options = args[2];
+rosette = {};
+"Bad rooms is really a to-do list of rooms that cause @rose to crash.";
+if (location in this.bad_rooms)
+    return {"Your compass spins madly!"};
+endif
+doors = this:find_doors(location, options);
+ways = doors[1];
+otherways = doors[2];
+"Find one-way doors and abreviate";
+for i in (ways)
+    if (i[3] != #-1)
+        name = i[2];
+        backways = this:find_doors(i[3], options)[3];
+        if (!(location in $list_utils:slice(backways, 3)))
+            name = "*" + name;
+        endif
+        name = this:abreviate(name, $list_utils:assoc(i[1], this.dirlength)[2]);
+        ways = {@setremove(ways, i), {i[1], name, i[3]}};
+    endif
+endfor
+for i in (otherways)
+    name = i[2];
+    backways = this:find_doors(i[3], options)[3];
+    if (!(location in $list_utils:slice(backways, 3)))
+        name = "*" + name;
+    endif
+    name = this:abreviate(name, 37 - length(i[1]));
+    otherways = {@setremove(otherways, i), {i[1], (i[1] + ": ") + name, i[3]}};
+endfor
+while (length(otherways) < 5)
+    otherways = {@otherways, {"", "", #-1}};
+endwhile
+rosette = {@rosette, $string_utils:center($list_utils:assoc("n", ways)[2], 41) + 
+otherways[1][2]};
+rosette = {@rosette, (($string_utils:center($list_utils:assoc("nw", ways)[2], 19) 
++ " N ") + $string_utils:center($list_utils:assoc("ne", ways)[2], 19)) + otherways[2][2]};
+rosette = {@rosette, (($string_utils:center($list_utils:assoc("w", ways)[2], 17) 
++ "W  *  E") + $string_utils:center($list_utils:assoc("e", ways)[2], 17)) + otherways[3][2]};
+rosette = {@rosette, (($string_utils:center($list_utils:assoc("sw", ways)[2], 19) 
++ " S ") + $string_utils:center($list_utils:assoc("se", ways)[2], 19)) + otherways[4][2]};
+rosette = {@rosette, $string_utils:center($list_utils:assoc("s", ways)[2], 41) + 
+otherways[5][2]};
+for i in [6..length(otherways)]
+    rosette = {@rosette, $string_utils:space(41, otherways[i][2])};
+endfor
+return rosette;
+.
+
+</pre>
+<BR>
+moveto:
+<pre>
+pass(@args);
+if ($object_utils:has_property(this, "features") && (#126 in this.features))
+    used = $list_utils:assoc(player, #126.read);
+    if ((used != {}) && ("a" in used[3]))
+        rose = #126:genrose(player.location, used[3]);
+        if (typeof(rose) == LIST)
+            player:tell_lines(rose);
+        endif
+    endif
+endif
+return;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp bad_rooms
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp usage
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp check
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp memos
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp read
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp valid_options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp guess_doors
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dirlength
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp trouble
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp troubleloc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp bad_parents
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp stdabrv
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp padabrv
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,140 @@
+<HTML>
+<HEAD>
+<TITLE>Boot FO</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Boot FO (#2001)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000106.htm">horse</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA feature for @booting obnoxious players.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000106.htm">horse</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThis FO is for @booting players who are being obnoxious.
+&nbsp&nbsp&nbsp&nbsp&nbspIt is available only to wizards, and certain individuals at the wizards' discretion.
+&nbsp&nbsp&nbsp&nbsp&nbspIf you feel you are being harassed, please see a wizard and explain the problem.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@boot:
+<pre>
+if (this:trusted(valid(cp = caller_perms()) ? cp | player))
+    nargs = length(args);
+    if (nargs < 1)
+        player:notify(tostr("Usage: ", verb, " <player>"));
+        return;
+    endif
+    who = $string_utils:match_player(dobjstr);
+    if ($command_utils:player_match_failed(who, dobjstr))
+        return;
+    endif
+    if ($object_utils:connected(who))
+        player:tell("Please enter your reason for @booting below.");
+        reason = $command_utils:read_lines();
+        if (length(reason) == 0)
+            player:tell("You need to supply a reason for @booting.");
+            return;
+        endif
+        who:tell(player.name, " has @booted you from the MOO.");
+        boot_player(who);
+        player:tell("You just @booted ", who.name, ".");
+        player:tell("Sending mail to *", this.boot_log.name, "...");
+        $mail_agent:send_message(player, this.boot_log, tostr(player.name, " booted 
+", who.name), reason);
+        player:tell("Mail sent.");
+    else
+        player:tell(who.name, " isn't connected.");
+    endif
+else
+    player:tell("You are not allowed to use this feature.  If you feel you are being 
+harassed, see a wizard.");
+endif
+.
+
+</pre>
+<BR>
+@addtrust @rmtrust:
+<pre>
+if ((valid(cp = caller_perms()) ? cp | player).wizard)
+    nargs = length(args);
+    if (nargs < 1)
+        player:tell("Usage: ", verb, " <player>");
+        return;
+    endif
+    who = $string_utils:match_player(dobjstr);
+    if ($command_utils:player_match_failed(who, dobjstr))
+        return;
+    endif
+    found = who in this.trusted;
+    if (verb == "@addtrust")
+        if (found)
+            player:tell(who.name, " is already in the list.");
+            return;
+        else
+            this.trusted = listappend(this.trusted, who);
+            player:tell(who.name, " added to list.");
+            return;
+        endif
+    endif
+    if (verb == "@rmtrust")
+        if (found)
+            this.trusted = $list_utils:setremove_all(this.trusted, who);
+            player:tell(who.name, " removed from list.");
+            return;
+        else
+            player:tell(who.name, " is not in the list.");
+            return;
+        endif
+    endif
+else
+    player:tell("You must be a wizard to do that.");
+endif
+.
+
+</pre>
+<BR>
+@listtrust:
+<pre>
+if (this:trusted(valid(cp = caller_perms()) ? cp | player))
+    player:tell("Boot FO trusted list:");
+    player:tell_lines($string_utils:names_of(this.trusted));
+else
+    player:tell("You must be a wizard to do that.");
+endif
+.
+
+</pre>
+<BR>
+trusted:
+<pre>
+return args[1].wizard || (args[1] in this.trusted);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp trusted
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp boot_log
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

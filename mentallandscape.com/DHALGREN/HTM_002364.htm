@@ -1,0 +1,65 @@
+<HTML>
+<HEAD>
+<TITLE>Test</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Test (#2364)</H3>
+(an instance of <A HREF="HTM_000008.htm">generic container</A> made by <A HREF="HTM_001080.htm">Random</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspgeneric frustrating wrapping paper, rather annoying.
+<BR>
+<BR>
+Test contains <A HREF="HTM_002394.htm">booger</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001213.htm">Randomhaus</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+open:
+<pre>
+if (player.location != this.location)
+    player:tell("You need to be in the same room as ", this.name);
+elseif (player.name != this.intended_owner)
+    player:tell("This is a present for someone else.  Please respect this or the 
+server will rip your entrails out.");
+else
+    this.contents:moveto(player);
+endif
+return 0;
+.
+
+</pre>
+<BR>
+kick:
+<pre>
+if (player != this.owner)
+    player:tell("You don't own this.  Don't kick it.");
+endif
+player.location:announce(player.name, " kicks ", this.name, "and it evaporates.");
+player:tell("goaway evaporates.");
+this.owner:tell("goaway recycled.");
+recycle(this);
+return 0;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp intended_owner
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

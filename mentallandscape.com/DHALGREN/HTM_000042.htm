@@ -1,0 +1,87 @@
+<HTML>
+<HEAD>
+<TITLE>permissions utilities</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> permissions utilities (#42)</H3>
+(an instance of <A HREF="HTM_000124.htm">Generic Utilities Package</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+controls:
+<pre>
+"@perm_utils:controls(who, what)";
+"Is WHO allowed to hack on WHAT?";
+return (args[1] == args[2].owner) || args[1].wizard;
+.
+
+</pre>
+<BR>
+apply:
+<pre>
+":apply(permstring,mods) => new permstring.";
+"permstring is a permissions string, mods is a concatenation of strings of the form 
++<letters>, !<letters>, or -<letters>, where <letters> is a string of letters as 
+might appear in a permissions string (`+' adds the specified permissions, `-' or 
+`!' removes them; `-' and `!' are entirely equivalent).";
+perms = args[1];
+mods = args[2];
+if ((!mods) || (!index("!-+", mods[1])))
+    return mods;
+endif
+i = 1;
+while (i <= length(mods))
+    if (mods[i] == "+")
+        while (((i = i + 1) <= length(mods)) && (!index("!-+", mods[i])))
+            if (!index(perms, mods[i]))
+                perms = perms + mods[i];
+            endif
+        endwhile
+    else
+        "mods[i] must be ! or -";
+        while (((i = i + 1) <= length(mods)) && (!index("!-+", mods[i])))
+            perms = strsub(perms, mods[i], "");
+        endwhile
+    endif
+endwhile
+return perms;
+.
+
+</pre>
+<BR>
+caller:
+<pre>
+stage = 1;
+c = callers();
+while (((stage = stage + 1) < length(c)) && (c[stage][1] == c[1][1]))
+endwhile
+return c[stage];
+.
+
+</pre>
+<BR>
+controls_prop controls_property:
+<pre>
+"controls_prop(who, what, propname)";
+"Is WHO allowed to hack on WHAT's PROPNAME?";
+return (args[1] == property_info(args[2], args[3])[1]) || args[1].wizard;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

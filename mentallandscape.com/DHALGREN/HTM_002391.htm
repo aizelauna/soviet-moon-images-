@@ -1,0 +1,58 @@
+<HTML>
+<HEAD>
+<TITLE>Info Feature</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Info Feature (#2391)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000907.htm">melusina</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000111.htm">Features Feature Object</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspFind out more about connection times than you ever wanted to know.  Courtesy of dried.
+&nbsp&nbsp&nbsp&nbsp&nbspUSAGE:  ti <player>
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+ti*me:
+<pre>
+if ((!valid(loser = toobj(argstr))) || (loser == #0))
+    if (!valid(loser = $string_utils:match_player(argstr)))
+        return player:tell("'", argstr, "' isn't a player, you fucking idiot.");
+    endif
+endif
+if (typeof(idle = idle_seconds(loser)) != ERR)
+    idle = $string_utils:from_seconds(idle);
+    conned = $string_utils:from_seconds(time() - loser.last_connect_time);
+    player:tell(loser.name, "(", loser, ") has been connected for ", conned, " and 
+idle for ", idle, ", in ", loser.location.name, "(", loser.location, ")");
+else
+    conned = $string_utils:from_seconds(loser.last_disconnect_time - loser.last_connect_time);
+    player:tell(loser.name, "(", loser, ") was last connected on ", player:ctime(loser.last_disconnect_time), 
+", for ", conned, ".");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

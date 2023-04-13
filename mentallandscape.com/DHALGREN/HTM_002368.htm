@@ -1,0 +1,152 @@
+<HTML>
+<HEAD>
+<TITLE>a line</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a line (#2368)</H3>
+(an instance of <A HREF="HTM_000003.htm">generic room</A> made by <A HREF="HTM_002372.htm">flat</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspEverything as it appears first.  Mechanical meaning in the confines of a cold, dark melodrama, where there is no implication in anything said, or seen.
+<BR>
+<BR>
+You see <A HREF="HTM_002372.htm">flat</A> here.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+announce*_all_but:
+<pre>
+pass(@args);
+c = callers();
+for caller in (c)
+    if (caller[2] == "say")
+        return this:pare(args[3]);
+    elseif (caller[2] == "eval_cmd_string")
+        return this:pare(args[1]);
+    endif
+endfor
+.
+
+</pre>
+<BR>
+pare:
+<pre>
+line = $string_utils:strip_chars(tostr(@args), "\":;'?.+=)(*&^%$#@!");
+words = $string_utils:words(line);
+for word in (words)
+    if (!(word in this.words))
+        return "";
+    endif
+endfor
+return this:parse(words);
+.
+
+</pre>
+<BR>
+parse:
+<pre>
+words = args[1];
+position = 1;
+output = {};
+for word in (words)
+    output = {@output, this:p_o_s(word)};
+endfor
+return output;
+tree = this:s(output);
+.
+
+</pre>
+<BR>
+addword:
+<pre>
+args = $string_utils:words(argstr);
+word = args[1];
+if (!(word in this.words))
+    this.words = {@this.words, word};
+endif
+for speech in (args[2..length(args)])
+    if (speech in this.p_o_s)
+        if (word in this.(tostr(speech, "_list")))
+            player:tell("'", word, "' is already listed as a ", speech, ".");
+        else
+            this.(tostr(speech, "_list")) = {@this.(tostr(speech, "_list")), word};
+            player:tell(speech, "_list updated with '", word, ".'");
+        endif
+    endif
+endfor
+.
+
+</pre>
+<BR>
+noun verb prep art rp name to_be adj p_o_s ger:
+<pre>
+word = args[1];
+if (verb == "p_o_s")
+    output = {};
+    for part in (this.p_o_s)
+        if (this:(part)(word))
+            output = {@output, part};
+        endif
+    endfor
+    return output;
+endif
+prop = tostr(verb, "_list");
+if (word in this.(prop))
+    return 1;
+endif
+return 0;
+.
+
+</pre>
+<BR>
+s:
+<pre>
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp words
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp art_list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp name_list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp noun_list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp prep_list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp adj_list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp rp_list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp to_be
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp word_output
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp symbol_output
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp p_o_s
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp verb_list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp pp_search
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp to_be_list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ger_list
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

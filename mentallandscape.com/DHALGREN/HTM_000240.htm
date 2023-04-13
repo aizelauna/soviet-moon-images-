@@ -1,0 +1,117 @@
+<HTML>
+<HEAD>
+<TITLE>Mail Name DB</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Mail Name DB (#240)</H3>
+(an instance of <A HREF="HTM_000039.htm">Generic Database</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp... for doing mail-recipient name lookups.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000179.htm">Cluttered Closet</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+add:
+<pre>
+":add(object,parent,name[,is_alias])";
+"returns 1 if successful";
+"        #o if #o already has that parent/name pair";
+if (!(caller in {this, $mail_agent}))
+    return E_PERM;
+endif
+object = args[1];
+parent = args[2];
+name = args[3];
+is_alias = {@args, 0}[4];
+pn = {parent, name};
+if (oops = this:insert(tostr(parent, ":", name), object))
+    if (oops[1] != object)
+        return oops[1];
+    endif
+elseif (olist = this:insert(colon_name = ":" + name, {object}))
+    "...there was already a list of objects for this name.";
+    "...reinsert them.";
+    this:insert(colon_name, setadd(olist[1], object));
+endif
+if (!(i = pn in object.names))
+    object.names = is_alias ? {@object.names, pn} | {pn, @object.names};
+    "...maybe fix capitalization...";
+elseif (strcmp(object.names[i][2], name) != 0)
+    object.names[i][2] = name;
+endif
+return 1;
+.
+
+</pre>
+<BR>
+remove:
+<pre>
+":remove(object,parent,name)";
+"removes {parent,name}.";
+if (!(caller in {this, $mail_agent}))
+    return E_PERM;
+endif
+object = args[1];
+parent = args[2];
+name = args[3];
+object.names = setremove(object.names, {parent, name});
+this:delete2(tostr(parent, ":", name), object);
+if ($list_utils:assoc(name, object.names, 2))
+    "...object still uses this name under other parents...";
+elseif (others = this:delete2(colon_name = ":" + name, {object}))
+    "...other objects still use this name...";
+    this:insert(colon_name, setremove(others[1], object));
+endif
+.
+
+</pre>
+<BR>
+test:
+<pre>
+if ($perm_utils:controls(caller_perms(), this))
+    return this:(args[1])(@listdelete(args, 1));
+else
+    return "fuckoff";
+endif
+.
+
+</pre>
+<BR>
+load:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+for m in ($object_utils:descendents($mail_recipient))
+    for n in (m.names || {})
+        if (typeof(n) != LIST)
+            me:notify(tostr(o:mail_name(), "n=", n));
+        elseif (o = #6824:add(m, @n))
+        else
+            me:notify(tostr(m:mail_name(), " ", n[1], ":", n[2], " ", o));
+        endif
+        $command_utils:suspend_if_needed(0);
+    endfor
+endfor
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

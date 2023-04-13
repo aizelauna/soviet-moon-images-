@@ -1,0 +1,85 @@
+<HTML>
+<HEAD>
+<TITLE>genna</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> genna (#352)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_000352.htm">genna</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspFig has no silk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspno silk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsponly burlap
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspand that
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsptattered
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspand frayed
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspwith the effort of making a soul.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002200.htm">Inside the Pothole</A>.
+<BR>
+<BR>
+<BR>
+genna owns <A HREF="HTM_000352.htm">genna</A> <A HREF="HTM_000355.htm">Abandoned Luncheonette</A> <A HREF="HTM_000413.htm">north</A> <A HREF="HTM_000412.htm">south</A> <A HREF="HTM_000452.htm">Social Shortcuts Feature</A> <A HREF="HTM_000934.htm">generic lunch</A> <A HREF="HTM_000931.htm">Hash'O'Matic</A> <A HREF="HTM_001066.htm">Generic Journeying SPARC</A> <A HREF="HTM_000209.htm">Dhalmart Shopping Cart</A> <A HREF="HTM_001498.htm">a small barrel</A> <A HREF="HTM_001539.htm">A simple room</A> <A HREF="HTM_002200.htm">Inside the Pothole</A> <A HREF="HTM_002410.htm">down</A> <A HREF="HTM_002411.htm">up</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+spoof:
+<pre>
+player.location:announce_all(argstr);
+.
+
+</pre>
+<BR>
+description:
+<pre>
+STR = "";
+for x in (this.desc)
+    if (typeof(x) == LIST)
+        STR = STR + x[random(length(x))];
+    else
+        STR = STR + x;
+    endif
+endfor
+return STR;
+.
+
+</pre>
+<BR>
+lock:
+<pre>
+player.location.free_entry = 0;
+player:tell("Room secured.");
+.
+
+</pre>
+<BR>
+unlock:
+<pre>
+player.location.free_entry = 1;
+player:tell("Room unlocked.");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp desc
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

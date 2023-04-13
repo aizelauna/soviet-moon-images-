@@ -1,0 +1,59 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Flammable Object</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Flammable Object (#2002)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_001457.htm">Trismegistos</A>)
+<BR>
+<BR>
+<pre>
+</pre>
+<BR>
+Burning noises:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp %D snaps, crackles, and pops in the flames
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Flames and black smoke spiral upwards from %D
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001676.htm">AnArchie Bunker</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspGeneric Flammable Object is intended for use with Trism's Gasoline Can. It
+&nbsp&nbsp&nbsp&nbsp&nbspcontains no verbs itself, but has useful properties that will help you
+&nbsp&nbsp&nbsp&nbsp&nbspcustom-create bonfires, effigies, and even custom-engineer your own fiery
+&nbsp&nbsp&nbsp&nbsp&nbsp"suicide."
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspMessage properties:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@ignite <this> is <message shown when object catches fire>
+&nbsp&nbsp&nbsp&nbsp&nbsp@burndesc <this> is <message substituted for object description while burning>
+&nbsp&nbsp&nbsp&nbsp&nbsp@burnout <this> is <message shown when object stops burning>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspList property:
+&nbsp&nbsp&nbsp&nbsp&nbsp<this>.burn_noise: a list of phrases randomly announced one a minute as the
+&nbsp&nbsp&nbsp&nbsp&nbspobject burns. Use @notedit to edit, with each phrase on a separate line.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp"Physical" properties:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp<this>.burn_minutes: logically enough, the number of minutes the object will burn. 
+Default is 1 minute, plus 1 minute per Kbyte of object size.
+&nbsp&nbsp&nbsp&nbsp&nbsp<this>.destructible: if 0, the object will not be recycled when it is done burning. 
+Default is 1.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNOTE: To make yourself a customized human torch, create these properties on yourself. 
+Don't forget, the message properties are in the format .ignite_msg , etc. .destructible 
+will not have any effect on a self-immolating player.
+</pre>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

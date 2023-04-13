@@ -1,0 +1,147 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Implement of Fiery Destruction</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Implement of Fiery Destruction (#1479)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_001457.htm">Trismegistos</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspAn olive-drab plastic jerry-can, with a red symbol stenciled on the side -- three 
+L's joined propeller-wise.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_001676.htm">AnArchie Bunker</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspAn in-theme way to recycle your objects or engage in spontaneous pyromania. Just 
+burn <object> with <can>. A burning object has its name appended with [burning] and 
+sends out occasional messages. The more bytes are in an object, the longer it takes 
+to be consumed. Burn baby burn! ...   
+&nbsp&nbsp&nbsp&nbsp&nbsp                              -- Trism the Oil Baron
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+destroy:
+<pre>
+if ((dobj.owner != player) && dobj.destructible)
+    player:tell("A misplaced sense of ethics prevents you from burning someone else's 
+ property.");
+    return;
+endif
+if (dobj.location != player.location)
+    player:tell("You must move ", dobj.name, " to where you are...");
+    return;
+endif
+burning = 1;
+if (dobj != player)
+    player:tell($string_utils:pronoun_sub(caller.predestroy_msg));
+    player.location:announce($string_utils:pronoun_sub(caller.opredestroy_msg));
+    fate = #1479:prop_default(dobj, "destructible", 1) ? "fiery recyclement" | "burning 
+torment";
+    if ($command_utils:yes_or_no(((("Condemn " + dobj.name) + " to ") + fate) + "?"))
+        player.location:announce_all(player.name, " tosses the match!");
+        descstore = dobj.description;
+        dobj.name = dobj.name + " [burning]";
+    else
+        burning = 0;
+        player:tell("You relent and blow out the match. The gasoline quickly evaporates.");
+        player.location:announce(player.name, " has mercy on ", dobj.name, " and 
+blows out the match. The gasoline quickly evaporates.");
+    endif
+else
+    player:tell("In a gesture of protest, you pour gasoline all over yourself and 
+light a match. WHOOMF!");
+    player.location:announce(player.name, " bathes in gasoline from ", this.name, 
+" then lights a match in a self-immolating act of protest. WHOOMF!");
+    descstore = dobj.description;
+endif
+if (burning)
+    player.location:announce_all($string_utils:pronoun_sub(#1479:prop_default(dobj, 
+"ignite_msg", "%D starts to burn.")));
+    dobj.description = $string_utils:pronoun_sub(#1479:prop_default(dobj, "burn_desc", 
+dobj.name + " is on fire, enveloped in orange flames, spewing black smoke."));
+    n = #1479:prop_default(dobj, "burn_minutes", (dobj.object_size[1] / 1000) + 1);
+    for t in [1..n]
+        suspend(30);
+        burnoise = #1479:prop_default(dobj, "burn_noise", ("Flames and black smoke 
+spiral heavenwards from the burning of " + dobj.aliases[1]) + ".");
+        if (typeof(burnoise) == LIST)
+            burnoise = burnoise[random(length(burnoise))];
+        endif
+        dobj.location:announce_all($string_utils:pronoun_sub(burnoise));
+        suspend(30);
+    endfor
+    if (dobj != player)
+        dobj.name = dobj.aliases[1];
+        dobj.description = descstore;
+        ashes = #1479:prop_default(dobj, "destructible", 1) ? "crumbling into ashes" 
+| "blackened but sound";
+        dobj.location:announce_all($string_utils:pronoun_sub(#1479:prop_default(dobj, 
+"burnout_msg", ("%D burns out, " + ashes) + ".")));
+        if (#1479:prop_default(dobj, "destructible", 1))
+            $recycler:_recycle(dobj);
+        endif
+    else
+        player.location:announce_all(dobj.name, " finds immolation tiresome and stops 
+burning.");
+        dobj.description = descstore;
+    endif
+endif
+.
+
+</pre>
+<BR>
+prop_default:
+<pre>
+"args[1] is object, args[2] is the property, args[3] the default to be returned if 
+the property doesn't exist on the object";
+if ($object_utils:has_property(args[1], args[2]))
+    return $code_utils:verb_or_property(args[1], args[2]);
+else
+    return args[3];
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gas
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp predestroy_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp opredestroy_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp destroy_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp odestroy_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp end-destroy_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp destroy_noise
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_001982.htm">gasoline can</A> <A HREF="HTM_001065.htm">a gasoline can</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,84 @@
+<HTML>
+<HEAD>
+<TITLE>Abandoned Luncheonette</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Abandoned Luncheonette (#355)</H3>
+(an instance of <A HREF="HTM_000262.htm">Generic Secured Post-Apocalypse Room</A> made by <A HREF="HTM_000352.htm">genna</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIt is raining and secure this day in Bellona.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYour feet stir up the dust as you enter this place and you instinctively clap your hand over your mouth and nose while looking around.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspClearly, nobody has had lunch here in a very long time. 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA fallen sign proclaims, 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspBlue Plate Special..... $22.38
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspRice Pudding.... $7.95
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAll prices include federal, city, and block taxes.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspGratuities always welcome.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspOther footprints in the dust lead you to believe that you aren't the only one who wishes this place were still open for business with prices as reasonable as those.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIt seems as if someone might even be rehabilitating this old luncheonette.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIn one corner is an upright formica-topped table and some chairs.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAs you rub your eyes you see a jukebox glowing from a dark corner.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp As you look out of this multi-colored, patched plexiglass storefront you can see the words: ettenoehcnuL kraP. Through the window you can see the street outside and beyond, the Park.
+[ south ] <A HREF="HTM_000375.htm">North End of the Park</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+announce_move:
+<pre>
+"announce_move(from,to): does general announcements when the generic";
+"portable room moves.";
+from = args[1];
+to = args[2];
+this:announce_all(this:teleport_msg() || (this:title() + " moves."));
+if (room = $object_utils:isa(to, $room))
+    where = this.location;
+    this:announce_all(where:title());
+endif
+if (!(callers()[2][2] in this.silent_actions))
+    speak = $object_utils:isa(from, $room) ? "announce_all" | "tell";
+    if (msg = this:teleport_outside_msg(from))
+        from:(speak)(msg);
+    endif
+    speak = room ? "announce_all" | "tell";
+    if (msg = this:oteleport_outside_msg(to))
+        msg = index(msg, this.name) ? msg | ((this:title() + " ") + msg);
+        to:(speak)(msg);
+    endif
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

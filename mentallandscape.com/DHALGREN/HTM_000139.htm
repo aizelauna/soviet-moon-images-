@@ -1,0 +1,81 @@
+<HTML>
+<HEAD>
+<TITLE>Grocery Store</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Grocery Store (#139)</H3>
+(an instance of <A HREF="HTM_000110.htm">Generic Post-Apocalypse Room</A> made by <A HREF="HTM_000095.htm">legba</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe walls of the store still have neon signs and large, bright ads on them.  There are groceries here too: cans of tuna and soup and fruit cocktail and spaghetti-os, rice and cereal and jars of ketchup and mayonnaise.  Sometimes there's fresh food as well: milk, eggs, cheese, fruits and vegetables bartered from the farmers downriver, kept in a generator-fueled cooler on the far wall.  
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspStill, it's not quite like grocery stores used to be.  The only light comes from dozens of flickering candles, scattering moving shadows on the yellowing walls.  The scent is cheese and apples, dry cereal and dust, and below that a sweet burning that might be sage.
+<BR>
+<BR>
+You see <A HREF="HTM_000205.htm">shelf of candles</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ stairs ] <A HREF="HTM_000121.htm">The Loft</A>.
+You make your way up the narrow, wooden stairs.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ out ] <A HREF="HTM_000128.htm">Outside the Grocery Store</A>.
+You struggle to raise the heavy, rolldown security door.  It clearly hasn't been oiled in quite sometime.  You manage to raise it up just enough to squirm under it, and fortunately, think to let it down gently so it doesn't bang and break a window or something.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ window ] <A HREF="HTM_000128.htm">Outside the Grocery Store</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+accept:
+<pre>
+"Copied from rummagesale (#624):accept by Deleuze (#213) Thu Mar 10 23:07:54 1994 
+EST";
+status = 0;
+what = args[1];
+status = pass(@args);
+if (!status)
+    if (this.owner in connected_players())
+        this.owner:tell(player.name, " just tried to move ", what.name, " into ", 
+this.name, ".");
+    endif
+    if (player == what)
+        player:moveto(#128);
+        if (player.location == #128)
+            player:tell("This being a post-apocalypic kind of place, there's a lot 
+of security around.  The grocery store's original owners seem to have been plagued 
+by space aliens who just teleported in all the time without even a by your leave 
+and took them away to their spaceships to do experiments.  So they took precautions. 
+ You'll have to find another way into the grocery store.");
+            #128:announce(player.name, " tries unsuccessfully to teleport into the 
+Grocery Store and gets bounced off the Space Alien Deflector Beam.");
+        endif
+    endif
+endif
+return status;
+.
+
+</pre>
+<BR>
+acceptable:
+<pre>
+return pass(@args) || (args[1].location.location == this);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

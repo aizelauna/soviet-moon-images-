@@ -1,0 +1,72 @@
+<HTML>
+<HEAD>
+<TITLE>Proto-Generic Aspect Seated Secured Post-Apocalypse Room</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Proto-Generic Aspect Seated Secured Post-Apocalypse Room (#2255)</H3>
+(an instance of <A HREF="HTM_000955.htm">Generic Room with Seats</A> made by <A HREF="HTM_002177.htm">Avon</A>)
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+look_self:
+<pre>
+"Copied from Generic Secured Post-Apocalypse Room (#262):look_self by Calkins (#150) 
+Sun Feb  5 22:20:48 1995 PST";
+if (player.location != this)
+    player:tell("You can't see that from here.");
+else
+    pass(@args);
+    if (this.aspect_msg == "dark")
+        player:tell(this.dark_msg);
+    elseif (this.aspect_msg == "dim")
+        player:tell(this.dim_msg);
+    elseif (this.aspect_msg == "candlelit")
+        player:tell(this.candlelit_msg);
+    elseif (this.aspect_msg == "lamplit")
+        player:tell(this.lamplit_msg);
+    elseif (this.aspect_msg == "flourescent")
+        player:tell(this.flourescent_msg);
+    elseif (this.aspect_msg == "spotlit")
+        player:tell(this.spotlit_msg);
+    endif
+endif
+"Lines 6-17 added by Avon (#2170), lines 2-4 modified so room can't be seen remotely 
+whether locked or not";
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp aspect_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dark_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dim_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp candlelit_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp lamplit_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp flourescent_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp spotlit_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_002222.htm">Bolthole</A> <A HREF="HTM_000569.htm">Orientalism</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

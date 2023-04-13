@@ -1,0 +1,133 @@
+<HTML>
+<HEAD>
+<TITLE>generic tattoo</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> generic tattoo (#1477)</H3>
+(an instance of <A HREF="HTM_000001.htm">Root Class</A> made by <A HREF="HTM_000538.htm">Eclipse</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspa pc still under construction. DO NOT @CHPARENT YOURSELF TO THIS YET. thank you for your attention.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000576.htm">Big Box O' Numbers</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+moveto:
+<pre>
+if (caller_perms() == this.owner)
+    pass(@args);
+endif
+if (this.location == this.home)
+    if (caller != this.remover)
+        player:tell(this.remover.name, " storms into the room, sneering at you.  
+She pulls a laser gun out of a black leather case, grabs your arm, pulls you to her, 
+and pins you down as she fries the tattoo from your ", this.tlocation, " with the 
+laser.  When she finishes, she shoves you away, puts her gun away, and stalks out, 
+leaving you howling in pain on the floor.");
+        player.location:announce($string_utils:pronoun_sub(tostr(this.remover.name, 
+" storms into the room, sneering at %n.  She pulls a laser gun out of a black leather 
+case, grabs %n's arm, pulls %o to her, and pins %o down as she fries the tattoo from 
+%n's ", this.tlocation, " with the laser.  When she finishes, she shoves %n away 
+and stalks out, leaving %n howling in pain on the floor.")));
+    endif
+    this.home:destroy_tattoo(this);
+endif
+.
+
+</pre>
+<BR>
+carried_msg:
+<pre>
+return this:get_message(verb[1..length(verb) - 4]);
+.
+
+</pre>
+<BR>
+title:
+<pre>
+return tostr("tattoo of ", this.tname);
+.
+
+</pre>
+<BR>
+set_aliases:
+<pre>
+if (m = match(n = tn = this.tname, "^%(an? %|the %)"))
+    n[m[1]..m[2]] = "";
+endif
+return pass({this.name, "tattoo", n, n + " tattoo", "tattoo of " + tn});
+.
+
+</pre>
+<BR>
+set_name:
+<pre>
+if (ok = pass(@args))
+    this:set_aliases();
+endif
+return ok;
+.
+
+</pre>
+<BR>
+hidden_verbs:
+<pre>
+return ((caller == this) || $perm_utils:controls(caller_perms(), this)) ? {@pass(@args), 
+"d*rop th*row", "gi*ve ha*nd"} | E_PERM;
+.
+
+</pre>
+<BR>
+d*rop th*row:
+<pre>
+player:tell($string_utils:pronoun_sub("It is impossible to drop a tattoo.  If you 
+would like it permanently removed, you can visit %n at %l (%[#l]).", r = this.remover, 
+r, r.location));
+player.location:announce($string_utils:pronoun_sub("%N scratches at %p %[tname]."));
+.
+
+</pre>
+<BR>
+gi*ve ha*nd:
+<pre>
+player:tell($string_utils:pronoun_sub("It is impossible to give away a tattoo.  If 
+ you would like it permanently removed, you can visit %n at %l (%[#l]).", r = this.remover, 
+r, r.location));
+player.location:announce($string_utils:pronoun_sub("%N scratches at %p %[tname]."));
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp tname
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp tlocation
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp carried_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp home
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp artist
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp remover
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_002181.htm">a man in bondage tattoo</A> <A HREF="HTM_002305.htm">The Stuff tattoo</A> <A HREF="HTM_002434.htm">an African silhouette tattoo</A> <A HREF="HTM_002578.htm">the Black Flag of Anarchy tattoo</A> <A HREF="HTM_002579.htm">The Never-Ending Circle of Reverberating Layers of Meaning tattoo</A> <A HREF="HTM_001613.htm">a biohazard symbol in bright blue tattoo</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

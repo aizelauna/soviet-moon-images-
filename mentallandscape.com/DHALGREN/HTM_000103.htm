@@ -1,0 +1,52 @@
+<HTML>
+<HEAD>
+<TITLE>Zon</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Zon (#103)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_000103.htm">Zon</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a tall lean fellow with an odd grin. He is wearing old jeans and a hemp colored shirt. He leans forward as if to listen more closely.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000180.htm">Clearing In The Park</A>.
+<BR>
+<BR>
+<BR>
+Zon owns <A HREF="HTM_000103.htm">Zon</A> <A HREF="HTM_000502.htm">Generic Wandering Automaton</A> <A HREF="HTM_000468.htm">Z</A> <A HREF="HTM_000503.htm">Z2</A> <A HREF="HTM_000505.htm">up</A> <A HREF="HTM_000506.htm">down</A> <A HREF="HTM_000527.htm">Z3</A> <A HREF="HTM_000528.htm">north</A> <A HREF="HTM_000529.htm">south</A> <A HREF="HTM_000555.htm">robot</A> <A HREF="HTM_000578.htm">cage</A> <A HREF="HTM_001241.htm">speedster</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+moveto:
+<pre>
+"Copied from Carrot's Rosette Feature Object (#126):moveto by Dred (#100) Tue Feb 
+15 18:13:16 1994 EST";
+pass(@args);
+if ($object_utils:has_property(this, "features") && (#126 in this.features))
+    used = $list_utils:assoc(player, #126.read);
+    if ((used != {}) && ("a" in used[3]))
+        rose = #126:genrose(player.location, used[3]);
+        if (typeof(rose) == LIST)
+            player:tell_lines(rose);
+        endif
+    endif
+endif
+return;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

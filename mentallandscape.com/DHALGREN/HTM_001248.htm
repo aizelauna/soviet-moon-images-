@@ -1,0 +1,47 @@
+<HTML>
+<HEAD>
+<TITLE>aghari</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> aghari (#1248)</H3>
+(an instance of <A HREF="HTM_001223.htm">Generic Lycanthropic Thespian PC</A> made by <A HREF="HTM_001248.htm">aghari</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA gentle man with a warm smile and an easy-going manner.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001256.htm">aghari's hollow</A>.
+<BR>
+<BR>
+<BR>
+aghari owns <A HREF="HTM_001248.htm">aghari</A> <A HREF="HTM_001256.htm">aghari's hollow</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+pbh:
+<pre>
+"A_child's pbh hug from pmc.";
+dobj = $string_utils:match_player(args[1]);
+if ($command_utils:player_match_failed(dobj, args[1]))
+    return;
+endif
+dobj:tell(player.name, " hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuugggggggggggggggggggggggggggggggggggggggggggggggggggssssssssssssssssssssssssssssssssss 
+you.");
+player:tell("Done.");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

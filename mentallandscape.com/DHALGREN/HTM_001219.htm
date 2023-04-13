@@ -1,0 +1,56 @@
+<HTML>
+<HEAD>
+<TITLE>an ancient statue of Icarus</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> an ancient statue of Icarus (#1219)</H3>
+(an instance of <A HREF="HTM_000007.htm">generic exit</A> made by <A HREF="HTM_000585.htm">kp</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAn old cracking chunk of marble, moulded into the tragic shape of Icarus, the man who dared to touch the sky.  His form is noble and smooth, with one leg off the ground as if he was about the leap into the air.  The wings on his arms are outstretched as his fingers point high into the sky, pointing at some unseen object which only he can see.  The ends of his right hand is, however, limp and folded, as if he was melting before he even left the ground.  Cut into the base of the statue, in a deep serif typeface, is an inscription: "The will cannot will backward."  A thick dark space under the statue gives you the distinct feeling that you could move the statue away from its location.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001218.htm">Square of Ruins</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+move push:
+<pre>
+if (this.key == 0)
+    player:tell("You grunt and wheeze as you push the statue back over the darkenened 
+hole in the ground, sealing the entrance.");
+    this.location:announce(player:title(), " grunts and wheezes as ", player.ps, 
+" pushes the statue of Icarus back over the darkened hole in the ground, sealing 
+the entrance.");
+    this.key = this.location;
+else
+    player:tell("You grunt and wheeze as you push the statue.  A mechanical scraping 
+noise comes from below your feet, and the statue begins to move without your help. 
+ Finally, the movement comes to a halt, and the statue has moved a few feet from 
+its original location, revealing a large dark hole in the ground...");
+    this.location:announce(player:title(), " grunts and wheezes as ", player.ps, 
+" pushes the statue.  A mechanical scraping noise emenates from below your feet, 
+and the statue seems to move without ", player:title(), "'s help!  After a few seconds 
+the movement comes to a halt and the statue has moved a few feet from its original 
+location, revealing a large dark hole in the ground...");
+    this.key = 0;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

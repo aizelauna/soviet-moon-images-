@@ -1,0 +1,59 @@
+<HTML>
+<HEAD>
+<TITLE>Edit Options</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Edit Options (#65)</H3>
+(an instance of <A HREF="HTM_000067.htm">Generic Option Package</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe options package for dealing with editing on the MOO. Works with all children of $generic_editor.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+actual:
+<pre>
+if (i = args[1] in {"parens", "noisy_insert"})
+    return {{{"no_parens", "quiet_insert"}[i], !args[2]}};
+else
+    return {args};
+endif
+.
+
+</pre>
+<BR>
+show:
+<pre>
+if (o = (name = args[2]) in {"parens", "noisy_insert"})
+    args[2] = {"no_parens", "quiet_insert"}[o];
+    return {@pass(@args), tostr("(", name, " is a synonym for -", args[2], ")")};
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp show_quiet_insert
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp show_eval_subs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp show_local
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp show_no_parens
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

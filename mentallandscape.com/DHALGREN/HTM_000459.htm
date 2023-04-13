@@ -1,0 +1,140 @@
+<HTML>
+<HEAD>
+<TITLE>generic integrating room</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> generic integrating room (#459)</H3>
+(an instance of <A HREF="HTM_000003.htm">generic room</A> made by <A HREF="HTM_000539.htm">Sick</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000539.htm">Sick</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe generic integrating room (#459) allows objects with .look_msg properties to be 
+integrated into the room's description, along with those exits with .obvious == 2.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspIf the room's .integrating property is 0, objects' look_msgs will not be integrated 
+into the room's description. Setting the .integrating property to a true value (1) 
+will cause the room to integrate the messages. A a negative value (-1) prevents player 
+objects from being integrated. The default .integration value is -1.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspIf the room's .exits_first property is true, exits will be integrated before objects. 
+Otherwise, objects are integrated first. By default, .exits_first is 1.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNote that objects with non-string .look_msg properties will not be shown in the room's 
+description or contents listing, effectively hiding them. However, the object must 
+be owned by the room's owner, or be in the .residents list for this to work.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp[ based on Joe's integrating room #17755@lambdamoo -- sick. ]
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+integrate_ok:
+<pre>
+if (msg = $code_utils:verb_or_property(o = args[1], "look_msg"))
+    if (is_player(o) && (this.integrating <= 0))
+        "... players not shown if .integrating 0 or negative";
+        return 0;
+    elseif (typeof(msg) == STR)
+        return 1;
+    else
+        "... room owner's objects and .residents are `hidden' when look_msg is non-string";
+        return ((o.owner == this.owner) || (o in this.residents)) && -1;
+    endif
+endif
+.
+
+</pre>
+<BR>
+look_self:
+<pre>
+if (!this.integrating)
+    return pass(@args);
+endif
+player:tell(this:titlec());
+if (!(args && args[1]))
+    contents = integrated = {};
+    for o in (setremove(this:contents(), player))
+        if ((ok = this:integrate_ok(o)) > 0)
+            integrated = setadd(integrated, o);
+        elseif (!ok)
+            contents = setadd(contents, o);
+        endif
+    endfor
+    player:tell_lines(this:description(@integrated));
+    this:tell_contents(contents, this.ctype);
+else
+    this:tell_contents(setremove(this:contents(), player), this.ctype);
+    this:tell_exits();
+endif
+.
+
+</pre>
+<BR>
+description:
+<pre>
+if (!(args && this.integrating))
+    return pass(@args);
+endif
+desc = this.description || "You see nothing special.";
+"... don't pass() because $room:description will append exit messages without regard 
+to .exits_first";
+first = second = "";
+for o in (args)
+    first = tostr(first, first && this.look_sep_msg, $object_utils:has_callable_verb(o, 
+"look_msg") ? o:look_msg() | $string_utils:pronoun_sub(o.look_msg, player, o));
+endfor
+for o in (this:obvious_exits(2))
+    second = tostr(second, second && this.look_sep_msg, $object_utils:has_callable_verb(o, 
+"look_msg") ? o:look_msg() | $string_utils:pronoun_sub(o.look_msg, player, o));
+endfor
+if (this.exits_first)
+    temp = first;
+    first = second;
+    second = temp;
+endif
+if (typeof(desc) == STR)
+    desc = tostr(desc, first && this.look_sep_msg, first, second && this.look_sep_msg, 
+second);
+else
+    desc[length(desc)] = tostr(desc[length(desc)], (first || second) && this.look_sep_msg, 
+first || second);
+    if (first && second)
+        desc = {@desc, second};
+    endif
+endif
+return desc;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp integrating
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp exits_first
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000988.htm">Entrance Passage</A> <A HREF="HTM_000992.htm">Bell Tower</A> <A HREF="HTM_001002.htm">Cathedral Altar</A> <A HREF="HTM_000456.htm">Preparation Chamber</A> <A HREF="HTM_000417.htm">Stair Landing</A> <A HREF="HTM_001392.htm">Cathedral of Our Lady of the Stars</A> <A HREF="HTM_001005.htm">Cathedral Steps</A> <A HREF="HTM_001402.htm">Stairwell</A> <A HREF="HTM_001006.htm">The Basement</A> <A HREF="HTM_001515.htm">Tiny Alcove</A> <A HREF="HTM_001519.htm">The Vault</A> <A HREF="HTM_001526.htm">Storage Closet</A> <A HREF="HTM_000923.htm">The House of Freaks</A> <A HREF="HTM_000950.htm">The Tank</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

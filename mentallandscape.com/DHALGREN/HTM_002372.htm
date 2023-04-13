@@ -1,0 +1,83 @@
+<HTML>
+<HEAD>
+<TITLE>flat</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> flat (#2372)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_002372.htm">flat</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspEaten from the inside, crushed from the out; a nasty plastic stain on the dark rock around.  Waking is rare, painful, taking him out of the loop of certainty to where things are never said or heard without the shock of thought and misgiving darkening their perfection.  And then.  Pop.
+<BR>
+<BR>
+flat is carrying <A HREF="HTM_002341.htm">lame</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002368.htm">a line</A>.
+<BR>
+<BR>
+<BR>
+flat owns <A HREF="HTM_002372.htm">flat</A> <A HREF="HTM_002368.htm">a line</A> <A HREF="HTM_002341.htm">lame</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+poke:
+<pre>
+if (random(100) > 50)
+    this.location:announce_all_but({player, this}, player.name, " pokes ", this.name, 
+".");
+    x = players()[random(length(players()))];
+    player:tell("You try to poke ", this.name, " but instead he grabs you and brutally 
+anal-rapes you with ", x.name, "'s severed forearm.  It's not altogether unpleasant, 
+and you grow aroused.  You care.");
+    this:tell(player.name, " tries to poke you, but instead you brutally anal-rape 
+", player.po, " with ", x.name, "'s severed forearm.  ", player.ps, " is aroused, 
+yes.  You care.");
+else
+    player:tell("You try to poke ", this.name, " but instead miss and gouge your 
+own eye out!  You care.");
+    this:tell(player.name, " gouges out ", player.pp, " eye in a failed attempt to 
+poke you.  Fucker.");
+    player.location:announce_all_but({player, this}, player.name, " gouges out ", 
+player.pp, " eye.  Bummer.");
+endif
+.
+
+</pre>
+<BR>
+see:
+<pre>
+if (!argstr)
+    return player:tell("You fucked up.  Try seeing SOMETHING, idiot.");
+endif
+if (valid(toobj(args[1])) && (toobj(args[1]) != #0))
+    target = toobj(args[1]);
+elseif (!valid(target = $string_utils:match_player(args[1])))
+    return player:tell("Invalid sight target.");
+endif
+if (((length(args) > 1) && (args[length(args)][1] == "l")) && valid(target.location))
+    target = target.location;
+endif
+player:tell(target:titlec());
+player:tell("This message brought to you courtesy of The_Mayor, a fucking obstructionist 
+moron.");
+player:tell_lines(target.description);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp feature_ok
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

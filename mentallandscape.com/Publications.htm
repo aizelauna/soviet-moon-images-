@@ -1,0 +1,401 @@
+<HTML>
+<HEAD>
+<TITLE>Publications</TITLE>
+<META name="author" content-"Don P. Mitchell">
+<META name="keywords" content="publications papers">
+</HEAD>
+
+<BODY bgcolor=#000000 text=#CCCCFF link=#FFFFFF vlink=#FFFFFF alink=#FFFFFF>
+<FONT face="Arial,Helvetica">
+<CENTER><FONT COLOR=#FFFFFF><H1>Publications</H1></FONT></CENTER>
+<P>
+<BR>
+
+<A NAME=PODC84></A>
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_84podc.jpg" alt="PODC 84">
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="left" VALIGN="center" WIDTH="420">
+Mitchell, Don and Michael Merritt, "A Distributed Algorithm for Deadlock
+Detection and Resolution",
+<CITE> Principles of Distributed Computing,</CITE> 1984.
+<P>
+A realization of Dijkstra's idea of the diffusing computation.  A deadlock cycle can be discovered by processes reading and writing messages on objects.
+(<A HREF="Papers_podc84.pdf">pdf</A>)
+</TD>
+</TR></TABLE> </CENTER>
+
+<A NAME=SIGGRAPH87></A>
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="right" VALIGN="center" WIDTH="420">
+Mitchell, Don, "Generating Antialiased Images at Low Sampling Densities",
+<CITE>SIGGRAPH 87.</CITE>
+<P>
+This described an <I>Antialiasing Module</I>, a general routine for building an image by non-uniform sampling of a function.  Specifically, a tile of blue-noise samples are used, along with a nonlinear reconstruction filter.
+(<A HREF="Papers_siggraph87.pdf">pdf</A>,
+<A HREF="Papers_87siggraph_fig1.htm">fig1</A>,
+<A HREF="Papers_87siggraph_fig2.htm">fig2</A>,
+<A HREF="Papers_87siggraph_fig7.htm">fig7</A>)
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_87siggraph.jpg" alt="SIGGRAPH 87">
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_88siggraph.jpg" alt="SIGGRAPH 88">
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="left" VALIGN="center" WIDTH="420">
+Mitchell, Don and Arun Netravali, "Reconstruction Filters in Computer Graphics",
+<CITE>SIGGRAPH 88.</CITE>
+<P>
+The infamous "Mitchell filter" is derived by studying cubic filters, both mathematically and subjectively.  Reconstruction with derivative values is also discussed.  We wrote a simple ray tracer that returned image gradient values, but I only touched on it in the paper.
+(<A HREF="Papers_siggraph88.pdf">pdf</A>,
+<A HREF="Papers_88siggraph_fig4.htm">fig4</A>,
+<A HREF="Papers_88siggraph_fig5.htm">fig5</A>,
+<A HREF="Papers_88siggraph_fig6.htm">fig6</A>,
+<A HREF="Papers_88siggraph_fig8.htm">fig8</A>,
+<A HREF="Papers_88siggraph_fig9.htm">fig9</A>,
+<A HREF="Papers_88siggraph_fig10.htm">fig10</A>,
+<A HREF="Papers_88siggraph_fig11.htm">fig11</A>,
+<A HREF="Papers_88siggraph_fig12.htm">fig12</A>,
+<A HREF="Papers_88siggraph_fig15.htm">fig15</A>,
+<A HREF="Papers_88siggraph_fig16.htm">fig16</A>)
+</TD>
+</TR></TABLE> </CENTER>
+
+<A NAME=Megacycles></A>
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="right" VALIGN="center" WIDTH="420">
+Amanatides, John and Don Mitchell, "Megacycles",
+<CITE> SIGGRAPH 89 Electronic Theater. </CITE>
+<P>
+Johnny and I wrote a ray tracer called FX for the AT&T Pixel Machine, and this movie was our demo.  The ray tracer parsed lisp, and so the model was a small file with recursive CSG definitions.
+Here is a high-resolution rendering of the <A HREF="Papers_89siggraph_final.htm">final scene</A>, and
+here is a wmv of the <A HREF="megacycles.wmv">video</A> (22 MB).
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_89siggraph.jpg" alt="SIGGRAPH 89">
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_90agi.jpg" alt="GI 90">
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="left" VALIGN="center" WIDTH="420">
+Mitchell, Don, "Robust Ray Intersection with Interval Arithmetic",
+<CITE>Proc. Graphics Interface 90.</CITE>
+<P>
+The FX ray tracer had a powerful system of nonlinear solvers that used interval arithmetic and automatic differentiation.  With only 256K of memory per node, the Pixel Machine encourage highly procedural and recursive approaches to texture and modeling.
+(
+<A HREF="Papers_graphicsinterface90b.pdf">pdf</A>,
+<A HREF="Papers_90agi_fig1.htm">fig1</A>,
+<A HREF="Papers_90agi_fig2.htm">fig2</A>,
+<A HREF="Papers_90agi_fig3.htm">fig3</A>,
+<A HREF="Papers_90agi_fig4.htm">fig4</A>
+)
+
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="right" VALIGN="center" WIDTH="420">
+Amanatides, John and Don Mitchell, "Some Regularization Problems in
+Ray Tracing",
+<CITE>Proc. Graphics Interface 90.</CITE>
+<P>
+FX did careful book-keeping to avoid numerical intersection errors, even when rays were near the corners of transparent objects.
+(<A HREF="Papers_graphicsinterface90a.pdf">pdf</A>,
+<A HREF="Papers_90bgi_fig1.htm">fig1</A>,
+<A HREF="Papers_90bgi_fig2.htm">fig2</A>,
+<A HREF="Papers_90bgi_fig3.htm">fig3</A>,
+<A HREF="Papers_90bgi_fig4.htm">fig4</A>
+)
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_90bgi.jpg" alt="GI 90">
+</TD>
+</TR></TABLE> </CENTER>
+
+<A NAME=Interlacing></A>
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_90asiggraph.jpg" alt="SIGGRAPH 90">
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="left" VALIGN="center" WIDTH="420">
+Amanatides, John and Don Mitchell, "Antialiasing of Interlaced Video
+Animation",
+<CITE>SIGGRAPH 90.</CITE>
+<P>
+Generating interlaced video requires careful multidimensional filtering to avoid spatial, temporal and chroma aliasing.  Interlacing images is a bad design, making these problems unnecessarily difficult.
+(<A HREF="Papers_siggraph90.pdf">pdf</A>,
+<A HREF="Papers_90siggraph_fig5.htm">fig5</A>,
+<A HREF="Papers_90siggraph_fig6.htm">fig6</A>,
+<A HREF="Papers_90siggraph_fig8.htm">fig8</A>,
+<A HREF="Papers_90siggraph_fig10.htm">fig10</A>,
+<A HREF="Papers_90siggraph_fig11.htm">fig11</A>)
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="right" VALIGN="center" WIDTH="420">
+Mitchell, Don, "The Antialiasing Problem in Ray Tracing",
+<CITE>Advanced Topics in Ray Tracing, Course Notes,</CITE> SIGGRAPH 90.
+<P>
+Even by 1990, it was necessary to start out by refuting erroneous claims that "jaggies" were not caused by aliasing!  Of course, there are other causes of jaggies, like bad gamma correction or nearest-neighbor image enlargement.
+(<A HREF="Papers_siggraph90tutorial.pdf">pdf</A>)
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_90bsiggraph.jpg" alt="SIGGRAPH 90">
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_91asiggraph.jpg" alt="SIGGRAPH 91">
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="left" VALIGN="center" WIDTH="420">
+Mitchell, Don, "Spectrally Optimal Sampling for Distribution Ray Tracing",
+<CITE>SIGGRAPH 91.</CITE>
+<P>
+One of the first quasi-random solutions to distribution ray tracing, although based on spectral analysis, not low-discrepancy quasi-random numbers.
+(<A HREF="Papers_siggraph91.pdf">pdf</A>,
+<A HREF="Papers_91siggraph_fig8.htm">fig8 & 9</A>,
+<A HREF="Papers_91siggraph_fig11.htm">fig11 & 12</A>,
+<A HREF="Papers_91siggraph_fig13.htm">fig13 & 14</A>,
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="right" VALIGN="center" WIDTH="420">
+Mitchell, Don, "Three Applications of Interval Analysis in Computer Graphics".
+<CITE>Frontiers of Rendering, Course Notes,</CITE> SIGGRAPH 91.
+<P>
+More information about the techniques used by the FX ray tracer.
+(<A HREF="Papers_siggraph91tutorial.pdf">pdf</A>)
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_91bsiggraph.jpg" alt="SIGGRAPH 91">
+</TD>
+</TR></TABLE> </CENTER>
+
+<A NAME=Caustics></A>
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_92siggraph.jpg" alt="SIGGRAPH 92">
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="left" VALIGN="center" WIDTH="420">
+Mitchell, Don, Pat Hanrahan, "Illumination from Curved Reflectors",
+<CITE>SIGGRAPH 92.</CITE>
+<P>
+One day, I told Pat that I knew how to do caustics: solve the Lagrange multiplier problem with interval solvers, and compute brightness from wavefront curvature.  He said, "Let's visit the Geometry Center and program with no distractions!".  We froze our asses off in Minneapolis, it was -25&#186; F.
+(<A HREF="Papers_siggraph92.pdf">pdf</A>,
+<A HREF="Papers_92siggraph_fig1.htm">fig1</A>,
+<A HREF="Papers_92siggraph_fig2.htm">fig2</A>,
+<A HREF="Papers_92siggraph_fig3.htm">fig3</A>,
+<A HREF="Papers_92siggraph_extra.htm">extra</A>)
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="right" VALIGN="center" WIDTH="420">
+Mitchell, Don, "Ray Tracing and Irregularities of Distribution",
+<CITE>Proc. 3rd Eurographics Workshop on Rendering</CITE>, 1992.
+<P>
+Arbitrary-edge discrepancy was introduced.  Optimal sampling patterns were found by Monte Carlo estimation of discrepancy.
+(<A HREF="Papers_eurographics92.pdf">pdf</A>)
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_92eurographics.jpg" alt="Eurographics 92">
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_93gi.jpg" alt="GI 93">
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="left" VALIGN="center" WIDTH="420">
+Dobkin, David and Don Mitchell, "Random-Edge Discrepancy of Super-sampling Patterns",
+<CITE>Proc. Graphics Interface 93.</CITE>
+<P>
+Dobkin and I invented an algorithm for computing discrepancy.  No need anymore for Monte Carlo estimation.
+(<A HREF="Papers_graphicsinterface93.pdf">pdf</A>)
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="right" VALIGN="center" WIDTH="420">
+Lacy, J. B., D. P. Mitchell, W. M. Schell, "CryptoLib: Cryptography in software.",
+<CITE>Proc. 4th UXENIX Security Workshop</CITE>, 1993.
+<P>
+Robert Morris Jr. and I modified my fast DES code to do fast UNIX password hashing.  He later did something very naughty with that code, although I don't believe he intended the damaging effects of his internet worm.
+(<A HREF="Papers_usenix93.pdf">pdf</A>)
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_93usenix.jpg" alt="USENIX 93">
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_95siggraph.jpg" alt="SIGGRAPH 95">
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="left" VALIGN="center" WIDTH="420">
+Kolb, Craig, Don Mitchell, and Pat Hanrahan, "A Realistic Camera Model for Computer Graphics",
+<CITE>SIGGRAPH 95.</CITE>
+<P>
+Pat and I had talked about this at Princeton, so they invited me to visit Stanford and help.  I programmed the depth of field sampling on a lap-top I brought with me.
+(<A HREF="Papers_siggraph95.pdf">pdf</A>)
+</TD>
+</TR></TABLE> </CENTER>
+
+<A NAME=MUDs></A>
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="right" VALIGN="center" WIDTH="420">
+Mitchell, Don, "From MUDs To Virtual Worlds", Microsoft Virtual Worlds Group, 1995.
+<P>
+A lot can be learned from text-based MUDS, but most VR enthusiasts were hostile to the idea that people could become immersed in a world without 3D graphics and head-mounted displays.  I believe the people who designed <I>Everquest</I> understood this.
+<P>
+The ppt presentation is a talk at <CITE>W.R.I.T.E. 95</CITE>.
+(<A HREF="Papers_95vworlds.htm">htm</A>,
+<A HREF="Papers_WRITE95.PPT">ppt</A>)
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_95vworlds.gif" alt="VWorlds 95">
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_96siggraph.jpg" alt="SIGGRAPH 96">
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="left" VALIGN="center" WIDTH="420">
+Mitchell, Don, "Consequences of Stratefied Sampling in Graphics",
+<CITE>SIGGRAPH 96.</CITE>
+<P>
+This was a weekend hack in the middle of the virtual worlds project at Microsoft.  But of course I had been thinking about this for years, so it was a very focused weekend!
+(<A HREF="Papers_siggraph96.pdf">pdf</A>,
+<A HREF="Papers_96siggraph_fig1.htm">fig1</A>)
+</TD>
+</TR></TABLE> </CENTER>
+
+<A NAME=Discrepancy></A>
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="right" VALIGN="center" WIDTH="420">
+Dobkin, David P, David Eppstein, Don. P. Mitchell, "Computing the Discrepancy with Applications
+to Supersampling Patterns", <CITE> ACM Trans. Graphics </CITE> Vol 15, No. 4 (Oct. 1996).
+<P>
+Here you see a low-discrepancy pattern of 16 points.  But I recommend blue noise, not low discrepancy.  Discrepancy is too closely coupled to box-fitering.
+(<A HREF="Papers_tog96.pdf">pdf</A>)
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_96tog.jpg" alt="TOG 96">
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_98usenix.jpg" alt="USENIX 98">
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="left" VALIGN="center" WIDTH="420">
+Vellon, M., Kirk Marple, Don Mitchell, Steve Drucker, "The Architecture of a Distributed Virtual Worlds System", <CITE>Proc. 4th USENIX Conf. on Object-Oriented Technologies and Systems</CITE>, 1998.
+<P>
+We rejected VRML and designed a more MUD-like object model.  This project ultimately grew into a huge confused effort, unfortunately.
+(<A HREF="Papers_usenix98.pdf">pdf</A>)
+</TD>
+</TR></TABLE> </CENTER>
+
+<A NAME=Cleartype></A>
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="right" VALIGN="center" WIDTH="420">
+Betrisey, C., Blinn, J. F., Dresevic, B., Hill, B., Hitchcock, G., Keely, B., Mitchell, D. P., Platt, J. C., Whitted, T., "Displaced Filtering for Patterned Displays,"
+<CITE>Proc. Society for Information Display Symposium</CITE>, 2000.
+<P>
+After Keely and Hitchcock invented ClearType, I wrote up the first technical analysis of what I called RGB decimation.  The scientific problem has been overshadowed by politics.
+(<A HREF="Papers_sid2000.pdf">pdf</A>,
+<A HREF="Papers_00sid_fig3.htm">fig1</A>)
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_00sid.jpg" alt="SID 2000">
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_01siggraph.jpg" alt="SIGGRAPH 2001">
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="left" VALIGN="center" WIDTH="420">
+Mitchell, Don, "Quasirandom Techniques", <CITE>SIGGRAPH 2001 Course 29</CITE>.
+<P>
+Have I mentioned that I think blue noise works better than quasirandom sampling?
+(<A HREF="Papers_siggraph2001.ppt">ppt</A>)
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="right" VALIGN="center" WIDTH="420">
+Snyder, John, Don Mitchell, "Sampling-Efficient Mapping of Spherical Images", <CITE>Microsoft Technical Report</CITE>, 2001.
+<P>
+We develop measures of quality for mappings from the plane to the sphere.  A number of mappings are analyzed, including some used to represent spherical textures and environment maps in graphics.
+(<A HREF="Papers_01spheremap.pdf">pdf</A>,
+<A HREF="Papers_01spheremap_figa.htm">figa</A>,
+<A HREF="Papers_01spheremap_figb.htm">figb</A>,
+<A HREF="Papers_01spheremap_figc.htm">figc</A>,
+<A HREF="Papers_01spheremap_figd.htm">figd</A>,
+<A HREF="Papers_01spheremap_fige.htm">fige</A>)
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_01spheremap.jpg" alt="Sphere Mapping 2001">
+</TD>
+</TR></TABLE> </CENTER>
+
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING=""><TR>
+<TD ALIGN="center" VALIGN = "top" WIDTH="200">
+<img width=200 src="Papers_02uw.jpg" alt="UW CSE 02-12-07">
+</TD>
+<TD WIDTH="20"> </TD>
+<TD ALIGN="left" VALIGN="center" WIDTH="420">
+Shade, Jonathan, Michael F. Cohen, Don P. Mitchell, "Tiling Layered Depth Images",
+<CITE>Tech. Report CSE 02-12-07,</CITE> University of Washington, 2002.
+<P>
+Several years ago, I suggested to Michael that 3D ground cover would make multiuser game environments much more realistic.  Jonathan found Wang tiles, which is a wonderful concept, making non-periodic expanses of texture from a finite set of square tiles.
+(<A HREF="Papers_02uw.pdf">pdf</A>)
+</TD>
+</TR></TABLE> </CENTER>
+
+<P><CENTER><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH="640">
+<A HREF="Index.htm"><FONT COLOR=#FFFFFF>Home</FONT></A>
+</TD></TR></TABLE></CENTER>
+
+<P><BR><CENTER>Copyright © 2003 Don P. Mitchell.  All rights reserved.</CENTER>
+
+
+</FONT>
+</BODY>
+</HTML>

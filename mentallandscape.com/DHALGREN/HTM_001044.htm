@@ -1,0 +1,174 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Speaking Wandering Automaton</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Speaking Wandering Automaton (#1044)</H3>
+(an instance of <A HREF="HTM_000502.htm">Generic Wandering Automaton</A> made by <A HREF="HTM_000538.htm">Eclipse</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a homeless, nomadic robot.   Its memory circuits were affected by being stored too close to a television set and may now be seen roaming about shouting "Exterminate!  Exterminate!".  
+<BR>
+<BR>
+Generic Speaking Wandering Automaton has some things to say:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Hey, my speak_msg is clear. Please set it for me!
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbsp   The Generic Speaking Wandering Automaton is a speaking child of the Generic Wandering 
+Automaton (#502).  The Generic Speaking Wandering Automaton (GSWA) will respond when 
+talked to, unless it has been gagged/shut up.
+&nbsp&nbsp&nbsp&nbsp&nbsp    
+&nbsp&nbsp&nbsp&nbsp&nbsp   GSWA Commands:
+&nbsp&nbsp&nbsp&nbsp&nbsp    
+&nbsp&nbsp&nbsp&nbsp&nbsp   talk (at/to) <GSWA>
+&nbsp&nbsp&nbsp&nbsp&nbsp        When the GSWA is spoken to, a response is given from it's .speak_msg property.
+&nbsp&nbsp&nbsp&nbsp&nbsp   
+&nbsp&nbsp&nbsp&nbsp&nbsp   shutup/gag <GSWA>
+&nbsp&nbsp&nbsp&nbsp&nbsp        Gagging or shutting up the GSWA diables the talk command by setting the GSWA's 
+.talkative property to 0 (it is, by default, 1).  Its .silent_msg and .osilent_msg 
+are given when the talk command is used, and its .gagged_msg is appended to its description, 
+if it is set.
+&nbsp&nbsp&nbsp&nbsp&nbsp   
+&nbsp&nbsp&nbsp&nbsp&nbsp   unshutup/ungag <GSWA>
+&nbsp&nbsp&nbsp&nbsp&nbsp        Ungagging the GSWA resets its .talkative property to 1, removes the .gagged_msg 
+from its description, and allows it to respond to the talk command with its .speak_msg. 
+
+&nbsp&nbsp&nbsp&nbsp&nbsp  
+&nbsp&nbsp&nbsp&nbsp&nbsp   The responses given by the GSWA to the talk command are stored in its .speak_msg 
+property.  This may be set to one string, or a list of strings may created, causing 
+the GSWA to give random messages from the list each time the talk command is used.
+&nbsp&nbsp&nbsp&nbsp&nbsp   The GSWA also has a .says_msg property, which determines how the GSWA delievers 
+its .speak_msg. This also may be set to one string, such as "whispers", or made into 
+a list, allowing random methods of speaking, such as "stutters", "warbles", or "howls".
+&nbsp&nbsp&nbsp&nbsp&nbsp   The GSWA's .silent_msg is displayed to a player who uses the talk command on a 
+gagged GSWA.  At the same time, the .osilent_msg is displayed to the location of 
+the player attempting to talk to the gagged GSWA.  These messages may also be made 
+into single strings or lists.
+&nbsp&nbsp&nbsp&nbsp&nbsp   The .gagged_msg of the GSWA is appended to the description of a gagged GSWA.  
+Nothing is appended if the message string is empty, and this message may also be 
+a single string or a list.
+&nbsp&nbsp&nbsp&nbsp&nbsp   The GSWA is also able to take advantage of rooms that support object integration 
+(#459).  The .look_msg property, settable as a string or a list, is appended to the 
+room's description.  If the message is an empty string, the GSWA will be concealed. 
+ If the room's integration is not on, the GSWA will simply appear in the room's contents.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   For information about the GSWA's parents, the Generic Wandering Automaton and 
+the Generic Automaton, see `help #502' and `help #192'.  - Eclipse
+&nbsp&nbsp&nbsp&nbsp&nbsp-------------------------------------------------------------------
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+talk:
+<pre>
+(player.location != this.location) ? player:tell("You can't talk to ", this.name, 
+" from here.") | ((!this.talkative) ? {player:tell(this:silent_msg()), this.location:announce(this:osilent_msg())} 
+| {this.location:announce(player.name, " ", verb, "s to ", this.name, "."), player:tell("You 
+", verb, " to ", this.name, "."), this.location:announce_all(this.name, " ", this:says_msg(), 
+", \"", this:speak_msg(), "\"")});
+.
+
+</pre>
+<BR>
+speak_msg silent_msg osilent_msg look_sep_msg gagged_msg:
+<pre>
+msg = this:get_message(verb[1..length(verb) - 4]);
+return $string_utils:pronoun_sub((typeof(msg) == LIST) ? msg[random(length(msg))] 
+| msg);
+.
+
+</pre>
+<BR>
+shutup gag:
+<pre>
+(player != this.owner) ? player:tell("You cannot gag any automatons not belonging 
+to you.") | ((!this.talkative) ? player:tell("You've already made ", this.name, " 
+shut up.") | {this:set_talkative(0), player:tell("You've made ", this.name, " shut 
+up.")});
+.
+
+</pre>
+<BR>
+unshutup ungag:
+<pre>
+(player != this.owner) ? player:tell("You cannot ungag any automatons not belonging 
+to you.") | (this.talkative ? player:tell(this.name, " is already able to talk.") 
+| {this:set_talkative(1), player:tell(this.name, " will now be able to talk again.")});
+.
+
+</pre>
+<BR>
+says_msg:
+<pre>
+msg = this.(verb);
+return (typeof(msg) == LIST) ? msg[random(length(msg))] | msg;
+.
+
+</pre>
+<BR>
+set_talkative:
+<pre>
+return (caller == this) ? this.talkative = args[1] | E_PERM;
+.
+
+</pre>
+<BR>
+description:
+<pre>
+d = pass(@args);
+this.talkative || ((s = this:gagged_msg()) && (d = (typeof(d) == LIST) ? listappend(d, 
+s) | ((typeof(d) == STR) ? (d + this:look_sep_msg()) + s | d)));
+return d;
+.
+
+</pre>
+<BR>
+acceptable:
+<pre>
+return !is_player(args[1]);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp speak_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp talkative
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp says_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp look_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp silent_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp osilent_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp look_sep_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gagged_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_001014.htm">Sister Devi</A> <A HREF="HTM_000878.htm">Diogenes</A> <A HREF="HTM_001385.htm">Trix</A> <A HREF="HTM_001414.htm">Ho-Tei</A> <A HREF="HTM_001520.htm">Shuffling Peon</A> <A HREF="HTM_001482.htm">The Critic</A> <A HREF="HTM_002088.htm">Biker Bob</A> <A HREF="HTM_002014.htm">Dr. Sass</A> <A HREF="HTM_002202.htm">The Pickpocket</A> <A HREF="HTM_001143.htm">The Lady of Shalott</A> <A HREF="HTM_001360.htm">The aging rhymester, Harry Machaut</A> <A HREF="HTM_002254.htm">Flower</A> <A HREF="HTM_000447.htm">KoKo</A> <A HREF="HTM_002357.htm">Eno</A> <A HREF="HTM_002383.htm">Generic Conversational Wandering Automaton</A> <A HREF="HTM_001988.htm">Saul</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

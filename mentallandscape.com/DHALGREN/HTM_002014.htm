@@ -1,0 +1,92 @@
+<HTML>
+<HEAD>
+<TITLE>Dr. Sass</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Dr. Sass (#2014)</H3>
+(an instance of <A HREF="HTM_001044.htm">Generic Speaking Wandering Automaton</A> made by <A HREF="HTM_000538.htm">Eclipse</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspDr. Sass is a frighteningly gorgeous woman, who stands about 6'2" in over-the-knee, zipper-backed, black leather spike-heeled boots. Her appearance disguises her intelligence, revealed by her skill with the laser gun.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspDr. Sass' thick black hair hangs down to her round, pert bottom, and makes her pale skin seem even paler.  Her bright blue eyes are ringed in black eyeliner, and her full lips are painted a racy, fire-engine red.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspHer body is tightly wrapped in a nurse's dress as white as the room around her, and her cleavage seems eager to burst the top button of the dress.  A black lace bra is very visible under the white dress, and a tattoo of a black rose creeps slowly up her chest.Her long arms are pale, and long slender fingers end in wicked-looking sharply-filed nails, painted a glossy black.  Her dress is almost too short, and her fishnet tights encaseher firm thighs and slide down into the tops of her boots, just above her knees.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspShe seems perpetually pissed off, but actually gets a kick out of her job.  She seems to have a disconcerting look of sadistic amusement on her face.
+<BR>
+<BR>
+Dr. Sass has some things to say:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Piss off, unless you want me to use this laser gun on you.
+<BR>
+<BR>
+Dr. Sass is carrying <A HREF="HTM_001987.htm">laser gun</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002193.htm">Removal Chamber</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+ask:
+<pre>
+if ((room = player.location) != this.location)
+    player:tell(this.name, " can't hear you from there.");
+    return;
+endif
+$you:say_action(tostr("%N %<asks> %t to ", iobjstr, "."));
+if (iobjstr && (m = match(iobjstr, "^%(remove%|erase%|delete%) +%(my +%)?%(.*%)")))
+    tattoo = player:match(tstr = substitute("%3", m));
+    if (tattoo == $failed_match)
+        room:announce_all(this.name, " looks at ", player.name, " like ", player.ps, 
+"'s an idiot.  \"Um, you don't have a ", tstr, " to remove.\"");
+    elseif (tattoo == $ambiguous_match)
+        room:announce_all(this.name, " says, \"Which ", tstr, " would you like for 
+me to remove, ", player.name, "?\"");
+    elseif (!valid(tattoo))
+        room:announce_all(this.name, " blinks.  \"You want me to remove _what_?\"");
+    elseif (parent(tattoo) != this.laser.generic_tattoo)
+        room:announce_all(this.name, " frowns.  \"If it ain't a tattoo, I don't have 
+a clue how to remove it.  Tried bleach?\"");
+    else
+        tname = tattoo:title();
+        tloc = tattoo.tlocation;
+        if ($command_utils:yes_or_no(tostr(this.name, " asks, \"Do you really want 
+me to remove your ", tname, "?\"")))
+            tattoo:moveto(tattoo.home);
+            room:announce_all(this.name, " pulls a laser gun out of a black leather 
+case, bares ", player.name, "'s ", tloc, ", and fries the ", tname, " from ", player.name, 
+"'s skin.");
+            room:announce_all("When ", this.name, " finishes, she smiles at the now 
+unmarked flesh, and puts her laser away, leaving ", player.name, " howling in pain 
+on the floor.");
+        else
+            room:announce_all(player.name, " quickly changes ", player.pp, " mind, 
+deciding ", player.ps, " likes his ", tname, " after all.");
+        endif
+    endif
+else
+    room:announce_all(this.name, " says, \"What do I look like, your slave?  If you 
+ain't looking to get a tattoo removed, shut the hell up.\"");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp laser
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

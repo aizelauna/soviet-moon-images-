@@ -1,0 +1,870 @@
+<HTML>
+<HEAD>
+<TITLE>Byte-Quota Utilities</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Byte-Quota Utilities (#330)</H3>
+(an instance of <A HREF="HTM_000124.htm">Generic Utilities Package</A> made by <A HREF="HTM_000034.htm">Quota</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspVerbs a user might want to call from a program:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :bi_create -- built-in create() call, takes same args.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :get_quota(who) -- just get the raw size_quota property
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :display_quota(who) -- prints to player the quota of who.  If caller_perms() controls who, include any secondary characters.  Called by @quota.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :get_size_quota(who [allchars]) -- return the quota of who, if allchars flag set, add info from all secondary chars, if caller_perms() permits.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :value_bytes(value) -- computes the size of the value.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :object_bytes(object) -- computes the size of the object and caches it.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :recent_object_bytes(object, days) -- computes and caches the size of object only if cached value more than days old.  Returns cached value.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :do_summary(user) -- prints out the results of summarize-one-user.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :summarize_one_user(user) -- summarizes and caches space usage for user.  See verb help for details.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspVerbs the system calls:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :"creation_permitted verb_addition_permitted property_addition_permitted"(who) -- returns true if who is permitted to build.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :initialize_quota(who) -- sets quota for newly created players
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :adjust_quota_for_programmer(who) -- empty; might add more quota to newly @progged player.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :enable_create(who) -- sets .ownership_quota to 1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :disable_create(who) -- sets .ownership_quota back to -1000 to prohibit create()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :charge_quota(who, object) -- subtract the size of object from who's quota.  Manipulates the #-unmeasured if what is not currently measured.  Called by $wiz_utils:set_owner.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :reimburse_quota(who, object) -- add the size of object to who's quota.  Ditto.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :preliminary_reimburse_quota(who, object) -- Because the set_owner is done *after* an object has been turned into $garbage, ordinary reimbursement fails. So we use this verb in the $recycler.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :set_quota(who, howmuch)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :quota_remaining(who) 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :display_quota_summary -- internal, called by display quota
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSee help @measure and help @quota for the command line verbs.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspPorter's notes:  If you are planning on porting this system to another MOO, here are the things to grab in addition to @dumping all of $quota_utils:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe following verbs have been changed on $prog:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp@prop*erty @verb @copy (@add-alias @copy-move as well)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe following verbs have been changed on $wiz:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp@programmer @quota
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe following verbs have been changed on $wiz_utils:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspset_programmer set_owner make_player
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe following verbs have been changed on $builder:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp@quota _create
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis verb probably should have gone on $builder.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp@measure
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe followig verbs have been changed on $recycler
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp_recycle _create setup_toad
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe following verb has been changed on $login:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspcreate
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAnd don't forget $alt_quota_utils, which has the object based implementation.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000034.htm">Quota</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+initialize_quota:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+else
+    args[1].size_quota = this.default_quota;
+    args[1].ownership_quota = this.large_negative_number;
+endif
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+else
+    $alt_quota_utils = this;
+    set_verb_code(this, "can_peek", {"return $perm_utils:controls(args[1], args[2]);"});
+    set_verb_code(this, "can_touch", {"return args[1].wizard;"});
+    this.exempted = {};
+endif
+.
+
+</pre>
+<BR>
+adjust_quota_for_programmer:
+<pre>
+return 0;
+.
+
+</pre>
+<BR>
+enable_create:
+<pre>
+if ((caller != this) && (!caller_perms().wizard))
+    return E_PERM;
+else
+    args[1].ownership_quota = 1;
+endif
+.
+
+</pre>
+<BR>
+disable_create:
+<pre>
+if ((caller != this) && (!caller_perms().wizard))
+    return E_PERM;
+else
+    args[1].ownership_quota = this.large_negative_number;
+endif
+.
+
+</pre>
+<BR>
+parse_create_args:
+<pre>
+"This figures out who is gonna own the stuff @create does.  If one arg, return caller_perms(). 
+ If two args, then if caller_perms().wizard, args[2].";
+if (length(args) == 1)
+    return caller_perms();
+elseif ((length(args) == 2) && $perm_utils:controls(caller_perms(), args[2]))
+    return args[2];
+else
+    return E_INVARG;
+endif
+.
+
+</pre>
+<BR>
+creation_permitted verb_addition_permitted property_addition_permitted:
+<pre>
+"Here's the tricky one.  Collect all the user's characters' cached usage data and 
+total quotas.  Compare same.  If usage bigger than quotas, return 0.  Else, add up 
+the total number of objects that haven't been measured recently.  If greater than 
+the allowed, return 0.  Else, reluctantly, return 1.";
+who = args[1];
+allwho = this:all_characters(who);
+quota = 0;
+usage = 0;
+unmeasured = 0;
+for x in (allwho)
+    quota = quota + x.size_quota[1];
+    usage = usage + x.size_quota[2];
+    unmeasured = unmeasured + x.size_quota[4];
+endfor
+if (usage >= quota)
+    return 0;
+elseif (unmeasured >= this.max_unmeasured)
+    return 0;
+else
+    return 1;
+endif
+.
+
+</pre>
+<BR>
+all_characters:
+<pre>
+if ((caller != this) && (!this:can_peek(caller_perms(), args[1])))
+    return E_PERM;
+    "elseif ($object_utils:has_property($local, \"registrar\"))";
+elseif ($object_utils:has_property($local, "second_char_registry"))
+    seconds = $local.second_char_registry:all_second_chars(args[1]);
+    return seconds ? seconds | {args[1]};
+else
+    return {args[1]};
+endif
+.
+
+</pre>
+<BR>
+display_quota:
+<pre>
+who = args[1];
+if (this:can_peek(caller_perms(), who) && (length(all = this:all_characters(who)) 
+> 1))
+    many = 1;
+else
+    many = 0;
+    all = {who};
+endif
+if (many)
+    tquota = 0;
+    tusage = 0;
+    ttime = $maxint;
+    tunmeasured = 0;
+    tunmeasurable = 0;
+endif
+for x in (all)
+    quota = x.size_quota[1];
+    usage = x.size_quota[2];
+    timestamp = x.size_quota[3];
+    unmeasured = x.size_quota[4];
+    unmeasurable = 0;
+    if (unmeasured >= 100)
+        unmeasurable = unmeasured / 100;
+        unmeasured = unmeasured % 100;
+    endif
+    if (many)
+        player:tell(x.name, " quota: ", $string_utils:group_number(quota), "; usage: 
+", $string_utils:group_number(usage), "; unmeasured: ", unmeasured, "; no .object_size: 
+", unmeasurable, ".");
+        tquota = tquota + quota;
+        tusage = tusage + usage;
+        ttime = min(ttime, timestamp);
+        tunmeasured = tunmeasured + unmeasured;
+        tunmeasurable = tunmeasurable + unmeasurable;
+    endif
+endfor
+if (many)
+    this:display_quota_summary(who, tquota, tusage, ttime, tunmeasured, tunmeasurable);
+else
+    this:display_quota_summary(who, quota, usage, timestamp, unmeasured, unmeasurable);
+endif
+.
+
+</pre>
+<BR>
+get_quota:
+<pre>
+return args[1].size_quota[1];
+.
+
+</pre>
+<BR>
+charge_quota:
+<pre>
+"Charge args[1] for the quota required to own args[2]";
+if ((caller == this) || caller_perms().wizard)
+    usage_index = 2;
+    unmeasured_index = 4;
+    who = args[1];
+    what = args[2];
+    object_size = $object_utils:has_property(what, "object_size") ? what.object_size[1] 
+| -1;
+    if (object_size <= 0)
+        who.size_quota[unmeasured_index] = who.size_quota[unmeasured_index] + 1;
+    else
+        who.size_quota[usage_index] = who.size_quota[usage_index] + object_size;
+    endif
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+reimburse_quota:
+<pre>
+"reimburse args[1] for the quota required to own args[2]";
+"If it is a $garbage, then if who = $hacker, then we mostly ignore everything. Who 
+cares what $hacker's quota looks like.";
+if ((caller == this) || caller_perms().wizard)
+    usage_index = 2;
+    unmeasured_index = 4;
+    who = args[1];
+    what = args[2];
+    if (parent(what) == $garbage)
+        return 0;
+    elseif (is_player(who))
+        object_size = what.object_size[1];
+        if (object_size <= 0)
+            who.size_quota[unmeasured_index] = who.size_quota[unmeasured_index] - 
+1;
+        else
+            who.size_quota[usage_index] = who.size_quota[usage_index] - object_size;
+        endif
+    endif
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+set_quota:
+<pre>
+"Set args[1]'s quota to args[2]";
+if (caller_perms().wizard || (caller == this))
+    "Size_quota[1] is the total quota permitted.";
+    return args[1].size_quota[1] = args[2];
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+get_size_quota:
+<pre>
+"Return args[1]'s quotas.  second arg of 1 means add all second chars.";
+who = args[1];
+all = args[2];
+if (all && ((caller == this) || this:can_peek(caller_perms(), who)))
+    all = this:all_characters(who);
+else
+    all = {who};
+endif
+baseline = {0, 0, 0, 0};
+for x in (all)
+    baseline[1] = baseline[1] + x.size_quota[1];
+    baseline[2] = baseline[2] + x.size_quota[2];
+    baseline[3] = min(baseline[3], x.size_quota[3]) || x.size_quota[3];
+    baseline[4] = baseline[4] + x.size_quota[4];
+endfor
+return baseline;
+.
+
+</pre>
+<BR>
+display_quota_summary:
+<pre>
+who = args[1];
+quota = args[2];
+usage = args[3];
+timestamp = args[4];
+unmeasured = args[5];
+unmeasurable = args[6];
+player:tell(who.name, " has a total building quota of ", $string_utils:group_number(quota), 
+" bytes.");
+player:tell(who.ppc, " total usage was ", $string_utils:group_number(usage), " as 
+of ", player:ctime(timestamp), ".");
+if (usage > quota)
+    player:tell(who.name, " is over quota by ", $string_utils:group_number(usage 
+- quota), " bytes.");
+else
+    player:tell(who.name, " may create up to ", $string_utils:group_number(quota 
+- usage), " more bytes of objects, properties, or verbs.");
+endif
+if (unmeasured)
+    plural = unmeasured != 1;
+    player:tell("There ", plural ? tostr("are ", unmeasured, " objects") | "is 1 
+object", " which ", plural ? "are" | "is", " not yet included in the tally; this 
+tally may thus be inaccurate.");
+    if (unmeasured >= this.max_unmeasured)
+        player:tell("The number of unmeasured objects is too large; no objects may 
+be created until @measure new is used.");
+    endif
+endif
+if (unmeasurable)
+    plural = unmeasurable != 1;
+    player:tell("There ", plural ? tostr("are ", unmeasurable, " objects") | "is 
+1 object", " which do", plural ? "" | "es", " not have a .object_size property and 
+will thus prevent additional building.", (who == player) ? "  Contact a wizard for 
+assistance in having this situation repaired." | "");
+endif
+.
+
+</pre>
+<BR>
+quota_remaining:
+<pre>
+"This wants to only be called by a wizard cuz I'm lazy.  This is just for @second-char 
+anyway.";
+if (caller_perms().wizard)
+    q = this:get_size_quota(args[1], 1);
+    return q[1] - q[2];
+endif
+.
+
+</pre>
+<BR>
+preliminary_reimburse_quota:
+<pre>
+"This does the reimbursement work of the recycler, since we ignore $garbage in ordinary 
+reimbursement.";
+if (caller_perms().wizard)
+    this:reimburse_quota(@args);
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+value_bytes:
+<pre>
+set_task_perms(caller_perms());
+v = args[1];
+t = typeof(v);
+if (t == LIST)
+    b = ((length(v) + 1) * 2) * 4;
+    for vv in (v)
+        $command_utils:suspend_if_needed(2);
+        b = b + this:value_bytes(vv);
+    endfor
+    return b;
+elseif (t == STR)
+    return length(v) + 1;
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+object_bytes object_size:
+<pre>
+"Algorithm:";
+"  Base object takes up 13 words plus length of name.  (builtin props?)";
+"  Each verb takes up 5 words overhead, plus length of its name, plus size of its 
+code.";
+"  Each property definition takes up 1 word plus length of property name, plus each 
+property on the object takes up 4 words.  (Or, 5 per defined prop, 4 per inherited 
+prop)";
+"Note: each word is four bytes.";
+foo = "delimit comments above from commented out code below";
+"set_task_perms(caller_perms())";
+o = args[1];
+b = this:object_overhead_bytes(o);
+vs = verbs(o);
+b = b + this:verb_overhead_bytes(o);
+for i in [0..length(vs) - 1]
+    $command_utils:suspend_if_needed(5);
+    vn = tostr(i);
+    info = verb_info(o, vn);
+    b = (b + length(info[3])) + 1;
+    b = b + this:value_bytes(verb_code(o, vn));
+endfor
+ps = $object_utils:all_properties_suspended(o);
+b = b + this:property_overhead_bytes(o, ps);
+for p in (ps)
+    if (!is_clear_property(o, p))
+        $command_utils:suspend_if_needed(5);
+        b = b + this:value_bytes(o.(p));
+    endif
+endfor
+if ($object_utils:has_property(o, "object_size"))
+    oldsize = o.object_size[1];
+    if ($object_utils:has_property(o.owner, "size_quota"))
+        "Update quota cache.";
+        if (oldsize)
+            o.owner.size_quota[2] = o.owner.size_quota[2] + (b - oldsize);
+        else
+            o.owner.size_quota[2] = o.owner.size_quota[2] + b;
+            if (o.owner.size_quota[4] > 0)
+                o.owner.size_quota[4] = o.owner.size_quota[4] - 1;
+            endif
+        endif
+    endif
+    o.object_size = {b, time()};
+endif
+return b;
+.
+
+</pre>
+<BR>
+do_summary:
+<pre>
+who = args[1];
+results = this:summarize_one_user(who);
+total = results[1];
+nuncounted = results[2];
+nzeros = results[3];
+oldest = results[4];
+player:tell(who.name, " statistics:");
+player:tell("  ", $string_utils:group_number(total), " bytes of storage measured.");
+player:tell("  Oldest measurement date ", ctime(oldest), " (", $string_utils:from_seconds(time() 
+- oldest), " ago)");
+if (nzeros || nuncounted)
+    player:tell("  Number of objects with no statistics recorded:  ");
+    player:tell("      ", nzeros, " recently created, ", nuncounted, " not descendents 
+of #1");
+endif
+.
+
+</pre>
+<BR>
+summarize_one_user:
+<pre>
+"Summarizes total space usage by one user (args[1]).  Optional second argument is 
+a flag to say whether to re-measure all objects for this user; specify the number 
+of seconds out of date you are willing to accept.  If negative, will only re-measure 
+objects which have no recorded data.";
+"Returns a list of four values:";
+"  total : total measured space in bytes";
+"  uncounted : Number of objects that were not counted because they aren't descendents 
+of #1";
+"  zeros : Number of objects which have been created too recently to have any measurement 
+data at all (presumably none if re-measuring)";
+"  most-out-of-date : the time() the oldest actual measurement was taken";
+who = args[1];
+if (length(args) == 2)
+    if (args[2] < 0)
+        earliest = 1;
+    else
+        earliest = time() - args[2];
+    endif
+else
+    earliest = 0;
+endif
+nzeros = 0;
+oldest = time();
+nuncounted = 0;
+ncounted = 1;
+total = 0;
+for x in ((typeof(who.owned_objects) == LIST) ? who.owned_objects | {})
+    if ($object_utils:has_property(x, "object_size"))
+        size = x.object_size[1];
+        time = x.object_size[2];
+        if (time < earliest)
+            "Re-measure.  This side-effects x.object_size.";
+            this:object_bytes(x);
+            size = x.object_size[1];
+            time = x.object_size[2];
+        endif
+        if (time)
+            oldest = min(oldest, time);
+        else
+            nzeros = nzeros + 1;
+        endif
+        total = total + size;
+        ncounted = ncounted + 1;
+    else
+        nuncounted = nuncounted + 1;
+    endif
+    $command_utils:suspend_if_needed(0);
+endfor
+"Cache the data...";
+who.size_quota[2] = total;
+who.size_quota[3] = oldest;
+who.size_quota[4] = (nuncounted * this.unmeasured_multiplier) + nzeros;
+return {total, nuncounted, nzeros, oldest};
+.
+
+</pre>
+<BR>
+recent_object_bytes:
+<pre>
+":recent_object_bytes(x, n) -- return object size of x, guaranteed to be no more 
+than n days old.  N defaults to this.cycle_days.";
+object = args[1];
+if (length(args) > 1)
+    since = args[2];
+else
+    since = this.cycle_days;
+endif
+if (!valid(object))
+    return 0;
+elseif (object.object_size[2] > (time() - (((since * 24) * 60) * 60)))
+    return object.object_size[1];
+else
+    return this:object_bytes(object);
+endif
+.
+
+</pre>
+<BR>
+measurement_task:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+else
+    num_processed = 0;
+    num_repetitions = 0;
+    usage_index = 2;
+    time_index = 3;
+    unmeasured_index = 4;
+    players = setremove(players(), $hacker);
+    lengthp = length(players);
+    index = this.working in players;
+    if (!index)
+        "Uh, oh, our guy got reaped while we weren't looking.  Better look for someone 
+else.";
+        index = 1;
+        while ((this.working > players[index]) && (index < lengthp))
+            index = index + 1;
+        endwhile
+        this.working = players[index];
+    endif
+    day = (60 * 60) * 24;
+    stop = time() + this.task_time_limit;
+    early = time() - (day * this.cycle_days);
+    while (time() < stop)
+        who = players[index];
+        if (is_player(who) && $object_utils:has_property(who, "size_quota"))
+            "Robustness in the face of reaping...";
+            usage = 0;
+            unmeasured = 0;
+            earliest = time();
+            for o in (who.owned_objects)
+                if ((o.owner == who) && (!(o in this.exempted)))
+                    "sanity check: might have recycled while we suspended!";
+                    if ($object_utils:has_property(o, "object_size"))
+                        if (o.object_size[2] < early)
+                            usage = usage + this:object_bytes(o);
+                        else
+                            usage = usage + o.object_size[1];
+                            earliest = min(earliest, o.object_size[2]);
+                        endif
+                    else
+                        unmeasured = unmeasured + 1;
+                    endif
+                endif
+                $command_utils:suspend_if_needed(3);
+            endfor
+            if (!is_clear_property(who, "size_quota"))
+                who.size_quota[usage_index] = usage;
+                who.size_quota[unmeasured_index] = this.unmeasured_multiplier * unmeasured;
+                who.size_quota[time_index] = earliest;
+            else
+                $mail_agent:send_message(player, player, "Quota Violation", {tostr(who, 
+" has a clear .size_quota property."), $string_utils:names_of({who, @$object_utils:ancestors(who)})});
+            endif
+        elseif (is_player(who))
+            "They don't have a size_quota property.  Whine.";
+            $mail_agent:send_message(player, player, "Quota Violation", {tostr(who, 
+" doesn't seem to have a .size_quota property."), $string_utils:names_of({who, @$object_utils:ancestors(who)})});
+        endif
+        if (index >= lengthp)
+            index = 1;
+        else
+            index = index + 1;
+        endif
+        num_processed = num_processed + 1;
+        if (num_processed > lengthp)
+            "If we've gotten everyone up to threshold, try measuring some later than 
+that.";
+            early = early + ((24 * 60) * 60);
+            num_repetitions = num_repetitions + 1;
+            num_processed = 0;
+        endif
+        this.working = players[index];
+    endwhile
+    if ((!num_repetitions) && (num_processed < (lengthp / 2)))
+        "Add this in because we aren't getting people summarized like we should. 
+ We're going to work for way longer now, cuz we're going to do a second pass, but 
+we really need to get those summaries done.  Only do this if we hardly did any work. 
+ Note the -1 here: measure all newly created objects as well.  More work, sigh.";
+        for x in (players)
+            if (is_player(x))
+                "Robustness as above...";
+                this:summarize_one_user(x, -1);
+            endif
+        endfor
+    endif
+    $mail_agent:send_message(player, player, "quota-utils report", {tostr("About 
+to measure objects of player ", this.working.name, " (", this.working, "), ", $string_utils:ordinal(this.working 
+in players), " out of ", lengthp, ".  We processed ", num_processed + (lengthp * 
+num_repetitions), " players in this run in ", num_repetitions, " times through all 
+players.")});
+    when = day - (time() % day);
+    fork (((13 * 60) * 60) + when)
+        this:measurement_task();
+    endfork
+endif
+.
+
+</pre>
+<BR>
+can_peek:
+<pre>
+return (args[1] == this.owner) || $perm_utils:controls(args[1], args[2]);
+.
+
+</pre>
+<BR>
+can_touch:
+<pre>
+return args[1].wizard || (args[1] in $local.arb.members);
+.
+
+</pre>
+<BR>
+do_breakdown:
+<pre>
+dobj = args[1];
+who = valid(caller_perms()) ? caller_perms() | player;
+if (!this:can_peek(who, dobj.owner))
+    return E_PERM;
+endif
+props = $object_utils:all_properties(dobj);
+grand_total = obj_over = this:object_overhead_bytes(dobj);
+output = {tostr("Object overhead:  ", obj_over)};
+if (props)
+    total = 0;
+    lines = {};
+    output = {@output, "Properties, defined and inherited, sorted by size:"};
+    for x in (props)
+        if (!is_clear_property(dobj, x))
+            size = this:value_bytes(dobj.(x));
+            total = total + size;
+            if (size)
+                lines = {@lines, {x, size}};
+            endif
+        endif
+    endfor
+    lines = $list_utils:reverse($list_utils:sort_suspended(0, lines, $list_utils:slice(lines, 
+2)));
+    for x in (lines)
+        text = tostr("  ", x[1], ":  ", x[2]);
+        output = {@output, text};
+    endfor
+    output = {@output, tostr("Total size of properties:  ", total)};
+    grand_total = grand_total + total;
+endif
+prop_over = this:property_overhead_bytes(dobj, props);
+output = {@output, tostr("Property overhead:  ", prop_over)};
+grand_total = grand_total + prop_over;
+if (verbs(dobj))
+    output = {@output, "Verbs, sorted by size:"};
+    total = 0;
+    lines = {};
+    for x in [0..length(verbs(dobj)) - 1]
+        vname = verb_info(dobj, tostr(x))[3];
+        size = this:value_bytes(verb_code(dobj, tostr(x)));
+        total = total + size;
+        lines = {@lines, {vname, size}};
+    endfor
+    lines = $list_utils:reverse($list_utils:sort_suspended(0, lines, $list_utils:slice(lines, 
+2)));
+    for x in (lines)
+        text = tostr("  ", x[1], ":  ", x[2]);
+        output = {@output, text};
+    endfor
+    output = {@output, tostr("Total size of verbs:  ", total)};
+    grand_total = grand_total + total;
+    verb_over = this:verb_overhead_bytes(dobj);
+    output = {@output, tostr("Verb overhead:  ", verb_over)};
+    grand_total = grand_total + verb_over;
+endif
+output = {@output, tostr("Grand total:  ", grand_total)};
+return output;
+.
+
+</pre>
+<BR>
+object_overhead_bytes:
+<pre>
+object = args[1];
+return ((13 * 4) + length(object.name)) + 1;
+.
+
+</pre>
+<BR>
+property_overhead_bytes:
+<pre>
+o = args[1];
+if (length(args) > 1)
+    ps = args[2];
+else
+    ps = $object_utils:all_properties_suspended(o);
+endif
+return (this:value_bytes(properties(o)) - 4) + ((length(ps) * 4) * 4);
+.
+
+</pre>
+<BR>
+verb_overhead_bytes:
+<pre>
+o = args[1];
+vs = verbs(o);
+return (length(vs) * 5) * 4;
+.
+
+</pre>
+<BR>
+bi_create:
+<pre>
+set_task_perms(caller_perms());
+who = this:parse_create_args(@args);
+if (this:creation_permitted(who))
+    this:enable_create(who);
+    value = create(@args);
+    this:disable_create(who);
+    if (typeof(value) != ERR)
+        this:charge_quota(who, value);
+    endif
+    return value;
+else
+    return E_QUOTA;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp default_quota
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp large_negative_number
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp max_unmeasured
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp unmeasured_multiplier
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp working
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cycle_days
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp task_time_limit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp byte_based
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp exempted
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

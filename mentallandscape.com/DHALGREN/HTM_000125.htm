@@ -1,0 +1,191 @@
+<HTML>
+<HEAD>
+<TITLE>Player Information Feature</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Player Information Feature (#125)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis feature contains various verbs that give you useful information about players.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000111.htm">Features Feature Object</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThese verbs are designed to help you get quick useful information on other players:
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+idle*-stats:
+<pre>
+"Usage:  idle-stats [<player> [<player> ... ]]";
+"Shows idle/connection information on <player>, or all connected players if none 
+is given.";
+"From #33500 by Sick@LambdaMOO";
+people = {};
+if (args)
+    for whostr in (args)
+        who = $string_utils:match_player(whostr);
+        if (!$command_utils:player_match_failed(who, whostr))
+            people = {@people, who};
+        endif
+    endfor
+else
+    people = connected_players();
+endif
+text = {};
+for who in (people)
+    if (who in connected_players())
+        text = {@text, tostr(who.name, " (", who, ") has been idle for ", $time_utils:english_time(idle_seconds(who)), 
+".")};
+        text = {@text, tostr(" ", who.psc, " connected at ", ctime(who.last_connect_time), 
+" (", $time_utils:english_time(time() - who.last_connect_time), " ago).")};
+        text = {@text, tostr(" ", who.name, "'s last disconnection was for ", $time_utils:english_time(who.last_connect_time 
+- who.last_disconnect_time), ".")};
+    else
+        text = {@text, tostr(who.name, " (", who, ") isn't connected.")};
+        text = {@text, tostr(" ", who.name, "'s last connection was from ", ctime(who.last_connect_time), 
+" to ", ctime(who.last_disconnect_time), " (", $time_utils:english_time(who.last_disconnect_time 
+- who.last_connect_time), ").")};
+        text = {@text, tostr(" That was ", $time_utils:english_time(time() - who.last_disconnect_time), 
+" ago.")};
+    endif
+endfor
+player:tell_lines(text);
+.
+
+</pre>
+<BR>
+@player-info @pi:
+<pre>
+"Usage:  @player-info <player> [with <reference>]";
+"";
+"Shows miscellaneous info about <player> in relation to objects you own, such as 
+which of your generics <player> owns descendants of and which of your mail lists 
+<player> subscribes to.";
+"If a <reference> is given, the info is in relation to <reference>'s objects rather 
+than your own.";
+"From #33500 by Sick@LambdaMOO";
+if ($command_utils:player_match_failed(who = $string_utils:match_player(dobjstr), 
+dobjstr))
+    return;
+endif
+if (prepstr && iobjstr)
+    if ($command_utils:player_match_failed(ref = $string_utils:match_player(iobjstr), 
+iobjstr))
+        return;
+    endif
+else
+    ref = player;
+endif
+player:tell($string_utils:nn(who), "  [ ", who.programmer ? "programmer " | "", who.wizard 
+? "wizard " | "", "]");
+player:tell("Aliases: ", $string_utils:english_list(who.aliases));
+player:tell("Parent:  ", $string_utils:nn(parent(who)));
+parents = members = owns = subscribes = uses = {};
+for o in (ref.owned_objects)
+    $command_utils:suspend_if_needed(0);
+    if ($object_utils:isa(who, o))
+        parents = setadd(parents, $string_utils:nn(o));
+    elseif ($set_utils:intersection(who.owned_objects, children(o)))
+        owns = setadd(owns, $string_utils:nn(o));
+    endif
+    if (($object_utils:has_property(o, "members") && (typeof(o.members) == LIST)) 
+&& (who in o.members))
+        members = setadd(members, $string_utils:nn(o));
+    endif
+    if (($object_utils:has_property(o, "mail_notify") && (typeof(o.mail_notify) == 
+LIST)) && (who in o.mail_notify))
+        subscribes = setadd(subscribes, $string_utils:nn(o));
+    endif
+    if ((($object_utils:has_property(o, "users") && (typeof(o.users) == LIST)) && 
+(who in o.users)) || (($object_utils:has_property(who, "features") && (typeof(who.features) 
+== LIST)) && (o in who.features)))
+        uses = setadd(uses, $string_utils:nn(o));
+    endif
+endfor
+$command_utils:suspend_if_needed(0);
+for spec in ({{parents, " is a descendant of "}, {members, " is a member of "}, {owns, 
+" owns a descendant of "}, {subscribes, " subscribes to "}, {uses, " uses "}})
+    if (spec[1])
+        player:tell(who.name, spec[2], $string_utils:english_list(spec[1]), ".");
+    endif
+endfor
+if ((pals = this:get_pals(who)) && (ref in pals))
+    player:tell(who.name, " considers ", (ref == player) ? "you" | ref.name, " a 
+pal.");
+endif
+if ((pals = this:get_pals(ref)) && (who in pals))
+    player:tell((ref == player) ? "You" | ref.name, " consider ", who.name, " a pal.");
+endif
+.
+
+</pre>
+<BR>
+get_pals:
+<pre>
+"From #33500 by Sick@LambdaMOO";
+who = args[1];
+for prop in (this.pals_props)
+    if ($object_utils:has_property(who, prop))
+        if (who.(prop) && (typeof(who.(prop)) == LIST))
+            return who.(prop);
+        endif
+    endif
+endfor
+return {};
+.
+
+</pre>
+<BR>
+@al*iases @names:
+<pre>
+"Usage: @aliases <player>";
+"";
+"Tells you all the aliases for <player>, or your own aliases if used without an argument. 
+This command also tells you the shortest alias.";
+if (dobjstr)
+    target = $string_utils:match_player(dobjstr);
+    if ($command_utils:player_match_failed(target, dobjstr))
+        return;
+    endif
+    player:tell(target.name, "'s current aliases are:");
+    player:tell($string_utils:english_list(target.aliases));
+else
+    player:tell("Your current aliases are:");
+    player:tell($string_utils:english_list(player.aliases));
+    target = player;
+endif
+short = target.name;
+for d in (target.aliases)
+    if (length(d) < length(short))
+        short = d;
+    endif
+endfor
+player:tell("Shortest alias: ", short);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp pals_props
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,283 @@
+<HTML>
+<HEAD>
+<TITLE>Repetitive Stress Injuries feature</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Repetitive Stress Injuries feature (#1188)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_001185.htm">Michele</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis feature provides aliases for commonly used commands, to reduce strain on your hands.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000111.htm">Features Feature Object</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbsphands hurt--use this.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspy       say yes
+&nbsp&nbsp&nbsp&nbsp&nbspn no    say no
+&nbsp&nbsp&nbsp&nbsp&nbspw wa    wave
+&nbsp&nbsp&nbsp&nbsp&nbsph       heh
+&nbsp&nbsp&nbsp&nbsp&nbsp/*      say with a ? at the end
+&nbsp&nbsp&nbsp&nbsp&nbspsa      say
+&nbsp&nbsp&nbsp&nbsp&nbspem emm  emote, ::
+&nbsp&nbsp&nbsp&nbsp&nbspns      nod solemnly
+&nbsp&nbsp&nbsp&nbsp&nbspwh*uggle hug    whuggle or hug someone
+&nbsp&nbsp&nbsp&nbsp&nbsp,*      emote <- *
+&nbsp&nbsp&nbsp&nbsp&nbspnd      nod
+&nbsp&nbsp&nbsp&nbsp&nbspgr      grin
+&nbsp&nbsp&nbsp&nbsp&nbsptoo     emote too!
+&nbsp&nbsp&nbsp&nbsp&nbspgg      giggle
+&nbsp&nbsp&nbsp&nbsp&nbspow      say your hands hurt
+&nbsp&nbsp&nbsp&nbsp&nbsplv      leave cuz of pain
+&nbsp&nbsp&nbsp&nbsp&nbspbl      blink
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+y:
+<pre>
+"y is yes.";
+$you:say_action("%N %<says>, \"Yes.\"");
+.
+
+</pre>
+<BR>
+n no:
+<pre>
+"n is no, and doesn't work.";
+$you:say_action("%N %<says>, \"No.\"");
+.
+
+</pre>
+<BR>
+w wa:
+<pre>
+"w is wave, and doesn't work.";
+$you:say_action("%N %<waves>.");
+.
+
+</pre>
+<BR>
+h:
+<pre>
+"h is heh.";
+$you:say_action("%N %<hehs>.");
+.
+
+</pre>
+<BR>
+=*:
+<pre>
+"= is emote.";
+what = verb[2..length(verb)];
+player.location:announce_all(player:name(), " ", what, " ", argstr);
+.
+
+</pre>
+<BR>
+/*:
+<pre>
+"/[player] [text] asks a question.";
+if (verb == "/")
+    $you:say_action(("%N %<says>, \"" + $string_utils:pronoun_quote(argstr)) + "?\"");
+elseif (!$command_utils:object_match_failed(dobj = player.location:match_object(dobjstr 
+= verb[2..length(verb)]), dobjstr))
+    $you:say_action(("%N [to %d]: " + $string_utils:pronoun_quote(argstr)) + "?");
+endif
+.
+
+</pre>
+<BR>
+sa em emm:
+<pre>
+"sa is say";
+"em is emote";
+"emm is emote with no space";
+if (verb == "emm")
+    if (args)
+        args[1] = ":" + args[1];
+    else
+        args = {":"};
+    endif
+    argstr = ":" + argstr;
+    verb = "em";
+endif
+player.location:({"say", "emote"}[verb in {"sa", "em"}])(@args);
+.
+
+</pre>
+<BR>
+ns:
+<pre>
+"ns [player] is nod solemnly.";
+if (args)
+    if (!$command_utils:object_match_failed(valid(dobj) ? dobj | (dobj = player.location:match_object(dobjstr)), 
+dobjstr))
+        $you:say_action("%N %<nods> solemnly to %d.");
+    endif
+else
+    $you:say_action("%N %<nods> solemnly.");
+endif
+.
+
+</pre>
+<BR>
+wh*uggle hug:
+<pre>
+"shorthand for whuggle";
+this.hug_feature:hug(@args);
+.
+
+</pre>
+<BR>
+,*:
+<pre>
+", is <";
+this.arrow_feature:("<" + verb[2..length(verb)])(@args);
+.
+
+</pre>
+<BR>
+nd:
+<pre>
+"nd [player] is nod.";
+if (args)
+    if (!$command_utils:object_match_failed(valid(dobj) ? dobj | (dobj = player.location:match_object(dobjstr)), 
+dobjstr))
+        "player.location:announce_all(player:dnamec(), \" nods \", dobj:dname(), 
+\".\");";
+        $you:say_action("%N %<nods> to %d.");
+    endif
+else
+    $you:say_action("%N %<nods>.");
+endif
+.
+
+</pre>
+<BR>
+gr:
+<pre>
+"gr [player] is grin.";
+if (args)
+    if (!$command_utils:object_match_failed(dobj, dobjstr))
+        $you:say_action("%N %<grins> at %d.");
+    endif
+else
+    $you:say_action("%N %<grins>.");
+endif
+.
+
+</pre>
+<BR>
+too:
+<pre>
+"too [player] is too!";
+if (args)
+    if (!$command_utils:object_match_failed(dobj, dobjstr))
+        argstr = ("too " + dobj:name()) + "!";
+        player.location:emote(argstr);
+    endif
+else
+    argstr = "too!";
+    player.location:emote(argstr);
+endif
+.
+
+</pre>
+<BR>
+gg:
+<pre>
+"gg [player] is giggle.";
+if (args)
+    if (!$command_utils:object_match_failed(dobj, dobjstr))
+        $you:say_action("%N %<giggles> at %d.");
+    endif
+else
+    $you:say_action("%N %<giggles>.");
+endif
+.
+
+</pre>
+<BR>
+ow:
+<pre>
+"Copied from ow feature object (#1531):ow by Michele (#1185) Fri Jan  7 09:57:45 
+1994 EST";
+"Copied from Carpal Tunnel Feature Object (#599):ns by Barry (#73) Fri Jan  7 09:38:31 
+1994 EST";
+"ow [player] is my hands (or fingers or wrists) hurt.";
+if (repetitive_stress_injury_affected_body_part = $code_utils:verb_or_property(player, 
+"repetitive_stress_injury_affected_body_part_msg"))
+    repetitive_stress_injury_affected_body_part = $string_utils:pronoun_sub(repetitive_stress_injury_affected_body_part);
+else
+    repetitive_stress_injury_affected_body_part = "hands";
+endif
+hurt = (repetitive_stress_injury_affected_body_part[length(repetitive_stress_injury_affected_body_part)] 
+== "s") ? "hurt" | "hurts";
+if (args)
+    if (!valid(dobj))
+        dobj = player.location:match_object(dobjstr);
+    endif
+    if (!$command_utils:object_match_failed(dobj, dobjstr))
+        $you:say_action(((("%N [to %d]: I shouldn't say much because my " + repetitive_stress_injury_affected_body_part) 
++ " ") + hurt) + ".");
+    endif
+else
+    $you:say_action(((("%N shouldn't say much because %p " + repetitive_stress_injury_affected_body_part) 
++ " ") + hurt) + ".");
+endif
+.
+
+</pre>
+<BR>
+lv:
+<pre>
+"Copied from bct (#1763):lv by DavidSan (#1185) Wed Feb 16 16:59:39 1994 EST";
+if (repetitive_stress_injury_leaving_message = $code_utils:verb_or_property(player, 
+"repetitive_stress_injury_leaving_message"))
+else
+    repetitive_stress_injury_leaving_message = "%N %<is> leaving.  Bye.";
+endif
+$you:say_action(repetitive_stress_injury_leaving_message);
+.
+
+</pre>
+<BR>
+bl:
+<pre>
+"bl [player] is blink.";
+if (args)
+    if (!$command_utils:object_match_failed(dobj, dobjstr))
+        $you:say_action("%N %<blinks> at %d.");
+    endif
+else
+    $you:say_action("%N %<blinks>.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp hug_feature
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp arrow_feature
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

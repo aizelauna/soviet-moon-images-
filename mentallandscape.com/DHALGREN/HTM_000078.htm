@@ -1,0 +1,138 @@
+<HTML>
+<HEAD>
+<TITLE>Patroclus</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Patroclus (#78)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_000078.htm">Patroclus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a handsome, pale boy from Seattle.  He gives you a quick smile when he sees you looking at him.  His hair is blond and parted in the middle, just long enough to dangle in his eyes.  A silver ring glitters in each ear, and a somewhat scraggly wisp of beard adorns his chin.  He's wearing a tank-top and a vest; his body is very slender and sharply defined, and you glimpse the corner of a tattoo on his right shoulder blade.  His jeans are faded and ripped at the knees, encircled by a wide black leather belt with holes all along it.  A chrome chain hangs from one belt loop to a wallet in his back pocket.  His fingers have some burns from operating an espresso machine, and from the way he keeps moving around, you can tell he drinks too many lattes.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspHe has a brass chain of mirrors, lenses and prisms wrapped around his neck and waist.
+<BR>
+<BR>
+Patroclus is carrying <A HREF="HTM_000211.htm">light shield</A> and <A HREF="HTM_002625.htm">Gouda</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000271.htm">Patro's Shack</A>.
+<BR>
+<BR>
+<BR>
+Patroclus owns <A HREF="HTM_000078.htm">Patroclus</A> <A HREF="HTM_000089.htm">Roof Top</A> <A HREF="HTM_000211.htm">light shield</A> <A HREF="HTM_000094.htm">cat</A> <A HREF="HTM_000145.htm">down</A> <A HREF="HTM_000146.htm">up</A> <A HREF="HTM_000271.htm">Patro's Shack</A> <A HREF="HTM_000273.htm">west</A> <A HREF="HTM_000274.htm">east</A> <A HREF="HTM_000550.htm">Generic Wearable Thing</A> <A HREF="HTM_000858.htm">medal</A> <A HREF="HTM_000872.htm">Pennyroyal Tea</A> <A HREF="HTM_000959.htm">Generic Post-Apocalypse Exit</A> <A HREF="HTM_001037.htm">Plutonium</A> <A HREF="HTM_001169.htm">copper ring</A> <A HREF="HTM_001413.htm">Shield of Achilles</A> <A HREF="HTM_001415.htm">The Computer Screen</A> <A HREF="HTM_001416.htm">A UNIX Directory</A> <A HREF="HTM_001417.htm">next</A> <A HREF="HTM_001418.htm">back</A> <A HREF="HTM_002147.htm">Jeweled Scorpion</A> <A HREF="HTM_001010.htm">Hex</A> <A HREF="HTM_002572.htm">glasses</A> <A HREF="HTM_002614.htm">Birthday Box!</A> <A HREF="HTM_002615.htm">envelope</A> <A HREF="HTM_002616.htm">birthday card</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@citizens:
+<pre>
+"Copied from Calkins (#150):@citizens Fri Feb 18 22:57:25 1994 EST";
+"Copied from Mayor (#2):@citizens Wed Jan 26 22:07:57 1994 EST";
+p = players();
+n = {};
+for i in (p)
+    n = listinsert(n, i.name);
+endfor
+player:tell($string_utils:print(n));
+.
+
+</pre>
+<BR>
+nnotify:
+<pre>
+if (this.gaglist && this:gag_p())
+    return;
+endif
+if ((this.refuselist && (player.location != this.location)) && this:refuse_p())
+    return;
+endif
+pass(@args);
+.
+
+</pre>
+<BR>
+ntell:
+<pre>
+this:notify(tostr(@args));
+.
+
+</pre>
+<BR>
+refuse_p:
+<pre>
+"Copied from generic player (#6):gag_p by The_Mayor (#2) Fri Sep 23 19:31:33 1994 
+EDT";
+if (player in this.refuselist)
+    return 1;
+elseif (refuse = this.refuselist)
+    for x in (callers())
+        if ((x[1] in refuse) || (x[4] in refuse))
+            return 1;
+        endif
+    endfor
+endif
+return 0;
+.
+
+</pre>
+<BR>
+page:
+<pre>
+"Copied from generic player (#6):page by The_Mayor (#2) Wed Oct 19 01:41:26 1994 
+EDT";
+nargs = length(args);
+if (nargs < 1)
+    player:notify(tostr("Usage: ", verb, " <player> [with <message>]"));
+    return;
+endif
+who = $string_utils:match_player(args[1]);
+if ($command_utils:player_match_result(who, args[1])[1])
+    return;
+elseif (who in this.gaglist)
+    player:tell("You have ", who:title(), " @gagged.  If you paged ", who.po, ", 
+", who.ps, " wouldn't be able to answer you.");
+    return;
+endif
+"for pronoun_sub's benefit...";
+dobj = who;
+iobj = player;
+header = player:page_origin_msg();
+text = "";
+if (nargs > 1)
+    if ((args[2] == "with") && (nargs > 2))
+        msg_start = 3;
+    else
+        msg_start = 2;
+    endif
+    msg = $string_utils:from_list(args[msg_start..nargs], " ");
+    text = tostr($string_utils:pronoun_sub(($string_utils:index_delimited(header, 
+player.name) ? "%S" | "%N") + " %<pages>, \""), msg, "\"");
+endif
+result = text ? who:receive_page(header, text) | who:receive_page(header);
+if (result == 2)
+    "not connected";
+    player:tell((typeof(msg = who:page_absent_msg()) == STR) ? msg | $string_utils:pronoun_sub("%n 
+is not currently logged in.", who));
+else
+    player:tell("You page, \"", msg, "\" to ", who.name);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp refuselist
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sitting_msg
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

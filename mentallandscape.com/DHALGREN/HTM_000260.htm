@@ -1,0 +1,116 @@
+<HTML>
+<HEAD>
+<TITLE>smorgasbord</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> smorgasbord (#260)</H3>
+(an instance of <A HREF="HTM_000008.htm">generic container</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a buffet offering a variety of expensive hors d'oeuvres and delicacies.  You wonder where Calkins gets this stuff in Bellona.
+<BR>
+<BR>
+smorgasbord contains <A HREF="HTM_000286.htm">coq au vin</A>, <A HREF="HTM_000284.htm">turtle soup</A>, <A HREF="HTM_000283.htm">sag paneer</A>, <A HREF="HTM_000279.htm">uni maki</A>, <A HREF="HTM_000285.htm">osso buco</A>, <A HREF="HTM_000281.htm">foie gras</A>, <A HREF="HTM_000280.htm">escargot</A>, <A HREF="HTM_000272.htm">silverware</A>, <A HREF="HTM_000282.htm">venison</A> and <A HREF="HTM_000278.htm">caviar</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000235.htm">Dining Room</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+p*ut in*sert d*rop:
+<pre>
+"Copied from generic container (#8):put by The_Mayor (#2) Fri Feb  4 23:44:45 1994 
+EST";
+if ((this.location != player) && (this.location != player.location))
+    player:tell("You can't get at ", this.name, ".");
+elseif (dobj == $nothing)
+    player:tell("What do you want to put ", prepstr, " ", this.name, "?");
+elseif ($command_utils:object_match_failed(dobj, dobjstr))
+elseif (!this.opened)
+    player:tell(this.name, " is closed.");
+else
+    dobj:moveto(this);
+    if (dobj.location == this)
+        player:tell(this:put_msg());
+        if (msg = this:oput_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    else
+        player:tell(this:put_fail_msg());
+        if (msg = this:oput_fail_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+re*move ta*ke g*et:
+<pre>
+"Copied from generic container (#8):remove by The_Mayor (#2) Fri Feb  4 23:45:01 
+1994 EST";
+if (!this.opened)
+    player:tell(this.name, " is not open.");
+elseif (this.dark)
+    player:tell("You can't see into ", this.name, " to remove anything.");
+elseif ((dobj = this:match_object(dobjstr)) == $nothing)
+    player:tell("What do you want to take from ", this.name, "?");
+elseif ($command_utils:object_match_failed(dobj, dobjstr))
+elseif (!(dobj in this:contents()))
+    player:tell(dobj.name, " isn't in ", this.name, ".");
+else
+    dobj:moveto(player);
+    if (dobj.location == player)
+        player:tell(this:remove_msg());
+        if (msg = this:oremove_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    else
+        dobj:moveto(this.location);
+        if (dobj.location == this.location)
+            player:tell(this:remove_msg());
+            if (msg = this:oremove_msg())
+                player.location:announce(player.name, " ", msg);
+            endif
+            player:tell("You can't pick up ", dobj.name, ", so it tumbles onto the 
+floor.");
+        else
+            player:tell(this:remove_fail_msg());
+            if (msg = this:oremove_fail_msg())
+                player.location:announce(player.name, " ", msg);
+            endif
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+announce_all:
+<pre>
+suspend(3);
+this.location:announce_all(@args);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000259.htm">teawagon</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

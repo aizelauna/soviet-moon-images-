@@ -1,0 +1,458 @@
+<HTML>
+<HEAD>
+<TITLE>Registration Database</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Registration Database (#18)</H3>
+(an instance of <A HREF="HTM_000039.htm">Generic Database</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA database of all registered email addresses of the players on this MOO.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+find* _only:
+<pre>
+return ((caller == this) || caller_perms().wizard) ? pass(@args) | E_PERM;
+.
+
+</pre>
+<BR>
+add:
+<pre>
+":add(player,email[,comment])";
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+who = args[1];
+email = args[2];
+comment = args[3..length(args)];
+l = this:find_exact(email);
+if (l == $failed_match)
+    this:insert(email, {{who, @comment}});
+elseif (i = $list_utils:iassoc(who, l))
+    this:insert(email, listset(l, {who, @comment}, i));
+else
+    this:insert(email, {@l, {who, @comment}});
+endif
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    pass();
+    this:clearall();
+    this.registrar = #2;
+endif
+.
+
+</pre>
+<BR>
+suspicious_address:
+<pre>
+"suspicious(address [,who])";
+"Determine whether an address appears to be another player in disguise.";
+"returns a list of similar addresses.";
+"If second argument given, then if all similar addresses are held by that";
+"person, let it pass---they're just switching departments at the same school";
+"or something.";
+"";
+"at the moment,";
+"  foo@bar.baz.bing.boo";
+"is considered 'similar' to anything matching";
+"  foo@*.bing.boo";
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+allowed = (length(args) > 1) ? args[2] | #-1;
+parsed = $network:parse_address(address = args[1]);
+userid = parsed[1];
+site = parsed[2];
+exact = (!site) && this:find_exact(address);
+if (!site)
+    site = $network.site;
+endif
+site = $network:local_domain(site);
+sitelen = length(site);
+others = this:find_all_keys(userid + "@");
+for other in (others)
+    if (other[max(1, (length(other) - sitelen) + 1)..length(other)] != site)
+        others = setremove(others, other);
+    endif
+endfor
+if (exact)
+    others = listinsert(others, address);
+endif
+for x in (others)
+    allzapped = 1;
+    for y in (this:find_exact(x))
+        if ((((length(y) == 2) && ((y[2] == "zapped due to inactivity") || (y[2] 
+== "toaded due to inactivity"))) || (y[1] == allowed)) || (($object_utils:has_property($local, 
+"second_char_registry") && (typeof(them = $local.second_char_registry:other_chars(y[1])) 
+== LIST)) && (allowed in them)))
+            "let them change to the address if it is them, or if it is a registered 
+char of theirs.";
+            "Hrm. Need typeof==LIST check because returns E_INVARG for shared characters. 
+bleah Ho_Yan 5/8/95";
+        else
+            allzapped = 0;
+        endif
+    endfor
+    if (allzapped)
+        others = setremove(others, x);
+    endif
+endfor
+return others;
+.
+
+</pre>
+<BR>
+suspicious_userid:
+<pre>
+"suspicious_userid(userid)";
+"Return yes if userid is root or postmaster or something like that.";
+return args[1] in {"", "sysadmin", "root", "postmaster", "bin", "SYSTEM", "OPERATOR"};
+"Thinking about ruling out hyphenated names, on the grounds that they're probably 
+mailing lists.";
+.
+
+</pre>
+<BR>
+describe_registration:
+<pre>
+"Returns a list of strings describing the registration data for an email address. 
+ Args[1] should be the result of this:find.";
+result = {};
+for x in (args[1])
+    name = (valid(x[1]) && is_player(x[1])) ? x[1].name | "<recycled>";
+    email = (valid(x[1]) && is_player(x[1])) ? x[1].email_address | "<???>";
+    result = {@result, tostr("  ", name, " (", x[1], ") current email: ", email, 
+(length(x) > 1) ? (" [" + x[2]) + "]" | "")};
+endfor
+return result;
+.
+
+</pre>
+<BR>
+get_player:
+<pre>
+"My attempt at some housekeeping, Dredful 2/17/94";
+"Useful for finding dual occurences of a player object. For finding 2nd chars as 
+$registration_db thinks of them. Probably when we begin reaping, this will help too";
+":get_player(OBJ)=>{{STR email, LIST players & comments}, {...}...}";
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+who = args[1];
+found = {};
+for prop in ({" ", @setremove(properties(this), "registrar")})
+    for datum in [1..length((l = this.(prop))[4])]
+        if ($list_utils:iassoc(who, l[4][datum]))
+            found = {@found, {l[3][datum], l[4][datum]}};
+        endif
+    endfor
+endfor
+return found;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp registrar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  m
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ma
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  b
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  h
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  a
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  t
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  s
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  br
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  j
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  r
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  9
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bri
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  c
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  d
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  e
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  da
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  90
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  l
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  w
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  p
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  K
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ca
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  do
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  f
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  am
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cw
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  V
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  re
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  se
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ka
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  901
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sha
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cs9
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  g
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mw
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  au
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  si
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  x
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pau
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  n
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Jo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jw
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ro
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Jl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ha
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  he
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  de
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  scd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sch
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sco
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  na
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ev
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  she
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tw
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  s7
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ra
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ja
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  I
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  st
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ch
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  paul
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ta
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  5
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  er
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  u
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vw
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cal
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  un
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cy
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  par
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  y
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  la
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  park
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  so
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  car
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ke
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ee
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dan
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ps
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  McC
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  McCo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mac
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  o
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jon
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  go
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  su
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  po
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cwa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  be
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jak
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ss
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cwag
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  me
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ho
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sum
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  eri
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  paul@
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  we
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  li
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ec
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  av
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

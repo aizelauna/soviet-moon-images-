@@ -1,0 +1,120 @@
+<HTML>
+<HEAD>
+<TITLE>Trix</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Trix (#1385)</H3>
+(an instance of <A HREF="HTM_001044.htm">Generic Speaking Wandering Automaton</A> made by <A HREF="HTM_000907.htm">melusina</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspWeirdly lavender black-rimmed eyes return your gaze. Her face is powdered dead white, lips carefully painted the color of a fresh bruise. Her glistening silver hair is bound in two tight braids, the tip of each plait dyed to match her contact lenses.  Small silver rings sparkle at her nose, eyebrow, and lower lip, as well as completely lining both ears.  Trix wears a skintight long-sleeved black vinyl jumpsuit with a pair of black thigh-high boots, standing easily on 5-inch heels.  Through the tightly stretched vinyl you can see the small circles of her nipple rings.  
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp[ <A HREF="HTM_001385_State2.htm">hug</A> ], in a daring mood, hugs Trix. Trix shoves him away roughly, lavender eyes flashing angrily.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp[ <A HREF="HTM_001385_State1.htm">touch</A> ] reaches out and touches Trix.  She backs away, snarling.
+<BR>
+<BR>
+Trix has some things to say:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Your place or mine?
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Did you want rubber or leather with that?
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Easy, tiger.
+<BR>
+<BR>
+Trix is carrying <A HREF="HTM_000578.htm">cage</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001310.htm">Le Cafe' Fetish</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+order:
+<pre>
+article = $string_utils:a_or_an(dobjstr);
+this.location:announce(player.name, " tries to order ", article, " ", dobjstr, " 
+from ", this.name);
+player:tell("You try to order ", article, " ", dobjstr, " from ", this.name);
+player:tell(this.name, " looks at you incredulously.  \"What kind of cafe' do you 
+think this is?  There's a spigot out back.\"");
+this.location:announce(this.name, " laughs mockingly at ", player.name, ".  She says, 
+\"You want WHAT?\"");
+.
+
+</pre>
+<BR>
+beg:
+<pre>
+"Copied from Devi (#1014):ask by Eclipse (#538) Wed Sep 21 01:16:12 1994 EDT";
+if (player.location != this.location)
+    player:tell("Long-distance begging is rather ineffective.");
+elseif (!this.talkative)
+    player:tell(this.name, " raises an eyebrow and turns away.");
+    this.location:announce(player.name, " stares pleadingly at ", this.name, " but 
+", this.name, " turns away scornfully.");
+else
+    this.location:announce($string_utils:pronoun_sub("%N drops to %p hands and knees 
+in front of Trix, whimpering as %s licks a glossy black boot."));
+    player:tell("You fall to your knees before ", this.name, ", groveling for all 
+you're worth.");
+    this.location:announce_all_but({this}, this.name, " ", this:begs_response_msg(), 
+" and ", this:sneers_msg(), ", \"", this:begs_msg(), "\"");
+endif
+.
+
+</pre>
+<BR>
+begs_msg:
+<pre>
+"Copied from Generic Speaking Wandering Automaton (#1044):speak_msg by Eclipse (#538) 
+Wed Sep 21 01:22:22 1994 EDT";
+msg = this.(verb);
+return $string_utils:pronoun_sub((typeof(msg) == LIST) ? msg[random(length(msg))] 
+| msg);
+.
+
+</pre>
+<BR>
+sneers_msg:
+<pre>
+"Copied from Generic Speaking Wandering Automaton (#1044):says_msg by Eclipse (#538) 
+Thu Sep 22 13:27:34 1994 EDT";
+msg = this.(verb);
+return (typeof(msg) == LIST) ? msg[random(length(msg))] | msg;
+.
+
+</pre>
+<BR>
+begs_response_msg:
+<pre>
+"Copied from Generic Speaking Wandering Automaton (#1044):says_msg by Eclipse (#538) 
+Thu Sep 22 13:31:15 1994 EDT";
+msg = this.(verb);
+return (typeof(msg) == LIST) ? msg[random(length(msg))] | msg;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp begs_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sneers_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp begs_response_msg
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

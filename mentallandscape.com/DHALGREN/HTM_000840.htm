@@ -1,0 +1,53 @@
+<HTML>
+<HEAD>
+<TITLE>a flute</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a flute (#840)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+<pre>
+</pre>
+&nbsp&nbsp&nbsp&nbsp&nbsp You try to play song on the flute. It sounds terrible. You've never heard song sound so bad. This flute is worthless! You quit playing it halfway through.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000095.htm">legba</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+play:
+<pre>
+"This simple routine just takes dobjstr to be a song, then offers two different messages 
+to player and others around";
+playing = this.plays_msg;
+oplaying = this.oplays_msg;
+playing = strsub(playing, "%song", dobjstr);
+playing = $string_utils:pronoun_sub(playing);
+oplaying = strsub(oplaying, "%song", dobjstr);
+oplaying = $string_utils:pronoun_sub(oplaying);
+player.location:announce(oplaying);
+player:tell(playing);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp plays_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oplays_msg
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

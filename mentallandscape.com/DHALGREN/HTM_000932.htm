@@ -1,0 +1,114 @@
+<HTML>
+<HEAD>
+<TITLE>the moon</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> the moon (#932)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbsp                 MO
+&nbsp&nbsp&nbsp&nbsp&nbsp                  ON
+&nbsp&nbsp&nbsp&nbsp&nbspShine the sharp horns of a crescent moon waxing to full
+&nbsp&nbsp&nbsp&nbsp&nbsp         above a horizon of a range of clouds........
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000896.htm">a peregrination</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+moon_phase:
+<pre>
+p = (time() - #932.calibration) % #932.period;
+waxing = "";
+phased = args[2];
+if ((p < 86400) || (p > (#932.period - 86400)))
+    phase = phased.new_moon_msg;
+elseif ((p > ((#932.period / 2) - 86400)) && (p < ((#932.period / 2) + 86400)))
+    phase = phased.full_moon_msg;
+else
+    if (((p > ((#932.period / 4) - 129600)) && (p < ((#932.period / 4) + 129600))) 
+|| ((p > (((this.period * 3) / 4) - 129600)) && (p < (((this.period * 3) / 4) + 129600))))
+        phase = phased.half_moon_msg;
+    elseif ((p < (#932.period / 4)) || (p > ((#932.period * 3) / 4)))
+        phase = phased.crescent_moon_msg;
+    else
+        phase = phased.gibbous_moon_msg;
+    endif
+    if (p > (#932.period / 2))
+        waxing = phased.moon_waning_msg;
+    else
+        waxing = phased.moon_waxing_msg;
+    endif
+endif
+if (typeof(args[1]) == STR)
+    s = strsub(args[1], "%waxing?", waxing);
+    return strsub(s, "%moonphase", phase);
+elseif (typeof(args[1]) == LIST)
+    l = {};
+    for s in (args[1])
+        s = strsub(s, "%waxing?", waxing);
+        s = strsub(s, "%moonphase", phase);
+        l = {@l, s};
+    endfor
+    return l;
+else
+    return args[1];
+endif
+.
+
+</pre>
+<BR>
+phase:
+<pre>
+this.location:announce_all(this:moon_phase("There shine%moonphase%waxing?"));
+.
+
+</pre>
+<BR>
+look_self:
+<pre>
+desc = this:moon_phase(this:description(), this);
+if (desc)
+    player:tell_lines(this:moon_phase(desc, this));
+else
+    player:tell("You see nothing special.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp full_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp new_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp half_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gibbous_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp crescent_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp moon_waxing_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp moon_waning_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp calibration
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp period
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

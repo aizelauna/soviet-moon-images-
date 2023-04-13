@@ -1,0 +1,78 @@
+<HTML>
+<HEAD>
+<TITLE>Slot Machine</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Slot Machine (#520)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+<pre>
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+pull:
+<pre>
+if (this.location != player.location)
+    player:tell("You aren't close enough to play with ", this.name, ".");
+    return;
+endif
+q = $quota_utils:get_quota(player);
+spin = abs(time()) % 11;
+for i in [1..spin]
+    random(8);
+endfor
+cost = this.cost;
+n = length(this.icons);
+win = (cost * n) * n;
+player:tell("The heavy metal level comes down with a resounding  >>KA-CHUNK<<.");
+player:tell("Pictures spin past the window and come to a stop one by one:");
+suspend(1);
+i1 = this.icons[random(n)];
+player:tell("   ", i1);
+suspend(1);
+i2 = this.icons[random(n)];
+player:tell("   ", i2);
+suspend(1);
+i3 = this.icons[random(n)];
+player:tell("   ", i3);
+if ((i1 == i2) && (i1 == i3))
+    if (i1 == "@boot")
+        this.location:announce_all("A klaxton blasts once from ", this.name, " and 
+", player.name, " cries out and collapses.");
+        $quota_utils:set_quota(player, q - cost);
+        boot_player(player);
+        player:tell("Have a nice day!");
+    else
+        this.location:announce_all("A bell rings on ", this.name, " and a lucky ", 
+player.name, " collects ", win, " bytes of new quota!");
+        player:tell("You scoop up your prize!  You quota is now: ", q + win);
+        $quota_utils:set_quota(player, q + win);
+    endif
+else
+    player:tell("The machine comes to a stop, having eaten ", cost, " bytes of your 
+quota.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp icons
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cost
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

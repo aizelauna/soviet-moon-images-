@@ -1,0 +1,107 @@
+<HTML>
+<HEAD>
+<TITLE>Tarquin</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Tarquin (#445)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_000445.htm">Tarquin</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspWearing an English Suit stolen from a store front window.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA felt hat pulled down over his forehead.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSteel rimmed dark glasses hide his eyes.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspHe is enveloped by a bright laser-red image of a six-foot tall mantis, its long glowing 
+forearms are folded in an attitude of prayer.
+<BR>
+<BR>
+Tarquin is carrying <A HREF="HTM_000434.htm">T's Light Shield</A> and <A HREF="HTM_001298.htm">coat</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000457.htm">truck</A>.
+<BR>
+<BR>
+<BR>
+Tarquin owns <A HREF="HTM_000445.htm">Tarquin</A> <A HREF="HTM_000434.htm">T's Light Shield</A> <A HREF="HTM_000457.htm">truck</A> <A HREF="HTM_000460.htm">out</A> <A HREF="HTM_000461.htm">truck</A> <A HREF="HTM_000204.htm">Meet Cafe</A> <A HREF="HTM_000403.htm">east</A> <A HREF="HTM_000454.htm">west</A> <A HREF="HTM_000453.htm">sailor</A> <A HREF="HTM_000540.htm">up</A> <A HREF="HTM_000541.htm">down</A> <A HREF="HTM_001298.htm">coat</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+loc*ate:
+<pre>
+who = $string_utils:match_player(dobjstr);
+if (valid(who))
+    who.location:look_self();
+else
+    player:tell("I can't find ", dobjstr, ".");
+endif
+.
+
+</pre>
+<BR>
+moveto:
+<pre>
+"Copied from Carrot's Rosette Feature Object (#126):moveto by Carrot (#448) Mon Feb 
+21 05:00:44 1994 EST";
+pass(@args);
+if ($object_utils:has_property(this, "features") && (#126 in this.features))
+    used = $list_utils:assoc(player, #126.read);
+    if ((used != {}) && ("a" in used[3]))
+        rose = #126:genrose(player.location, used[3]);
+        if (typeof(rose) == LIST)
+            player:tell_lines(rose);
+        endif
+    endif
+endif
+return;
+.
+
+</pre>
+<BR>
+hunt:
+<pre>
+"";
+LIST = {"north", "south", "east", "west", "up", "down", "out", "in", "northeast", 
+"northwest", "southeast", "southwest", "enter", "exit", "door"};
+exit = $nothing;
+who = $string_utils:match_player(dobjstr);
+if (valid(who))
+    for x in (LIST)
+        if (valid(who.location:match_exit(x)) && (!valid(exit)))
+            exit = who.location:match_exit(x);
+        endif
+    endfor
+    if (valid(exit))
+        for x in (LIST)
+            if (valid(exit.dest:match_exit(x)) && (exit.dest:match_exit(x).dest == 
+who.location))
+                player.location:announce(player.name, " creates a temporary spatial 
+warp.");
+                exit.dest:match_exit(x):invoke(player);
+                return;
+            endif
+        endfor
+    else
+        player:tell("There doesn't seem to be any standard exits.");
+    endif
+else
+    player:tell("There is no player by that name.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

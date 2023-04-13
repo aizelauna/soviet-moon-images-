@@ -1,0 +1,116 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Performance Room</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Performance Room (#1998)</H3>
+(an instance of <A HREF="HTM_000563.htm">Generic Room with Stacking</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIf you are wearing a costume in here (that is, if you are a child of the Generic Thespian, #1223, wearing a child of the Generic Costume, #1226), your own name will be replaced with the name of your costume's role when you :say, :emote, or perform certain stage-talk functions.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspAs a child of the Generic Room with Stacking (#563), this room supports stacking.
+&nbsp&nbsp&nbsp&nbsp&nbspAs a descendant of #110 and #176 this room supports MOO-weather, ambient noise, and 
+other features.
+&nbsp&nbsp&nbsp&nbsp&nbspIn the Performance Room, moreover, if you are a Thespian (a descendant of #1223) 
+and are wearing a costume (a descendant of #1226), the most common expressive actions, 
+:say, :emote, and certain stage-feature functions (borrowed from #112, the Stage 
+Talk FO) are emended to refer not to your player.name, but your costume.role_msg.
+&nbsp&nbsp&nbsp&nbsp&nbsp(Other verbs are likely to reveal your player.name)
+&nbsp&nbsp&nbsp&nbsp&nbspBreak a leg!
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+say:
+<pre>
+player:tell("You say, \"", argstr, "\"");
+this:announce(this:get_name(player), " says, \"", argstr, "\"");
+.
+
+</pre>
+<BR>
+emote:
+<pre>
+name = this:get_name(player);
+if ((argstr != "") && (argstr[1] == ":"))
+    this:announce_all(name, argstr[2..length(argstr)]);
+else
+    this:announce_all(name, " ", argstr);
+endif
+.
+
+</pre>
+<BR>
+get_name:
+<pre>
+who = args[1];
+name = who.name;
+if ($object_utils:has_property(who, "costume"))
+    costume = who.costume;
+    if ($object_utils:has_property(costume, "role_msg"))
+        costume.role_msg ? name = costume.role_msg | name;
+    endif
+endif
+return name;
+.
+
+</pre>
+<BR>
+`*:
+<pre>
+" Hacked from the stage-feature object, #112. ";
+name = verb[2..length(verb)];
+who = player.location:match_object(name);
+if ($command_utils:object_match_failed(who, name))
+    return;
+endif
+player.location:announce_all(this:get_name(player), " [to ", this:get_name(who), 
+"]: ", argstr);
+.
+
+</pre>
+<BR>
+[*:
+<pre>
+" hacked from #112, the Stage-talk FO. ";
+player.location:announce_all((((this:get_name(player) + " ") + verb) + " ") + argstr);
+.
+
+</pre>
+<BR>
+]*:
+<pre>
+" Hacked from #112, the Stage-talk FO. ";
+player.location:announce_all("[", (((this:get_name(player) + " ") + verb[2..length(verb)]) 
++ (argstr ? " " + argstr | "")) + "]");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000850.htm">Pleasance...</A> <A HREF="HTM_000896.htm">a peregrination</A> <A HREF="HTM_002025.htm">Below the Stage</A> <A HREF="HTM_000926.htm">Empty Lot</A> <A HREF="HTM_002558.htm">a Clock</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

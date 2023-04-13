@@ -1,0 +1,114 @@
+<HTML>
+<HEAD>
+<TITLE>Dredful</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Dredful (#96)</H3>
+(an instance of <A HREF="HTM_000058.htm">generic wizard</A> made by <A HREF="HTM_000096.htm">Dredful</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSimply speaking, Dred is Dredful.
+<BR>
+<BR>
+Dredful is carrying <A HREF="HTM_000122.htm">dbMeter</A>, <A HREF="HTM_000123.htm">Core Updater</A>, <A HREF="HTM_000414.htm">medal</A>, <A HREF="HTM_000777.htm">Generics Registry FO</A> and <A HREF="HTM_001145.htm">Registry Db</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000097.htm">Zero Surface</A>.
+<BR>
+<BR>
+<BR>
+Dredful owns <A HREF="HTM_000096.htm">Dredful</A> <A HREF="HTM_000097.htm">Zero Surface</A> <A HREF="HTM_000102.htm">Wizard-Mail</A> <A HREF="HTM_000104.htm">Local-Specific Help DB</A> <A HREF="HTM_000105.htm">Local Clearinghouse</A> <A HREF="HTM_000107.htm">graffiti</A> <A HREF="HTM_000108.htm">Core-Updates</A> <A HREF="HTM_000109.htm">Login Watcher</A> <A HREF="HTM_000111.htm">Features Feature Object</A> <A HREF="HTM_000122.htm">dbMeter</A> <A HREF="HTM_000123.htm">Core Updater</A> <A HREF="HTM_000218.htm">paper bag</A> <A HREF="HTM_000313.htm">Player-Requests</A> <A HREF="HTM_000124.htm">Generic Utilities Package</A> <A HREF="HTM_000326.htm">Switching</A> <A HREF="HTM_000327.htm">Quota-Requests</A> <A HREF="HTM_000426.htm">Player Request Board</A> <A HREF="HTM_000319.htm">Second Character Registry</A> <A HREF="HTM_000666.htm">Grim Reaper</A> <A HREF="HTM_001488.htm">Generic Dispenser</A> <A HREF="HTM_000072.htm">Network Utilities</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+whl:
+<pre>
+lists = $code_utils:help_db_list();
+g = {};
+if (args)
+    which = argstr;
+    for d in (lists)
+        if ($object_utils:has_property(d, which))
+            g = {@g, d};
+        endif
+    endfor
+    if (g)
+        this:tell($string_utils:name_and_number_list(g));
+    else
+        this:tell("Topic not found: ", argstr);
+    endif
+else
+    this:tell("Which topic?");
+endif
+.
+
+</pre>
+<BR>
+find_write:
+<pre>
+if (player != this)
+    return E_PERM;
+endif
+found = {};
+for d in [1..tonum(max_object())]
+    for f in (verbs(t = toobj(d)))
+        res = verb_info(t, $string_utils:strip_chars($string_utils:words(f)[1], "*"));
+        if (index(res[2], "w"))
+            found = {@found, $string_utils:print({t, f, @res})};
+        endif
+        $command_utils:suspend_if_needed(0);
+    endfor
+    $command_utils:suspend_if_needed(0);
+endfor
+$mail_agent:send_message(this, this, "Writable verbs in the db", found);
+.
+
+</pre>
+<BR>
+new-add-massmail:
+<pre>
+if (player != this)
+    player:tell(E_PERM);
+    return;
+endif
+player:tell("Starting mass-mail");
+msg = {tostr("From Dredful@", $network.moo_name, ":")};
+msg = {@msg, "", tostr("Currently, you have a character on our MOO, ", $network.moo_name, 
+".")};
+msg = {@msg, "", "The address for our MOO has just been changed to:", "", "dhalgren.english.washington.edu 
+7777"};
+msg = {@msg, "", "Please make a note of this.", "", tostr("If you still have problems 
+connecting, please send email to ", $login.registration_address, "."), "", "Thanks.", 
+"Dredful"};
+for d in (players()[204..length(players())])
+    if (d.email_address && (!$object_utils:isa(d, $guest)))
+        player:tell("...", d);
+        $network:sendmail(d.email_address, "Dhalgren address change", "Reply-to: 
+" + $login.registration_address, @msg);
+    endif
+    $command_utils:suspend_if_needed(2, "[< suspending massmail >]");
+endfor
+player:tell("Done massmail");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp user
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp temp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp login_watcher
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

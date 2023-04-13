@@ -1,0 +1,196 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Boomerang Thing</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Boomerang Thing (#261)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThis thing will return to its home after a certain delay, settable, from when it 
+was removed from its home. Much like a boomerang. See `help #261' for details.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThis object is set up to return home after a certain time delay started when it leaves 
+its home.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspSettable properties:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsphome - where this object lives and where it will return after the delay.
+&nbsp&nbsp&nbsp&nbsp&nbsp       Use `@home <object> is <home>' to set this.
+&nbsp&nbsp&nbsp&nbsp&nbspdelay - how long, in seconds, the object is allowed away from home.
+&nbsp&nbsp&nbsp&nbsp&nbsp        The delay must be a positive number, or it won't return at all.
+&nbsp&nbsp&nbsp&nbsp&nbsp        (Perhaps a strategic programming advantage.)
+&nbsp&nbsp&nbsp&nbsp&nbspohome_arrive_msg - message displayed to home when the object comes in.
+&nbsp&nbsp&nbsp&nbsp&nbspgo_home_msg - message displayed to the player who had the object when it left.
+&nbsp&nbsp&nbsp&nbsp&nbspogo_home_msg - if the object is in a room when it leaves, this is displayed.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp----
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+birth:
+<pre>
+if (caller == this)
+    if (this.delay <= 0)
+        return 0;
+    elseif (!$recycler:valid(this.home))
+        return 0;
+    elseif (!$code_utils:task_valid(this.return_task))
+        this.birth_time = time();
+        fork birth (0)
+            this.return_task = birth;
+            this:countdown();
+        endfork
+        return 1;
+    elseif ($code_utils:task_valid(this.return_task))
+        "extend delay";
+        this.birth_time = time();
+    else
+        "Something weird.";
+        return 0;
+    endif
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+return_home:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+if ($recycler:valid(this.home))
+    source = this.location;
+    if (is_player(source))
+        source:tell(this:go_home_msg());
+    else
+        source:announce_all(this:ogo_home_msg());
+    endif
+    "This assumes the :moveto won't crap out. Might should fork it..";
+    this:moveto(this.home);
+    if (this.location == this.home)
+        this.home:announce_all(this:ohome_arrive_msg());
+    endif
+else
+    "Ack, bad home";
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+countdown:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+while ((this.location != this.home) && (time() < (this.birth_time + this.delay)))
+    suspend(this.interim_delay);
+    this:interim_effect();
+endwhile
+if (this.location != this.home)
+    this:return_home();
+endif
+this.return_task = 0;
+this.birth_time = 0;
+.
+
+</pre>
+<BR>
+moveto:
+<pre>
+pass(@args);
+if (this.location != this.home)
+    this:birth();
+endif
+.
+
+</pre>
+<BR>
+ohome_arrive_msg go_home_msg ogo_home_msg:
+<pre>
+return $string_utils:pronoun_sub(this.(verb));
+.
+
+</pre>
+<BR>
+interim_effect:
+<pre>
+"Default is to just do nothing. But fun kids can overwrite this verb and have interim 
+effects every .interim_delay. I made that property !c, so if they want a longer delay, 
+just let me know and I'll set it.";
+return;
+.
+
+</pre>
+<BR>
+@home:
+<pre>
+"Usage: @home <this> is <place>";
+"";
+"Sets the home of this boomerang child to whatever place might be.";
+if ($perm_utils:controls(player, this))
+    if (iobjstr)
+        what = player:my_match_object(iobjstr);
+        if (!$command_utils:object_match_failed(what, iobjstr))
+            player:tell("Setting home of ", $string_utils:nn(this), " to ", $string_utils:nn(what));
+            this.home = what;
+        endif
+    else
+        player:tell("Current home of ", $string_utils:nn(this), ": ", $string_utils:nn(this.home));
+    endif
+else
+    player:tell(E_PERM);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp home
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp birth_time
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp return_task
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp delay
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ohome_arrive_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp go_home_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ogo_home_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp interim_delay
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000264.htm">Tome of Enigmatic Theory</A> <A HREF="HTM_000272.htm">silverware</A> <A HREF="HTM_000101.htm">Generic Edible Object</A> <A HREF="HTM_000341.htm">Red Hat</A> <A HREF="HTM_000386.htm">woad</A> <A HREF="HTM_000387.htm">yellow ocher</A> <A HREF="HTM_000388.htm">red ocher</A> <A HREF="HTM_000435.htm">Ankh</A> <A HREF="HTM_000500.htm">Generic Consumable I</A> <A HREF="HTM_000614.htm">ticket</A> <A HREF="HTM_000811.htm">microphone</A> <A HREF="HTM_001056.htm">Carrier Pigeon</A> <A HREF="HTM_001168.htm">Playbill</A> <A HREF="HTM_001023.htm">quarter</A> <A HREF="HTM_001425.htm">irony</A> <A HREF="HTM_001426.htm">a prayer-wheel</A> <A HREF="HTM_001453.htm">the sun</A> <A HREF="HTM_002110.htm">a hanger</A> <A HREF="HTM_000571.htm">ball</A> <A HREF="HTM_000566.htm">block</A> <A HREF="HTM_000567.htm">pyramid</A> <A HREF="HTM_000568.htm">table</A> <A HREF="HTM_001612.htm">glistening earthmound</A> <A HREF="HTM_000713.htm">a brush</A> <A HREF="HTM_002260.htm">lipstick</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

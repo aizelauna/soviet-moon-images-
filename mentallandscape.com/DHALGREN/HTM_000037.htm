@@ -1,0 +1,105 @@
+<HTML>
+<HEAD>
+<TITLE>you</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> you (#37)</H3>
+(an instance of <A HREF="HTM_000077.htm">Generic Gendered Object</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspan object useful for pronoun substitution
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+verb_sub:
+<pre>
+return $gender_utils:get_conj(args[1], this);
+x = args[1];
+len = length(x);
+if ((len > 3) && (rindex(x, "n't") == (len - 3)))
+    return this:verb_sub(x[1..len - 3]) + "n't";
+endif
+for y in (this.conjugations)
+    if (x == y[1])
+        return y[2];
+    endif
+endfor
+for y in ({{"ches", "ch"}, {"ies", "y"}, {"sses", "ss"}, {"shes", "sh"}, {"s", ""}})
+    if ((len > length(y[1])) && (rindex(x, y[1]) == ((len - length(y[1])) + 1)))
+        return x[1..len - length(y[1])] + y[2];
+    endif
+endfor
+return x;
+.
+
+</pre>
+<BR>
+say_action:
+<pre>
+"$you:say_action(message [,who [,thing, [,where]]]).";
+"announce 'message' with pronoun substitution as if it were just ";
+"  where:announce_all($string_utils:pronoun_sub(message, who, thing, where)); ";
+"except that who (player), dobj, and iobj get modified messages, with the appropriate 
+use of 'you' instead of their name.";
+"who   default player";
+"thing default object that called this verb";
+"where default who.location";
+msg = args[1];
+who = (length(args) >= 2) ? args[2] | player;
+thing = (length(args) >= 3) ? args[3] | caller;
+where = (length(args) >= 4) ? args[4] | who.location;
+you = this;
+if (typeof(msg) == LIST)
+    tell = "";
+    for x in (msg)
+        tell = tell + ((typeof(x) == STR) ? x | x[random(length(x))]);
+    endfor
+else
+    tell = msg;
+endif
+who:tell($string_utils:pronoun_sub(this:fixpos(tell, "%n"), you, thing, where));
+if ($object_utils:has_callable_verb(where, "announce_all_but"))
+    where:announce_all_but({dobj, who, iobj}, $string_utils:pronoun_sub(tell, who, 
+thing, where));
+endif
+if (valid(dobj) && (dobj != who))
+    x = dobj;
+    dobj = you;
+    x:tell($string_utils:pronoun_sub(this:fixpos(tell, "%d"), who, thing, where));
+    dobj = x;
+endif
+if (valid(iobj) && (!(iobj in {who, dobj})))
+    x = iobj;
+    iobj = you;
+    x:tell($string_utils:pronoun_sub(this:fixpos(tell, "%i"), who, thing, where));
+    iobj = x;
+endif
+.
+
+</pre>
+<BR>
+fixpos:
+<pre>
+which = args[2] + "'s";
+return strsub(strsub(args[1], which, "your"), $string_utils:uppercase(which), "Your");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp conjugations
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

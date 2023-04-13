@@ -1,0 +1,163 @@
+<HTML>
+<HEAD>
+<TITLE>Programmer Help</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Programmer Help (#24)</H3>
+(an instance of <A HREF="HTM_000032.htm">Generic Help Database</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis provides help on the programmer commands available on $prog and related topics.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+errors:
+<pre>
+text = args[1];
+for i in [1..length($code_utils.error_list)]
+    text = {@text, tostr("    ", $string_utils:left($code_utils.error_names[i], 15), 
+$code_utils.error_list[i])};
+endfor
+return text;
+.
+
+</pre>
+<BR>
+prepositions:
+<pre>
+text = args[1];
+for p in ($code_utils:prepositions())
+    text = {@text, tostr($string_utils:space(4), p)};
+endfor
+return text;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @check-property
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @check-chparent
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @egrep
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp regular-expressions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @show
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @grep
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp prog-index
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp prepositions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ;
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp utilities
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp truth
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp tasks
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp statements
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp programming
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp precedence
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp language
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp functions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp expressions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp eval
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp errors
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @verb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @setenv
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @rmverb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @rmproperty
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @prospectus
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @property
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @program
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @kill
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @kids
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @forked
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @edit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @display
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @dbsize
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @copy
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @chparent
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @chmod
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @args
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp .program
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @clearproperty
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @disown
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @disinherit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @displayoptions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @display-options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @add-feature
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @remove-feature
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp features
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp examine
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp #
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @programmer-options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @programmeroptions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @progoptions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @prog-options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp options
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

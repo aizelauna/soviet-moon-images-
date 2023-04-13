@@ -1,0 +1,193 @@
+<HTML>
+<HEAD>
+<TITLE>matching utilities</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> matching utilities (#52)</H3>
+(an instance of <A HREF="HTM_000124.htm">Generic Utilities Package</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+match:
+<pre>
+":match(string, object-list)";
+"Return object in 'object-list' aliased to 'string'.";
+"Matches on a wide variety of syntax, including:";
+" \"5th axe\" -- The fifth object matching \"axe\" in the object list.";
+" \"where's sai\" -- The only object contained in 'where' matching \"sai\" (possible 
+$ambiguous_match).";
+" \"where's second staff\" -- The second object contained in 'where' matching \"staff\".";
+" \"my third dagger\" -- The third object in your inventory matching \"dagger\".";
+"Ordinal matches are determined according to the match's position in 'object-list' 
+or, if a possessive (such as \"where\" above) is given, then the ordinal is the nth 
+match in that object's inventory.";
+"In the matching room (#3879@LambdaMOO), the 'object-list' consists of first the 
+player's contents, then the room's, and finally all exits leading from the room.";
+string = args[1];
+olist = args[2];
+if (!string)
+    return $nothing;
+elseif (string == "me")
+    return player;
+elseif (string == "here")
+    return player.location;
+elseif (valid(object = $string_utils:literal_object(string)))
+    return object;
+elseif (valid(object = $string_utils:match(string, olist, "aliases")))
+    return object;
+elseif (parsed = this:parse_ordinal_reference(string))
+    return this:match_nth(parsed[2], olist, parsed[1]);
+elseif (parsed = this:parse_possessive_reference(string))
+    whostr = parsed[1];
+    objstr = parsed[2];
+    if (valid(whose = this:match(whostr, olist)))
+        return this:match(objstr, whose.contents);
+    else
+        return whose;
+    endif
+else
+    return object;
+endif
+.
+
+</pre>
+<BR>
+match_nth:
+<pre>
+":match_nth(string, objlist, n)";
+"Find the nth object in 'objlist' that matches 'string'.";
+what = args[1];
+where = args[2];
+n = args[3];
+for v in (where)
+    z = 0;
+    for q in (v.aliases)
+        z = z || (index(q, what) == 1);
+    endfor
+    if (z && (!(n = n - 1)))
+        return v;
+    endif
+endfor
+return $failed_match;
+.
+
+</pre>
+<BR>
+match_verb:
+<pre>
+"$match_utils:match_verb(verbname, object) => Looks for a command-line style verb 
+named <verbname> on <object> with current values of prepstr, dobjstr, dobj, iobjstr, 
+and iobj.  If a match is made, the verb is called with @args[3] as arguments and 
+1 is returned.  Otherwise, 0 is returned.";
+vrb = args[1];
+what = args[2];
+if (where = $object_utils:has_verb(what, vrb))
+    if ((vargs = verb_args(where[1], vrb)) != {"this", "none", "this"})
+        if (((((((vargs[2] == "any") || ((!prepstr) && (vargs[2] == "none"))) || 
+index(("/" + vargs[2]) + "/", ("/" + prepstr) + "/")) && (((vargs[1] == "any") || 
+((!dobjstr) && (vargs[1] == "none"))) || ((dobj == what) && (vargs[1] == "this")))) 
+&& (((vargs[3] == "any") || ((!iobjstr) && (vargs[3] == "none"))) || ((iobj == what) 
+&& (vargs[3] == "this")))) && index(verb_info(where[1], vrb)[2], "x")) && verb_code(where[1], 
+vrb))
+            set_task_perms(caller_perms());
+            what:(vrb)(@args[3]);
+            return 1;
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+match_list:
+<pre>
+":match_list(string, object_list) -> List of all matches.";
+what = args[1];
+where = args[2];
+r = {};
+for v in (where)
+    if (!(v in r))
+        z = 0;
+        for q in (v.aliases)
+            z = z || (index(q, what) == 1);
+        endfor
+        if (z)
+            r = listappend(r, v);
+        endif
+    endif
+endfor
+return r;
+.
+
+</pre>
+<BR>
+parse_ordinal_reference parse_ordref:
+<pre>
+":parse_ordref(string)";
+"Parses strings referring to an 'nth' object.";
+"=> {NUM n, STR object} Where 'n' is the number the ordinal represents, and 'object' 
+is the rest of the string.";
+"=> 0 If the given string is not an ordinal reference.";
+"  Example:";
+":parse_ordref(\"second broadsword\") => {2, \"broadsword\"}";
+":parse_ordref(\"second\") => 0";
+"  Note that there must be more to the string than the ordinal alone.";
+if (m = match(args[1], ("^" + this.ordinal_regexp) + " +%([^ ].+%)$"))
+    o = substitute("%1", m);
+    n = (o in this.ordn) || (o in this.ordw);
+    return n && {n, substitute("%2", m)};
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+parse_possessive_reference:
+<pre>
+":parse_possessive_reference(string)";
+"Parses strings in a possessive format.";
+"=> {STR whose, STR object}  Where 'whose' is the possessor of 'object'.";
+"If the string consists only of a possessive string (ie: \"my\", or \"yduJ's\"), 
+then 'object' will be an empty string.";
+"=> 0 If the given string is not a possessive reference.";
+"  Example:";
+":parse_possessive_reference(\"joe's cat\") => {\"joe\", \"cat\"}";
+":parse_possessive_reference(\"sis' fish\") => {\"sis\", \"fish\"}";
+"  Strings are returned as a value suitable for a :match routine, thus 'my' becoming 
+'me'.";
+":parse_possessive_reference(\"my dog\") => {\"me\", \"dog\"}";
+string = args[1];
+if (m = match(string, "^my$%|^my +%(.+%)?"))
+    return {"me", substitute("%1", m)};
+elseif (m = match(string, "^%([^ ]+s?%)%'s? *%(.+%)?"))
+    return {substitute("%1", m), substitute("%2", m)};
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ordn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ordw
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ordinal_regexp
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

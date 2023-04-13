@@ -1,0 +1,156 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Drink Object</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Drink Object (#522)</H3>
+(an instance of <A HREF="HTM_000500.htm">Generic Consumable I</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe generic parent of the drink object branch of the consumables tree.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000801.htm">Consumable Storage Room</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+build_a_drink:
+<pre>
+"Makes a drink that your bartender can hand out.";
+"Expected args: STR container name, STR drink name, STR || LIST description";
+if ($object_utils:has_property(caller, "bartender") && caller.bartender)
+    if (!valid(new = this.home:available()))
+        new = $recycler:_create(this.drinkable_root);
+    endif
+    new.container_name = args[1];
+    new.drink_name = args[2];
+    name = tostr(new.container_name, " of ", new.drink_name);
+    new:build(name, args[3]);
+    new:set_aliases({@new.aliases, new.drink_name});
+    return new;
+endif
+.
+
+</pre>
+<BR>
+cleanup:
+<pre>
+if ((caller == this) || ($object_utils:has_property(caller, "bartender") && caller.bartender))
+    if (((($object_utils:has_property(player.location, "bartender") && $recycler:valid(bar 
+= player.location.bartender)) && $object_utils:has_property(bar, "bartender")) && 
+(bar.bartender == 1)) && $object_utils:has_callable_verb(bar, "cleanup_effects"))
+        bar:cleanup_effects(this);
+    else
+        player:tell("As you finish your ", this.name, ", it suddenly disappears.");
+    endif
+    pass(@args);
+    if ((this != this.consumable_root) && (this != this.drinkable_root))
+        "Kill off the boomerang task so it doesn't crap out later.";
+        "Fork it off so it's surely the last thing that happens.";
+        fork (0)
+            if ($code_utils:task_valid(this.return_task))
+                kill_task(this.return_task);
+            endif
+            $recycler:_recycle(this);
+        endfork
+    endif
+endif
+.
+
+</pre>
+<BR>
+consume:
+<pre>
+if ((caller != this) || (this == this.drinkable_root))
+    return E_PERM;
+endif
+"They just used it, so give them more boomerang time.";
+this.birth_time = time();
+pass(@args);
+.
+
+</pre>
+<BR>
+main_subs:
+<pre>
+"Does some big substitutions for the drinkable object children.";
+" %container will be substituted with the name of the container";
+" %drink will be substituted with the name of the drink";
+msg = args[1];
+msg = strsub(msg, "%container", this.container_name);
+msg = strsub(msg, "%drink", this.drink_name);
+return pass(msg);
+.
+
+</pre>
+<BR>
+amt_left:
+<pre>
+amt = $math_utils:percentage(this.amount, this.max_amount);
+amt = tonum(amt[1..length(amt) - 1]);
+if (amt == 100)
+    msg = "It is completely full of %drink.";
+elseif (amt > 85)
+    msg = "It is mostly full of %drink.";
+elseif (amt > 74)
+    msg = "It is three quarters full of %drink.";
+elseif (amt > 60)
+    msg = "It is more than halfway full of %drink.";
+elseif (amt > 45)
+    msg = "It is about halfway full of %drink.";
+elseif (amt > 34)
+    msg = "It is less than halfway full of %drink.";
+elseif (amt > 20)
+    msg = "It is a quarter full of %drink.";
+elseif (amt > 10)
+    msg = "It is less than a quarter full of %drink.";
+elseif (amt > 0)
+    msg = "There is a little bit of %drink left in it.";
+else
+    msg = "It is completely empty.";
+endif
+return this:main_subs(msg);
+.
+
+</pre>
+<BR>
+description:
+<pre>
+desc = pass(@args);
+amt = this:amt_left();
+desc = (typeof(desc) == LIST) ? desc | {desc};
+desc[length(desc)] = (desc[length(desc)] + "  ") + amt;
+return desc;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp drinkable_root
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mint
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp container_name
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp drink_name
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp nonalc
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_002384.htm">big glass of Self</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

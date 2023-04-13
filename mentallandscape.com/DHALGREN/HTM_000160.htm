@@ -1,0 +1,103 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Light Shield</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Light Shield (#160)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a nine-foot length of mirrors, lenses and prisms linked together with shiny 
+brass chain.  On a small brass tag you read "producto do Brazil".
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspIn Samuel Delaney's book, Dhalgren, young gang members wore hologram projectors called 
+light shields.  Part of our theme is to use light shields in the place of morphing 
+player classes.  This object is the first and simplest form of light shield.  It 
+is simply a carried object with an integrating worn_msg.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@activate <shield>    Announce the activate_msg and begin to
+&nbsp&nbsp&nbsp&nbsp&nbsp                      integrate hologram_msg into the players desc.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@deactivate <shield>  Announce the deactivate_msg.  The worn shield
+&nbsp&nbsp&nbsp&nbsp&nbsp                      resumes its appearance as described in shield_msg.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+act*ivate,turnon:
+<pre>
+if (this in player.contents)
+    if (!this.activated)
+        this.activated = 1;
+        this.worn_msg = this.hologram_msg;
+        amsg = $string_utils:pronoun_sub(this.activate_msg);
+        player.location:announce_all(player.name, amsg);
+    else
+        player:tell(this.name, " is already turned on.");
+    endif
+else
+    player:tell("You cannot turn on a light shield unless you are wearing it.");
+endif
+.
+
+</pre>
+<BR>
+de*activate,turnoff:
+<pre>
+if (this in player.contents)
+    if (this.activated)
+        this.worn_msg = this.shield_msg;
+        this.activated = 0;
+        dmsg = $string_utils:pronoun_sub(this.deactivate_msg);
+        player.location:announce_all(player.name, dmsg);
+    else
+        player:tell(this.name, " is already turned off.");
+    endif
+else
+    player:tell("You must be wearing the light shield to turn it off.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp hologram_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp worn_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp activated
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp activate_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp deactivate_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp shield_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000211.htm">light shield</A> <A HREF="HTM_000193.htm">Silver Shield</A> <A HREF="HTM_000242.htm">Aura</A> <A HREF="HTM_000291.htm">light shield</A> <A HREF="HTM_000294.htm">Lights</A> <A HREF="HTM_000303.htm">light shield</A> <A HREF="HTM_000410.htm">light shield</A> <A HREF="HTM_000411.htm">shield</A> <A HREF="HTM_000408.htm">light shield</A> <A HREF="HTM_000434.htm">T's Light Shield</A> <A HREF="HTM_000616.htm">Glass Beads</A> <A HREF="HTM_000625.htm">trench</A> <A HREF="HTM_000944.htm">a jacket</A> <A HREF="HTM_001155.htm">Phase Cloak</A> <A HREF="HTM_001363.htm">Bat Shield</A> <A HREF="HTM_001440.htm">waistcoat</A> <A HREF="HTM_001297.htm">My Light Shield</A> <A HREF="HTM_002157.htm">Iguana</A> <A HREF="HTM_002356.htm">light shield</A> <A HREF="HTM_002606.htm">Sunglasses</A> <A HREF="HTM_002655.htm">frock</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,148 @@
+<HTML>
+<HEAD>
+<TITLE>lame</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> lame (#2341)</H3>
+(an instance of <A HREF="HTM_000001.htm">Root Class</A> made by <A HREF="HTM_002372.htm">flat</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002372.htm">flat</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+make-net:
+<pre>
+params = $string_utils:explode(argstr);
+layers = {};
+depth = length(params);
+for ln in [1..depth]
+    layer = {};
+    links = {};
+    if (ln != 1)
+        for node in [1..tonum(params[ln - 1])]
+            links = {@links, 100};
+        endfor
+    endif
+    for node in [1..tonum(params[ln])]
+        if (links)
+            layer = {@layer, {1, links}};
+        else
+            layer = {@layer, 1};
+        endif
+    endfor
+    layers = {@layers, layer};
+endfor
+if (length(layers) == length(params))
+    player:tell("A ", length(params), "-layered job well done.");
+    this.nodes = layers;
+endif
+.
+
+</pre>
+<BR>
+_input:
+<pre>
+inputs = args[1];
+if (length(this.nodes[1]) == length(inputs))
+    this.nodes[1] = inputs;
+endif
+.
+
+</pre>
+<BR>
+_sum:
+<pre>
+layer = tonum(args[1]);
+for node in [1..length(this.nodes[layer])]
+    value = 100;
+    linklist = this.nodes[layer][node][2];
+    for link in [1..length(linklist)]
+        if (layer == 2)
+            value = value + (linklist[link] * this.nodes[layer - 1][link]);
+        else
+            value = value + (linklist[link] * this.nodes[layer - 1][link][1]);
+        endif
+    endfor
+    this.nodes[layer][node][1] = ((value / length(linklist)) > 50) ? 1 | 0;
+endfor
+.
+
+</pre>
+<BR>
+_train:
+<pre>
+input = args[1];
+desiredout = args[2];
+this:input(input);
+for layer in [2..length(this.nodes)]
+    this:sum(layer);
+endfor
+actualout = {};
+for node in (this.nodes[length(this.nodes)])
+    actualout = {@actualout, node[1]};
+endfor
+this:_backprop(desiredout, actualout, length(this.nodes));
+.
+
+</pre>
+<BR>
+_backprop:
+<pre>
+desiredout = args[1];
+actualout = args[2];
+layer = args[3];
+.
+
+</pre>
+<BR>
+sum:
+<pre>
+layer = tonum(argstr);
+this:_sum(layer);
+out = "Neuron outputs:  ";
+for node in (this.nodes[length(this.nodes)])
+    out = tostr(out, node[1], "  ");
+endfor
+inputout = "Neuron inputs:  ";
+for node in (this.nodes[1])
+    inputout = tostr(inputout, node, "  ");
+endfor
+player:tell_lines({inputout, out});
+.
+
+</pre>
+<BR>
+input:
+<pre>
+ins = $string_utils:explode(argstr);
+out = {};
+for i in (ins)
+    out = {@out, tonum(i)};
+endfor
+this:_input(out);
+player:tell(argstr);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp nodes
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp feature_ok
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

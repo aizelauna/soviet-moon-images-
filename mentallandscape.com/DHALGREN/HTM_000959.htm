@@ -1,0 +1,103 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Post-Apocalypse Exit</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Post-Apocalypse Exit (#959)</H3>
+(an instance of <A HREF="HTM_000007.htm">generic exit</A> made by <A HREF="HTM_000078.htm">Patroclus</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+leave_msg oleave_msg arrive_msg oarrive_msg nogo_msg onogo_msg:
+<pre>
+"Copied from generic exit (#7):leave_msg by The_Mayor (#2) Sun Apr 24 23:53:41 1994 
+EDT";
+msg = this.(verb);
+msg = this:weather_daytime(msg);
+return msg ? $string_utils:pronoun_sub(msg, @args) | "";
+.
+
+</pre>
+<BR>
+weather_daytime:
+<pre>
+"Copied from Generic Post-Apocalypse Room (#110):weather_daytime by Calkins (#150) 
+Sun Apr 24 23:49:37 1994 EDT";
+hour = tonum(ctime(clock = time())[12..13]);
+if ((hour < 6) || (hour > 20))
+    daytime = this.night_msg;
+elseif (hour < 9)
+    daytime = this.morning_msg;
+elseif (hour < 18)
+    daytime = this.day_msg;
+else
+    daytime = this.evening_msg;
+endif
+noise = abs((((clock / 3600) / 8) * 1103515245) + 12345) % 3;
+climate = abs(((clock / 3600) / 24) + noise) % 11;
+if (climate == 2)
+    weather = this.raining_msg;
+elseif (climate < 6)
+    weather = this.warm_msg;
+elseif (climate == 8)
+    weather = this.snowing_msg;
+else
+    weather = this.cool_msg;
+endif
+if (typeof(args[1]) == STR)
+    s = strsub(args[1], "%weather", weather);
+    return strsub(s, "%daytime", daytime);
+elseif (typeof(args[1]) == LIST)
+    l = {};
+    for s in (args[1])
+        s = strsub(s, "%weather", weather);
+        s = strsub(s, "%daytime", daytime);
+        l = {@l, s};
+    endfor
+    return l;
+else
+    return args[1];
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp day_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp night_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp evening_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp morning_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp warm_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cool_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp raining_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp snowing_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000274.htm">east</A> <A HREF="HTM_000156.htm">door</A> <A HREF="HTM_000155.htm">out</A> <A HREF="HTM_001160.htm">south</A> <A HREF="HTM_001161.htm">north</A> <A HREF="HTM_001053.htm">Generic Transparent Exit</A> <A HREF="HTM_001568.htm">west</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

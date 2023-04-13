@@ -1,0 +1,88 @@
+<HTML>
+<HEAD>
+<TITLE>Pile of Clothes</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Pile of Clothes (#470)</H3>
+(an instance of <A HREF="HTM_000449.htm">Generic pile of stuff</A> made by <A HREF="HTM_000095.htm">legba</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000121.htm">The Loft</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+protected_verbs:
+<pre>
+"Copied from Generic pile of stuff (#449):protected_verbs by Carrot (#448) Mon Feb 
+21 15:16:45 1994 EST";
+if ((caller != this.generic) && (caller != this))
+    return E_PERM;
+endif
+if (args[1] == "set_prop")
+    object = args[2];
+    prop = args[3];
+    val = args[4];
+    if (prop == "name")
+        $building_utils:set_names(object, val);
+    else
+        object.(prop) = val;
+    endif
+elseif (args[1] == "create")
+    return $recycler:_create(this.generic_object);
+elseif (args[1] == "verbs")
+    object = args[2];
+    return verbs(object);
+elseif (args[1] == "verb_info")
+    object = args[2];
+    STR = args[3];
+    return verb_info(object, STR);
+elseif (args[1] == "properties")
+    object = args[2];
+    return properties(object);
+elseif (args[1] == "all_properties")
+    object = args[2];
+    return $object_utils:all_properties(object);
+elseif (args[1] == "recycle")
+    object = args[2];
+    if (valid(object) && (parent(object) == this.generic_object))
+        $recycler:_recycle(object);
+    endif
+elseif (args[1] == "verb_name")
+    if (!this.take_name)
+        my_verb_info = verb_info(this.generic, "take");
+        my_verb_code = verb_code(this.generic, "take");
+        my_verb_args = verb_args(this.generic, "take");
+        add_verb(this, my_verb_info, my_verb_args);
+        set_verb_code(this, strsub(my_verb_info[3][1..index(my_verb_info[3] + " ", 
+" ") - 1], "*", ""), my_verb_code);
+        this.take_name = "take";
+    endif
+    if (typeof(info = verb_info(this, this.take_name)) == ERR)
+        return info;
+    else
+        what = args[2];
+        val = set_verb_info(this, this.take_name, {@info[1..2], what});
+        this.take_name = strsub(what[1..index(what + " ", " ") - 1], "*", "");
+        return val;
+    endif
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

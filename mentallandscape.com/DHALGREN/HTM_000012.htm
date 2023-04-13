@@ -1,0 +1,869 @@
+<HTML>
+<HEAD>
+<TITLE>Login Commands</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Login Commands (#12)</H3>
+(an instance of <A HREF="HTM_000001.htm">Root Class</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis provides everything needed by #0:do_login_command.  See `help $login' on $core_help for details.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+?:
+<pre>
+if (caller != #0)
+    return E_PERM;
+else
+    clist = {};
+    for i in [0..length(verbs(this)) - 1]
+        if ((verb_args(this, tostr(i)) == {"any", "none", "any"}) && index((info 
+= verb_info(this, tostr(i)))[2], "x"))
+            vname = $string_utils:explode(info[3])[1];
+            star = index(vname + "*", "*");
+            clist = {@clist, $string_utils:uppercase(vname[1..star - 1]) + strsub(vname[star..length(vname)], 
+"*", "")};
+        endif
+    endfor
+    notify(player, "I don't understand that.  Valid commands at this point are");
+    notify(player, "   " + $string_utils:english_list(setremove(clist, "?"), "", 
+" or "));
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+wel*come @wel*come:
+<pre>
+if (caller != #0)
+    return E_PERM;
+else
+    msg = this.welcome_message;
+    version = server_version();
+    for line in ((typeof(msg) == LIST) ? msg | {msg})
+        if (typeof(line) == STR)
+            notify(player, strsub(line, "%v", version));
+        endif
+    endfor
+    this:check_player_db();
+    this:check_for_shutdown();
+    "dunno if we really need to see lag here. Dredful 2/16/94";
+    "this:maybe_print_lag()";
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+w*ho @w*ho:
+<pre>
+masked = $login.who_masks_wizards ? $wiz_utils:connected_wizards() | {};
+if (caller != #0)
+    return E_PERM;
+elseif (!args)
+    $code_utils:show_who_listing($set_utils:difference(connected_players(), masked)) 
+|| this:notify("No one logged in.");
+else
+    plyrs = listdelete($command_utils:player_match_result($string_utils:match_player(args), 
+args), 1);
+    $code_utils:show_who_listing(plyrs, $set_utils:intersection(plyrs, masked));
+endif
+return 0;
+.
+
+</pre>
+<BR>
+co*nnect @co*nnect:
+<pre>
+you_lose_msg = "Either that player does not exist, or has a different password.";
+if (caller != #0)
+    return E_PERM;
+    "...caller isn't :do_login_command...";
+elseif (!(length(args) in {1, 2}))
+    notify(player, tostr("Usage:  ", verb, " <existing-player-name> <password>"));
+elseif (!valid(candidate = orig_candidate = this:_match_player(name = strsub(args[1], 
+" ", "_"))))
+    notify(player, you_lose_msg);
+    "...unknown player...";
+elseif ((typeof(candidate.password) == STR) && ((length(candidate.password) < 2) 
+|| (crypt({@args, ""}[2], candidate.password[1..2]) != candidate.password)))
+    notify(player, you_lose_msg);
+    "...bad password...";
+    server_log(tostr("FAILED CONNECT: ", args[1], " (", candidate, ") on ", connection_name(player), 
+($string_utils:connection_hostname(connection_name(player)) in candidate.all_connect_places) 
+? "" | "******"));
+elseif ((parent(candidate) == $guest) && (!valid(candidate = candidate:defer())))
+    if (candidate == #-2)
+        server_log(tostr("GUEST DENIED: ", connection_name(player)));
+        notify(player, "Sorry, guest characters are not allowed from your site at 
+the current time.");
+    else
+        notify(player, "Sorry, all of our guest characters are in use right now.");
+    endif
+elseif ((!candidate.wizard) && ((howmany = length(connected_players())) >= (max = 
+this:max_connections())))
+    notify(player, this.connection_limit_msg);
+    notify(player, tostr("There are ", howmany, " connected; maximum is currently 
+", max, "."));
+    server_log(tostr("CONNECTION LIMIT EXCEEDED: ", args[1], " (", candidate, ") 
+on ", connection_name(player)));
+    boot_player(player);
+else
+    if (candidate != orig_candidate)
+        notify(player, tostr("Okay,... ", name, " is in use.  Logging you in as `", 
+candidate.name, "'"));
+    endif
+    this:record_connection(candidate);
+    return candidate;
+endif
+return 0;
+.
+
+</pre>
+<BR>
+cr*eate @cr*eate:
+<pre>
+if (caller != #0)
+    return E_PERM;
+    "... caller isn't :do_login_command()...";
+elseif (!this:player_creation_enabled(player))
+    notify(player, this:registration_string());
+    "... we've disabled player creation ...";
+elseif (length(args) != 2)
+    notify(player, tostr("Usage:  ", verb, " <new-player-name> <new-password>"));
+elseif ($player_db.frozen)
+    notify(player, "Sorry, can't create any new players right now.  Try again in 
+a few minutes.");
+elseif ((!(name = args[1])) || (name == "<>"))
+    notify(player, "You can't have a blank name!");
+    if (name)
+        notify(player, "Also, don't use angle brackets (<>).");
+    endif
+elseif ((name[1] == "<") && (name[length(name)] == ">"))
+    notify(player, "Try that again but without the angle brackets, e.g.,");
+    notify(player, tostr(" ", verb, " ", name[2..length(name) - 1], " ", strsub(strsub(args[2], 
+"<", ""), ">", "")));
+    notify(player, "This goes for other commands as well.");
+elseif (index(name, " "))
+    notify(player, "Sorry, no spaces are allowed in player names.  Use dashes or 
+underscores.");
+    "... lots of routines depend on there not being spaces in player names...";
+elseif ((!$player_db:available(name)) || (this:_match_player(name) != $failed_match))
+    notify(player, "Sorry, that name is not available.  Please choose another.");
+    "... note the :_match_player call is not strictly necessary...";
+    "... it is merely there to handle the case that $player_db gets corrupted.";
+elseif (!(password = args[2]))
+    notify(player, "You must set a password for your player.");
+else
+    new = $quota_utils:bi_create($player_class, $nothing);
+    set_player_flag(new, 1);
+    new.name = name;
+    new.aliases = {name};
+    new.programmer = $player_class.programmer;
+    new.password = crypt(password);
+    new.last_connect_time = $maxint;
+    "Last disconnect time is creation time, until they login.";
+    new.last_disconnect_time = time();
+    "make sure the owership quota isn't clear!";
+    $quota_utils:initialize_quota(new);
+    this:record_connection(new);
+    move(new, $player_start);
+    $player_db:insert(name, new);
+    return new;
+endif
+return 0;
+.
+
+</pre>
+<BR>
+q*uit @q*uit:
+<pre>
+if (caller != #0)
+    return E_PERM;
+else
+    boot_player(player);
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+up*time @up*time:
+<pre>
+if (caller != #0)
+    return E_PERM;
+else
+    notify(player, tostr("The server has been up for ", $time_utils:english_time(time() 
+- $last_restart_time), "."));
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+v*ersion @v*ersion:
+<pre>
+if (caller != #0)
+    return E_PERM;
+else
+    notify(player, tostr("The MOO is currently running version ", server_version(), 
+" of the LambdaMOO server code."));
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+parse_command:
+<pre>
+":parse_command(@args) => {verb, args}";
+"Given the args from #0:do_login_command,";
+"  returns the actual $login verb to call and the args to use.";
+"Commands available to not-logged-in users should be located on this object and given 
+the verb_args \"any none any\"";
+if (caller != #0)
+    return E_PERM;
+endif
+if (!args)
+    return {this.blank_command, @args};
+elseif ((verb = args[1]) && ((verb_args(this, verb) == {"any", "none", "any"}) && 
+index(verb_info(this, verb)[2], "x")))
+    return args;
+else
+    return {this.bogus_command, @args};
+endif
+.
+
+</pre>
+<BR>
+check_for_shutdown:
+<pre>
+when = $shutdown_time - time();
+if (when >= 0)
+    line = "***************************************************************************";
+    notify(player, "");
+    notify(player, "");
+    notify(player, line);
+    notify(player, line);
+    notify(player, "****");
+    notify(player, ("****  WARNING:  The server will shut down in " + $time_utils:english_time(when 
+- (when % 60))) + ".");
+    for piece in ($generic_editor:fill_string($shutdown_message, 60))
+        notify(player, "****            " + piece);
+    endfor
+    notify(player, "****");
+    notify(player, line);
+    notify(player, line);
+    notify(player, "");
+    notify(player, "");
+endif
+.
+
+</pre>
+<BR>
+check_player_db:
+<pre>
+if ($player_db.frozen)
+    line = "***************************************************************************";
+    notify(player, "");
+    notify(player, line);
+    notify(player, "***");
+    for piece in ($generic_editor:fill_string("The character-name matcher is currently 
+being reloaded.  This means your character name might not be recognized even though 
+it still exists.  Don't panic.  You can either wait for the reload to finish or you 
+can connect using your object number if you remember it (e.g., `connect #1234 yourpassword').", 
+65))
+        notify(player, "***       " + piece);
+    endfor
+    if (this:player_creation_enabled(player))
+        notify(player, "***       This also means that character creation is disabled.");
+    endif
+    notify(player, "***");
+    notify(player, line);
+    notify(player, "");
+endif
+.
+
+</pre>
+<BR>
+_match_player:
+<pre>
+":_match_player(name)";
+"This is the matching routine used by @connect.";
+"returns either a valid player corresponding to name or $failed_match.";
+name = args[1];
+if (valid(candidate = $string_utils:literal_object(name)) && is_player(candidate))
+    return candidate;
+endif
+".....uncomment this to trust $player_db and have `connect' recognize aliases";
+if (valid(candidate = $player_db:find_exact(name)) && is_player(candidate))
+    return candidate;
+endif
+".....uncomment this if $player_db gets hosed and you want by-name login";
+". for candidate in (players())";
+".   if (candidate.name == name)";
+".     return candidate; ";
+".   endif ";
+". endfor ";
+".....";
+return $failed_match;
+.
+
+</pre>
+<BR>
+notify:
+<pre>
+set_task_perms(caller_perms());
+notify(player, args[1]);
+.
+
+</pre>
+<BR>
+tell:
+<pre>
+"keeps bad things from happening if someone brings this object into a room and talks 
+to it.";
+return 0;
+.
+
+</pre>
+<BR>
+player_creation_enabled:
+<pre>
+"Accepts a player object.  If player creation is enabled for that player object, 
+then return true.  Otherwise, return false.";
+"Default implementation checks the player's connecting host via $login:blacklisted 
+to decide.";
+if (caller_perms().wizard)
+    return this.create_enabled && (!this:blacklisted($string_utils:connection_hostname(connection_name(args[1]))));
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+newt_registration_string registration_string:
+<pre>
+return $string_utils:subst(this.(verb), {{"%e", this.registration_address}, {"%%", 
+"%"}});
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    pass();
+    this.max_connections = 999999;
+    this.bogus_command = "?";
+    this.blank_command = "help";
+    this.create_enabled = 1;
+    this.registration_address = "";
+    this.registration_string = "Character creation is disabled.";
+    this.newt_registration_string = "Your character is temporarily hosed.";
+    this.welcome_message = {"Welcome to the LambdaCore database.", "", "Type 'connect 
+wizard' to log in.", "", "You will probably want to change this text, which is stored 
+in $login.welcome_message."};
+    this.redlist = this.blacklist = this.graylist = this.spooflist = {{}, {}};
+    this.who_masks_wizards = 0;
+    if ("monitor" in properties(this))
+        delete_property(this, "monitor");
+    endif
+    if ("monitor" in verbs(this))
+        delete_verb(this, "monitor");
+    endif
+    if ("special_action" in verbs(this))
+        set_verb_code(this, "special_action", {});
+    endif
+endif
+.
+
+</pre>
+<BR>
+special_action:
+<pre>
+.
+
+</pre>
+<BR>
+blacklisted graylisted redlisted spooflisted:
+<pre>
+":blacklisted(hostname) => is hostname on the .blacklist";
+":graylisted(hostname)  => is hostname on the .graylist";
+":redlisted(hostname)   => is hostname on the .redlist";
+sitelist = this.(this:listname(verb));
+if (!caller_perms().wizard)
+    return E_PERM;
+elseif (((hostname = args[1]) in sitelist[1]) || (hostname in sitelist[2]))
+    return 1;
+elseif ($site_db:domain_literal(hostname))
+    for lit in (sitelist[1])
+        if ((index(hostname, lit) == 1) && ((hostname + ".")[length(lit) + 1] == 
+"."))
+            return 1;
+        endif
+    endfor
+else
+    for dom in (sitelist[2])
+        if (index(dom, "*"))
+            "...we have a wildcard; let :match_string deal with it...";
+            if ($string_utils:match_string(hostname, dom))
+                return 1;
+            endif
+        else
+            "...tail of hostname ...";
+            if ((r = rindex(hostname, dom)) && ((("." + hostname)[r] == ".") && (((r 
+- 1) + length(dom)) == length(hostname))))
+                return 1;
+            endif
+        endif
+    endfor
+endif
+return 0;
+.
+
+</pre>
+<BR>
+blacklist_add graylist_add redlist_add spooflist_add:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+where = args[1];
+lname = this:listname(verb);
+which = 1 + (!$site_db:domain_literal(where));
+this.(lname)[which] = setadd(this.(lname)[which], where);
+return 1;
+.
+
+</pre>
+<BR>
+blacklist_remove graylist_remove redlist_remove spooflist_remove:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+where = args[1];
+lname = this:listname(verb);
+which = 1 + (!$site_db:domain_literal(where));
+if (where in this.(lname)[which])
+    this.(lname)[which] = setremove(this.(lname)[which], where);
+    return 1;
+else
+    return E_INVARG;
+endif
+.
+
+</pre>
+<BR>
+listname:
+<pre>
+return {"???", "blacklist", "graylist", "redlist", "spooflist"}[1 + index("bgrs", 
+(args[1] || "?")[1])];
+.
+
+</pre>
+<BR>
+record_connection:
+<pre>
+":record_connection(plyr) update plyr's connection information";
+"to reflect impending login.";
+if (!caller_perms().wizard)
+    return E_PERM;
+else
+    plyr = args[1];
+    plyr.first_connect_time = min(time(), plyr.first_connect_time);
+    plyr.previous_connection = {plyr.last_connect_time, $string_utils:connection_hostname(plyr.last_connect_place)};
+    plyr.last_connect_time = time();
+    plyr.last_connect_place = cn = connection_name(player);
+    chost = $string_utils:connection_hostname(cn);
+    acp = setremove(plyr.all_connect_places, chost);
+    plyr.all_connect_places = {chost, @acp[1..min(length(acp), 15)]};
+    if (parent(plyr) != $guest)
+        $site_db:add(plyr, chost);
+    endif
+endif
+.
+
+</pre>
+<BR>
+who(vanilla):
+<pre>
+if (caller != #0)
+    return E_PERM;
+elseif (!args)
+    $code_utils:show_who_listing(connected_players()) || this:notify("No one logged 
+in.");
+else
+    plyrs = listdelete($command_utils:player_match_result($string_utils:match_player(args), 
+args), 1);
+    $code_utils:show_who_listing(plyrs);
+endif
+return 0;
+.
+
+</pre>
+<BR>
+sample_lag:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+while (1)
+    this.last_lag_sample = now = time();
+    suspend(15);
+    lag = (time() - now) - 15;
+    this.lag_samples = {lag, @this.lag_samples[1..3]};
+endwhile
+.
+
+</pre>
+<BR>
+is_lagging:
+<pre>
+return this:current_lag() > this.lag_cutoff;
+.
+
+</pre>
+<BR>
+max_connections:
+<pre>
+max = this.max_connections;
+if (typeof(max) == LIST)
+    if (this:is_lagging())
+        max = max[1];
+    else
+        max = max[2];
+    endif
+endif
+return max;
+.
+
+</pre>
+<BR>
+request_character:
+<pre>
+"request_character(player, name, address)";
+"return true if succeeded";
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+who = args[1];
+name = args[2];
+address = args[3];
+connection = $string_utils:connection_hostname(connection_name(who));
+if (reason = $wiz_utils:check_player_request(name, address, connection))
+    prefix = "";
+    if (reason[1] == "-")
+        reason = reason[2..length(reason)];
+        prefix = "Please";
+    else
+        prefix = "Please try again, or, to register another way,";
+    endif
+    notify(who, reason);
+    notify(who, tostr(prefix, " mail to ", $login.registration_address, ","));
+    notify(who, " with the character name you want.");
+    return 0;
+endif
+if (lines = $no_one:eval_d("$local.help.(\"multiple-characters\")")[2])
+    notify(who, "Remember, in general, only one character per person is allowed.");
+    notify(who, tostr("Do you already have a ", $network.moo_name, " character? [enter 
+`yes' or `no']"));
+    answer = read(who);
+    if (answer == "yes")
+        notify(who, "Process terminated *without* creating a character.");
+        return 0;
+    elseif (answer != "no")
+        return notify(who, tostr("Please try again; when you get this question, answer 
+`yes' or `no'. You answered `", answer, "'"));
+    endif
+    notify(who, "For future reference, do you want to see the full policy (from `help 
+multiple-characters'?");
+    notify(who, "[enter `yes' or `no']");
+    if (read(who) == "yes")
+        for x in (lines)
+            for y in ($generic_editor:fill_string(x, 70))
+                notify(who, y);
+            endfor
+        endfor
+    endif
+endif
+notify(who, tostr("A character named `", name, "' will be created."));
+notify(who, tostr("A random password will be generated, and mailed with"));
+notify(who, tostr(" an explanatory message to: ", address));
+notify(who, "Is this OK? [enter `yes' or `no']");
+if (read(who) != "yes")
+    notify(who, "Process terminated *without* creating a character.");
+    return 0;
+endif
+"took out Automatic creation, Dredful 2/16/94";
+if ($player_db.frozen)
+    notify(who, "Sorry, can't create any new players right now.  Try again in a few 
+minutes.");
+    return 0;
+else
+    $mail_agent:send_message($registration_db.registrar, $registration_db.registrar, 
+"Player request", {"Player request from " + connection, "", (("@make-player " + name) 
++ " ") + address});
+    $local.request_board:add_req($registration_db.registrar:length_all_msgs());
+    notify(who, tostr("Request for new character ", name, " email address '", address, 
+"' accepted."));
+    notify(who, tostr("Please be patient until the registrar gets around to it."));
+    notify(who, tostr("If you don't get email within a week, please send regular"));
+    notify(who, tostr("  email to: ", $login.registration_address, "."));
+    return 1;
+endif
+"This is the old stuff, Dredful 2/16/94";
+if (!$network.active)
+else
+    new = $wiz_utils:make_player(name, address);
+    password = new[2];
+    new = new[1];
+    notify(who, tostr("Character ", name, " (", new, ") created."));
+    notify(who, tostr("Mailing password to ", address, "; you should get the mail 
+very soon."));
+    notify(who, tostr("If you do not get it, please do NOT request another character."));
+    notify(who, tostr("Instead, send regular email to ", $login.registration_address, 
+","));
+    notify(who, tostr("with the name of the character you requested."));
+    $mail_agent:send_message(this.owner, $new_player_log, tostr(name, " (", new, 
+")"), {address, tostr(" Automatically created at request of ", valid(player) ? player.name 
+| "unconnected player", " from ", connection, ".")});
+    $wiz_utils:send_new_player_mail(tostr("Someone connected from ", connection, 
+" at ", ctime(), " requested a character on ", $network.moo_name, " for email address 
+", address, "."), name, address, new, password);
+    return 1;
+endif
+.
+
+</pre>
+<BR>
+req*uest @req*uest:
+<pre>
+if (caller != #0)
+    return E_PERM;
+endif
+"must be #0:do_login_command";
+if (!this.request_enabled)
+    notify(player, this:registration_string());
+elseif ((length(args) != 3) || (args[2] != "for"))
+    notify(player, tostr("Usage:  ", verb, " <new-player-name> for <email-address>"));
+elseif ($login:request_character(player, args[1], args[3]))
+    boot_player(player);
+endif
+.
+
+</pre>
+<BR>
+h*elp @h*elp:
+<pre>
+if (caller != #0)
+    return E_PERM;
+else
+    msg = this.help_message;
+    for line in ((typeof(msg) == LIST) ? msg | {msg})
+        if (typeof(line) == STR)
+            notify(player, line);
+        endif
+    endfor
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+maybe_print_lag:
+<pre>
+lag = this:current_lag();
+if (lag > 1)
+    lagstr = tostr("approximately ", lag, " seconds");
+elseif (lag == 1)
+    lagstr = "approximately 1 second";
+else
+    lagstr = "low";
+endif
+notify(player, tostr("The lag is ", lagstr, "; there are ", length(connected_players()), 
+" players connected."));
+.
+
+</pre>
+<BR>
+current_lag:
+<pre>
+"estimate current lag as max of most recent sample and average of the rest of the 
+samples";
+thislag = max(0, (time() - this.last_lag_sample) - this.lag_sample_interval);
+if (thislag > (60 * 10))
+    "more than 10 minutes, probably the lag sampler stopped";
+    return -1;
+endif
+samples = this.lag_samples;
+thislag = max(thislag, samples[1]);
+sum = 0;
+cnt = 0;
+for x in (listdelete(samples, 1))
+    sum = sum + x;
+    cnt = cnt + 1;
+endfor
+return max(thislag, samples[1], sum / cnt);
+.
+
+</pre>
+<BR>
+request_character(old):
+<pre>
+"request_character(player, name, address)";
+"return true if succeeded";
+return;
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+who = args[1];
+name = args[2];
+address = args[3];
+connection = $string_utils:connection_hostname(connection_name(who));
+if (reason = $wiz_utils:check_player_request(name, address, connection))
+    prefix = "";
+    if (reason[1] == "-")
+        reason = reason[2..length(reason)];
+        prefix = "Please";
+    else
+        prefix = "Please try again, or, to register another way,";
+    endif
+    notify(who, reason);
+    notify(who, tostr(prefix, " mail to ", $login.registration_address, ","));
+    notify(who, " with the character name you want.");
+    return 0;
+endif
+if (lines = $no_one:eval_d("$local.help.(\"multiple-characters\")")[2])
+    notify(who, "Remember, in general, only one character per person is allowed.");
+    notify(who, tostr("Do you already have a ", $network.moo_name, " character? [enter 
+`yes' or `no']"));
+    answer = read(who);
+    if (answer == "yes")
+        notify(who, "Process terminated *without* creating a character.");
+        return 0;
+    elseif (answer != "no")
+        return notify(who, tostr("Please try again; when you get this question, answer 
+`yes' or `no'. You answered `", answer, "'"));
+    endif
+    notify(who, "For future reference, do you want to see the full policy (from `help 
+multiple-characters'?");
+    notify(who, "[enter `yes' or `no']");
+    if (read(who) == "yes")
+        for x in (lines)
+            for y in ($generic_editor:fill_string(x, 70))
+                notify(who, y);
+            endfor
+        endfor
+    endif
+endif
+notify(who, tostr("A character named `", name, "' will be created."));
+notify(who, tostr("A random password will be generated, and mailed with"));
+notify(who, tostr(" an explanatory message to: ", address));
+notify(who, "Is this OK? [enter `yes' or `no']");
+if (read(who) != "yes")
+    notify(who, "Process terminated *without* creating a character.");
+    return 0;
+endif
+if (!$network.active)
+    $mail_agent:send_message(this.owner, $registration_db.registrar, "Player request", 
+{"Player request from " + connection, ":", "", (("@make-player " + name) + " ") + 
+address});
+    notify(who, tostr("Request for new character ", name, " email address '", address, 
+"' accepted."));
+    notify(who, tostr("Please be patient until the registrar gets around to it."));
+    notify(who, tostr("If you don't get email within a week, please send regular"));
+    notify(who, tostr("  email to: ", $login.registration_address, "."));
+elseif ($player_db.frozen)
+    notify(who, "Sorry, can't create any new players right now.  Try again in a few 
+minutes.");
+else
+    new = $wiz_utils:make_player(name, address);
+    password = new[2];
+    new = new[1];
+    notify(who, tostr("Character ", name, " (", new, ") created."));
+    notify(who, tostr("Mailing password to ", address, "; you should get the mail 
+very soon."));
+    notify(who, tostr("If you do not get it, please do NOT request another character."));
+    notify(who, tostr("Instead, send regular email to ", $login.registration_address, 
+","));
+    notify(who, tostr("with the name of the character you requested."));
+    $mail_agent:send_message(this.owner, $new_player_log, tostr(name, " (", new, 
+")"), {address, tostr(" Automatically created at request of ", valid(player) ? player.name 
+| "unconnected player", " from ", connection, ".")});
+    $wiz_utils:send_new_player_mail(tostr("Someone connected from ", connection, 
+" at ", ctime(), " requested a character on ", $network.moo_name, " for email address 
+", address, "."), name, address, new, password);
+    return 1;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp welcome_message
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp newt_registration_string
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp registration_string
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp registration_address
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp create_enabled
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp bogus_command
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp blank_command
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp graylist
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp blacklist
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp redlist
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp who_masks_wizards
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp max_player_name
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp spooflist
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ignored
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp max_connections
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp connection_limit_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp lag_samples
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp request_enabled
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_message
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp last_lag_sample
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp lag_sample_interval
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp boot_exceptions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp boot_process
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp lag_cutoff
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

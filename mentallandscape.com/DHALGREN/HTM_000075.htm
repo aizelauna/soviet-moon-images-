@@ -1,0 +1,486 @@
+<HTML>
+<HEAD>
+<TITLE>Gopher utilities</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Gopher utilities (#75)</H3>
+(an instance of <A HREF="HTM_000124.htm">Generic Utilities Package</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAn interface to Gopher internet services.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspCopyright (c) 1992,1993 Grump,JoeFeedback@LambdaMOO.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis object contains just the raw verbs for getting data from gopher servers and parsing the results. Look at #50122 (Generic Gopher Slate) for one example of a user interface. 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:get(site, port, selection)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Get data from gopher server: returns a list of strings, or an error if it couldn't connect. Results are cached.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:get_now(site, port, selection)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Used by $gopher:get. Arguments are the same: this actually gets the 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  data without checking the cache. (Don't call this, since the
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  caching is important to reduce lag.)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:show_text(who, start, end, site, port, selection)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Requires wiz-perms to call.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  like who:notify_lines($gopher:get(..node..)[start..end])
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:clear_cache()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Erase the gopher cache.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:parse(string)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Takes a directory line as returned by $gopher:get, and return a list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  {host, port, selector, label}
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp   host, port, and selector are what you send to :get.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  label is a string, where the first character is the type code.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:type(char)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp   returns the name of the gopher type indicated by the character, e.g.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp   $gopher:type("I") => "image"
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+get_now:
+<pre>
+"Usage:  get_now(site, port, message)";
+"Returns a list of strings, or an error if we couldn't connect.";
+host = args[1];
+port = args[2];
+if (!this:trusted(caller_perms()))
+    return E_PERM;
+elseif ((!match(host, $network.valid_host_regexp)) && (!match(host, "[0-9]+%.[0-9]+%.[0-9]+%.[0-9]+")))
+    "allow either welformed internet hosts or explicit IP addresses.";
+    return E_INVARG;
+elseif (((port != 70) && (port != 80)) && (port < 100))
+    "disallow connections to low number ports; necessary?";
+    return E_INVARG;
+endif
+opentime = time();
+con = $network:open(args[1], args[2]);
+opentime = time() - opentime;
+if (typeof(con) == ERR)
+    return con;
+endif
+notify(con, args[3]);
+results = {};
+count = this.limit;
+"perhaps this isn't necessary, but if a gopher source is slowly spewing things, perhaps 
+we don't want to hang forever -- perhaps this should just fork a process to close 
+the connection instead?";
+now = time();
+timeout = 30;
+end = "^%.$";
+if ((length(args) == 4) && (args[4][1] == "2"))
+end = "^[2-9]";
+endif
+while ((((typeof(string = read(con)) == STR) && (!match(string, end))) && ((count 
+= count - 1) > 0)) && ((now + timeout) > (now = time())))
+if (string && (string[1] == "."))
+string = string[2..length(string)];
+endif
+results = {@results, string};
+endwhile
+$network:close(con);
+if (opentime > 0)
+"This is to keep repeated calls to $network:open to 'slow responding hosts' from 
+totally spamming.";
+suspend(0);
+endif
+return results;
+.
+
+</pre>
+<BR>
+parse:
+<pre>
+"parse gopher result line:";
+"return {host, port, tag, label}";
+"host/port/tag are what you send to the gopher server to get that line";
+"label is <type>/human readable entry";
+string = args[1];
+tab = index(string, "	");
+label = string[1..tab - 1];
+string = string[tab + 1..length(string)];
+tab = index(string, "	");
+tag = string[1..tab - 1];
+string = string[tab + 1..length(string)];
+tab = index(string, "	");
+host = string[1..tab - 1];
+string = string[tab + 1..length(string)];
+tab = index(string, "	");
+port = tonum(tab ? string[1..tab - 1] | string);
+return {host, port, tag, label};
+"ignore extra material after port, if any";
+.
+
+</pre>
+<BR>
+show_text:
+<pre>
+"$gopher:show_text(who, start, end, ..node..)";
+"like who:notify_lines($gopher:get(..node..)[start..end]), but pipelined";
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+who = args[1];
+start = args[2];
+end = args[3];
+args = args[4..length(args)];
+con = $network:open(args[1], args[2]);
+if (typeof(con) == ERR)
+player:tell("Sorry, can't get this information now.");
+return;
+endif
+notify(con, args[3]);
+read(con);
+"initial blank line";
+line = 0;
+sent = 0;
+end = end || this.limit;
+while (((string = read(con)) != ".") && (typeof(string) == STR))
+line = line + 1;
+if ((line >= start) && ((!end) || (line <= end)))
+sent = sent + 1;
+if (valid(who))
+    if (string && (string[1] == "."))
+        string = string[2..length(string)];
+    endif
+    who:notify(string);
+else
+    notify(who, string);
+endif
+endif
+endwhile
+$network:close(con);
+return sent;
+.
+
+</pre>
+<BR>
+type:
+<pre>
+type = args[1];
+if (type == "1")
+    return "menu";
+elseif (type == "?")
+    return "menu?";
+elseif (type == "0")
+    return "text";
+elseif (type == "7")
+    return "search";
+elseif (type == "9")
+    return "binary";
+elseif (type == "2")
+    return "phone directory";
+elseif (type == "4")
+    return "binhex";
+elseif (type == "8")
+    return "telnet";
+elseif (type == "I")
+    return "image";
+elseif (type == " ")
+    "not actually gopher protocol: used by 'goto'";
+    return "";
+else
+    return "unknown";
+endif
+"not done, need to fill out";
+.
+
+</pre>
+<BR>
+summary:
+<pre>
+"return a 'nice' string showing the information in a gopher node";
+if (typeof(parse = args[1]) == STR)
+    parse = this:parse(parse);
+endif
+if (parse[1] == "!")
+    return {"[remembered set]", "", ""};
+endif
+if (length(parse) > 3)
+    label = parse[4];
+    if (label)
+        type = $gopher:type(label[1]);
+        label = label[2..length(label)];
+        if (type == "menu")
+        elseif (type == "search")
+            label = (("<" + parse[3][rindex(parse[3], "	") + 1..length(parse[3])]) 
++ "> ") + label;
+        else
+            label = (type + ": ") + label;
+        endif
+    else
+        label = "(top)";
+    endif
+else
+    label = parse[3] + " (top)";
+endif
+port = "";
+if (parse[2] != 70)
+    port = tostr(" ", parse[2]);
+endif
+return {tostr("[", parse[1], port, "]"), label, parse[3]};
+.
+
+</pre>
+<BR>
+get:
+<pre>
+"Usage: get(site, port, selection)";
+"returns a list of strings, or an error if it couldn't connect. Results are cached.";
+request = args[1..3];
+while ((index = request in this.cache_requests) && (this.cache_times[index] > time()))
+    if (typeof(result = this.cache_values[index]) != NUM)
+        return result;
+    endif
+    if ($code_utils:task_valid(result))
+        "spin, let other process getting same data win, or timeout";
+        suspend(1);
+    else
+        "well, other process crashed, or terminated, or whatever.";
+        this.cache_times[index] = 0;
+    endif
+endwhile
+if (!this:trusted(caller_perms()))
+    return E_PERM;
+endif
+while (this.cache_times && (this.cache_times[1] < time()))
+    $command_utils:suspend_if_needed(0);
+    this.cache_times = listdelete(this.cache_times, 1);
+    this.cache_values = listdelete(this.cache_values, 1);
+    this.cache_requests = listdelete(this.cache_requests, 1);
+    "caution: don't want to suspend between test and removal";
+endwhile
+$command_utils:suspend_if_needed(0);
+this:cache_entry(@request);
+value = this:get_now(@args);
+$command_utils:suspend_if_needed(0);
+index = this:cache_entry(@request);
+this.cache_times[index] = time() + ((typeof(value) == ERR) ? 120 | 1800);
+this.cache_values[index] = value;
+return value;
+.
+
+</pre>
+<BR>
+clear_cache:
+<pre>
+if (!this:trusted(caller_perms()))
+    return E_PERM;
+endif
+if (!args)
+    this.cache_values = this.cache_times = this.cache_requests = {};
+elseif (index = args[1..3] in this.cache_requests)
+    this.cache_requests = listdelete(this.cache_requests, index);
+    this.cache_times = listdelete(this.cache_times, index);
+    this.cache_values = listdelete(this.cache_values, index);
+endif
+.
+
+</pre>
+<BR>
+unparse:
+<pre>
+"unparse(host, port, tag, label) => string";
+host = args[1];
+port = args[2];
+tag = args[3];
+label = args[4];
+if (tab = index(tag, "	"))
+    "remove search terms from search nodes";
+    tag = tag[1..tab - 1];
+endif
+return tostr(label, "	", tag, "	", host, "	", port);
+.
+
+</pre>
+<BR>
+interpret_error:
+<pre>
+"return an explanation for a 'false' $gopher:get result";
+value = args[1];
+if (value == E_INVARG)
+    return "That gopher server is not reachable or is not responding.";
+elseif (value == E_QUOTA)
+    return "Gopher connections cannot be made at this time because of system resource 
+limitations!";
+elseif (typeof(value) == ERR)
+    return tostr("The gopher request results in an error: ", value);
+else
+    return "The gopher request has no results.";
+endif
+.
+
+</pre>
+<BR>
+trusted:
+<pre>
+"default -- gopher trusts everybody";
+return 1;
+.
+
+</pre>
+<BR>
+_textp:
+<pre>
+"_textp(parsed node)";
+"Return true iff the parsed info points to a text node.";
+return index("02", args[1][4][1]);
+.
+
+</pre>
+<BR>
+_mail_text:
+<pre>
+"_mail_text(parsed node)";
+"Return the text to be mailed out for the given node.";
+where = args[1];
+if (this:_textp(where))
+    return $gopher:get(@where);
+else
+    text = {};
+    for x in ($gopher:get(@where))
+        parse = $gopher:parse(x);
+        sel = parse[4];
+        text = {@text, "Type=" + sel[1], "Name=" + sel[2..length(sel)], "Path=" + 
+parse[3], "Host=" + parse[1], "Port=" + tostr(parse[2]), "#"};
+    endfor
+    return text;
+endif
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    this:clear_cache();
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+display_cache:
+<pre>
+"Just for debugging -- shows what's in the gopher cache";
+req = this.cache_requests;
+tim = this.cache_times;
+val = this.cache_values;
+"save values in case cache changes while printing";
+player:tell("size -- expires -- host (port) ------ selector ------------");
+for i in [1..length(req)]
+    re = req[i];
+    host = $string_utils:left(re[1] + ((re[2] == 70) ? "" | tostr(" (", re[2], ")")), 
+24);
+    expires = $string_utils:right($time_utils:dhms(tim[i] - time()), 8);
+    va = val[i];
+    if (typeof(va) == LIST)
+        va = length(va);
+    elseif (typeof(va) == ERR)
+        va = $error:name(va);
+    else
+        va = tostr(va);
+    endif
+    selector = re[3];
+    if (length(selector) > 40)
+        selector = "..." + selector[length(selector) - 37..length(selector)];
+    endif
+    player:tell($string_utils:right(va, 8), expires, " ", host, selector);
+endfor
+player:tell("--- end cache display -------------------------------------");
+.
+
+</pre>
+<BR>
+get_cache:
+<pre>
+"Usage: get_cache(site, port, selection)";
+"return current cache";
+request = args[1..3];
+if (index = request in this.cache_requests)
+    if (this.cache_times[index] > now)
+        return this.cache_values[index];
+    endif
+endif
+return 0;
+.
+
+</pre>
+<BR>
+cache_entry:
+<pre>
+if (index = args in this.cache_requests)
+    return index;
+else
+    this.cache_times = {@this.cache_times, time() + 240};
+    this.cache_values = {@this.cache_values, task_id()};
+    this.cache_requests = {@this.cache_requests, args};
+    return length(this.cache_requests);
+endif
+.
+
+</pre>
+<BR>
+help_msg:
+<pre>
+return this:description();
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cache_requests
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cache_times
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cache_values
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp limit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cache_timeout
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

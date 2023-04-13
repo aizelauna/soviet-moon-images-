@@ -1,0 +1,246 @@
+<HTML>
+<HEAD>
+<TITLE>Site-Locks</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Site-Locks (#70)</H3>
+(an instance of <A HREF="HTM_000046.htm">Generic Mail Recipient</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspNotes on annoying sites.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000047.htm">Mail Distribution Center</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    pass();
+    "this:rm_message_seq({1, 1 + this:length_all_msgs()})";
+    "this:expunge_rmm()";
+    for p in (properties(this))
+        $command_utils:suspend_if_needed(0);
+        if (p && (p[1] == " "))
+            delete_property(this, p);
+        endif
+    endfor
+    this.messages = this.messages_going = {};
+    this.mail_forward = {player, this};
+    this.mail_notify = {player};
+    for p in ({"moderator_forward", "moderator_notify", "writers", "readers", "expire_period", 
+"last_used_time"})
+        this.(p) = $mail_recipient.(p);
+    endfor
+    this.moderated = 1;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+<BR>
+MAIL MESSAGES:
+<BR>
+<BR>
+<BR>
+Date: 1994 May 25, 04:34:37 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @redlist domain `extro.ucc.su.oz.au'
+<BR>
+
+<BR>
+<BR>
+Date: 1994 Jul 11, 12:04:09 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @redlist domain `holycross.edu'
+<BR>
+
+<BR>
+Uncool guests.
+<BR>
+<BR>
+Date: 1994 Jul 11, 12:13:57 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @unredlist domain `holycross.edu'
+<BR>
+
+<BR>
+<BR>
+Date: 1994 Jul 11, 12:14:49 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: oops
+<BR>
+
+<BR>
+Sorry about that.  A misunderstanding...
+<BR>
+<BR>
+Date: 1994 Sep 23, 10:46:07 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @blacklist domain `bgsu.edu'
+<BR>
+
+<BR>
+<BR>
+Date: 1994 Sep 23, 01:53:47 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @blacklist domain `muohio.edu'
+<BR>
+
+<BR>
+<BR>
+Date: 1994 Sep 23, 01:54:23 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @newt Spatula_Guest (#1607)
+<BR>
+
+<BR>
+nextsrv.cas.muohio.edu einstein.bgsu.edu servax.fiu.edu
+<BR>
+Harassment.  Will unnewt him after the weekend.
+<BR>
+<BR>
+Date: 1994 Sep 23, 01:58:14 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @denewt Spatula_Guest (#1607)
+<BR>
+
+<BR>
+<BR>
+Date: 1994 Sep 26, 11:02:46 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @unblacklist domain `muohio.edu'
+<BR>
+
+<BR>
+<BR>
+Date: 1994 Sep 26, 11:03:16 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @unblacklist domain `bgsu.edu'
+<BR>
+
+<BR>
+<BR>
+Date: 1994 Sep 26, 11:03:39 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @unredlist domain `extro.ucc.su.oz.au'
+<BR>
+
+<BR>
+<BR>
+Date: 1994 Sep 26, 11:04:02 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @redlist domain `ozelmail.com.au'
+<BR>
+
+<BR>
+<BR>
+Date: 1994 Sep 29, 10:03:07 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @blacklist domain `bgsu.edu'
+<BR>
+
+<BR>
+<BR>
+Date: 1994 Sep 29, 10:09:52 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @unblacklist domain `bgsu.edu'
+<BR>
+
+<BR>
+<BR>
+Date: 1994 Oct 12, 12:21:41 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @redlist domain `ozemail.com.au'
+<BR>
+
+<BR>
+<BR>
+Date: 1994 Oct 12, 12:21:54 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Site-Locks (#70)
+<BR>
+Subj: @unredlist domain `ozelmail.com.au'
+<BR>
+
+<BR>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

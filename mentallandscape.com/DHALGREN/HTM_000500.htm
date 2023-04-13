@@ -1,0 +1,153 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Consumable I</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Consumable I (#500)</H3>
+(an instance of <A HREF="HTM_000261.htm">Generic Boomerang Thing</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis generic contains the basic functionality required for items that can be consumed. Also, as a child of the Generic Boomerang Thing #261, kids of this will return home after a substantial delay (1 hour) if they aren't consumed entirely before then.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000801.htm">Consumable Storage Room</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+consume:
+<pre>
+"Does the special effects when this is consumed.";
+"this.consume_db:find(consume_verb) should return data in this format:";
+"(NUM amt consumed, STR what player sees, STR what room sees, LIST {OBJ, STR verb, 
+NUM delay, LIST args} for fork delayed response)";
+if ((caller != this) || (this == this.consumable_root))
+    return E_PERM;
+endif
+con_verb = args[1];
+if (valid(this.consume_db) && $object_utils:has_callable_verb(this.consume_db, "find"))
+    if (eff = this.consume_db:find(con_verb))
+        player:tell(this:main_subs(eff[2]));
+        player.location:announce(this:main_subs(eff[3]));
+        this:consumed_amt(eff[1]);
+        if (eff[4])
+            fork (eff[4][3])
+                eff[4][1]:(eff[4][2])(this, con_verb, eff[1], @eff[4][4]);
+            endfork
+        endif
+    else
+        player:tell("For some reason, you can't ", con_verb, " your ", this.name, 
+".");
+    endif
+else
+    player:tell("Unfortunately, there doesn't seem to be any way to ", con_verb, 
+" that.");
+endif
+.
+
+</pre>
+<BR>
+build:
+<pre>
+"Sets up the consumable. Expects args:";
+"(STR this new name, STR|LIST this new description)";
+if (this == this.consumable_root)
+    return E_PERM;
+endif
+this:load_verb();
+this.amount = this.max_amount;
+this:set_name(args[1]);
+this:set_aliases({args[1]});
+this:set_description(args[2]);
+this:moveto(player);
+.
+
+</pre>
+<BR>
+consumed_amt:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+this.amount = this.amount - args[1];
+if (this.amount <= 0)
+    this:cleanup();
+endif
+.
+
+</pre>
+<BR>
+main_subs:
+<pre>
+"Usual subs. But have this verb so children can override and put in special subs 
+as needed.";
+msg = args[1];
+return $string_utils:pronoun_sub(msg);
+.
+
+</pre>
+<BR>
+cleanup:
+<pre>
+if ((caller != this) || (this == this.consumable_root))
+    return E_PERM;
+endif
+if (this.consume_verbs)
+    delete_verb(this, this.consume_verbs[1]);
+endif
+this.amount = this.max_amount;
+this:moveto(this.home);
+.
+
+</pre>
+<BR>
+load_verb:
+<pre>
+if ((caller != this) || (this == this.consumable_root))
+    return E_PERM;
+endif
+if (this.consume_verbs)
+    fullname = $string_utils:from_list(this.consume_verbs, " ");
+    add_verb(this, {this.consumable_root.owner, "rd", fullname}, {"this", "none", 
+"none"});
+    set_verb_code(this, this.consume_verbs[1], {"this:consume(verb);"});
+endif
+.
+
+</pre>
+<BR>
+description:
+<pre>
+return this:main_subs(this.description);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp consume_verbs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp consume_db
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp amount
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp max_amount
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp consumable_root
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000522.htm">Generic Drink Object</A> <A HREF="HTM_000828.htm">Generic Drug Object</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

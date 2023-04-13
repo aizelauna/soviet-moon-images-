@@ -1,0 +1,1833 @@
+<HTML>
+<HEAD>
+<TITLE>generic programmer</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> generic programmer (#59)</H3>
+(an instance of <A HREF="HTM_000004.htm">generic builder</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a player who is too experienced to have any excuse for not having a description.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@prop*erty:
+<pre>
+set_task_perms(player);
+if (!player.programmer)
+    player:notify("You need to be a programmer to do this.");
+    player:notify("If you want to become a programmer, talk to a wizard.");
+    return;
+elseif (!$quota_utils:property_addition_permitted(player))
+    player:tell("Property addition not permitted.");
+    return;
+endif
+nargs = length(args);
+usage = tostr("Usage:  ", verb, " <object>.<prop-name> [<init_value> [<perms> [<owner>]]]");
+if ((nargs < 1) || (!(spec = $code_utils:parse_propref(args[1]))))
+    player:notify(usage);
+    return;
+endif
+object = player:my_match_object(spec[1]);
+name = spec[2];
+if ($command_utils:object_match_failed(object, spec[1]))
+    return;
+endif
+if (nargs < 2)
+    value = 0;
+else
+    q = $string_utils:prefix_to_value(argstr[$string_utils:word_start(argstr)[2][1]..length(argstr)]);
+    if (q[1] == 0)
+        player:notify(tostr("Syntax error in initial value:  ", q[2]));
+        return;
+    endif
+    value = q[2];
+    args = {args[1], value, @$string_utils:words(q[1])};
+    nargs = length(args);
+endif
+perms = (nargs < 3) ? "rc" | args[3];
+if (nargs < 4)
+    owner = player;
+else
+    owner = $string_utils:match_player(args[4]);
+    if ($command_utils:player_match_result(owner, args[4])[1])
+        return;
+    endif
+endif
+if (nargs > 4)
+    player:notify(usage);
+    return;
+endif
+e = add_property(object, name, value, {owner, perms});
+if (typeof(e) != ERR)
+    player:notify(tostr("Property added with value ", $string_utils:print(object.(name), 
+1), "."));
+elseif (e != E_INVARG)
+    player:notify(tostr(e));
+elseif ($object_utils:has_property(object, name))
+    player:notify(tostr("Property ", object, ".", name, " already exists."));
+else
+    for i in [1..length(perms)]
+        if (!index("rcw", perms[i]))
+            player:notify(tostr("Unknown permission bit:  ", perms[i]));
+            return;
+        endif
+    endfor
+    "...the only other possibility...";
+    player:notify("Property is already defined on one or more descendents.");
+    player:notify(tostr("Try @check-prop ", args[1]));
+endif
+.
+
+</pre>
+<BR>
+@chmod:
+<pre>
+set_task_perms(player);
+if (length(args) != 2)
+    player:notify(tostr("Usage:  ", verb, " <object-or-property-or-verb> <permissions>"));
+    return;
+endif
+what = args[1];
+perms = args[2];
+if (index(what, ".") && (spec = $code_utils:parse_propref(what)))
+    if (valid(object = player:my_match_object(spec[1])))
+        pname = spec[2];
+        info = property_info(object, pname);
+        if (info == E_PROPNF)
+            player:notify("That object does not have that property.");
+        elseif (typeof(info) == ERR)
+            player:notify(tostr(info));
+        else
+            info[2] = perms = $perm_utils:apply(info[2], perms);
+            result = set_property_info(object, pname, info);
+            if (result == E_INVARG)
+                player:notify(tostr("\"", perms, "\" is not a valid permissions string 
+for a property."));
+            elseif (typeof(result) == ERR)
+                player:notify(tostr(result));
+            else
+                player:notify(tostr("Property permissions set to \"", perms, "\"."));
+            endif
+        endif
+        return;
+    endif
+elseif (spec = $code_utils:parse_verbref(what))
+    if (!player.programmer)
+        player:notify("You need to be a programmer to do this.");
+        player:notify("If you want to become a programmer, talk to a wizard.");
+        return;
+    endif
+    if (valid(object = player:my_match_object(spec[1])))
+        vname = spec[2];
+        info = verb_info(object, vname);
+        if (info == E_VERBNF)
+            player:notify("That object does not define that verb.");
+        elseif (typeof(info) == ERR)
+            player:notify(tostr(info));
+        elseif (!valid(owner = info[1]))
+            player:notify(tostr("That verb is owned by an invalid object (", owner, 
+"); it needs to be @chowned."));
+        elseif (!is_player(owner))
+            player:notify(tostr("That verb is owned by a non-player object (", owner.name, 
+", ", owner, "); it needs to be @chowned."));
+        else
+            info[2] = perms = $perm_utils:apply(info[2], perms);
+            if (index(info, "w"))
+                player:notify("That would allow anyone to change your verb.");
+            elseif ((result = set_verb_info(object, vname, info)) == E_INVARG)
+                player:notify(tostr("\"", perms, "\" is not a valid permissions string 
+for a verb."));
+            elseif (typeof(result) == ERR)
+                player:notify(tostr(result));
+            else
+                player:notify(tostr("Verb permissions set to \"", perms, "\"."));
+            endif
+        endif
+        return;
+    endif
+elseif (valid(object = player:my_match_object(what)))
+    perms = $perm_utils:apply(((object.r ? "r" | "") + (object.w ? "w" | "")) + (object.f 
+? "f" | ""), perms);
+    r = w = f = 0;
+    for i in [1..length(perms)]
+        if (perms[i] == "r")
+            r = 1;
+        elseif (perms[i] == "w")
+            w = 1;
+        elseif (perms[i] == "f")
+            f = 1;
+        else
+            player:notify(tostr("\"", perms, "\" is not a valid permissions string 
+for an object."));
+            return;
+        endif
+    endfor
+    if ((((object.r = r) == E_PERM) || ((object.w = w) == E_PERM)) || ((object.f 
+= f) == E_PERM))
+        player:notify("Permission denied.");
+    else
+        player:notify(tostr("Object permissions set to \"", perms, "\"."));
+    endif
+    return;
+endif
+$command_utils:object_match_failed(object, what);
+.
+
+</pre>
+<BR>
+@args:
+<pre>
+if (player != caller)
+    return;
+endif
+set_task_perms(player);
+if (!player.programmer)
+    player:notify("You need to be a programmer to do this.");
+    player:notify("If you want to become a programmer, talk to a wizard.");
+    return;
+endif
+if (!(args && (spec = $code_utils:parse_verbref(args[1]))))
+    player:notify(tostr(args ? ("\"" + args[1]) + "\"?  " | "", "<object>:<verb> 
+ expected."));
+elseif ($command_utils:object_match_failed(object = player:my_match_object(spec[1]), 
+spec[1]))
+    "...can't find object...";
+elseif ((info = verb_args(object, name = spec[2])) == E_VERBNF)
+    player:notify("That object does not have a verb with that name.");
+elseif (typeof(info) == ERR)
+    player:notify(tostr(info));
+elseif (typeof(pas = $code_utils:parse_argspec(@listdelete(args, 1))) != LIST)
+    "...arg spec is bogus...";
+    player:notify(tostr(pas));
+elseif (!(newargs = pas[1]))
+    player:notify($string_utils:from_list(info, " "));
+elseif (pas[2])
+    player:notify(tostr("\"", pas[2][1], "\" unexpected."));
+else
+    info[2] = info[2][1..index(info[2] + "/", "/") - 1];
+    info = {@newargs, @info[length(newargs) + 1..length(info)]};
+    result = set_verb_args(object, name, info);
+    if (result == E_INVARG)
+        player:notify(tostr("\"", info[2], "\" is not a valid preposition (?)"));
+    elseif (typeof(result) == ERR)
+        player:notify(tostr(result));
+    else
+        player:notify("Verb arguments changed.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+eval*-d:
+<pre>
+"A MOO-code evaluator.  Type `;CODE' or `eval CODE'.";
+"Calls player:eval_cmd_string to first transform CODE in any way appropriate (e.g., 
+prefixing .eval_env) and then do the actual evaluation.  See documentation for this:eval_cmd_string";
+"If you set your @prog-option +eval_time, you find out how many ticks and seconds 
+you used.";
+"If eval-d is used, the evaluation is performed as if the debug flag were unset.";
+if (player != this)
+    player:tell("I don't understand that.");
+    return;
+endif
+set_task_perms(player);
+result = player:eval_cmd_string(argstr, verb != "eval-d");
+if (result[1])
+    player:notify(this:eval_value_to_string(result[2]));
+    if (player:prog_option("eval_time") && (!output_delimiters(player)[2]))
+        player:notify(tostr("[used ", result[3], " tick", (result[3] != 1) ? "s, 
+" | ", ", result[4], " second", (result[4] != 1) ? "s" | "", ".]"));
+    endif
+else
+    player:notify_lines(result[2]);
+    nerrors = length(result[2]);
+    player:notify(tostr(nerrors, " error", (nerrors == 1) ? "." | "s."));
+endif
+.
+
+</pre>
+<BR>
+@rmprop*erty:
+<pre>
+set_task_perms(player);
+if ((length(args) != 1) || (!(spec = $code_utils:parse_propref(args[1]))))
+    player:notify(tostr("Usage:  ", verb, " <object>.<property>"));
+    return;
+endif
+object = player:my_match_object(spec[1]);
+pname = spec[2];
+if ($command_utils:object_match_failed(object, spec[1]))
+    return;
+endif
+result = delete_property(object, pname);
+if (result == E_PROPNF)
+    player:notify("That object does not define that property.");
+elseif (typeof(result) == ERR)
+    player:notify(tostr(result));
+else
+    player:notify("Property removed.");
+endif
+.
+
+</pre>
+<BR>
+@verb:
+<pre>
+set_task_perms(player);
+if (!player.programmer)
+    player:notify("You need to be a programmer to do this.");
+    player:notify("If you want to become a programmer, talk to a wizard.");
+    return;
+elseif (!$quota_utils:verb_addition_permitted(player))
+    player:tell("Verb addition not permitted because quota exceeded.");
+    return;
+endif
+if (!(args && (spec = $code_utils:parse_verbref(args[1]))))
+    player:notify(tostr("Usage:  ", verb, " <object>:<verb-name(s)> [<dobj> [<prep> 
+[<iobj> [<permissions> [<owner>]]]]]"));
+    return;
+elseif ($command_utils:object_match_failed(object = player:my_match_object(spec[1]), 
+spec[1]))
+    return;
+endif
+name = spec[2];
+"...Adding another verb of the same name is often a mistake...";
+namelist = $string_utils:explode(name);
+for n in (namelist)
+    if (i = index(n, "*"))
+        n = n[1..i - 1] + n[i + 1..length(n)];
+    endif
+    if ((hv = $object_utils:has_verb(object, n)) && (hv[1] == object))
+        player:notify(tostr("Warning:  Verb `", n, "' already defined on that object."));
+    endif
+endfor
+if (typeof(pas = $code_utils:parse_argspec(@listdelete(args, 1))) != LIST)
+    player:notify(tostr(pas));
+    return;
+endif
+verbargs = pas[1] || (player:prog_option("verb_args") || {});
+verbargs = {@verbargs, "none", "none", "none"}[1..3];
+rest = pas[2];
+if (rest)
+    perms = rest[1];
+elseif (verbargs == {"this", "none", "this"})
+    perms = "rxd";
+else
+    perms = "rd";
+endif
+if (length(rest) < 2)
+    owner = player;
+elseif (length(rest) > 2)
+    player:notify(tostr("\"", rest[3], "\" unexpected."));
+    return;
+elseif ($command_utils:player_match_result(owner = $string_utils:match_player(rest[2]), 
+rest[2])[1])
+    return;
+elseif (owner == $nothing)
+    player:notify("Verb can't be owned by no one!");
+    return;
+endif
+x = add_verb(object, {owner, perms, name}, verbargs);
+if (x == E_INVARG)
+    player:notify(tostr(rest ? tostr("\"", perms, "\" is not a valid set of permissions.") 
+| tostr("\"", verbargs[2], "\" is not a valid preposition (?)")));
+elseif (typeof(x) == ERR)
+    player:notify(tostr(x));
+else
+    player:notify(tostr("Verb added (", length(verbs(object)) - 1, ")."));
+endif
+.
+
+</pre>
+<BR>
+@rmverb:
+<pre>
+set_task_perms(player);
+if (!(args && (spec = $code_utils:parse_verbref(args[1]))))
+    player:notify(tostr("Usage:  ", verb, " <object>:<verb>"));
+elseif ($command_utils:object_match_failed(object = player:my_match_object(spec[1]), 
+spec[1]))
+    "...bogus object...";
+elseif (typeof(argspec = $code_utils:parse_argspec(@listdelete(args, 1))) != LIST)
+    player:notify(tostr(argspec));
+elseif (argspec[2])
+    player:notify($string_utils:from_list(argspec[2], " ") + "??");
+elseif (length(argspec = argspec[1]) in {1, 2})
+    player:notify({"Missing preposition", "Missing iobj specification"}[length(argspec)]);
+else
+    verbname = spec[2];
+    if (index(verbname, "*") > 1)
+        verbname = strsub(verbname, "*", "");
+    endif
+    if ((loc = $code_utils:tonum(verbname)) == E_TYPE)
+        loc = $code_utils:find_last_verb_named(object, verbname);
+        if (argspec)
+            argspec[2] = $code_utils:full_prep(argspec[2]) || argspec[2];
+            while ((loc >= 0) && (verb_args(object, tostr(loc)) != argspec))
+                loc = $code_utils:find_last_verb_named(object, verbname, loc);
+            endwhile
+        endif
+        if (loc < 0)
+            player:notify(tostr("That object does not define that verb", argspec 
+? " with those args." | "."));
+            return;
+        endif
+    endif
+    info = verb_info(object, tostr(loc));
+    vargs = verb_args(object, tostr(loc));
+    result = delete_verb(object, tostr(loc));
+    if (result == E_VERBNF)
+        player:notify("That object does not define that verb.");
+    elseif (typeof(result) == ERR)
+        player:notify(tostr(result));
+    elseif (info)
+        player:notify(tostr("Verb ", object, ":", info[3], " (", loc, ") {", $string_utils:from_list(vargs, 
+" "), "} removed."));
+    else
+        player:notify(tostr("Unreadable verb ", object, ":", loc, " removed."));
+    endif
+endif
+.
+
+</pre>
+<BR>
+@list:
+<pre>
+"@list <obj>:<verb> [<dobj> <prep> <iobj>] [with[out] paren|num] [all] [ranges]";
+set_task_perms(player);
+pflag = player:prog_option("list_all_parens");
+nflag = !player:prog_option("list_no_numbers");
+aflag = 0;
+argspec = {};
+range = {};
+spec = args ? $code_utils:parse_verbref(args[1]) | E_INVARG;
+args = spec ? listdelete(args, 1) | E_INVARG;
+while (args)
+    if (args[1] && ((index("without", args[1]) == 1) || (args[1] == "wo")))
+        "...w,wi,wit,with => 1; wo,witho,withou,without => 0...";
+        fval = !index(args[1], "o");
+        if (index("parentheses", args[2]) == 1)
+            pflag = fval;
+            args[1..2] = {};
+        elseif (index("numbers", args[2]) == 1)
+            nflag = fval;
+            args[1..2] = {};
+        else
+            player:notify(tostr(args[1], " WHAT?"));
+            args = E_INVARG;
+        endif
+    elseif (index("all", args[1]) == 1)
+        aflag = 1;
+        args[1..1] = {};
+    elseif (index("0123456789", args[1][1]) || (index(args[1], "..") == 1))
+        if (E_INVARG == (s = $seq_utils:from_string(args[1])))
+            player:notify(tostr("Garbled range:  ", args[1]));
+            args = E_INVARG;
+        else
+            range = $seq_utils:union(range, s);
+            args = listdelete(args, 1);
+        endif
+    elseif (argspec)
+        "... second argspec?  Not likely ...";
+        player:notify(tostr(args[1], " unexpected."));
+        args = E_INVARG;
+    elseif (typeof(pas = $code_utils:parse_argspec(@args)) == LIST)
+        argspec = pas[1];
+        argspec[2] = $code_utils:full_prep(argspec[2]) || argspec[2];
+        args = pas[2];
+    else
+        "... argspec is bogus ...";
+        player:notify(tostr(pas));
+        args = E_INVARG;
+    endif
+endwhile
+if (args == E_INVARG)
+    player:notify(tostr("Usage:  ", verb, " <object>:<verb> [<dobj> <prep> <iobj>] 
+[with|without parentheses|numbers] [all] [ranges]"));
+    return;
+elseif ($command_utils:object_match_failed(object = player:my_match_object(spec[1]), 
+spec[1]))
+    return;
+endif
+shown_one = 0;
+for what in ({object, @$object_utils:ancestors(object)})
+    if (argspec)
+        vnum = $code_utils:find_verb_named(what, spec[2], 0);
+        while ((vnum < 0) || (verb_args(what, vname = tostr(vnum)) != argspec))
+            vnum = $code_utils:find_verb_named(what, spec[2], vnum + 1);
+        endwhile
+        code = (vnum < 0) ? E_VERBNF | verb_code(what, vname, pflag);
+    else
+        vname = spec[2];
+        code = verb_code(what, vname, pflag);
+    endif
+    if (code != E_VERBNF)
+        if (shown_one)
+            player:notify("");
+        elseif (what != object)
+            player:notify(tostr("Object ", object, " does not define that verb", 
+argspec ? " with those args" | "", ", but its ancestor ", what, " does."));
+        endif
+        if (typeof(code) == ERR)
+            player:notify(tostr(what, ":", vname, " -- ", code));
+        else
+            info = verb_info(what, vname);
+            vname = info[3];
+            if (index(vname, " "))
+                vname = $string_utils:print(vname);
+            endif
+            vargs = verb_args(what, vname);
+            if (index(vargs[2], "/"))
+                vargs[2] = tostr("(", vargs[2], ")");
+            endif
+            player:notify(tostr(what, ":", vname, "   ", $string_utils:from_list(vargs, 
+" ")));
+            if (code == {})
+                player:notify("(That verb has not been programmed.)");
+            else
+                lineseq = {1, length(code) + 1};
+                range && (lineseq = $seq_utils:intersection(range, lineseq));
+                if (!lineseq)
+                    player:notify("(No lines in that range.)");
+                endif
+                for k in [1..length(lineseq) / 2]
+                    for i in [lineseq[(2 * k) - 1]..lineseq[2 * k] - 1]
+                        if (nflag)
+                            player:notify(tostr(" "[1..i < 10], i, ":  ", code[i]));
+                        else
+                            player:notify(code[i]);
+                        endif
+                        $command_utils:suspend_if_needed(0);
+                    endfor
+                endfor
+            endif
+        endif
+        shown_one = 1;
+    endif
+    if (shown_one && (!aflag))
+        return;
+    endif
+endfor
+if (!shown_one)
+    player:notify(tostr("That object does not define that verb", argspec ? " with 
+those args." | "."));
+endif
+.
+
+</pre>
+<BR>
+@forked:
+<pre>
+set_task_perms(player);
+if (!dobjstr)
+    tasks = queued_tasks();
+elseif ($command_utils:player_match_result(dobj = $string_utils:match_player(dobjstr), 
+dobjstr)[1])
+    return;
+elseif (typeof(tasks = $wiz_utils:queued_tasks(dobj)) != LIST)
+    player:notify(tostr(verb, " ", dobj.name, "(", dobj, "):  ", tasks));
+    return;
+endif
+if (tasks)
+    su = $string_utils;
+    player:notify("Queue ID    Start Time            Owner         Verb (Line) [This]");
+    player:notify("--------    ----------            -----         -----------------");
+    now = time();
+    for task in (tasks)
+        $command_utils:suspend_if_needed(0);
+        q_id = task[1];
+        start = task[2];
+        time = (start >= now) ? ctime(start)[5..24] | su:left((start == -1) ? "Reading 
+input ..." | tostr(now - start, " seconds ago..."), 20);
+        owner = task[5];
+        owner_name = valid(owner) ? owner.name | tostr("Dead ", owner);
+        vloc = task[6];
+        vname = task[7];
+        lineno = task[8];
+        this = task[9];
+        player:notify(tostr(su:left(tostr(q_id), 10), "  ", time, "  ", su:left(owner_name, 
+12), "  ", vloc, ":", vname, " (", lineno, ")", (this != vloc) ? tostr(" [", this, 
+"]") | ""));
+        if ((vname == "suspend_if_needed") && (vloc == $command_utils))
+            "Find out the first line of the callers() list as stored by $command_utils.suspend_database_info(q_id)";
+            sde = $command_utils:suspend_database_info(q_id)[1];
+            player:notify(tostr("                    Called By...  ", su:left(valid(sde[3]) 
+? sde[3].name | tostr("Dead ", sde[3]), 12), "  ", sde[4], ":", sde[2], (sde[1] != 
+sde[4]) ? tostr(" [", sde[1], "]") | ""));
+        endif
+    endfor
+    player:notify("-----------------------------------------------------------------");
+else
+    player:notify("No tasks.");
+endif
+.
+
+</pre>
+<BR>
+@kill:
+<pre>
+"Kills one or more tasks.";
+"Arguments:";
+"   object:verb -- kills all tasks which were started from that object and verb.";
+"   all -- kills all tasks owned by invoker";
+"   all player-name -- wizard variant:  kills all tasks owned by player.";
+"   all everyone -- wizard variant:  really kills all tasks.";
+"   Integer taskid -- kills the specifically named task.";
+"   soon [integer] -- kills all tasks scheduled to run in the next [integer] seconds, 
+which defaults to 60.";
+"   %integer -- kills all tasks which end in the digits contained in integer.";
+set_task_perms(player);
+if (length(args) == 0)
+    player:notify_lines({tostr("Usage:  ", verb, " [object]:[verb]"), tostr("    
+    ", verb, " task_id"), tostr("        ", verb, " soon [number-of-seconds]", player.wizard 
+? " [everyone|<player name>]" | ""), tostr("        ", verb, " all", player.wizard 
+? " [everyone|<player name>]" | "")});
+    return;
+elseif (taskid = tonum(args[1]))
+elseif (all = args[1] == "all")
+    everyone = 0;
+    realplayer = player;
+    if (player.wizard && (length(args) > 1))
+        realplayer = $string_utils:match_player(args[2]);
+        everyone = args[2] == "everyone";
+        if ((!valid(realplayer)) && (!everyone))
+            $command_utils:player_match_result(realplayer, args[2]);
+            return;
+        elseif (!everyone)
+            set_task_perms(realplayer);
+        endif
+    endif
+elseif (soon = args[1] == "soon")
+    realplayer = player;
+    if (length(args) > 1)
+        soon = tonum(args[2]);
+        if ((soon <= 0) && (!player.wizard))
+            player:notify(tostr("Usage:  ", verb, " soon [positive-number-of-seconds]"));
+            return;
+        elseif (player.wizard)
+            result = this:kill_aux_wizard_parse(@args[2..length(args)]);
+            soon = result[1];
+            if (result[1] < 0)
+                "already gave them an error message";
+                return;
+            elseif (result[2] == 1)
+                everyone = 1;
+            else
+                everyone = 0;
+                set_task_perms(result[2]);
+                realplayer = result[2];
+            endif
+        endif
+    else
+        soon = 60;
+        everyone = 0;
+    endif
+elseif (percent = args[1][1] == "%")
+    l = length(args[1]);
+    digits = tonum(args[1][2..l]);
+    percent = tonum("1" + "0000000000"[1..l - 1]);
+elseif (colon = index(argstr, ":"))
+    whatstr = argstr[1..colon - 1];
+    vrb = argstr[colon + 1..length(argstr)];
+    if (whatstr)
+        what = player:my_match_object(whatstr);
+    endif
+else
+    player:notify_lines({tostr("Usage:  ", verb, " [object]:[verb]"), tostr("    
+    ", verb, " task_id"), tostr("        ", verb, " soon [number-of-seconds]", player.wizard 
+? " [everyone|<player name>]" | ""), tostr("        ", verb, " all", player.wizard 
+? " [\"everyone\"|<player name>]" | "")});
+    return;
+endif
+"OK, parsed the line, and punted them if it was bogus.  This verb could have been 
+a bit shorter at the expense of readability.  I think it's getting towards unreadable 
+as is.  At this point we've set_task_perms'd, and set up an enormous number of local 
+variables.  Evaluate them in the order we set them, and we should never get var not 
+found.";
+queued_tasks = queued_tasks();
+killed = 0;
+if (taskid)
+    returnval = kill_task(taskid);
+    if (typeof(returnval) == ERR)
+        player:notify(tostr("Invalid task ID ", taskid, "."));
+    else
+        player:notify(tostr("Killed task ", taskid, "."));
+        killed = 1;
+    endif
+elseif (all)
+    for task in (queued_tasks)
+        if (everyone || (realplayer == task[5]))
+            kill_task(task[1]);
+            killed = 1;
+            this:_kill_task_message(task);
+        endif
+    endfor
+elseif (soon)
+    now = time();
+    for task in (queued_tasks)
+        if (((task[2] - now) < soon) && ((!player.wizard) || (everyone || (realplayer 
+== task[5]))))
+            kill_task(task[1]);
+            killed = 1;
+            this:_kill_task_message(task);
+        endif
+    endfor
+elseif (percent)
+    for task in (queued_tasks)
+        if (digits == (task[1] % percent))
+            kill_task(task[1]);
+            killed = 1;
+            this:_kill_task_message(task);
+        endif
+    endfor
+elseif ((colon || vrb) || whatstr)
+    for task in (queued_tasks)
+        if ((((((whatstr == "") || (valid(task[6]) && (index(task[6].name, whatstr) 
+== 1))) || (valid(task[9]) && (index(task[9].name, whatstr) == 1))) || (task[9] == 
+what)) || (task[6] == what)) && ((vrb == "") || (index(" " + strsub(task[7], "*", 
+""), " " + vrb) == 1)))
+            this:_kill_task_message(task);
+            kill_task(task[1]);
+            killed = 1;
+        endif
+    endfor
+else
+    player:notify("Something is funny; I didn't understand your @kill command.  You 
+shouldn't have gotten here.  Please send yduJ mail saying you got this message from 
+@kill, and what you had typed to @kill.");
+endif
+if (!killed)
+    player:notify("No tasks killed.");
+endif
+.
+
+</pre>
+<BR>
+@edit(old):
+<pre>
+if (!player.programmer)
+    player:notify("You need to be a programmer to do this.");
+    player:notify("If you want to become a programmer, talk to a wizard.");
+    return;
+endif
+$verb_editor:invoke(argstr, verb);
+.
+
+</pre>
+<BR>
+@copy @copy-x @copy-move:
+<pre>
+"Usage:  @copy source:verbname to target[:verbname]";
+"  the target verbname, if not given, defaults to that of the source.  If the target 
+verb doesn't already exist, a new verb is installed with the same args, names, code, 
+and permission flags as the source.  Otherwise, the existing target's verb code is 
+overwritten and no other changes are made.";
+"This the poor man's version of multiple inheritance... the main problem is that 
+someone may update the verb you're copying and you'd never know.";
+"  if @copy-x is used, makes an unusable copy (!x, this none this).  If @copy-move 
+is used, deletes the source verb as well.";
+set_task_perms(player);
+if (!player.programmer)
+    player:notify("You need to be a programmer to do this.");
+    player:notify("If you want to become a programmer, talk to a wizard.");
+    return;
+elseif ((verb != "@copy-move") && (!$quota_utils:verb_addition_permitted(player)))
+    player:tell("Verb addition not permitted because quota exceeded.");
+    return;
+elseif ((!(from = $code_utils:parse_verbref(dobjstr))) || (!iobjstr))
+    player:notify(tostr("Usage:  ", verb, " obj:verb to obj:verb"));
+    player:notify(tostr("        ", verb, " obj:verb to obj"));
+    player:notify(tostr("        ", verb, " obj:verb to :verb"));
+    return;
+elseif ($command_utils:object_match_failed(fobj = player:my_match_object(from[1]), 
+from[1]))
+    return;
+elseif (iobjstr[1] == ":")
+    to = {fobj, iobjstr[2..length(iobjstr)]};
+elseif (!(to = $code_utils:parse_verbref(iobjstr)))
+    iobj = player:my_match_object(iobjstr);
+    if ($command_utils:object_match_failed(iobj, iobjstr))
+        return;
+    endif
+    to = {iobj, from[2]};
+elseif ($command_utils:object_match_failed(tobj = player:my_match_object(to[1]), 
+to[1]))
+    return;
+else
+    to[1] = tobj;
+endif
+from[1] = fobj;
+if (((verb == "@copy-move") && (!$perm_utils:controls(player, fobj))) && (!$quota_utils:verb_addition_permitted(player)))
+    player:tell("Won't be able to delete old verb.  Quota exceeded, so unable to 
+continue.  Aborted.");
+    return;
+endif
+to_firstname = strsub(to[2][1..index(to[2] + " ", " ") - 1], "*", "") || "*";
+if ((!(hv = $object_utils:has_verb(to[1], to_firstname))) || (hv[1] != to[1]))
+    if ((!(info = verb_info(@from))) || (!(vargs = verb_args(@from))))
+        player:notify(tostr("Retrieving ", from[1], ":", from[2], " --> ", info && 
+vargs));
+        return;
+    endif
+    if (!player.wizard)
+        info[1] = player;
+    endif
+    if (verb == "@copy-x")
+        "... make sure this is an unusable copy...";
+        info[2] = strsub(info[2], "x", "");
+        vargs = {"this", "none", "this"};
+    endif
+    if (from[2] != to[2])
+        info[3] = to[2];
+    endif
+    if (ERR == typeof(e = add_verb(to[1], info, vargs)))
+        player:notify(tostr("Adding ", to[1], ":", to[2], " --> ", e));
+        return;
+    endif
+endif
+code = verb_code(@from);
+owner = verb_info(@from)[1];
+if (owner != player)
+    code = {tostr("\"Copied from ", from[1].name, " (", from[1], "):", from[2], (from[1] 
+== owner) ? " " | tostr(" by ", owner.name, " (", owner, ") "), ctime(), "\";"), 
+@code};
+    if (!player:prog_option("copy_expert"))
+        player:notify("Use of @copy is discouraged.  Please do not use @copy if you 
+can use inheritance or features instead.  Use @copy carefully, and only when absolutely 
+necessary, as it is wasteful of database space.");
+    endif
+endif
+if (ERR == typeof(e = set_verb_code(to[1], to_firstname, code)))
+    player:notify(tostr("Copying ", from[1], ":", from[2], " to ", to[1], ":", to[2], 
+" --> ", e));
+else
+    player:notify(tostr(to[1], ":", to[2], " code set."));
+endif
+if (verb == "@copy-move")
+    e = delete_verb(from[1], from[2]);
+    if (typeof(e) == ERR)
+        player:tell("Deleting old verb failed: ", e);
+    else
+        player:tell("Removed ", from[1], ":", from[2], ".");
+    endif
+endif
+.
+
+</pre>
+<BR>
+_kill_task_message:
+<pre>
+set_task_perms(caller_perms());
+task = args[1];
+player:notify(tostr("Killed: ", $string_utils:right(tostr("task ", task[1]), 17), 
+", verb ", task[6], ":", task[7], ", line ", task[8], (task[9] != task[6]) ? ", this==" 
++ tostr(task[9]) | ""));
+.
+
+</pre>
+<BR>
+@prog*ram:
+<pre>
+"This version of @program deals with multiple verbs having the same name.";
+"... @program <object>:<verbname> <dobj> <prep> <iobj>  picks the right one.";
+if (player != caller)
+    return;
+endif
+set_task_perms(player);
+"...";
+"...catch usage errors first...";
+"...";
+punt = "...set punt to 0 only if everything works out...";
+if (!(args && (spec = $code_utils:parse_verbref(args[1]))))
+    player:notify(tostr("Usage: ", verb, " <object>:<verb> [<dobj> <prep> <iobj>]"));
+elseif ($command_utils:object_match_failed(object = player:my_match_object(spec[1]), 
+spec[1]))
+    "...bogus object...";
+elseif (typeof(argspec = $code_utils:parse_argspec(@listdelete(args, 1))) != LIST)
+    player:notify(tostr(argspec));
+elseif (argspec[2])
+    player:notify($string_utils:from_list(argspec[2], " ") + "??");
+elseif (length(argspec = argspec[1]) in {1, 2})
+    player:notify({"Missing preposition", "Missing iobj specification"}[length(argspec)]);
+else
+    punt = 0;
+    verbname = spec[2];
+    if (index(verbname, "*") > 1)
+        verbname = strsub(verbname, "*", "");
+    endif
+endif
+"...";
+"...if we have an argspec, we'll need to reset verbname...";
+"...";
+if (punt)
+elseif (argspec)
+    if (!(argspec[2] in {"none", "any"}))
+        argspec[2] = $code_utils:full_prep(argspec[2]);
+    endif
+    loc = $code_utils:find_verb_named(object, verbname);
+    while ((loc >= 0) && (verb_args(object, tostr(loc)) != argspec))
+        loc = $code_utils:find_verb_named(object, verbname, loc + 1);
+    endwhile
+    if (loc < 0)
+        punt = "...can't find it....";
+        player:notify("That object has no verb matching that name + args.");
+    else
+        verbname = tostr(loc);
+    endif
+else
+    loc = -1;
+endif
+"...";
+"...get verb info...";
+"...";
+if (punt || (!(punt = "...reset punt to TRUE...")))
+elseif ((info = verb_info(object, verbname)) == E_VERBNF)
+    player:notify("That object does not have that verb definition.");
+elseif (typeof(info) == ERR)
+    player:notify(tostr(info));
+else
+    punt = 0;
+    aliases = info[3];
+    if (loc < 0)
+        loc = (aliases in (verbs(object) || {})) - 1;
+    endif
+endif
+"...";
+"...read the code...";
+"...";
+if (punt)
+    player:notify(tostr("Now ignoring code for ", args ? args[1] | "nothing in particular", 
+"."));
+    $command_utils:read_lines();
+    player:notify("Verb code ignored.");
+else
+    player:notify(tostr("Now programming ", object.name, ":", aliases, "(", (loc 
+< 0) ? "??" | loc, ")."));
+    lines = $command_utils:read_lines();
+    if (result = set_verb_code(object, verbname, lines))
+        player:notify_lines(result);
+        player:notify(tostr(length(result), " error(s)."));
+        player:notify("Verb not programmed.");
+    elseif (typeof(result) == ERR)
+        player:notify(tostr(result));
+        player:notify("Verb not programmed.");
+    else
+        player:notify("0 errors.");
+        player:notify("Verb programmed.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+@setenv:
+<pre>
+"Usage: @setenv <environment string>";
+"Set your .eval_env property.  Most useful when eval won't work to set it";
+"because your .eval_env contains an error.";
+set_task_perms(player);
+if (!argstr)
+    player:notify(tostr("Usage:  ", verb, " <environment string>"));
+    return;
+endif
+player:notify(tostr("Current eval environment is: ", player.eval_env));
+result = player:set_eval_env(argstr);
+if (typeof(result) == ERR)
+    player:notify(tostr(result));
+    return;
+endif
+player:notify(tostr(".eval_env set to \"", player.eval_env, "\" (", player.eval_ticks, 
+" ticks)."));
+.
+
+</pre>
+<BR>
+@pros*pectus pros*pectus:
+<pre>
+set_task_perms((caller_perms() == $nothing) ? player | caller_perms());
+dobj = $string_utils:match_player(dobjstr);
+if (!dobjstr)
+    player:notify(tostr("Usage: ", verb, " <player> [from <start>] [to <end>]"));
+    return;
+elseif ($command_utils:player_match_result(dobj, dobjstr)[1])
+    return;
+endif
+dobjwords = $string_utils:words(dobjstr);
+if (args[1..length(dobjwords)] == dobjwords)
+    args = args[length(dobjwords) + 1..length(args)];
+endif
+if (!(parse_result = $code_utils:_parse_audit_args(@args)))
+    player:notify(tostr("Usage:  ", verb, " player [from <start>] [to <end>]"));
+    return;
+endif
+return $building_utils:do_prospectus(dobj, @parse_result);
+.
+
+</pre>
+<BR>
+@d*isplay:
+<pre>
+"@display <object>[.[property]]*[,[inherited_property]]*[:[verb]]*[;[inherited_verb]]*";
+"null names for properties and verbs are interpreted as meaning all of them.";
+opivu = {{}, {}, {}, {}, {}};
+string = "";
+punc = 1;
+literal = 0;
+for jj in [1..length(argstr)]
+    j = argstr[jj];
+    if (literal)
+        string = string + j;
+        literal = 0;
+    elseif (j == "\\")
+        literal = 1;
+    elseif (y = index(".,:;", j))
+        opivu[punc] = {@opivu[punc], string};
+        punc = 1 + y;
+        string = "";
+    else
+        string = string + j;
+    endif
+endfor
+opivu[punc] = {@opivu[punc], string};
+objname = opivu[1][1];
+it = this:my_match_object(objname);
+if ($command_utils:object_match_failed(it, objname))
+    return;
+endif
+readable = (it.owner == this) || (it.r || this.wizard);
+cant = {};
+if ("" in opivu[2])
+    if (readable)
+        prop = properties(it);
+    else
+        prop = {};
+        cant = setadd(cant, it);
+    endif
+    if (!this:display_option("thisonly"))
+        what = it;
+        while ((!prop) && valid(what = parent(what)))
+            if ((what.owner == this) || (what.r || this.wizard))
+                prop = properties(what);
+            else
+                cant = setadd(cant, what);
+            endif
+        endwhile
+    endif
+else
+    prop = opivu[2];
+endif
+if ("" in opivu[3])
+    inh = {};
+    for what in ({it, @$object_utils:ancestors(it)})
+        if (((what.owner == this) || what.r) || this.wizard)
+            inh = {@inh, @properties(what)};
+        else
+            cant = setadd(cant, what);
+        endif
+    endfor
+else
+    inh = opivu[3];
+endif
+for q in (inh)
+    if (q in properties(it))
+        prop = setadd(prop, q);
+        inh = setremove(inh, q);
+    endif
+endfor
+vrb = {};
+if ("" in opivu[4])
+    if (readable)
+        vrbs = verbs(it);
+    else
+        vrbs = {};
+        cant = setadd(cant, it);
+    endif
+    what = it;
+    if (!this:display_option("thisonly"))
+        while ((!vrbs) && valid(what = parent(what)))
+            if ((what.owner == this) || (what.r || this.wizard))
+                vrbs = verbs(what);
+            else
+                cant = setadd(cant, what);
+            endif
+        endwhile
+    endif
+    for n in [0..length(vrbs) - 1]
+        vrb = setadd(vrb, {what, tostr(n)});
+    endfor
+else
+    for w in (opivu[4])
+        if (y = $object_utils:has_verb(it, w))
+            vrb = setadd(vrb, {y[1], w});
+        else
+            this:notify(tostr("No such verb, \"", w, "\""));
+        endif
+    endfor
+endif
+if ("" in opivu[5])
+    for z in ({it, @$object_utils:ancestors(it)})
+        if (((this == z.owner) || z.r) || this.wizard)
+            for n in [0..length(verbs(z)) - 1]
+                vrb = setadd(vrb, {z, tostr(n)});
+            endfor
+        else
+            cant = setadd(cant, z);
+        endif
+    endfor
+else
+    for w in (opivu[5])
+        if (typeof(y = $object_utils:has_verb(it, w)) == LIST)
+            vrb = setadd(vrb, {y[1], w});
+        else
+            this:notify(tostr("No such verb, \"", w, "\""));
+        endif
+    endfor
+endif
+if (({""} in opivu) || (opivu[2..5] == {{}, {}, {}, {}}))
+    this:notify(tostr(it.name, " (", it, ") [ ", it.r ? "readable " | "", it.w ? 
+"writeable " | "", it.f ? "fertile " | "", is_player(it) ? "(player) " | "", it.programmer 
+? "programmer " | "", it.wizard ? "wizard " | "", "]"));
+    if (it.owner != (is_player(it) ? it | this))
+        this:notify(tostr("  Owned by ", valid(p = it.owner) ? p.name | "** extinct 
+**", " (", p, ")."));
+    endif
+    this:notify(tostr("  Child of ", valid(p = parent(it)) ? p.name | "** none **", 
+" (", p, ")."));
+    if (it.location != $nothing)
+        this:notify(tostr("  Location ", valid(p = it.location) ? p.name | "** unplace 
+(tell a wizard, fast!) **", " (", p, ")."));
+    endif
+endif
+set_task_perms(this.owner);
+blankargs = this:display_option("blank_tnt") ? {"this", "none", "this"} | #-1;
+for b in (vrb)
+    $command_utils:suspend_if_needed(0);
+    where = b[1];
+    q = b[2];
+    short = strsub(y = index(q, " ") ? q[1..y - 1] | q, "*", "");
+    inf = verb_info(where, short);
+    if ((typeof(inf) == LIST) || (inf == E_PERM))
+        name = (typeof(inf) == LIST) ? inf[3] | q;
+        name = index(name, " ") ? ("\"" + name) + "\"" | name;
+        line = $string_utils:left(tostr($string_utils:right(tostr(where), 6), ":", 
+name, " "), 32);
+        if (inf == E_PERM)
+            line = line + "   ** unreadable **";
+        else
+            line = $string_utils:left(tostr(line, inf[1].name, " (", inf[1], ") "), 
+53) + ((i = inf[2] in {"x", "xd", "d", "rd"}) ? {" x", " xd", "  d", "r d"}[i] | 
+inf[2]);
+            vargs = verb_args(where, short);
+            if (vargs != blankargs)
+                if (this:display_option("shortprep") && (!(vargs[2] in {"any", "none"})))
+                    vargs[2] = $code_utils:short_prep(vargs[2]);
+                endif
+                line = $string_utils:left(line + " ", 60) + $string_utils:from_list(vargs, 
+" ");
+            endif
+        endif
+        this:notify(line);
+    elseif (inf == E_VERBNF)
+        this:notify(tostr(inf));
+        this:notify(tostr("  ** no such verb, \"", short, "\" **"));
+    else
+        this:notify("This shouldn't ever happen. @display is buggy.");
+    endif
+endfor
+all = {@prop, @inh};
+max = (length(all) < 4) ? 999 | (this:linelen() - 56);
+depth = (length(all) < 4) ? -1 | 1;
+truncate_owner_names = length(all) > 1;
+for q in (all)
+    $command_utils:suspend_if_needed(0);
+    inf = property_info(it, q);
+    if (inf == E_PROPNF)
+        if (q in $code_utils.builtin_props)
+            this:notify(tostr($string_utils:left("," + q, 25), "Built in property 
+           ", (length(y = $string_utils:from_value(it.(q), 1, depth)) > max) ? y[1..max] 
++ ".." | y));
+        else
+            this:notify(tostr("  ** property not found, \"", q, "\" **"));
+        endif
+    else
+        pname = $string_utils:left(tostr((q in properties(it)) ? "." | (is_clear_property(it, 
+q) ? " " | ","), q, " "), 25);
+        if (inf == E_PERM)
+            this:notify(pname + "   ** unreadable **");
+        else
+            oname = inf[1].name;
+            truncate_owner_names && ((length(oname) > 12) && (oname = oname[1..12]));
+            (inf[2][1] != "r") && (inf[2][1..0] = " ");
+            (inf[2][2] != "w") && (inf[2][2..1] = " ");
+            this:notify($string_utils:left(tostr($string_utils:left(tostr(pname, 
+oname, " (", inf[1], ") "), 47), inf[2], " "), 54) + ((length(y = $string_utils:from_value(it.(q), 
+1, depth)) > max) ? y[1..max] + ".." | y));
+        endif
+    endif
+endfor
+if (cant)
+    failed = {};
+    for k in (cant)
+        failed = listappend(failed, tostr(k.name, " (", k, ")"));
+    endfor
+    this:notify($string_utils:centre(tostr(" no permission to read ", $string_utils:english_list(failed, 
+", ", " or ", " or "), ". "), 75, "-"));
+else
+    this:notify($string_utils:centre(" finished ", 75, "-"));
+endif
+.
+
+</pre>
+<BR>
+@db*size:
+<pre>
+set_task_perms(player);
+"Let 'em @kill it.";
+count = 0;
+for i in [0..tonum(max_object())]
+    if ($command_utils:running_out_of_time())
+        player:notify(tostr("Counting... [", count, "/", i - 1, "]"));
+        suspend(0);
+    endif
+    if (valid(toobj(i)))
+        count = count + 1;
+    endif
+endfor
+player:notify(tostr("There are ", count, " valid objects out of ", tonum(max_object()) 
++ 1, " allocated object numbers."));
+.
+
+</pre>
+<BR>
+@gethelp:
+<pre>
+"@gethelp [<topic>] [from <db or dblist>]";
+"  Prints the raw text of topic from the appropriate help db.";
+"  With no argument, gets the blank (\"\") topic from wherever it lives";
+"  Text is printed as a script for changing this help topic ";
+"  (somewhat like @dump...)";
+if (!prepstr)
+    topic = argstr;
+    dblist = $code_utils:help_db_list();
+elseif (prepstr != "from")
+    player:notify("Usage:  ", verb, " [<topic>] [from <db>]");
+    return;
+elseif (!(e = $no_one:eval_d(iobjstr = argstr[$string_utils:word_start(argstr)[(prepstr 
+in args) + 1][1]..length(argstr)])))
+    player:notify(tostr(e));
+    return;
+elseif (!e[1])
+    player:notify_lines(e[2]);
+    return;
+elseif (!(typeof(dblist = e[2]) in {OBJ, LIST}))
+    player:notify(tostr(iobjstr, " => ", dblist, " -- not an object or a list"));
+    return;
+else
+    topic = dobjstr;
+    if (typeof(dblist) == OBJ)
+        dblist = {dblist};
+    endif
+endif
+search = $code_utils:help_db_search(topic, dblist);
+if (!search)
+    player:notify("Topic not found.");
+elseif (search[1] == $ambiguous_match)
+    player:notify(tostr("Topic `", topic, "' ambiguous:  ", $string_utils:english_list(search[2], 
+"none", " or ")));
+elseif (typeof(text = (db = search[1]):dump_topic(fulltopic = search[2])) == ERR)
+    "...ok...shoot me.  This is a -d verb...";
+    player:notify(tostr("Cannot retrieve `", fulltopic, "' on ", $code_utils:corify_object(db), 
+":  ", text));
+else
+    player:notify_lines(text);
+endif
+.
+
+</pre>
+<BR>
+@grep @egrep:
+<pre>
+set_task_perms(player);
+if (prepstr == "in")
+    pattern = dobjstr;
+    objlist = player:eval_cmd_string(iobjstr, 0);
+    if (!objlist[1])
+        player:notify(tostr("Had trouble reading `", iobjstr, "':  "));
+        player:notify_lines(@objlist[2]);
+        return;
+    elseif (typeof(objlist[2]) == OBJ)
+        objlist = {objlist[2..2]};
+    elseif (typeof(objlist[2]) != LIST)
+        player:notify(tostr("Value of `", iobjstr, "' is not an object or list:  
+", $string_utils:print(objlist[2])));
+        return;
+    else
+        objlist = objlist[2..2];
+    endif
+elseif ((prepstr == "from") && (player.wizard && (n = tonum(toobj(iobjstr)))))
+    pattern = dobjstr;
+    objlist = {n};
+elseif (args && player.wizard)
+    pattern = argstr;
+    objlist = {};
+else
+    player:notify(tostr("Usage:  ", verb, " <pattern> ", player.wizard ? "[in {<objectlist>} 
+| from <number>]" | "in {<objectlist>}"));
+    return;
+endif
+player:notify(tostr("Searching for verbs ", @prepstr ? {prepstr, " ", iobjstr, " 
+"} | {}, (verb == "@egrep") ? "matching the pattern " | "containing the string ", 
+$string_utils:print(pattern), " ..."));
+player:notify("");
+$code_utils:((verb == "@egrep") ? "find_verbs_matching" | "find_verbs_containing")(pattern, 
+@objlist);
+.
+
+</pre>
+<BR>
+@s*how:
+<pre>
+set_task_perms(player);
+if (dobjstr == "")
+    player:notify(tostr("Usage:  ", verb, " <object-or-property-or-verb>"));
+    return;
+endif
+if (index(dobjstr, ".") && (spec = $code_utils:parse_propref(dobjstr)))
+    if (valid(object = player:my_match_object(spec[1])))
+        return $code_utils:show_property(object, spec[2]);
+    endif
+elseif (spec = $code_utils:parse_verbref(dobjstr))
+    if (valid(object = player:my_match_object(spec[1])))
+        return $code_utils:show_verbdef(object, spec[2]);
+    endif
+elseif (((dobjstr[1] == "$") && ((pname = dobjstr[2..length(dobjstr)]) in properties(#0))) 
+&& (typeof(#0.(pname)) == OBJ))
+    if (valid(object = #0.(pname)))
+        return $code_utils:show_object(object);
+    endif
+elseif ((dobjstr[1] == "$") && (spec = $code_utils:parse_propref(dobjstr)))
+    return $code_utils:show_property(#0, spec[2]);
+else
+    if (valid(object = player:my_match_object(dobjstr)))
+        return $code_utils:show_object(object);
+    endif
+endif
+$command_utils:object_match_failed(object, dobjstr);
+.
+
+</pre>
+<BR>
+@check-p*roperty:
+<pre>
+"@check-prop object.property";
+"  checks for descendents defining the given property.";
+set_task_perms(player);
+if (!(spec = $code_utils:parse_propref(dobjstr)))
+    player:notify(tostr("Usage:  ", verb, " <object>.<prop-name>"));
+elseif ($command_utils:object_match_failed(object = player:my_match_object(spec[1]), 
+spec[1]))
+    "...bogus object...";
+elseif (!($perm_utils:controls(player, object) || object.w))
+    player:notify("You can't create a property on that object anyway.");
+elseif ($object_utils:has_property(object, prop = spec[2]))
+    player:notify("That object already has that property.");
+elseif (olist = $object_utils:descendants_with_property_suspended(object, prop))
+    player:notify("The following descendents have this property defined:");
+    player:notify("  " + $string_utils:from_list(olist, " "));
+else
+    player:notify("No property name conflicts found.");
+endif
+.
+
+</pre>
+<BR>
+set_eval_env:
+<pre>
+"set_eval_env(string);";
+"Run <string> through eval.  If it doesn't compile, return E_INVARG.  If it crashes, 
+well, it crashes.  If it works okay, set .eval_env to it and set .eval_ticks to the 
+amount of time it took.";
+set_task_perms(caller_perms());
+program = args[1];
+value = $code_utils:eval_d(("ticks = ticks_left();" + program) + ";return ticks - 
+ticks_left() - 2;");
+if (!value[1])
+    return E_INVARG;
+elseif (typeof(value[2]) == ERR)
+    return value[2];
+endif
+ok = this.eval_env = program;
+this.eval_ticks = value[2];
+if (typeof(ok) == ERR)
+    return ok;
+else
+    return 1;
+endif
+.
+
+</pre>
+<BR>
+@clearp*roperty @clprop*erty:
+<pre>
+"@clearproperty <obj>.<prop>";
+"Set the value of <obj>.<prop> to `clear', making it appear to be the same as the 
+property on its parent.";
+set_task_perms(player);
+if (!(l = $code_utils:parse_propref(dobjstr)))
+    player:notify(tostr("Usage:  ", verb, " <object>.<property>"));
+elseif ($command_utils:object_match_failed(dobj = player:my_match_object(l[1]), l[1]))
+    "... bogus object...";
+elseif (is_clear_property(dobj, prop = l[2]))
+    player:notify(tostr("Property ", dobj, ".", prop, " is already clear!"));
+elseif ((result = clear_property(dobj, prop)) == E_INVARG)
+    player:notify(tostr("You can't clear ", dobj, ".", prop, "; none of the ancestors 
+define that property."));
+elseif (typeof(result) == ERR)
+    player:notify(tostr(result));
+else
+    player:notify(tostr("Property ", dobj, ".", prop, " cleared; value is now ", 
+$string_utils:print(dobj.(prop)), "."));
+endif
+.
+
+</pre>
+<BR>
+@disown @disinherit:
+<pre>
+"Syntax: @disown <object> [from <object>]";
+"This command is used to remove unwanted children of objects you control. If you 
+control an object, and there is a child of that object you do not want, this command 
+will chparent() the object to its grandparent.";
+if (prepstr)
+    if (prepstr != "from")
+        player:notify("Usage:  ", verb, " <object> [from <object>]");
+        return;
+    elseif ($command_utils:object_match_failed(iobj = player:my_match_object(iobjstr), 
+iobjstr))
+        "... from WHAT?..";
+        return;
+    elseif (valid(dobj = $string_utils:literal_object(dobjstr)))
+        "... literal object number...";
+        if (parent(dobj) != iobj)
+            player:notify(tostr(dobj, " is not a child of ", iobj.name, " (", iobj, 
+")"));
+            return;
+        endif
+    elseif ($command_utils:object_match_failed(dobj = $string_utils:match(dobjstr, 
+children(iobj), "name", children(iobj), "aliases"), dobjstr))
+        "... can't match dobjstr against any children of iobj";
+        return;
+    endif
+elseif ($command_utils:object_match_failed(dobj = player:my_match_object(dobjstr), 
+dobjstr))
+    "... can't match dobjstr...";
+    return;
+endif
+victim = dobj;
+parent = parent(victim);
+if ($perm_utils:controls(player, victim))
+    "... why is he using @disown?... probably by mistake...";
+    player:notify(tostr(victim.name, " (", victim, ") is yours.  Use @chparent."));
+elseif (!valid(parent))
+    player:notify(tostr(victim.name, " (", victim, ") is already an orphan."));
+elseif (!$perm_utils:controls(player, parent))
+    player:notify(tostr(parent.name, " (", parent, "), the parent of ", victim.name, 
+" (", victim, "), is not yours."));
+elseif (!valid(grandparent = parent(parent)))
+    "... still not sure about this... do we care?  --Rog...";
+    player:notify(tostr(victim.name, " (", victim, ") has no grandparent to take 
+custody."));
+else
+    chparent(victim, grandparent);
+    player:notify(tostr(victim.name, " (", victim, ")'s parent is now ", grandparent.name, 
+" (", grandparent, ")."));
+endif
+.
+
+</pre>
+<BR>
+eval_cmd_string:
+<pre>
+":eval_cmd_string(string[,debug])";
+"Evaluates the string the way this player would normally expect to see it evaluated 
+if it were typed on the command line.  debug (defaults to 1) indicates how the debug 
+flag should be set during the evaluation.";
+" => {@eval_result, ticks, seconds}";
+"where eval_result is the result of the actual eval() call.";
+"";
+"For the case where string is an expression, we need to prefix `return ' and append 
+`;' to string before passing it to eval().  However this is not appropriate for statements, 
+where it is assumed an explicit return will be provided somewhere or that the return 
+value is irrelevant.  The code below assumes that string is an expression unless 
+it either begins with a semicolon `;' or one of the MOO language statement keywords.";
+"Next, the substitutions described by this.eval_subs, which should be a list of pairs 
+{string, sub}, are performed on string";
+"Finally, this.eval_env is prefixed to the beginning while this.eval_ticks is subtracted 
+from the eventual tick count.  This allows string to refer to predefined variables 
+like `here' and `me'.";
+set_task_perms(caller_perms());
+program = args[1] + ";";
+debug = {@args, 1}[2] ? 33 | 0;
+if (!match(program, "^ *%(;%|%(if%|fork?%|return%|while%)[^a-z0-9A-Z_]%)"))
+    program = "return " + program;
+endif
+program = tostr(this.eval_env, ";", $code_utils:substitute(program, this.eval_subs));
+ticks = ((ticks_left() - 48) - this.eval_ticks) + debug;
+seconds = seconds_left();
+value = debug ? eval(program) | $code_utils:eval_d(program);
+seconds = seconds - seconds_left();
+ticks = ticks - ticks_left();
+return {@value, ticks, seconds};
+.
+
+</pre>
+<BR>
+@dump:
+<pre>
+"@dump something [with [id=...] [noprops] [noverbs] [create]]";
+"This spills out all properties and verbs on an object, calling suspend at appropriate 
+intervals.";
+"   id=#nnn -- specifies an idnumber to use in place of the object's actual id (for 
+porting to another MOO)";
+"   noprops -- don't show properties.";
+"   noverbs -- don't show verbs.";
+"   create  -- indicates that a @create command should be generated and all of the 
+verbs be introduced with @verb rather than @args; the default assumption is that 
+the object already exists and you're just doing this to have a look at it.";
+set_task_perms(player);
+dobj = player:my_match_object(dobjstr);
+if ($command_utils:object_match_failed(dobj, dobjstr))
+    return;
+endif
+if (prepstr && (prepstr != "with"))
+    player:notify(tostr("Usage:  ", verb, " something [with [id=...] [noprops] [noverbs] 
+[create]]"));
+    return;
+endif
+targname = tostr(dobj);
+options = {"props", "verbs"};
+create = 0;
+if (iobjstr)
+    for o in ($string_utils:explode(iobjstr))
+        if (index(o, "id=") == 1)
+            targname = o[4..length(o)];
+        elseif (o in {"noprops", "noverbs"})
+            options = setremove(options, o[3..length(o)]);
+        elseif (o in {"create"})
+            create = 1;
+        endif
+    endfor
+endif
+if (create)
+    parent = parent(dobj);
+    pstring = tostr(parent);
+    for p in (properties(#0))
+        if (#0.(p) == parent)
+            pstring = "$" + p;
+        endif
+    endfor
+    player:notify(tostr("@create ", pstring, " named ", dobj.name, ":", $string_utils:from_list(dobj.aliases, 
+",")));
+endif
+for p in (("props" in options) ? properties(dobj) | {})
+    pquoted = $string_utils:print(p);
+    info = property_info(dobj, p);
+    value = dobj.(p);
+    if (create)
+        uvalue = (typeof(value) == LIST) ? "{}" | 0;
+        player:notify(tostr("@prop ", targname, ".", pquoted, " ", uvalue || $string_utils:print_suspended(value), 
+" ", info[2] || "\"\"", (info[1] == dobj.owner) ? "" | tostr(" ", info[1])));
+        if (uvalue && value)
+            player:notify(tostr(";;", targname, ".(", pquoted, ") = ", $string_utils:print_suspended(value)));
+        endif
+    else
+        if (info[2] != "rc")
+            player:notify(tostr("@chmod ", targname, ".", pquoted, " ", info[2]));
+        endif
+        if (info[1] != dobj.owner)
+            player:notify(tostr("@chown ", targname, ".", pquoted, " ", info[1]));
+        endif
+        player:notify(tostr(";;", targname, ".(", pquoted, ") = ", $string_utils:print_suspended(value)));
+    endif
+    $command_utils:suspend_if_needed(0);
+endfor
+for a in (("props" in options) ? $object_utils:ancestors(dobj) | {})
+    for p in (properties(a))
+        $command_utils:suspend_if_needed(1);
+        pquoted = $string_utils:print(p);
+        value = dobj.(p);
+        avalue = a.(p);
+        if (typeof(value) == ERR)
+            player:notify(tostr("\"", targname, ".(", pquoted, ") => ", $code_utils:error_name(value), 
+" (", value, ")"));
+        elseif ((typeof(avalue) == ERR) || (value != avalue))
+            player:notify(tostr(";;", targname, ".(", pquoted, ") = ", $string_utils:print_suspended(value)));
+        endif
+    endfor
+    $command_utils:suspend_if_needed(1);
+endfor
+if (!("verbs" in options))
+    player:notify("\"***finished***");
+    return;
+endif
+player:notify("");
+v = tostr(0);
+while ((info = verb_info(dobj, v)) || (info == E_PERM))
+    if (index(info[3], "(old)") && 0)
+        "Thought about skipping (old) verbs...";
+        player:tell("Skipping ", dobj, ":\"", info[3], "\"...");
+    else
+        suspend(1);
+        if (typeof(info) == ERR)
+            player:notify(tostr("\"", dobj, ":", v, " --- ", info, "\";"));
+        else
+            if (i = index(vname = info[3], " "))
+                vname = vname[1..i - 1];
+            endif
+            if (vname[1] != "*")
+                vname = strsub(vname, "*", "");
+            endif
+            args = verb_args(dobj, v);
+            prep = (args[2] in {"any", "none"}) ? args[2] | $code_utils:short_prep(args[2]);
+            perms = (info[2] != ((args == {"this", "none", "this"}) ? "rxd" | "rd")) 
+? info[2] || "\"\"" | "";
+            if (create)
+                if (info[1] == dobj.owner)
+                    tail = perms ? tostr(" ", perms) | "";
+                else
+                    tail = tostr(" ", perms || info[2], " ", info[1]);
+                endif
+                player:notify(tostr("@verb ", targname, ":\"", info[3], "\" ", args[1], 
+" ", prep, " ", args[3], tail));
+            else
+                player:notify(tostr("@args ", targname, ":\"", info[3], "\" ", args[1], 
+" ", prep, " ", args[3]));
+                if (info[1] != dobj.owner)
+                    player:notify(tostr("@chown ", targname, ":", vname, " ", info[1]));
+                endif
+                if (perms)
+                    player:notify(tostr("@chmod ", targname, ":", vname, " ", perms));
+                endif
+            endif
+            if (code = verb_code(dobj, v, 1, 1))
+                player:notify(tostr("@program ", targname, ":", vname));
+                for c in (code)
+                    player:notify(c);
+                    $command_utils:suspend_if_needed(0);
+                endfor
+                player:notify_lines({".", ""});
+            endif
+        endif
+    endif
+    if (index(tostr(" ", info[3], " "), " * "))
+        "... we have a * verb.  may as well forget trying to list...";
+        "... the rest; they're invisible.  set v to something nonstring.";
+        v = E_TYPE;
+    else
+        v = tostr(tonum(v) + 1);
+    endif
+    $command_utils:suspend_if_needed(0);
+endwhile
+player:notify("\"***finished***");
+.
+
+</pre>
+<BR>
+#*:
+<pre>
+"Copied from Player Class hacked with eval that does substitutions and assorted stuff 
+(#8855):# by Geust (#24442) Sun May  9 20:19:05 1993 PDT";
+"#<string>[.<property>|.parent] [exit|player|inventory] [for <code>] returns information 
+about the object (we'll call it <thing>) named by string.  String is matched in the 
+current room unless one of exit|player|inventory is given.";
+"If neither .<property>|.parent nor <code> is specified, just return <thing>.";
+"If .<property> is named, return <thing>.<property>.  .parent returns parent(<thing>).";
+"If <code> is given, it is evaluated, with the value returned by the first part being 
+substituted for %# in <code>.";
+"For example, the command";
+"  #JoeFeedback.parent player for tonum(%#)";
+"will return 26026 (unless Joe has chparented since writing this).";
+set_task_perms(player);
+if (!(whatstr = verb[2..dot = min(index(verb + ".", "."), index(verb + ":", ":")) 
+- 1]))
+    player:notify("Usage:  #string [exit|player|inventory]");
+    return;
+elseif (!args)
+    what = player:my_match_object(whatstr);
+elseif (index("exits", args[1]) == 1)
+    what = player.location:match_exit(whatstr);
+elseif (index("inventory", args[1]) == 1)
+    what = player:match(whatstr);
+elseif (index("players", args[1]) == 1)
+    what = $string_utils:match_player(whatstr);
+    if ($command_utils:player_match_failed(what, whatstr))
+        return;
+    endif
+else
+    what = player:my_match_object(whatstr);
+endif
+if ((!valid(what)) && match(whatstr, "^[0-9]+$"))
+    what = toobj(whatstr);
+endif
+if ($command_utils:object_match_failed(what, whatstr))
+    return;
+endif
+while (index(verb, ".parent") == (dot + 1))
+    what = parent(what);
+    dot = dot + 7;
+endwhile
+if (dot >= length(verb))
+    val = what;
+elseif ((value = $code_utils:eval_d(tostr("return ", what, verb[dot + 1..length(verb)], 
+";")))[1])
+    val = value[2];
+else
+    player:notify_lines(value[2]);
+    return;
+endif
+if (prepstr)
+    program = strsub(iobjstr + ";", "%#", $string_utils:print(val));
+end = 1;
+"while (\"A\" <= (l = argstr[end]) && l <= \"Z\")";
+while (("A" <= (l = program[end])) && (l <= "Z"))
+end = end + 1;
+endwhile
+if ((program[1] == ";") || (program[1..end - 1] in {"if", "for", "fork", "return", 
+"while"}))
+program = $code_utils:substitute(program, this.eval_subs);
+else
+program = $code_utils:substitute("return " + program, this.eval_subs);
+endif
+if ((value = eval(program))[1])
+player:notify(this:eval_value_to_string(value[2]));
+else
+player:notify_lines(value[2]);
+nerrors = length(value[2]);
+player:notify(tostr(nerrors, " error", (nerrors == 1) ? "." | "s."));
+endif
+else
+player:notify(this:eval_value_to_string(val));
+endif
+.
+
+</pre>
+<BR>
+eval_value_to_string:
+<pre>
+set_task_perms(caller_perms());
+if (typeof(val = args[1]) == OBJ)
+    return tostr("=> ", val, "  ", valid(val) ? ("(" + val.name) + ")" | ((a = $list_utils:assoc(val, 
+{{#-1, "<$nothing>"}, {#-2, "<$ambiguous_match>"}, {#-3, "<$failed_match>"}})) ? 
+a[2] | "<invalid>"));
+elseif (typeof(val) == ERR)
+    return tostr("=> ", $code_utils:error_name(val), "  (", val, ")");
+else
+    return tostr("=> ", $string_utils:print(val));
+endif
+.
+
+</pre>
+<BR>
+@progo*ptions @prog-o*ptions @programmero*ptions @programmer-o*ptions:
+<pre>
+"@<what>-option <option> [is] <value>   sets <option> to <value>";
+"@<what>-option <option>=<value>        sets <option> to <value>";
+"@<what>-option +<option>     sets <option>   (usually equiv. to <option>=1";
+"@<what>-option -<option>     resets <option> (equiv. to <option>=0)";
+"@<what>-option !<option>     resets <option> (equiv. to <option>=0)";
+"@<what>-option <option>      displays value of <option>";
+set_task_perms(player);
+what = "prog";
+options = what + "_options";
+option_pkg = #0.(options);
+set_option = ("set_" + what) + "_option";
+if (!args)
+    player:notify_lines({("Current " + what) + " options:", "", @option_pkg:show(this.(options), 
+option_pkg.names)});
+    return;
+elseif (typeof(presult = option_pkg:parse(args)) == STR)
+    player:notify(presult);
+    return;
+else
+    if (length(presult) > 1)
+        if (typeof(sresult = this:(set_option)(@presult)) == STR)
+            player:notify(sresult);
+            return;
+        elseif (!sresult)
+            player:notify("No change.");
+            return;
+        endif
+    endif
+    player:notify_lines(option_pkg:show(this.(options), presult[1]));
+endif
+.
+
+</pre>
+<BR>
+prog_option:
+<pre>
+":prog_option(name)";
+"Returns the value of the specified prog option";
+if ((caller == this) || $perm_utils:controls(caller_perms(), this))
+    return $prog_options:get(this.prog_options, args[1]);
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+set_prog_option:
+<pre>
+":set_prog_option(oname,value)";
+"Changes the value of the named option.";
+"Returns a string error if something goes wrong.";
+if (!((caller == this) || $perm_utils:controls(caller_perms(), this)))
+    return tostr(E_PERM);
+endif
+"...this is kludgy, but it saves me from writing the same verb 3 times.";
+"...there's got to be a better way to do this...";
+verb[1..4] = "";
+foo_options = verb + "s";
+"...";
+if (typeof(s = #0.(foo_options):set(this.(foo_options), @args)) == STR)
+    return s;
+elseif (s == this.(foo_options))
+    return 0;
+else
+    this.(foo_options) = s;
+    return 1;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp eval_subs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp eval_ticks
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp eval_env
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp prog_options
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000038.htm">Hacker</A> <A HREF="HTM_000071.htm">baglady</A> <A HREF="HTM_000079.htm">Marlowe</A> <A HREF="HTM_000099.htm">Useful Utilitarian PC</A> <A HREF="HTM_000158.htm">Tak</A> <A HREF="HTM_000178.htm">Rat_Korga</A> <A HREF="HTM_000034.htm">Quota</A> <A HREF="HTM_000475.htm">Hemlock</A> <A HREF="HTM_000793.htm">Gannef</A> <A HREF="HTM_000964.htm">Sander</A> <A HREF="HTM_001433.htm">Chaos</A> <A HREF="HTM_001449.htm">NetBlazer</A> <A HREF="HTM_001209.htm">Janus</A> <A HREF="HTM_002315.htm">lynn</A> <A HREF="HTM_002314.htm">Indiana-Jones</A> <A HREF="HTM_002593.htm">SunRay</A> <A HREF="HTM_002634.htm">Amazon_Bitch</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

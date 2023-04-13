@@ -1,0 +1,52 @@
+<HTML>
+<HEAD>
+<TITLE>Inside the Pothole</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Inside the Pothole (#2200)</H3>
+(an instance of <A HREF="HTM_000955.htm">Generic Room with Seats</A> made by <A HREF="HTM_000352.htm">genna</A>)
+<BR>
+<BR>
+<BR>
+You see <A HREF="HTM_000209.htm">Dhalmart Shopping Cart</A> and <A HREF="HTM_000352.htm">genna</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ up ] <A HREF="HTM_000128.htm">Outside the Grocery Store</A>.
+Hand over hand, you haul yourself up and out of the deep hole.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+description:
+<pre>
+STR = "";
+for x in (this.desc)
+    if (typeof(x) == LIST)
+        STR = STR + x[random(length(x))];
+    else
+        STR = STR + x;
+    endif
+endfor
+return STR;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp desc
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

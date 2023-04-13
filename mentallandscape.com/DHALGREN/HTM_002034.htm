@@ -1,0 +1,131 @@
+<HTML>
+<HEAD>
+<TITLE>ga</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> ga (#2034)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_001286.htm">Drummer</A>)
+<BR>
+<BR>
+<pre>
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_001289.htm">The Club</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@addstate:
+<pre>
+this.states = setadd(this.states, dobjstr);
+if ((dobjstr + "_msg") in properties(this))
+    return;
+else
+    player:tell("Enter the message ", this.name, " will issue when it enters the 
+", dobjstr, " state.");
+    add_property(this, dobjstr + "_msg", $command_utils:read(), {this.owner, "rc"});
+endif
+.
+
+</pre>
+<BR>
+@ddump:
+<pre>
+player:tell("STATES:  ", $string_utils:print(this.states));
+player:tell("TRANSITIONS:  ", $string_utils:print(this.delta));
+player:tell("CURRENT STATE:  ", this.currently);
+player:tell(this.name, "UNDERSTANDS:  ", $string_utils:print(this.alph));
+.
+
+</pre>
+<BR>
+@rmst*ate:
+<pre>
+this.states = setremove(this.states, dobjstr);
+.
+
+</pre>
+<BR>
+@addtrans:
+<pre>
+player:tell("Origin state?");
+origin_state = $command_utils:read();
+player:tell("Destination state?");
+dest_state = $command_utils:read();
+this.alph = setadd(this.alph, dobjstr);
+this.states = setadd(this.states, origin_state);
+this.states = setadd(this.states, dest_state);
+player:tell("On ", dobjstr, ", ", iobjstr, " will transit from \"", origin_state, 
+"\" to \"", dest_state, ".\"");
+newtrans = setadd({}, dobjstr);
+newtrans = setadd(newtrans, dest_state);
+player:tell("newtrans ==", $string_utils:print(newtrans));
+table = $list_utils:assoc(origin_state, this.delta);
+if (table == {})
+    this.delta = setadd(this.delta, setadd({origin_state}, newtrans));
+else
+    this.delta[$list_utils:iassoc(origin_state, this.delta)] = setadd(table, newtrans);
+endif
+.
+
+</pre>
+<BR>
+transit:
+<pre>
+newstate = $list_utils:assoc(args[1], $list_utils:assoc(this.currently, this.delta))[2];
+player:tell($string_utils:pronoun_sub(this.(newstate + "_msg")));
+this.currently = newstate;
+.
+
+</pre>
+<BR>
+@o*rder:
+<pre>
+player:tell("/", dobjstr, "/", prepstr, "/", iobjstr);
+if (iobjstr in this.alph)
+    this:transit(iobjstr);
+else
+    player:tell($string_utils:pronoun_sub(this.ENOSTATE_msg));
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp alph
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp start
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp final
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp states
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp delta
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp currently
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp standing_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ENOSTATE_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp groveling_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp licking_feet_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp licking_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp awaiting punishment_msg
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

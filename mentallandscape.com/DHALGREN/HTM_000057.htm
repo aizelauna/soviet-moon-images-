@@ -1,0 +1,587 @@
+<HTML>
+<HEAD>
+<TITLE>command utilities</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> command utilities (#57)</H3>
+(an instance of <A HREF="HTM_000124.htm">Generic Utilities Package</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp$command_utils is the repository for verbs that are of general usefulness to authors of all sorts of commands.  For more details about any of these verbs, use `help $command_utils:<verb-name>'.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspDetecting and Handling Failures in Matching
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp-------------------------------------------
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:object_match_failed(match_result, name)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp    Test whether or not a :match_object() call failed and print messages if so.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:player_match_failed(match_result, name)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp    Test whether or not a :match_player() call failed and print messages if so.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:player_match_result(match_results, names)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp    ...similar to :player_match_failed, but does a whole list at once.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspReading Input from the Player
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp-----------------------------
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:read()         -- Read one line of input from the player and return it.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:yes_or_no([prompt])
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                -- Prompt for and read a `yes' or `no' answer.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:read_lines()   -- Read zero or more lines of input from the player.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:dump_lines(lines) 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                -- Return list of lines quoted so that feeding them to 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                   :read_lines() will reproduce the original lines.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspUtilities for Suspending
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp------------------------
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:running_out_of_time()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                -- Return true if we're low on ticks or seconds.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:suspend_if_needed(time)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                -- Suspend (and return true) if we're running out of time.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspClient Support for Lengthy Commands
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp-----------------------------------
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:suspend(args)  -- Handle PREFIX and SUFFIX for clients in long commands.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+object_match_failed:
+<pre>
+"Usage: object_match_failed(object, string)";
+"Prints a message if string does not match object.  Generally used after object is 
+derived from a :match_object(string).";
+match_result = args[1];
+string = args[2];
+tell = $perm_utils:controls(caller_perms(), player) ? "notify" | "tell";
+if ((index(string, "#") == 1) && ($code_utils:toobj(string) != E_TYPE))
+    "...avoid the `I don't know which `#-2' you mean' message...";
+    if (!valid(match_result))
+        player:(tell)(tostr(string, " does not exist."));
+    endif
+    return !valid(match_result);
+elseif (match_result == $nothing)
+    player:(tell)("You must give the name of some object.");
+elseif (match_result == $failed_match)
+    player:(tell)(tostr("I see no \"", string, "\" here."));
+elseif (match_result == $ambiguous_match)
+    player:(tell)(tostr("I don't know which \"", string, "\" you mean."));
+elseif (!valid(match_result))
+    player:(tell)(tostr(match_result, " does not exist."));
+else
+    return 0;
+endif
+return 1;
+.
+
+</pre>
+<BR>
+player_match_result player_match_failed:
+<pre>
+":player_match_failed(result,string)";
+"  is exactly like :object_match_failed(result,string)";
+"  except that its messages are more suitable for player searches.";
+":player_match_result(results,strings)";
+"  handles a list of results, also presumably from $string_utils:match_player(strings), 
+printing messages to player for *each* of the nonmatching strings.  It returns a 
+list, an overall result (true if some string didn't match --- just like player_match_failed), 
+followed by the list players that matched.";
+"";
+"An optional 3rd arg gives an identifying string to prefix to each of the nasty messages.";
+if (valid(player))
+    tell = $perm_utils:controls(caller_perms(), player) ? "notify" | "tell";
+    plyr = player;
+else
+    tell = "notify";
+    plyr = $login;
+endif
+"...";
+match_results = args[1];
+strings = args[2];
+cmdid = {@args, ""}[3] || "";
+pmf = verb == "player_match_failed";
+if (typeof(match_results) == OBJ)
+    match_results = {match_results};
+    strings = {strings};
+endif
+pset = {};
+bombed = 0;
+for i in [1..length(match_results)]
+    if (valid(result = match_results[i]))
+        pset = setadd(pset, match_results[i]);
+    elseif (result == $nothing)
+        "... player_match_result quietly skips over blank strings";
+        if (pmf)
+            plyr:(tell)("You must give the name of some player.");
+            bombed = 1;
+        endif
+    elseif (result == $failed_match)
+        plyr:(tell)(tostr(cmdid, "\"", strings[i], "\" is not the name of any player."));
+        bombed = 1;
+    elseif (result == $ambiguous_match)
+        lst = $player_db:find_all(strings[i]);
+        plyr:(tell)(tostr(cmdid, "\"", strings[i], "\" could refer to ", (length(lst) 
+> 20) ? tostr("any of ", length(lst), " players") | $string_utils:english_list($list_utils:map_arg(2, 
+$string_utils, "pronoun_sub", "%n (%#)", lst), "no one", " or "), "."));
+        bombed = 1;
+    else
+        plyr:(tell)(tostr(result, " does not exist."));
+        bombed = 1;
+    endif
+endfor
+return pmf ? bombed | {bombed, @pset};
+.
+
+</pre>
+<BR>
+read:
+<pre>
+"$command_utils:read() -- read a line of input from the player and return it";
+"Optional argument is a prompt portion to replace `a line of input' in the prompt.";
+"";
+"Returns E_PERM if the current task is not a command task that has never called suspend().";
+if (args && (typeof(args[1]) == STR))
+    prompt = args[1];
+else
+    prompt = "a line of input";
+endif
+c = callers();
+p = c[length(c)][5];
+p:notify(tostr("[Type ", prompt, " or `@abort' to abort the command.]"));
+ans = read();
+if (typeof(ans) == ERR)
+    return ans;
+elseif ($string_utils:trim(ans) == "@abort")
+    p:notify(">> Command Aborted <<");
+    kill_task(task_id());
+else
+    return ans;
+endif
+.
+
+</pre>
+<BR>
+read_lines:
+<pre>
+"$command_utils:read_lines() -- read zero or more lines of input";
+"";
+"Returns a list of strings, the lines typed by the player.  Returns E_PERM if the 
+current task is not a command task that has never called suspend().";
+"In order that one may enter arbitrary lines, including \"@abort\" or \".\", if the 
+first character in an input line is `.' and there is some nonwhitespace afterwords, 
+the `.' is dropped and the rest of the line is taken verbatim, so that, e.g., \".@abort\" 
+enters as \"@abort\" and \"..\" enters as \".\".";
+c = callers();
+p = c[length(c)][5];
+p:notify("[Type lines of input; use `.' to end or `@abort' to abort the command.]");
+ans = {};
+while (1)
+    if (typeof(line = read()) == ERR)
+        return line;
+    elseif ((line[1..min(6, length(line))] == "@abort") && ((tail = line[7..length(line)]) 
+== $string_utils:space(tail)))
+        p:notify(">> Command Aborted <<");
+        kill_task(task_id());
+    elseif ((!line) || (line[1] != "."))
+        ans = {@ans, line};
+    elseif ((tail = line[2..length(line)]) == $string_utils:space(tail))
+        return ans;
+    else
+        ans = {@ans, tail};
+    endif
+endwhile
+.
+
+</pre>
+<BR>
+yes_or_no:
+<pre>
+":yes-or-no([prompt]) -- prompts the player for a yes or no answer and returns a 
+true value iff the player enters a line of input that is some prefix of \"yes\"";
+"";
+"Returns E_NONE if the player enters a blank line, E_INVARG, if the player enters 
+something that isn't a prefix of \"yes\" or \"no\", and E_PERM if the current task 
+is not a command task that has never called suspend().";
+c = callers();
+p = c[length(c)][5];
+p:notify(tostr(args ? args[1] + " " | "", "[Enter `yes' or `no']"));
+ans = read(@((caller == p) || $perm_utils:controls(caller_perms(), p)) ? {p} | {});
+if (typeof(ans) == ERR)
+    return ans;
+elseif (ans = $string_utils:trim(ans))
+    if (ans == "@abort")
+        p:notify(">> Command Aborted <<");
+        kill_task(task_id());
+    endif
+    return (index("yes", ans) == 1) || ((index("no", ans) != 1) && E_INVARG);
+else
+    return E_NONE;
+endif
+.
+
+</pre>
+<BR>
+read_lines_escape:
+<pre>
+"$command_utils:read_lines_escape(escapes[,help]) -- read zero or more lines of input";
+"";
+"Similar to :read_lines() except that help is available and one may specify other 
+escape sequences to terminate the read.";
+"  escapes should be either a string or list of strings; this specifies which inputs 
+other from `.' or `@abort' should terminate the read (... don't use anything beginning 
+with a `.').";
+"  help should be a string or list of strings to be printed in response to the player 
+typing `?'; the first line of the help text should be a general comment about what 
+the input text should be used for.  Successive lines should describe the effects 
+of the alternative escapes.";
+"Returns {end,list-of-strings-input} where end is the particular line that terminated 
+this input or 0 if input terminated normally with `.'.  Returns E_PERM if the current 
+task is not a command task that has never called suspend().  ";
+"@abort and lines beginning with `.' are treated exactly as with :read_lines()";
+c = callers();
+p = c[length(c)][5];
+escapes = {".", "@abort", @(typeof(args[1]) == LIST) ? args[1] | {args[1]}};
+p:notify(tostr("[Type lines of input; `?' for help; end with `", $string_utils:english_list(escapes, 
+"", "' or `", "', `", ""), "'.]"));
+ans = {};
+escapes[1..0] = {"?"};
+"... set up the help text...";
+help = {@args, "You are currently in a read loop."}[2];
+if (typeof(help) != LIST)
+    help = {help};
+endif
+help[2..1] = {"Type `.' on a line by itself to finish.", "Anything else with a leading 
+period is entered with the period removed.", "Type `@abort' to abort the command 
+completely."};
+while (typeof(line = read()) != ERR)
+    if ((trimline = $string_utils:trimr(line)) in escapes)
+        if (trimline == ".")
+            return {0, ans};
+        elseif (trimline == "@abort")
+            p:notify(">> Command Aborted <<");
+            kill_task(task_id());
+        elseif (trimline == "?")
+            p:notify_lines(help);
+        else
+            return {trimline, ans};
+        endif
+    else
+        if (line && (line[1] == "."))
+            line[1..1] = "";
+        endif
+        ans = {@ans, line};
+    endif
+endwhile
+return line;
+.
+
+</pre>
+<BR>
+suspend:
+<pre>
+"Suspend, using output_delimiters() in case a client needs to keep track";
+"of the output of the current command.";
+"Args are TIME, amount of time to suspend, and optional (misnamed) OUTPUT.";
+"If given no OUTPUT, just do a suspend.";
+"If OUTPUT is neither list nor string, suspend and return output_delimiters";
+"If OUTPUT is a list, it should be in the output_delimiters() format:";
+"  {PREFIX, SUFFIX}.  Use these to handle that client stuff.";
+"If OUTPUT is a string, it should be SUFFIX (output_delimiters[2])";
+"";
+"Proper usage:";
+"The first time you want to suspend, use";
+"  output_delimiters = $command_utils:suspend(time, x);";
+"where x is some non-zero number.";
+"Following, use";
+"  $command_utils:suspend(time, output_delimiters);";
+"To wrap things up, use";
+"  $command_utils:suspend(time, output_delimiters[2]);";
+"You'll probably want time == 0 most of the time.";
+"Note: Using this from verbs called by other verbs could get pretty weird.";
+set_task_perms(caller_perms());
+time = args[1];
+output = (length(args) == 2) && args[2];
+if (!output)
+    suspend(time);
+else
+    if (typeof(output) == LIST)
+        PREFIX = output[1];
+        SUFFIX = output[2];
+        if (PREFIX)
+            player:tell(output[2]);
+        endif
+        suspend(time);
+        if (SUFFIX)
+            player:tell(output[1]);
+        endif
+    elseif (typeof(output) == STR)
+        if (output)
+            player:tell(output);
+        endif
+    else
+        output = output_delimiters(player);
+        suspend(time);
+        if (output != {"", ""})
+            player:tell(output[1]);
+        endif
+        return output;
+    endif
+endif
+.
+
+</pre>
+<BR>
+running_out_of_time:
+<pre>
+"Return true if we're running out of ticks or seconds.";
+return (seconds_left() < 2) || (ticks_left() < 4000);
+.
+
+</pre>
+<BR>
+suspend_if_needed:
+<pre>
+"Usage:  $command_utils:suspend_if_needed(<time>[, @<announcement>])";
+"See if we're running out of ticks or seconds, and if so suspend(<time>) and return 
+true.  If more than one arg is given, print the remainder with player:tell.";
+if (this:running_out_of_time())
+    " && valid(player)) -- taking check out for now ";
+    if (ann = listdelete(args, 1))
+        player:tell(@ann);
+    endif
+    data = {task_id(), callers()};
+    this:suspend_database_add(data);
+    set_task_perms(caller_perms());
+    suspend(args[1]);
+    this:suspend_database_remove(data);
+    return 1;
+endif
+.
+
+</pre>
+<BR>
+dump_lines:
+<pre>
+":dump_lines(text) => text `.'-quoted for :read_lines()";
+"  text is assumed to be a list of strings";
+"Returns a corresponding list of strings which, when read via :read_lines, ";
+"produces the original list of strings (essentially, any strings beginning ";
+"with a period \".\" have the period doubled).";
+"The list returned includes a final \".\"";
+text = args[1];
+newtext = {};
+i = lasti = 0;
+for line in (text)
+    if (line && (line[1] == "."))
+        newtext = {@newtext, @(i > lasti) ? text[lasti + 1..i] | {}, "." + line};
+        lasti = i = i + 1;
+    else
+        i = i + 1;
+    endif
+endfor
+return {@newtext, @(i > lasti) ? text[lasti + 1..i] | {}, "."};
+.
+
+</pre>
+<BR>
+explain_syntax:
+<pre>
+":explain_syntax(here,verb,args)";
+verb = args[2];
+for x in ({player, args[1], @valid(dobj) ? {dobj} | {}, @valid(iobj) ? {iobj} | {}})
+    what = x;
+    while (hv = $object_utils:has_verb(what, verb))
+        what = hv[1];
+        i = 0;
+        while (0 <= (i = $code_utils:find_verb_named(what, verb, i)))
+            if (evs = $code_utils:explain_verb_syntax(x, verb, @verb_args(what, tostr(i))))
+                player:tell("Try this instead:  ", evs);
+                return 1;
+            endif
+            i = i + 1;
+        endwhile
+        what = parent(what);
+    endwhile
+endfor
+return 0;
+.
+
+</pre>
+<BR>
+do_huh:
+<pre>
+":do_huh(verb,args)  what :huh should do by default.";
+set_task_perms(cp = caller_perms());
+verb = args[1];
+args = args[2];
+notify = $perm_utils:controls(cp, player) ? "notify" | "tell";
+if (player:my_huh(verb, args))
+    "... the player found something funky to do ...";
+elseif (caller:here_huh(verb, args))
+    "... the room found something funky to do ...";
+elseif (player:last_huh(verb, args))
+    "... player's second round found something to do ...";
+elseif (dobj == $ambiguous_match)
+    if (iobj == $ambiguous_match)
+        player:(notify)(tostr("I don't understand that (\"", dobjstr, "\" and \"", 
+iobjstr, "\" are both ambiguous names)."));
+    else
+        player:(notify)(tostr("I don't understand that (\"", dobjstr, "\" is an ambiguous 
+name)."));
+    endif
+elseif (iobj == $ambiguous_match)
+    player:(notify)(tostr("I don't understand that (\"", iobjstr, "\" is an ambiguous 
+name)."));
+else
+    player:(notify)("I don't understand that.");
+    player:my_explain_syntax(caller, verb, args) || (caller:here_explain_syntax(caller, 
+verb, args) || this:explain_syntax(caller, verb, args));
+endif
+.
+
+</pre>
+<BR>
+suspend_database_add:
+<pre>
+if (caller == this)
+    this.suspend_database = setadd(this.suspend_database, args[1]);
+endif
+.
+
+</pre>
+<BR>
+suspend_database_remove:
+<pre>
+if (caller == this)
+    this.suspend_database = setremove(this.suspend_database, args[1]);
+endif
+.
+
+</pre>
+<BR>
+suspend_database_cleanup:
+<pre>
+if (caller_perms().wizard)
+    q = $list_utils:slice(queued_tasks(), 1);
+    newdb = {};
+    for x in (this.suspend_database)
+        if (x[1] in q)
+            newdb = {@newdb, x};
+        endif
+    endfor
+    this.suspend_database = newdb;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+task_info:
+<pre>
+"task_info(task id)";
+"Return info (the same info supplied by queued_tasks()) about a given task id, or 
+E_INVARG if there's no such task queued.";
+"WIZARDLY";
+set_task_perms(caller_perms());
+tasks = queued_tasks();
+task_id = args[1];
+for task in (tasks)
+    if (task[1] == task_id)
+        return task;
+    endif
+endfor
+return E_INVARG;
+.
+
+</pre>
+<BR>
+suspend_database_display:
+<pre>
+this:suspend_database_cleanup();
+who = caller_perms();
+for x in (this.suspend_database)
+    if (who.wizard || (x[2][1][3] == who))
+        player:tell(x[1]);
+        for y in (x[2])
+            player:tell("   ", $string_utils:print(y));
+        endfor
+    endif
+endfor
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    this.suspend_database = {};
+endif
+.
+
+</pre>
+<BR>
+suspend_database_info:
+<pre>
+"$command_utils:suspend_database_info(task_id) => Returns callers list of $command_utils:suspend_if_needed() 
+call with given task_id.  Caller_perms() must be a Wizard or the owner of the task. 
+ Returns {} if no task.";
+"WIZARDLY";
+task_id = args[1];
+cp = caller_perms();
+this:suspend_database_cleanup();
+task = $list_utils:assoc(task_id, this.suspend_database);
+if (!cp.wizard)
+    if (!(queued = $list_utils:assoc(task_id, queued_tasks())))
+        return {};
+    elseif (queued[5] != cp)
+        return E_PERM;
+    endif
+endif
+return task ? task[2] | {};
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp suspend_database
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

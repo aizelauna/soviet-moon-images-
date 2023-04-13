@@ -1,0 +1,55 @@
+<HTML>
+<HEAD>
+<TITLE>Liquor FO</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Liquor FO (#1257)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_001237.htm">Trees_Beatnik</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000111.htm">Features Feature Object</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspWhat good is a MOO without a lick verb, anyhow?
+&nbsp&nbsp&nbsp&nbsp&nbspUsage:  lick <player>
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+lick:
+<pre>
+"What good is a MOO without a lick verb anyhow?";
+"USAGE:  lick <player>";
+if (!valid(dobj))
+    player:tell("Can't do it. Sorry.");
+else
+    player:tell("You lick ", dobj.name, "!");
+    dobj:tell(player.name, " licks you!");
+    dobj.location:announce_all_but({player, dobj}, player.name, " licks ", dobj.name, 
+"!");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

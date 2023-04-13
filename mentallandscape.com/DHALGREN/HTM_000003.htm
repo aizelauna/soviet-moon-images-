@@ -1,0 +1,830 @@
+<HTML>
+<HEAD>
+<TITLE>generic room</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> generic room (#3)</H3>
+(an instance of <A HREF="HTM_000001.htm">Root Class</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+confunc:
+<pre>
+this:look_self(player.brief);
+this:announce(player.name, " has connected.");
+.
+
+</pre>
+<BR>
+disfunc:
+<pre>
+fork (300)
+    if ((((valid(player) && (!(player in connected_players()))) && ((player.last_connect_time 
++ 300) < time())) && (this != player.home)) && (player.location != player.home))
+        fork (0)
+            "This is forked so that it's protected from aborts due to errors in the 
+player's :moveto verb.";
+            if (player.location != player.home)
+                move(player, $player_start);
+            endif
+        endfork
+        start = player.location;
+        player:moveto(player.home);
+        if (player.location != start)
+            start:announce("A gang of youths charge in, grab ", player.name, ", and 
+quickly drag ", player.po, " out of sight.");
+        endif
+        if (player.location == player.home)
+            player.home:announce("A gang of youths drag ", player.name, " in and 
+roughly deposit ", player.po, ". They rummage around on ", player.pp, " body for 
+a bit then run off.");
+        endif
+    endif
+endfork
+this:announce(player.name, " has disconnected.");
+.
+
+</pre>
+<BR>
+say:
+<pre>
+player:tell("You say, \"", argstr, "\"");
+this:announce(player.name, " says, \"", argstr, "\"");
+.
+
+</pre>
+<BR>
+emote:
+<pre>
+if ((argstr != "") && (argstr[1] == ":"))
+    this:announce_all(player.name, argstr[2..length(argstr)]);
+else
+    this:announce_all(player.name, " ", argstr);
+endif
+.
+
+</pre>
+<BR>
+announce:
+<pre>
+for dude in (setremove(this:contents(), player))
+    dude:tell(@args);
+endfor
+.
+
+</pre>
+<BR>
+match_exit:
+<pre>
+what = args[1];
+if (what)
+    yes = $failed_match;
+    for e in (this.exits)
+        if (valid(e) && (what in {e.name, @e.aliases}))
+            if (yes == $failed_match)
+                yes = e;
+            elseif (yes != e)
+                return $ambiguous_match;
+            endif
+        endif
+    endfor
+    return yes;
+else
+    return $nothing;
+endif
+.
+
+</pre>
+<BR>
+add_exit:
+<pre>
+set_task_perms(caller_perms());
+return (this.exits = setadd(this.exits, args[1])) != E_PERM;
+.
+
+</pre>
+<BR>
+tell_contents:
+<pre>
+contents = args[1];
+ctype = args[2];
+if ((!this.dark) && (contents != {}))
+    if (ctype == 0)
+        player:tell("Contents:");
+        for thing in (contents)
+            player:tell("  ", thing:title());
+        endfor
+    elseif (ctype == 1)
+        for thing in (contents)
+            if (is_player(thing))
+                player:tell(thing:title(), " is here.");
+            else
+                player:tell("You see ", thing:title(), " here.");
+            endif
+        endfor
+    elseif (ctype == 2)
+        player:tell("You see ", $string_utils:title_list(contents), " here.");
+    elseif (ctype == 3)
+        players = things = {};
+        for x in (contents)
+            if (is_player(x))
+                players = {@players, x};
+            else
+                things = {@things, x};
+            endif
+        endfor
+        if (things)
+            player:tell("You see ", $string_utils:title_list(things), " here.");
+        endif
+        if (players)
+            player:tell($string_utils:title_listc(players), (length(players) == 1) 
+? " is" | " are", " here.");
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+@exits:
+<pre>
+if (!$perm_utils:controls(valid(caller_perms()) ? caller_perms() | player, this))
+    player:tell("Sorry, only the owner of a room may list its exits.");
+elseif (this.exits == {})
+    player:tell("This room has no conventional exits.");
+else
+    for exit in (this.exits)
+        player:tell(exit.name, " (", exit, ") leads to ", valid(exit.dest) ? exit.dest.name 
+| "???", " (", exit.dest, ") via {", $string_utils:from_list(exit.aliases, ", "), 
+"}.");
+    endfor
+endif
+.
+
+</pre>
+<BR>
+look_self:
+<pre>
+player:tell(this:title());
+if (!(args && args[1]))
+    pass();
+endif
+this:tell_contents(setremove(this:contents(), player), this.ctype);
+this:tell_exits();
+.
+
+</pre>
+<BR>
+acceptable:
+<pre>
+what = args[1];
+return this:is_unlocked_for(what) && (((this.free_entry || ((what == this.blessed_object) 
+&& (task_id() == this.blessed_task))) || (what.owner == this.owner)) || ((typeof(this.residents) 
+== LIST) && (what in this.residents)));
+.
+
+</pre>
+<BR>
+add_entrance:
+<pre>
+set_task_perms(caller_perms());
+return (this.entrances = setadd(this.entrances, args[1])) != E_PERM;
+.
+
+</pre>
+<BR>
+bless_for_entry:
+<pre>
+if (caller in this.entrances)
+    this.blessed_object = args[1];
+    this.blessed_task = task_id();
+endif
+.
+
+</pre>
+<BR>
+@entrances:
+<pre>
+if (!$perm_utils:controls(valid(caller_perms()) ? caller_perms() | player, this))
+    player:tell("Sorry, only the owner of a room may list its entrances.");
+elseif (this.entrances == {})
+    player:tell("This room has no conventional entrances.");
+else
+    for exit in (this.entrances)
+        player:tell(exit.name, " (", exit, ") comes from ", valid(exit.source) ? 
+exit.source.name | "???", " (", exit.source, ") via {", $string_utils:from_list(exit.aliases, 
+", "), "}.");
+    endfor
+endif
+.
+
+</pre>
+<BR>
+go:
+<pre>
+if ((!args) || (!(dir = args[1])))
+    player:tell("You need to specify a direction.");
+    return E_INVARG;
+elseif (valid(exit = player.location:match_exit(dir)))
+    exit:invoke();
+    if (length(args) > 1)
+        "Now give objects in the room we just passed through a chance to act.";
+        suspend(0);
+        player.location:go(@listdelete(args, 1));
+    endif
+elseif (exit == $failed_match)
+    player:tell("You can't go that way (", dir, ").");
+else
+    player:tell("I don't know which direction `", dir, "' you mean.");
+endif
+.
+
+</pre>
+<BR>
+l*ook:
+<pre>
+if ((dobjstr == "") && (!prepstr))
+    this:look_self();
+elseif ((prepstr != "in") && (prepstr != "on"))
+    if ((!dobjstr) && (prepstr == "at"))
+        dobjstr = iobjstr;
+        iobjstr = "";
+    else
+        dobjstr = dobjstr + (prepstr && ((dobjstr && " ") + prepstr));
+        dobjstr = dobjstr + (iobjstr && ((dobjstr && " ") + iobjstr));
+    endif
+    dobj = this:match_object(dobjstr);
+    if (!$command_utils:object_match_failed(dobj, dobjstr))
+        dobj:look_self();
+    endif
+elseif (!iobjstr)
+    player:tell(verb, " ", prepstr, " what?");
+else
+    iobj = this:match_object(iobjstr);
+    if (!$command_utils:object_match_failed(iobj, iobjstr))
+        if (dobjstr == "")
+            iobj:look_self();
+        elseif ((thing = iobj:match(dobjstr)) == $failed_match)
+            player:tell("I don't see any \"", dobjstr, "\" ", prepstr, " ", iobj.name, 
+".");
+        elseif (thing == $ambiguous_match)
+            player:tell("There are several things ", prepstr, " ", iobj.name, " one 
+might call \"", dobjstr, "\".");
+        else
+            thing:look_self();
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+announce_all:
+<pre>
+for dude in (this:contents())
+    dude:tell(@args);
+endfor
+.
+
+</pre>
+<BR>
+announce_all_but:
+<pre>
+text = listdelete(args, 1);
+contents = this:contents();
+for l in (args[1])
+    contents = setremove(contents, l);
+endfor
+for listener in (contents)
+    listener:tell(@text);
+endfor
+.
+
+</pre>
+<BR>
+enterfunc:
+<pre>
+object = args[1];
+if (is_player(object))
+    player = object;
+    this:look_self(player.brief);
+endif
+if (object == this.blessed_object)
+    this.blessed_object = #-1;
+endif
+.
+
+</pre>
+<BR>
+exitfunc:
+<pre>
+return;
+.
+
+</pre>
+<BR>
+remove_exit:
+<pre>
+exit = args[1];
+if (caller != exit)
+    set_task_perms(caller_perms());
+endif
+return (this.exits = setremove(this.exits, exit)) != E_PERM;
+.
+
+</pre>
+<BR>
+remove_entrance:
+<pre>
+exit = args[1];
+if (caller != exit)
+    set_task_perms(caller_perms());
+endif
+return (this.entrances = setremove(this.entrances, exit)) != E_PERM;
+.
+
+</pre>
+<BR>
+@add-exit:
+<pre>
+set_task_perms(player);
+if (!dobjstr)
+    player:tell("Usage:  @add-exit <exit-number>");
+    return;
+endif
+exit = this:match_object(dobjstr);
+if ($command_utils:object_match_failed(exit, dobjstr))
+    return;
+endif
+if (!($exit in $object_utils:ancestors(exit)))
+    player:tell("That doesn't look like an exit object to me...");
+    return;
+endif
+dest = exit.dest;
+source = exit.source;
+if (dest == E_PERM)
+    player:tell("You can't read the exit's destination to check that it's consistent!");
+    return;
+elseif (source == E_PERM)
+    player:tell("You can't read that exit's source to check that it's consistent!");
+    return;
+elseif (source != this)
+    player:tell("That exit wasn't made to be attached here; it was made as an exit 
+from ", source.name, " (", source, ").");
+    return;
+elseif (((typeof(dest) != OBJ) || (!valid(dest))) || (!($room in $object_utils:ancestors(dest))))
+    player:tell("That exit doesn't lead to a room!");
+    return;
+endif
+if (!this:add_exit(exit))
+    player:tell("Sorry, but you must not have permission to add exits to this room.");
+else
+    player:tell("You have added ", exit, " as an exit that goes to ", exit.dest.name, 
+" (", exit.dest, ") via ", $string_utils:english_list(setadd(exit.aliases, exit.name)), 
+".");
+endif
+.
+
+</pre>
+<BR>
+@add-entrance:
+<pre>
+set_task_perms(player);
+if (!dobjstr)
+    player:tell("Usage:  @add-entrance <exit-number>");
+    return;
+endif
+exit = this:match_object(dobjstr);
+if ($command_utils:object_match_failed(exit, dobjstr))
+    return;
+endif
+if (!($exit in $object_utils:ancestors(exit)))
+    player:tell("That doesn't look like an exit object to me...");
+    return;
+endif
+dest = exit.dest;
+if (dest == E_PERM)
+    player:tell("You can't read the exit's destination to check that it's consistent!");
+    return;
+elseif (dest != this)
+    player:tell("That exit doesn't lead here!");
+    return;
+endif
+if (!this:add_entrance(exit))
+    player:tell("Sorry, but you must not have permission to add entrances to this 
+room.");
+else
+    player:tell("You have added ", exit, " as an entrance that gets here via ", $string_utils:english_list(setadd(exit.aliases, 
+exit.name)), ".");
+endif
+.
+
+</pre>
+<BR>
+recycle:
+<pre>
+"Make a mild attempt to keep people and objects from ending up in #-1 when people 
+recycle a room";
+if ((caller == this) || $perm_utils:controls(caller_perms(), this))
+    "... first try spilling them out onto the floor of enclosing room if any";
+    if (valid(this.location))
+        for x in (this.contents)
+            x:moveto(this.location);
+        endfor
+    endif
+    "... try sending them home...";
+    for x in (this.contents)
+        if (is_player(x))
+            if ((typeof(x.home) == OBJ) && valid(x.home))
+                x:moveto(x.home);
+            endif
+            if (x.location == this)
+                move(x, $player_start);
+            endif
+        elseif (valid(x.owner))
+            x:moveto(x.owner);
+        endif
+    endfor
+    pass(@args);
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+e east w west s south n north ne northeast nw northwest se southeast sw southwest 
+u up d down:
+<pre>
+exit = this:match_exit(verb);
+if (valid(exit))
+    exit:invoke();
+elseif (exit == $failed_match)
+    player:tell("You can't go that way.");
+else
+    player:tell("I don't know which direction `", verb, "' you mean.");
+endif
+.
+
+</pre>
+<BR>
+@eject @eject! @eject!!:
+<pre>
+set_task_perms(player);
+if ($command_utils:object_match_failed(dobj, dobjstr))
+    return;
+elseif (dobj.location != this)
+    player:tell(dobj.name, "(", dobj, ") is not here.");
+    return;
+elseif (!$perm_utils:controls(player, this))
+    player:tell("You are not the owner of this room.");
+    return;
+elseif (dobj.wizard)
+    player:tell("Sorry, you can't ", verb, " a wizard.");
+    dobj:tell(player.name, " tried to ", verb, " you.");
+    return;
+endif
+iobj = this;
+player:tell(this:ejection_msg());
+this:((verb == "@eject") ? "eject" | "eject_basic")(dobj);
+if (verb != "@eject!!")
+    dobj:tell(this:victim_ejection_msg());
+endif
+this:announce_all_but({player, dobj}, this:oejection_msg());
+.
+
+</pre>
+<BR>
+ejection_msg oejection_msg victim_ejection_msg:
+<pre>
+return $string_utils:pronoun_sub(this.(verb));
+.
+
+</pre>
+<BR>
+accept_for_abode:
+<pre>
+who = args[1];
+return (valid(who) && ((this.free_home || $perm_utils:controls(who, this)) || ((typeof(residents 
+= this.residents) == LIST) ? who in this.residents | (who == this.residents)))) && 
+this:acceptable(who);
+.
+
+</pre>
+<BR>
+@resident*s:
+<pre>
+if (!$perm_utils:controls(player, this))
+    player:tell("You must own this room to manipulate the legal residents list.  
+Try contacting ", this.owner.name, ".");
+else
+    if (typeof(this.residents) != LIST)
+        this.residents = {this.residents};
+    endif
+    if (!dobjstr)
+        "First, remove !valid objects from this room...";
+        for x in (this.residents)
+            if (!valid(x))
+                player:tell("Warning: removing ", x, ", an invalid object, from the 
+residents list.");
+                this.residents = setremove(this.residents, x);
+            endif
+        endfor
+        player:tell("Allowable residents in this room:  ", $string_utils:english_list($list_utils:map_prop(this.residents, 
+"name"), "no one"), ".");
+        return;
+    elseif (dobjstr[1] == "!")
+        notflag = 1;
+        dobjstr = dobjstr[2..length(dobjstr)];
+    else
+        notflag = 0;
+    endif
+    result = $string_utils:match_player_or_object(dobjstr);
+    if (!result)
+        return;
+    else
+        "a one element list was returned to us if it won.";
+        result = result[1];
+        if (notflag)
+            if (!(result in this.residents))
+                player:tell(result.name, " doesn't appear to be in the residents 
+list of ", this.name, ".");
+            else
+                this.residents = setremove(this.residents, result);
+                player:tell(result.name, " removed from the residents list of ", 
+this.name, ".");
+            endif
+        else
+            if (result in this.residents)
+                player:tell(result.name, " is already an allowed resident of ", this.name, 
+".");
+            else
+                this.residents = {@this.residents, result};
+                player:tell(result.name, " added to the residents list of ", this.name, 
+".");
+            endif
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+match:
+<pre>
+target = {@this:contents(), @this:exits()};
+return $string_utils:match(args[1], target, "name", target, "aliases");
+.
+
+</pre>
+<BR>
+@remove-exit:
+<pre>
+set_task_perms(player);
+if (!dobjstr)
+    player:tell("Usage:  @remove-exit <exit>");
+    return;
+endif
+exit = this:match_object(dobjstr);
+if (!(exit in this.exits))
+    if ($command_utils:object_match_failed(exit, dobjstr))
+        return;
+    endif
+    player:tell("Couldn't find \"", dobjstr, "\" in the exits list of ", this.name, 
+".");
+    return;
+elseif (!this:remove_exit(exit))
+    player:tell("Sorry, but you do not have permission to remove exits from this 
+room.");
+else
+    name = valid(exit) ? exit.name | "<recycled>";
+    player:tell("Exit ", exit, " (", name, ") removed from exit list of ", this.name, 
+" (", this, ").");
+endif
+.
+
+</pre>
+<BR>
+@remove-entrance:
+<pre>
+set_task_perms(player);
+if (!dobjstr)
+    player:tell("Usage:  @remove-entrance <entrance>");
+    return;
+endif
+entrance = $string_utils:match(dobjstr, this.entrances, "name", this.entrances, "aliases");
+if (!valid(entrance))
+    "Try again to parse it.  Maybe they gave object number.  Don't complain if it's 
+invalid though; maybe it's been recycled in some nefarious way.";
+    entrance = this:match_object(dobjstr);
+endif
+if (!(entrance in this.entrances))
+    player:tell("Couldn't find \"", dobjstr, "\" in the entrances list of ", this.name, 
+".");
+    return;
+elseif (!this:remove_entrance(entrance))
+    player:tell("Sorry, but you do not have permission to remove entrances from this 
+room.");
+else
+    name = valid(entrance) ? entrance.name | "<recycled>";
+    player:tell("Entrance ", entrance, " (", name, ") removed from entrance list 
+of ", this.name, " (", this, ").");
+endif
+.
+
+</pre>
+<BR>
+moveto:
+<pre>
+if ((caller in {this, this.owner}) || $perm_utils:controls(caller_perms(), this))
+    return pass(@args);
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+who_location_msg:
+<pre>
+return (msg = this.(verb)) ? $string_utils:pronoun_sub(msg, args[1]) | "";
+.
+
+</pre>
+<BR>
+exits entrances:
+<pre>
+if ((caller == this) || $perm_utils:controls(caller_perms(), this))
+    return this.(verb);
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+obvious_exits:
+<pre>
+"obvious_exits(FLAG)";
+"FLAG=0 or not there - return all exits with .obvious>0";
+"FLAG=1 - return all exits with .obvious=1";
+"FLAG>=2 - return all exits with .obvious=2";
+fl = 0;
+if (args)
+    fl = args[1] ? (args[1] == 1) ? args[1] | 2 | 0;
+endif
+exits = {};
+for exit in (this.exits)
+    if ((ob = exit:obvious()) && ((!fl) || (ob == fl)))
+        exits = setadd(exits, exit);
+    endif
+endfor
+return exits;
+.
+
+</pre>
+<BR>
+here_huh:
+<pre>
+":here_huh(verb,args)  -- room-specific :huh processing.  This should return 1 if 
+it finds something interesting to do and 0 otherwise; see $command_utils:do_huh.";
+"For the generic room, we check for the case of the caller specifying an exit for 
+which a corresponding verb was never defined.";
+set_task_perms(caller_perms());
+if (args[2] || ($failed_match == (exit = this:match_exit(verb = args[1]))))
+    "... okay, it's not an exit.  we give up...";
+    return 0;
+elseif (valid(exit))
+    exit:invoke();
+else
+    "... ambiguous exit ...";
+    player:tell("I don't know which direction `", verb, "' you mean.");
+endif
+return 1;
+.
+
+</pre>
+<BR>
+room_announce*_all_but:
+<pre>
+this:(verb[6..length(verb)])(@args);
+.
+
+</pre>
+<BR>
+examine_commands_ok:
+<pre>
+return this == args[1].location;
+.
+
+</pre>
+<BR>
+examine_key:
+<pre>
+"examine_key(examiner)";
+"return a list of strings to be told to the player, indicating what the key on this 
+type of object means, and what this object's key is set to.";
+"the default will only tell the key to a wizard or this object's owner.";
+who = args[1];
+if (((caller == this) && $perm_utils:controls(who, this)) && (this.key != 0))
+    return {tostr(this:title(), " will accept only objects matching the following 
+key:"), tostr("  ", $lock_utils:unparse_key(this.key))};
+endif
+.
+
+</pre>
+<BR>
+examine_contents:
+<pre>
+"examine_contents(who)";
+if (caller == this)
+    this:tell_contents(this.contents, this.ctype);
+endif
+.
+
+</pre>
+<BR>
+tell_exits:
+<pre>
+"displays exits with obvious = 1 to player, ";
+obexits_list = {};
+for exit in (this:obvious_exits(1))
+    obexits_list = listappend(obexits_list, (exit.name + " to ") + exit.dest.name);
+endfor
+if (obexits_list && this.exit_display)
+    player:tell("Obvious exits: " + $string_utils:english_list(obexits_list));
+endif
+.
+
+</pre>
+<BR>
+description:
+<pre>
+"Adds on the exit integration messages, or :look_msg for each exit with .obvious=2. 
+Adds a paragraph to the end of the description if it is a LIST of strings. Or tags 
+onto the end if the description is a STR.";
+desc = (f = pass(@args)) ? f | "You see nothing special.";
+exmess = "";
+for exit in (this:obvious_exits(2))
+    exmess = (exmess + this.look_sep_msg) + exit:look_msg();
+endfor
+if ((typeof(desc) == STR) && exmess)
+    desc = desc + exmess;
+elseif (exmess)
+    desc[length(desc)] = tostr(desc[length(desc)] + exmess);
+endif
+return desc;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp who_location_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp free_home
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp victim_ejection_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ejection_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oejection_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp residents
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp free_entry
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp entrances
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp blessed_object
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp blessed_task
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp exits
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dark
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ctype
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp look_sep_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp exit_display
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000051.htm">Generic Editor</A> <A HREF="HTM_000011.htm">River bank</A> <A HREF="HTM_000097.htm">Zero Surface</A> <A HREF="HTM_000179.htm">Cluttered Closet</A> <A HREF="HTM_000159.htm">Crumbling Foundation</A> <A HREF="HTM_000295.htm">Quonset</A> <A HREF="HTM_000290.htm">Under The Rock</A> <A HREF="HTM_000315.htm">Service Road</A> <A HREF="HTM_000375.htm">North End of the Park</A> <A HREF="HTM_000378.htm">riverrun</A> <A HREF="HTM_000275.htm">The Disciple's Room</A> <A HREF="HTM_000423.htm">Hovel</A> <A HREF="HTM_000504.htm">mist filled cloud</A> <A HREF="HTM_000503.htm">Z2</A> <A HREF="HTM_000516.htm">The Monkey House</A> <A HREF="HTM_000527.htm">Z3</A> <A HREF="HTM_000530.htm">Somewhere lost</A> <A HREF="HTM_000544.htm">Steps</A> <A HREF="HTM_000559.htm">Camp Site</A> <A HREF="HTM_000592.htm">Scorpion Nest</A> <A HREF="HTM_000593.htm">East Jackson</A> <A HREF="HTM_000557.htm">Treehouse</A> <A HREF="HTM_000676.htm">Sanctuary</A> <A HREF="HTM_000707.htm">The Annex</A> <A HREF="HTM_000263.htm">The Lodge</A> <A HREF="HTM_000761.htm">Maze</A> <A HREF="HTM_000763.htm">maze</A> <A HREF="HTM_000765.htm">maze</A> <A HREF="HTM_000767.htm">maze</A> <A HREF="HTM_000769.htm">maze</A> <A HREF="HTM_000772.htm">maze</A> <A HREF="HTM_000775.htm">maze</A> <A HREF="HTM_000791.htm">The rusted hulk of Kerouac's Car.</A> <A HREF="HTM_000798.htm">The Eye of Pan</A> <A HREF="HTM_000800.htm">the shade</A> <A HREF="HTM_000801.htm">Consumable Storage Room</A> <A HREF="HTM_000827.htm">New York Flat</A> <A HREF="HTM_000863.htm">The Abyss</A> <A HREF="HTM_000865.htm">Drainage Ditch North</A> <A HREF="HTM_000893.htm">Sanctuary</A> <A HREF="HTM_000913.htm">Juxtaposition</A> <A HREF="HTM_000929.htm">Cornea</A> <A HREF="HTM_000956.htm">Little St.</A> <A HREF="HTM_000965.htm">The Opium Den</A> <A HREF="HTM_001015.htm">A Green Shade</A> <A HREF="HTM_001017.htm">The Gymnasium</A> <A HREF="HTM_001018.htm">Boy's Lockeroom</A> <A HREF="HTM_001134.htm">footbridge</A> <A HREF="HTM_001183.htm">BioLab</A> <A HREF="HTM_001192.htm">coffing</A> <A HREF="HTM_001195.htm">Burton's Bungalow</A> <A HREF="HTM_001196.htm">nw grassy river bank</A> <A HREF="HTM_001197.htm">Grassy River Bank</A> <A HREF="HTM_001042.htm">Under the Ruins</A> <A HREF="HTM_001210.htm">The Primal Chaos</A> <A HREF="HTM_001218.htm">Square of Ruins</A> <A HREF="HTM_000852.htm">The Barge</A> <A HREF="HTM_001262.htm">topoi</A> <A HREF="HTM_001269.htm">**Dj-CJ's Disco Tek**</A> <A HREF="HTM_001275.htm">here</A> <A HREF="HTM_001276.htm">mangrove</A> <A HREF="HTM_001281.htm">Brian's Place</A> <A HREF="HTM_001221.htm">Strap's Lockerroom</A> <A HREF="HTM_001300.htm">allgemeiner Raum</A> <A HREF="HTM_001309.htm">loft</A> <A HREF="HTM_001312.htm">Forest Treehouse</A> <A HREF="HTM_001313.htm">The Branches of Woody Willow</A> <A HREF="HTM_001316.htm">Willow Grove Clearing</A> <A HREF="HTM_001319.htm">Feline Forest</A> <A HREF="HTM_001321.htm">Fox Terrace, Western side</A> <A HREF="HTM_001324.htm">West Fox Terrace</A> <A HREF="HTM_001327.htm">West Corner of The Park</A> <A HREF="HTM_001329.htm">East Corner of The Park</A> <A HREF="HTM_001331.htm">North Corner of The Park</A> <A HREF="HTM_001334.htm">West Corner of The Park</A> <A HREF="HTM_001337.htm">South Corner of The Park</A> <A HREF="HTM_001341.htm">In the Pond</A> <A HREF="HTM_001354.htm">a dark, unnamed alley</A> <A HREF="HTM_001404.htm">Rhizome</A> <A HREF="HTM_001040.htm">Myroom</A> <A HREF="HTM_001415.htm">The Computer Screen</A> <A HREF="HTM_001416.htm">A UNIX Directory</A> <A HREF="HTM_001422.htm">TechnoTopia</A> <A HREF="HTM_001238.htm">Axl's Mansion</A> <A HREF="HTM_001471.htm">Heather's Haven</A> <A HREF="HTM_001462.htm">Generic anonymous room</A> <A HREF="HTM_001496.htm">Bathroom</A> <A HREF="HTM_001533.htm"></A> <A HREF="HTM_001528.htm">Training room</A> <A HREF="HTM_001529.htm">Entrance</A> <A HREF="HTM_001530.htm">Electric Godland</A> <A HREF="HTM_000459.htm">generic integrating room</A> <A HREF="HTM_001556.htm">thunk</A> <A HREF="HTM_001586.htm">FirePlace</A> <A HREF="HTM_001621.htm">Town Square</A> <A HREF="HTM_001623.htm">TransPort Lobby</A> <A HREF="HTM_001626.htm">Sea/Subterranean TransPort</A> <A HREF="HTM_001629.htm">Aerospace TransPort</A> <A HREF="HTM_001622.htm">TransPort Office</A> <A HREF="HTM_001635.htm">Interdimensional TransPort</A> <A HREF="HTM_001638.htm">Monorail TransPort</A> <A HREF="HTM_001641.htm">Zariski Lighthouse</A> <A HREF="HTM_001644.htm">Forest</A> <A HREF="HTM_001647.htm">MedFaire Parking Lot</A> <A HREF="HTM_001650.htm">Hotel Lobby</A> <A HREF="HTM_001653.htm">Atrium</A> <A HREF="HTM_001658.htm">Main Convention Hall</A> <A HREF="HTM_001661.htm">Hotel Patio</A> <A HREF="HTM_001664.htm">Changing Room/Showers</A> <A HREF="HTM_001670.htm">Hot Tub</A> <A HREF="HTM_001679.htm">here</A> <A HREF="HTM_001681.htm">here</A> <A HREF="HTM_001683.htm">Pool</A> <A HREF="HTM_001686.htm">here</A> <A HREF="HTM_001688.htm">Registration</A> <A HREF="HTM_001691.htm">Homeless Shelter</A> <A HREF="HTM_001694.htm">here</A> <A HREF="HTM_001696.htm">Post Office</A> <A HREF="HTM_001699.htm">Library Vestibule</A> <A HREF="HTM_001702.htm">Government Street</A> <A HREF="HTM_001707.htm">Government Street East</A> <A HREF="HTM_001710.htm">Planning Office</A> <A HREF="HTM_001713.htm">Police Station</A> <A HREF="HTM_001716.htm">Prison Cell</A> <A HREF="HTM_001719.htm">here</A> <A HREF="HTM_001721.htm">West of Covenant Beach</A> <A HREF="HTM_001725.htm">Covenant Beach</A> <A HREF="HTM_001728.htm">here</A> <A HREF="HTM_001730.htm">Northeast Covenant Beach</A> <A HREF="HTM_001736.htm">King Street</A> <A HREF="HTM_001741.htm">King Street</A> <A HREF="HTM_001744.htm">Pebbly Walk</A> <A HREF="HTM_001747.htm">Temple Entryway</A> <A HREF="HTM_001750.htm">Administrative Concourse</A> <A HREF="HTM_001753.htm">The Trash Bin</A> <A HREF="HTM_001756.htm">Dark Tunnel</A> <A HREF="HTM_001759.htm">Dark Tunnel</A> <A HREF="HTM_001762.htm">Dark Tunnel</A> <A HREF="HTM_001765.htm">Dark Tunnel</A> <A HREF="HTM_001768.htm">Harv's Bargain Basement</A> <A HREF="HTM_001771.htm">Sacrificial Pit</A> <A HREF="HTM_001776.htm">Pit Ledge</A> <A HREF="HTM_001780.htm">Moustapha's Auction Emporium</A> <A HREF="HTM_001783.htm">Atop the Scaffold</A> <A HREF="HTM_001787.htm">Crawlway</A> <A HREF="HTM_001792.htm">King Street Shopping Center</A> <A HREF="HTM_001795.htm">Intersection of King and Queen Streets</A> <A HREF="HTM_001798.htm">Unicorn Point</A> <A HREF="HTM_001803.htm">Unicorn Point Topiary</A> <A HREF="HTM_001806.htm">Unicorn Point Gazebo</A> <A HREF="HTM_001814.htm">Mountain Peak</A> <A HREF="HTM_001817.htm">Midair</A> <A HREF="HTM_001824.htm">Kiosk</A> <A HREF="HTM_001833.htm">here</A> <A HREF="HTM_001835.htm">Reference Room</A> <A HREF="HTM_001838.htm">Encyclopedia Alcove</A> <A HREF="HTM_001856.htm">Crowded Wooden Bridge</A> <A HREF="HTM_001859.htm">here</A> <A HREF="HTM_001861.htm">Under the Bridge</A> <A HREF="HTM_001864.htm">here</A> <A HREF="HTM_001866.htm">here</A> <A HREF="HTM_001868.htm">Central Fairgrounds</A> <A HREF="HTM_001872.htm">here</A> <A HREF="HTM_001874.htm">Southern Fairgrounds</A> <A HREF="HTM_001877.htm">here</A> <A HREF="HTM_001878.htm">here</A> <A HREF="HTM_001880.htm">here</A> <A HREF="HTM_001673.htm">here</A> <A HREF="HTM_001675.htm">Western Fairgrounds</A> <A HREF="HTM_001884.htm">here</A> <A HREF="HTM_001886.htm">here</A> <A HREF="HTM_001888.htm">here</A> <A HREF="HTM_001890.htm">here</A> <A HREF="HTM_001892.htm">here</A> <A HREF="HTM_001894.htm">Northern Fairgrounds</A> <A HREF="HTM_001897.htm">here</A> <A HREF="HTM_001899.htm">here</A> <A HREF="HTM_001902.htm">Under Unicorn Point</A> <A HREF="HTM_001905.htm">here</A> <A HREF="HTM_001914.htm">here</A> <A HREF="HTM_001916.htm">here</A> <A HREF="HTM_001918.htm">here</A> <A HREF="HTM_001920.htm">here</A> <A HREF="HTM_001922.htm">here</A> <A HREF="HTM_001924.htm">here</A> <A HREF="HTM_001926.htm">here</A> <A HREF="HTM_001928.htm">here</A> <A HREF="HTM_001930.htm">here</A> <A HREF="HTM_001932.htm">here</A> <A HREF="HTM_001934.htm">here</A> <A HREF="HTM_001936.htm">here</A> <A HREF="HTM_001938.htm">here</A> <A HREF="HTM_001940.htm">Crallway Corner</A> <A HREF="HTM_001943.htm">here</A> <A HREF="HTM_001945.htm">On the Ledge, Eastside</A> <A HREF="HTM_001948.htm">On the Ledge, Northside</A> <A HREF="HTM_001951.htm">On the Ledge, Southside</A> <A HREF="HTM_001503.htm">here</A> <A HREF="HTM_001506.htm">here</A> <A HREF="HTM_001665.htm">here</A> <A HREF="HTM_001984.htm">An Enigma</A> <A HREF="HTM_001997.htm">A Dry Cave</A> <A HREF="HTM_001965.htm">The Lotus</A> <A HREF="HTM_002037.htm">Sunken TinyMUD Classic</A> <A HREF="HTM_002040.htm">The Town Square</A> <A HREF="HTM_002045.htm">The Temple of Arkteks-t'leep</A> <A HREF="HTM_002049.htm">Junkpile</A> <A HREF="HTM_002070.htm">THIS is the Rec Room!!!!</A> <A HREF="HTM_002074.htm">In the Tub</A> <A HREF="HTM_002093.htm">here</A> <A HREF="HTM_002095.htm">here</A> <A HREF="HTM_002097.htm">here</A> <A HREF="HTM_002099.htm">here</A> <A HREF="HTM_002101.htm">here</A> <A HREF="HTM_002103.htm">here</A> <A HREF="HTM_002104.htm">here</A> <A HREF="HTM_002113.htm">Gully</A> <A HREF="HTM_002126.htm">The Savior's Pad</A> <A HREF="HTM_002077.htm">Sandbox</A> <A HREF="HTM_002141.htm">goatpen</A> <A HREF="HTM_002160.htm">Mina's Place</A> <A HREF="HTM_002165.htm">Outside the Cave</A> <A HREF="HTM_002210.htm">Sand Dune</A> <A HREF="HTM_002174.htm">boardroom</A> <A HREF="HTM_001407.htm">Marcus Garvey</A> <A HREF="HTM_002224.htm">Tight Passageway</A> <A HREF="HTM_001054.htm">Stopping Place</A> <A HREF="HTM_001067.htm">Garden Underground</A> <A HREF="HTM_001362.htm">Stomping Ground</A> <A HREF="HTM_001992.htm">between a rock and a hard place</A> <A HREF="HTM_002204.htm">Mom's Digs</A> <A HREF="HTM_002012.htm">female dressing room</A> <A HREF="HTM_002261.htm">Ground Floor Landing</A> <A HREF="HTM_002264.htm">Second Floor Landing</A> <A HREF="HTM_002267.htm">Hallway, Second Floor</A> <A HREF="HTM_002271.htm">Third Floor Landing</A> <A HREF="HTM_002274.htm">Hallway, Third Floor</A> <A HREF="HTM_002278.htm">#19</A> <A HREF="HTM_002292.htm">Rich's Bungalo of Naughty Ideas</A> <A HREF="HTM_002302.htm">'Sweetheart's Room'</A> <A HREF="HTM_000589.htm">The Greatest Deal</A> <A HREF="HTM_002307.htm">A Big Spaceship</A> <A HREF="HTM_002309.htm">The Ballroom</A> <A HREF="HTM_000912.htm">Gene_Pool</A> <A HREF="HTM_001434.htm">Indestructible_Object</A> <A HREF="HTM_002259.htm">Arc</A> <A HREF="HTM_000995.htm">The-Temple-of-Doom</A> <A HREF="HTM_000176.htm">Generic Ambient Noise Room</A> <A HREF="HTM_002336.htm">Stone Oasis</A> <A HREF="HTM_002189.htm">Trans-Yuggothian Expressway</A> <A HREF="HTM_002183.htm">Maid's Quarters</A> <A HREF="HTM_002385.htm">Caged</A> <A HREF="HTM_002347.htm">The Whipping Post</A> <A HREF="HTM_002368.htm">a line</A> <A HREF="HTM_002393.htm">Woods</A> <A HREF="HTM_001144.htm">The Week</A> <A HREF="HTM_000564.htm">Tibet</A> <A HREF="HTM_000805.htm">Three story apartment house</A> <A HREF="HTM_002439.htm">A drop of water</A> <A HREF="HTM_001513.htm">The Last Page</A> <A HREF="HTM_002339.htm">The Chandelier</A> <A HREF="HTM_002456.htm">Cyberhutch</A> <A HREF="HTM_002461.htm">within the looking glass</A> <A HREF="HTM_002480.htm">alley</A> <A HREF="HTM_002473.htm">Boathouse</A> <A HREF="HTM_002475.htm">Boathouse</A> <A HREF="HTM_002465.htm">Death's_Door</A> <A HREF="HTM_002491.htm">Goat Pen</A> <A HREF="HTM_002487.htm">The far north.</A> <A HREF="HTM_002489.htm">Collapsed Subway Station</A> <A HREF="HTM_002353.htm">Deep Sewer</A> <A HREF="HTM_002498.htm">Inside the Box</A> <A HREF="HTM_002523.htm">Athene</A> <A HREF="HTM_002517.htm">Athene</A> <A HREF="HTM_002529.htm">Sewer</A> <A HREF="HTM_002531.htm">Sewer</A> <A HREF="HTM_002538.htm">Den of Inequity</A> <A HREF="HTM_002547.htm">Sewer</A> <A HREF="HTM_002559.htm">riverden</A> <A HREF="HTM_002571.htm">Gardening At Night</A> <A HREF="HTM_002478.htm">FunLand</A> <A HREF="HTM_002580.htm">stanza</A> <A HREF="HTM_002471.htm">Kitchenette</A> <A HREF="HTM_002595.htm">SunRay's Home</A> <A HREF="HTM_002596.htm">Woodland</A> <A HREF="HTM_002598.htm">Millebornes Game</A> <A HREF="HTM_002602.htm">Promotional Plug</A> <A HREF="HTM_002611.htm">a ditch</A> <A HREF="HTM_002624.htm"></A> <A HREF="HTM_002417.htm">The Velvet Edge</A> <A HREF="HTM_002636.htm">Conference Room</A> <A HREF="HTM_002644.htm">The Frying Pan</A> <A HREF="HTM_002645.htm">Atomic Cafe</A> <A HREF="HTM_002651.htm">Bitch Hideaway</A> <A HREF="HTM_002652.htm">Acid-Rain-Glow Hut</A> <A HREF="HTM_002653.htm">Razor's Edge.</A> <A HREF="HTM_002656.htm">Moorishmaiden's mailbox</A> <A HREF="HTM_002667.htm">Ancient Oak Tree</A> <A HREF="HTM_002668.htm">RK's Place</A> <A HREF="HTM_002402.htm">Cognito</A> <A HREF="HTM_001607.htm">Helix of Semi-Precious Stones</A> <A HREF="HTM_002672.htm">Egg of Inexistence</A> <A HREF="HTM_002685.htm">Ein Spelunkhaus</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

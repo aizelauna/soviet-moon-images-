@@ -1,0 +1,98 @@
+<HTML>
+<HEAD>
+<TITLE>body part</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> body part (#2184)</H3>
+(an instance of <A HREF="HTM_000001.htm">Root Class</A> made by <A HREF="HTM_002378.htm">Lumiere</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a disembodied body part. Ew, gross.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002378.htm">Lumiere</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+description:
+<pre>
+if (((length((c = callers())[1][2]) >= 5) && (c[1][2][1..5] == "@exam")) && (c[1][4] 
+== $player))
+    player:tell("  The @examine command is obsolete.");
+    player:tell("  Try: `examine ", argstr, "'");
+    kill_task(task_id());
+elseif (is_clear_property(this, "description"))
+    return {tostr("You see the ", this.name, ".")};
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+cure_all:
+<pre>
+if (caller == this.body)
+    this:set_description(this.undamaged_description);
+endif
+.
+
+</pre>
+<BR>
+reset:
+<pre>
+if (caller == this.body)
+    this.covered = 1;
+    this.damages = {};
+    this:set_description(this.undamaged_description);
+    return 1;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+strip:
+<pre>
+if (caller == this.body)
+    if (!is_clear_property(this.naked_description))
+        this:set_description(this.naked_description);
+    endif
+    return 1;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp covered
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp damages
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp body
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp undamaged_description
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp naked_description
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_001455.htm">head</A> <A HREF="HTM_002192.htm">left arm</A> <A HREF="HTM_002199.htm">right arm</A> <A HREF="HTM_002212.htm">back</A> <A HREF="HTM_001208.htm">ass</A> <A HREF="HTM_002005.htm">left leg</A> <A HREF="HTM_002136.htm">right leg</A> <A HREF="HTM_000873.htm">neck</A> <A HREF="HTM_001064.htm">breasts</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

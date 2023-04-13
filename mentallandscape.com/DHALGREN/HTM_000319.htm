@@ -1,0 +1,221 @@
+<HTML>
+<HEAD>
+<TITLE>Second Character Registry</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Second Character Registry (#319)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000096.htm">Dredful</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe repository of all second character information for Dhalgren. Usable only by wizards and trusted players.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000111.htm">Features Feature Object</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+is_second_char:
+<pre>
+if (!this:trust(caller_perms()))
+    return E_PERM;
+endif
+who = args[1];
+for set in (this.seconds)
+    if (who in set)
+        return 1;
+    endif
+endfor
+return 0;
+.
+
+</pre>
+<BR>
+all_second_chars other_chars:
+<pre>
+if (!this:trust(caller_perms()))
+    return E_PERM;
+endif
+who = args[1];
+for set in (this.seconds)
+    if (who in set)
+        return (verb == "other_chars") ? setremove(set, who) | set;
+    endif
+endfor
+return {};
+.
+
+</pre>
+<BR>
+trust:
+<pre>
+return (player.wizard || (player in this.trust)) || (args[1] in this.trust);
+.
+
+</pre>
+<BR>
+feature_ok:
+<pre>
+return args[1].wizard || (args[1] in this.trust);
+.
+
+</pre>
+<BR>
+@second:
+<pre>
+"Usage: @second <char1> to <char2>";
+"";
+"Usable only by wizards or trusted players. Registers char1 to char2 as characters 
+with the same human behind them. If any previous registrations exist, then all are 
+together now.";
+if (!this:trust(player))
+    return E_PERM;
+endif
+one = $string_utils:match_player(dobjstr);
+if (!$command_utils:player_match_failed(one, dobjstr))
+    two = $string_utils:match_player(iobjstr);
+    if (!$command_utils:player_match_failed(two, iobjstr))
+        setone = this:char_index(one);
+        settwo = this:char_index(two);
+        if ((!setone) && (!settwo))
+            this.seconds = {@this.seconds, {one, two}};
+            player:tell("Now registered: ", $string_utils:nanl({one, two}));
+        elseif (setone && (!settwo))
+            if (two in this.seconds[setone])
+                player:tell($string_utils:nn(two), " is already registered to ", 
+$string_utils:nn(one));
+            else
+                this.seconds[setone] = setadd(this.seconds[setone], two);
+                player:tell("Now registered: ", $string_utils:nanl(this.seconds[setone]));
+            endif
+        elseif (settwo && (!setone))
+            if (one in this.seconds[settwo])
+                player:tell($string_utils:nn(one), " is already registered to ", 
+$string_utils:nn(two));
+            else
+                this.seconds[settwo] = setadd(this.seconds[settwo], one);
+                player:tell("Now registered: ", $string_utils:nanl(this.seconds[settwo]));
+            endif
+        elseif (setone == settwo)
+            player:tell("Those players are already registered as: ", $string_utils:nanl(this.seconds[setone]));
+        else
+            player:tell("There are two groups of registered players:");
+            player:tell($string_utils:nanl(this.seconds[setone]));
+            player:tell($string_utils:nanl(this.seconds[settwo]));
+            player:tell("You should probably double check their registrations and 
+use `@unsecond' and `@second' to fix it up.");
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+char_index:
+<pre>
+if (!this:trust(player))
+    return E_PERM;
+endif
+who = args[1];
+for ind in [1..length(this.seconds)]
+    if (who in this.seconds[ind])
+        return ind;
+    endif
+endfor
+return 0;
+.
+
+</pre>
+<BR>
+@unsecond:
+<pre>
+"Usage: @unsecond <char1> from <char2>";
+"";
+"Usable by wizards or trusted players only to remove a second char association.";
+if (!this:trust(player))
+    return E_PERM;
+endif
+one = $string_utils:match_player(dobjstr);
+if (!$command_utils:player_match_failed(one, dobjstr))
+    two = $string_utils:match_player(iobjstr);
+    if (!$command_utils:player_match_failed(two, iobjstr))
+        this:unsecond_char(one, two);
+    endif
+endif
+.
+
+</pre>
+<BR>
+@seconds:
+<pre>
+"Usage: @seconds [player]";
+"";
+"Usable only by wizards or trusted players. If [player] is given, then returns all 
+second characters, if player has any, of that player. If no argument is given, lists 
+all groups of second characters.";
+if (!this:trust(player))
+    return E_PERM;
+endif
+if (dobjstr)
+    who = $string_utils:match_player(dobjstr);
+    if (!$command_utils:player_match_failed(who, dobjstr))
+        if (set = this:all_second_chars(who))
+            player:tell("Registered: ", $string_utils:nanl(set));
+        else
+            player:tell($string_utils:nn(who), " has no other characters according 
+to this object.");
+        endif
+    endif
+else
+    player:tell("Full registrations:");
+    for set in (this.seconds)
+        player:tell($string_utils:nanl(set));
+    endfor
+    player:tell("-- Finished");
+endif
+.
+
+</pre>
+<BR>
+unsecond_char:
+<pre>
+if (!this:trust(caller_perms()))
+    return E_PERM;
+endif
+one = args[1];
+two = args[2];
+if (!(one in this.seconds[ind = this:char_index(two)]))
+    player:tell($string_utils:nn(one), " is not registered to ", $string_utils:nn(two));
+else
+    if (length(this.seconds[ind]) == 2)
+        this.seconds = listdelete(this.seconds, ind);
+        player:tell("Removed ", $string_utils:nn(one), " from the association. Full 
+registration is now: ", $string_utils:nanl(this.seconds[ind]));
+    else
+        this.seconds[ind] = setremove(this.seconds[ind], one);
+        player:tell("Removed association involving ", $string_utils:nanl({one, two}), 
+".");
+    endif
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp trust
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp seconds
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

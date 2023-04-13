@@ -1,0 +1,101 @@
+<HTML>
+<HEAD>
+<TITLE>Hovel</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Hovel (#423)</H3>
+(an instance of <A HREF="HTM_000003.htm">generic room</A> made by <A HREF="HTM_000071.htm">baglady</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspRight away you notice the clutter. Objects of all size, shape, and purpose litter the floor and walls in various states of disrepair. You notice TVs stacked up to make walls, telephones shoved in niches, baskets scattered about, lamps laying on the floor, cans of food, some open, scattered about and actually arranged in curiously neat piles. There is some kind of makeshift bed here, consisting of many floral coverings and even draperies.
+<BR>
+<BR>
+You see <A HREF="HTM_000071.htm">baglady</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp There is an opening in the debris and clutter to the north. You can see an apartment lobby beyond it.
+[ north ] <A HREF="HTM_000189.htm">Lobby of Labry Apartments</A>.
+You leave the debris behind.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+clean:
+<pre>
+"Usage: clean <object> at <location>";
+"";
+"Asks the baglady to move <object> to <location> whenever it isn't there and hasn't 
+been used in a while.";
+target = player:my_match_object(dobjstr);
+if (!$command_utils:object_match_failed(target, dobjstr))
+    place = player:my_match_object(iobjstr);
+    if (!$command_utils:object_match_failed(place, iobjstr))
+        player:tell(this.owner:add_cleanup(target, player, place));
+    endif
+endif
+.
+
+</pre>
+<BR>
+remove:
+<pre>
+"Usage: remove <object>";
+"";
+"If the object is in the baglady's list of objects to move around, then this will 
+remove it.";
+if (!dobjstr)
+    player:tell("Remove what?");
+    return;
+endif
+target = player:my_match_object(dobjstr);
+if (!$command_utils:object_match_failed(target, dobjstr))
+    player:tell(this.owner:remove_cleanup(target, player));
+endif
+.
+
+</pre>
+<BR>
+list:
+<pre>
+"Usage: list [player]";
+"";
+"If given, lists objects cleaned up for [player]. Otherwise, lists all objects being 
+cleaned up by the baglady.";
+if (dobjstr)
+    who = $string_utils:match_player(dobjstr);
+    if (!$command_utils:player_match_failed(who, dobjstr))
+        this.owner:cleanup_list(who);
+    endif
+else
+    this.owner:cleanup_list();
+endif
+.
+
+</pre>
+<BR>
+status:
+<pre>
+"Usage: status";
+"";
+"Tells you the current status of the baglady's cleanup activities.";
+this.owner:clean_status();
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

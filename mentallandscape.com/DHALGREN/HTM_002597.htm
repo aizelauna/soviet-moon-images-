@@ -1,0 +1,75 @@
+<HTML>
+<HEAD>
+<TITLE>Millebornes database</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Millebornes database (#2597)</H3>
+(an instance of <A HREF="HTM_000001.htm">Root Class</A> made by <A HREF="HTM_000539.htm">Sick</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000539.htm">Sick</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+random_deck:
+<pre>
+deck = {};
+cards = this.card_names;
+totals = this.card_totals;
+for c in [1..length(cards)]
+    for x in [1..totals[c]]
+        deck = listinsert(deck, cards[c], random(length(deck) + 1));
+    endfor
+endfor
+return deck;
+.
+
+</pre>
+<BR>
+match_card:
+<pre>
+card = args[1];
+cards = this.card_names;
+if (i = (card in cards) || $string_utils:find_prefix(card, cards))
+    return cards[i];
+else
+    return "";
+endif
+.
+
+</pre>
+<BR>
+card_title:
+<pre>
+i = (card = args[1]) in this.card_names;
+if (this.card_totals[i] == 1)
+    return tostr("the ", card, " safety card");
+elseif (index("aeiou", card[1]))
+    return tostr("an ", card, " card");
+else
+    return tostr("a ", card, " card");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp card_names
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp card_totals
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

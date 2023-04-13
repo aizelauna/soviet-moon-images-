@@ -1,0 +1,112 @@
+<HTML>
+<HEAD>
+<TITLE>Generic anonymous room</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic anonymous room (#1462)</H3>
+(an instance of <A HREF="HTM_000003.htm">generic room</A> made by <A HREF="HTM_001473.htm">Gilmore</A>)
+<BR>
+<BR>
+<BR>
+You see <A HREF="HTM_001391.htm">kickme</A> here.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+say:
+<pre>
+player:tell("You say, \"", argstr, "\"");
+this:s_announce("Someone says, \"", argstr, "\"");
+.
+
+</pre>
+<BR>
+emote:
+<pre>
+if ((argstr != "") && (argstr[1] == ":"))
+    this:s_announce_all("Someone", argstr[2..length(argstr)]);
+else
+    this:s_announce_all("Someone ", argstr);
+endif
+.
+
+</pre>
+<BR>
+match_object:
+<pre>
+r = pass(@args);
+if (r in this.contents)
+    return #-1;
+endif
+.
+
+</pre>
+<BR>
+who_location_msg:
+<pre>
+return $string_utils:pronoun_sub((h = args[1].home).(verb), args[1], h, h);
+.
+
+</pre>
+<BR>
+tell_contents:
+<pre>
+return;
+.
+
+</pre>
+<BR>
+announce*_all_but:
+<pre>
+if ((verb == "announce") || (verb == "announce_all"))
+    this:("s_" + verb)("Something moves about in the darkness.");
+else
+    this:s_announce_all_but(args[1], "Something moves about in the darkness.");
+endif
+.
+
+</pre>
+<BR>
+s_announce:
+<pre>
+"Copied from generic room (#3):announce by The_Mayor (#2) Thu Aug 25 23:05:02 1994 
+EDT";
+for dude in (setremove(this:contents(), player))
+    dude:tell(@args);
+endfor
+.
+
+</pre>
+<BR>
+s_announce_all:
+<pre>
+"Copied from generic room (#3):announce_all by The_Mayor (#2) Thu Aug 25 23:05:10 
+1994 EDT";
+for dude in (this:contents())
+    dude:tell(@args);
+endfor
+.
+
+</pre>
+<BR>
+title:
+<pre>
+return player.home.name;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

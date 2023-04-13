@@ -1,0 +1,92 @@
+<HTML>
+<HEAD>
+<TITLE>Maid's Quarters</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Maid's Quarters (#2183)</H3>
+(an instance of <A HREF="HTM_000003.htm">generic room</A> made by <A HREF="HTM_002378.htm">Lumiere</A>)
+<BR>
+<BR>
+<BR>
+You see <A HREF="HTM_002186.htm">Claudia</A> and <A HREF="HTM_002190.htm">cabinet</A> here.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+l*ook:
+<pre>
+return this.submissive:look_command(argstr) || pass(@args);
+.
+
+</pre>
+<BR>
+description:
+<pre>
+if (((length((c = callers())[1][2]) >= 5) && (c[1][2][1..5] == "@exam")) && (c[1][4] 
+== $player))
+    player:tell("  The @examine command is obsolete.");
+    player:tell("  Try: `examine ", argstr, "'");
+    kill_task(task_id());
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+hidden_verbs:
+<pre>
+who = args[1];
+hidden = pass(@args);
+for v in ({"look"})
+    hidden = setadd(hidden, {this, verb_info(this, v)[3], verb_args(this, v)});
+endfor
+return hidden;
+.
+
+</pre>
+<BR>
+help_msg:
+<pre>
+if (this:is_pervert(caller_perms()))
+    return $generic_help:subst(this.(verb));
+else
+    return {};
+endif
+.
+
+</pre>
+<BR>
+is_pervert:
+<pre>
+return args[1] in this.perverts;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp submissive
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp perverts
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

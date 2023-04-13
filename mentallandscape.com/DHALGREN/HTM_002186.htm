@@ -1,0 +1,119 @@
+<HTML>
+<HEAD>
+<TITLE>Claudia</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Claudia (#2186)</H3>
+(an instance of <A HREF="HTM_000077.htm">Generic Gendered Object</A> made by <A HREF="HTM_002378.htm">Lumiere</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspClaudia's not really herself today.
+<BR>
+<BR>
+Claudia contains <A HREF="HTM_002188.htm">key</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002183.htm">Maid's Quarters</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+look_command:
+<pre>
+if (caller != this.home)
+    return E_PERM;
+elseif (valid(l = this:match_part(@args)))
+    l:look_self();
+    return 1;
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+accept:
+<pre>
+return args[1].owner == this.owner;
+.
+
+</pre>
+<BR>
+match_part:
+<pre>
+part = args[1];
+if (match(part, tostr("^", this.name, "'s "), 0))
+    return this:(verb)(part[length(this.name) + 4..length(part)]);
+endif
+base = $string_utils:match(part, children(this.part), "name", children(this.part), 
+"aliases");
+if (base == $ambiguous_match)
+    if (part in {"leg", "arm"})
+        return this:(verb)(tostr({"right", "left"}[random(2)], " ", part));
+    else
+        return base;
+    endif
+else
+    return base;
+endif
+.
+
+</pre>
+<BR>
+description:
+<pre>
+if (((length((c = callers())[1][2]) >= 5) && (c[1][2][1..5] == "@exam")) && (c[1][4] 
+== $player))
+    player:tell("  The @examine command is obsolete.");
+    player:tell("  Try: `examine ", argstr, "'");
+    kill_task(task_id());
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+hidden_verbs:
+<pre>
+who = args[1];
+hidden = pass(@args);
+if ("i don't want to see @gender" || (!$perm_utils:controls(who, this)))
+    where = $object_utils:has_verb(this, "@gender")[1];
+    hidden = setadd(hidden, {where, verb_info(where, "@gender")[3], verb_args(where, 
+"@gender")});
+endif
+return hidden;
+.
+
+</pre>
+<BR>
+reset:
+<pre>
+if ($perm_utils:controls(caller_perms(), this))
+    for x in (children(this.part))
+        x:set_description(x.undamaged_description);
+    endfor
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp home
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp part
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,412 @@
+<HTML>
+<HEAD>
+<TITLE>Refusals Player Class</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Refusals Player Class (#396)</H3>
+(an instance of <A HREF="HTM_000098.htm">Basic Local PC</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000179.htm">Cluttered Closet</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+add_refusal:
+<pre>
+"add_refusal(STR refusal type, OBJ person, NUM until time, not duration)";
+"if OBJ==$nothing, then refusing everyone.";
+if (caller != this)
+    return E_PERM;
+endif
+type = tostr(args[1], "_refusals");
+who = args[2];
+until = args[3];
+if (valid(who))
+    return this.(type) = setadd(this.(type), {who, until});
+else
+    return this.(type) = {{who, until}};
+endif
+.
+
+</pre>
+<BR>
+remove_refusal:
+<pre>
+"remove_refusal(STR type, OBJ who) removes the refusal from who. Doesn't matter if 
+time is up or not";
+if (caller != this)
+    return E_PERM;
+endif
+type = tostr(args[1], "_refusals");
+who = args[2];
+if (ind = $list_utils:iassoc(who, this.(type)))
+    return this.(type) = listdelete(this.(type), ind);
+else
+    return $failed_match;
+endif
+.
+
+</pre>
+<BR>
+is_refusing:
+<pre>
+"is_refusing(STR type, OBJ who) - returns true if this is refusing that `type' kind 
+of refusals from who.";
+if (caller != this)
+    return E_PERM;
+endif
+type = tostr(args[1], "_refusals");
+who = args[2];
+if (ind = $list_utils:iassoc(who, this.(type)))
+    if (this.(type)[ind][2] < time())
+        "time is up, remove it";
+        this:remove_refusal(@args);
+        return 0;
+    else
+        return this.(type)[ind][2];
+    endif
+elseif (ind = $list_utils:iassoc($nothing, this.(type)))
+    "refusing everyone if $nothing is in there";
+    return this.(type)[ind][2];
+elseif ($object_utils:isa(who, $guest) && (ind = $list_utils:iassoc($guest, this.(type))))
+    "refusing all guests";
+    return this.(type)[ind][2];
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+@refuse:
+<pre>
+"Syntax: @refuse <type> from <player[s]> [for <time period>]";
+"";
+"Valid types: mail, page, move, whisper, everything";
+"You can specify one <player>, or several separated by spaces, or `everyone'";
+"If you leave out `for <time period>', it will default to 1 week. Otherwise, you 
+can specify any english time period. Or you can state `forever'. You can also specify 
+`guests' to mean all guests.";
+"Examples:";
+"@refuse mail page from Dred legba for 2 weeks";
+"@refuse everything from Patro forever";
+"@refuse everything from everyone forever";
+if (player != this)
+    player:tell(E_PERM);
+    return;
+endif
+if (!(types = this:parse_refusal_type(dobjstr)))
+    this:tell("This type of refusal doesn't exist: \"", dobjstr, "\".");
+    return;
+endif
+result = this:parse_refusal_from(iobjstr);
+if (!result[1])
+elseif (typeof(result[2]) == ERR)
+    this:tell("This time interval makes no sense.");
+else
+    whoadded = typeadded = {};
+    until = time() + result[2];
+    until = (until < 0) ? $maxint | until;
+    for who in (result[1])
+        for type in (types)
+            if (this:is_refusing(type, $nothing))
+                this:tell("You are already refusing ", type, " from everyone. Please 
+clear this first before adding specific players.");
+            elseif (this:is_refusing(type, who))
+                this:tell("You are already refusing ", type, " from ", valid(who) 
+? $object_utils:isa(who, $guest) ? "all guests" | $string_utils:nn(who) | "everyone", 
+".");
+            else
+                this:add_refusal(type, who, until);
+                typeadded = setadd(typeadded, type);
+                whoadded = setadd(whoadded, who);
+            endif
+        endfor
+    endfor
+    if (whoadded)
+        whostr = ($nothing in whoadded) ? "everyone" | $string_utils:nanl(whoadded);
+        whostr = strsub(whostr, $string_utils:nn($guest), "all guests");
+        this:tell("Now refusing ", $string_utils:english_list(typeadded), " from 
+", whostr, " for ", $time_utils:english_time(result[2]), ".");
+        this:tell("Expiration date: ", this:ctime(until));
+    endif
+endif
+.
+
+</pre>
+<BR>
+@unrefuse @allow:
+<pre>
+"Usage: @allow <types> from [player[s]]";
+"       @unrefuse";
+"";
+"Valid types:  page, mail, move, whisper, everything";
+"You can specify one or more player, or the word `everyone'. Also, if you leave it 
+out, everyone will be assumed. The type can be any one or several from the list separated 
+by spaces.";
+"Examples:";
+"@allow move from everyone";
+"@unrefuse mail page from Dred legba";
+if (player != this)
+    player:tell(E_PERM);
+    return;
+endif
+if (!(types = this:parse_refusal_type(dobjstr)))
+    this:tell("This type of refusal doesn't exist: \"", dobjstr, "\".");
+    return;
+endif
+result = this:parse_refusal_from(iobjstr);
+if (result[1])
+    changed = 0;
+    for who in (result[1])
+        typerem = {};
+        for type in (types)
+            if (who == $nothing)
+                this.(tostr(type, "_refusals")) = {};
+                typerem = {@typerem, type};
+            elseif (this:is_refusing(type, $nothing))
+                this:tell("You are refusing ", type, " from everyone. You must clear 
+this explicitly.");
+            elseif (this:remove_refusal(type, who) != $failed_match)
+                typerem = {@typerem, type};
+            else
+                this:tell("You are not refusing ", type, " from ", $string_utils:nn(who), 
+".");
+            endif
+        endfor
+        changed = 1;
+        if (typerem)
+            this:tell("You are no longer refusing ", $string_utils:english_list(typerem), 
+" from ", (who == $nothing) ? "everyone" | ($object_utils:isa(who, $guest) ? "all 
+guests" | $string_utils:nn(who)), ".");
+        endif
+    endfor
+    if (!changed)
+        this:tell("Your refusals have not been changed.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+parse_refusal_type:
+<pre>
+"parse_refusal_type(STR containing refusal names) => returns list of explicit matched 
+refusal types. Can handle:";
+"page and mail";
+"page mail move";
+"And so on. Hopefully, even commas. However there MUST be spaces in between.";
+refstr = args[1];
+matches = {};
+if (!refstr)
+    return this.refusal_types;
+endif
+for ref in ($string_utils:words(refstr))
+    if (ref == "everything")
+        return this.refusal_types;
+    elseif (fnd = match(ref, this.refusal_type_regexp))
+        matches = {@matches, ref[fnd[1]..fnd[2]]};
+    endif
+endfor
+return matches;
+.
+
+</pre>
+<BR>
+parse_refusal_from:
+<pre>
+"parse_refusal_from(STR to parse) => pulls out the list of players in the first part, 
+then the time in the second part, separated by \"for\"";
+fromstr = args[1];
+fromwords = $string_utils:words(fromstr);
+if (forind = "for" in fromwords)
+    whowords = fromwords[1..forind - 1];
+    timestr = $string_utils:from_list(fromwords[forind + 1..length(fromwords)], " 
+");
+    if (index(timestr, "ever"))
+        timestr = "999 years";
+    endif
+elseif (forind = "forever" in fromwords)
+    timestr = "999 years";
+    whowords = fromwords[1..forind - 1];
+else
+    timestr = "1 week";
+    whowords = fromwords;
+endif
+if ((!whowords) || ("everyone" in whowords))
+    who = {$nothing};
+else
+    who = {};
+    whowords = (gind = "guests" in whowords) ? listdelete(whowords, gind) | whowords;
+    if (whowords)
+        who = $string_utils:match_player(@whowords);
+        who = (typeof(who) == OBJ) ? {who} | who;
+        whomatch = $command_utils:player_match_result(who, whowords);
+        who = (length(whomatch) > 1) ? whomatch[2..length(whomatch)] | {};
+    endif
+    if (gind)
+        who = {@who, $guest};
+    endif
+endif
+return {who, $time_utils:parse_english_time_interval(timestr)};
+.
+
+</pre>
+<BR>
+@refusals:
+<pre>
+"Usage: @refusals";
+"";
+"Shows you what you refusals you currently have.";
+for type in (this.refusal_types)
+    typestr = tostr(type, "_refusals");
+    if (until = this:is_refusing(type, $nothing))
+        this:tell("Refusing ", type, " from everyone until ", this:ctime(until), 
+".");
+    elseif (!this.(typestr))
+        this:tell("You are not refusing ", type, "s.");
+    else
+        whofnd = untfnd = {};
+        for who in ($list_utils:slice(this.(typestr)))
+            if (until = this:is_refusing(type, who))
+                whofnd = {@whofnd, who};
+                untfnd = {@untfnd, until};
+            endif
+        endfor
+        if (whofnd)
+            this:tell("Refusing ", type, " from:");
+            for d in [1..length(whofnd)]
+                this:tell("   ", $object_utils:isa(whofnd[d], $guest) ? "All guests" 
+| $string_utils:nn(whofnd[d]), " until ", this:ctime(untfnd[d]));
+            endfor
+        else
+            this:tell("You are not refusing ", type, "s.");
+        endif
+    endif
+endfor
+.
+
+</pre>
+<BR>
+receive_page:
+<pre>
+if (this:is_refusing("page", player))
+    return 0;
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+receive_message:
+<pre>
+if ((!$perm_utils:controls(caller_perms(), this)) && (caller != this))
+    return E_PERM;
+elseif (this:is_refusing("mail", args[2]))
+    return this:mail_refusal_msg();
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+page_echo_msg:
+<pre>
+if (this:is_refusing("page", player))
+    return (msg = this.page_refusal_msg) ? $string_utils:pronoun_sub(msg, this) | 
+"";
+else
+    return (msg = this.(verb)) ? $string_utils:pronoun_sub(msg, this) | "";
+endif
+.
+
+</pre>
+<BR>
+mail_refusal_msg page_refusal_msg whisper_refusal_msg:
+<pre>
+return (msg = this.(verb)) ? $string_utils:pronoun_sub(msg, this) | "";
+.
+
+</pre>
+<BR>
+moveto:
+<pre>
+by = callers();
+"Ignore all the verbs on this.";
+while (((y = by[1])[1] == this) && (y[2] == verb))
+    by = listdelete(by, 1);
+endwhile
+if ((player != this) && this:is_refusing("move", player))
+    return 0;
+endif
+last = $nothing;
+for k in (by)
+    perms = k[3];
+    if ((!perms.wizard) && (perms != this))
+        if (perms != last)
+            "check for possible malicious programmer";
+            if (this:is_refusing("move", perms))
+                return 0;
+            endif
+            last = perms;
+        endif
+    endif
+endfor
+return pass(@args);
+.
+
+</pre>
+<BR>
+wh*isper:
+<pre>
+"'whisper <message> to <this player>' - Whisper a message to this player which nobody 
+else can see.";
+if (this:is_refusing("whisper", player))
+    player:tell(this:whisper_refused_msg());
+else
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp page_refusals
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail_refusals
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp move_refusals
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp refusal_types
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp refusal_type_regexp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp page_refusal_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail_refusal_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp whisper_refusals
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp whisper_refusal_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000004.htm">generic builder</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

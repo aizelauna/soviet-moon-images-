@@ -1,0 +1,76 @@
+<HTML>
+<HEAD>
+<TITLE>Nutmeg Orchard</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Nutmeg Orchard (#90)</H3>
+(an instance of <A HREF="HTM_000110.htm">Generic Post-Apocalypse Room</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA wet concrete path runs east and west through a peaceful and startlingly beautiful orchard of nutmeg trees.  A canopy of leaves arches over several benches of cedarwood.  The trees are laden with sweet yellow nutmeg fruit, and some green monkeys play in the upper branches.  Through a break in the haze, you see a strangely enlarged red sun.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou notice a faded small sign by the path.  It reads, "Please do not feed, pet, annoy, harass or kick the animals."  A narrow path leads south.
+<BR>
+<BR>
+You see <A HREF="HTM_000093.htm">nutmeg fruit</A> and <A HREF="HTM_000197.htm">the monkey</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp You see an exit in the stone wall surrounding the park.
+[ west ] <A HREF="HTM_000086.htm">Stone Lions</A>.
+You walk along the path, emerging from the park, onto Broadway.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp The path continues to the east.
+[ east ] <A HREF="HTM_000180.htm">Clearing In The Park</A>.
+The path turns from concrete to gravel, and you enter a clearing.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp A narrow dirt path disappears into the trees to the south.
+[ south ] <A HREF="HTM_000431.htm">The Rave</A>.
+You make your way through the trees and bushes and emerge in a wide field where people are dancing and listening to music.
+<BR>
+<BR>
+This place has a certain ambiance...
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA monkey chatters noisily in the treetops.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspTwo monkeys fight over a piece of fruit.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA little smoke drifts from the east.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou hear techno music playing to the south.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou hear ambient house music playing to the south.
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+emote:
+<pre>
+pass(@args);
+if (((argstr != "") && (argstr[1] != ":")) && index(argstr, "monkey"))
+    pose = strsub(argstr, "the monkey", player.name);
+    pose = strsub(pose, "monkey", player.name);
+    fork (7)
+        this:announce_all("The monkey ", pose);
+    endfork
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,347 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Room with Stacking</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Room with Stacking (#563)</H3>
+(an instance of <A HREF="HTM_000110.htm">Generic Post-Apocalypse Room</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou are in a kindergarten play room full of stackable toys.
+<BR>
+<BR>
+You see <A HREF="HTM_000568.htm">table</A>, <A HREF="HTM_000571.htm">ball</A>, <A HREF="HTM_000566.htm">block</A> and <A HREF="HTM_000567.htm">pyramid</A> here.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+stack_index:
+<pre>
+"make sure an object is in the stacked structure";
+if ((caller != this) || (!((what = args[1]) in this.contents)))
+    return E_PERM;
+endif
+i = what in this.stacked;
+if (i == 0)
+    this.stacked = {@this.stacked, what};
+    this.supports = {@this.supports, {}};
+    this.on_top_of = {@this.on_top_of, this};
+    i = length(this.stacked);
+endif
+return i;
+.
+
+</pre>
+<BR>
+do_stack:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+thing = args[1];
+support = args[2];
+if (thing == support)
+    player:tell("You can't put a thing on top of itself.");
+    return 0;
+endif
+t = this:stack_index(thing);
+s = this:stack_index(support);
+this:pull_stacked(thing);
+this.on_top_of[t] = support;
+this.supports[s] = {@this.supports[s], thing};
+return 1;
+.
+
+</pre>
+<BR>
+pull_stacked:
+<pre>
+"pull an object out of the is_stacked relation";
+what = args[1];
+if ((caller == this) && (i = what in this.stacked))
+    oldtop = this.on_top_of[i];
+    if (oldtop == this)
+        otname = "the floor";
+    else
+        otname = oldtop.name;
+    endif
+    this.on_top_of[i] = this;
+    if (j = oldtop in this.stacked)
+        this.supports[j] = setremove(this.supports[j], what);
+        this.supports[j] = {@this.supports[j], @this.supports[i]};
+    endif
+    s = this.supports[i];
+    for o in (s)
+        if (j = o in this.stacked)
+            this.on_top_of[j] = oldtop;
+        endif
+    endfor
+    if (s)
+        if (length(s) == 1)
+            f = " falls on ";
+        else
+            f = " fall on ";
+        endif
+        fork (2)
+            this:announce_all($string_utils:title_listc(s), f, otname, ".");
+        endfork
+        this.supports[i] = {};
+    endif
+endif
+.
+
+</pre>
+<BR>
+stack put set lay:
+<pre>
+if (player.location != this)
+    player:tell("You cannot stack things in another room.n");
+    return;
+endif
+if ((!valid(dobj)) || (dobj.location != this))
+    player:tell("There is no ", dobjstr, " in this room.");
+    return;
+endif
+if ((!valid(iobj)) || (iobj.location != this))
+    player:tell("There is no ", iobjstr, " in this room.");
+    return;
+endif
+if (is_player(dobj) || (is_player(iobj) && (iobj != player)))
+    player:tell("You can't stack players or things on other players.");
+    return;
+endif
+if (this:do_stack(dobj, iobj))
+    this:announce_all(player.name, " sets ", dobj.name, " on ", iobj.name, ".");
+endif
+.
+
+</pre>
+<BR>
+exitfunc:
+<pre>
+pass(@args);
+what = args[1];
+if (i = what in this.stacked)
+    this:pull_stacked(what);
+    this.stacked = listdelete(this.stacked, i);
+    this.on_top_of = listdelete(this.on_top_of, i);
+    this.supports = listdelete(this.supports, i);
+endif
+.
+
+</pre>
+<BR>
+@clear_stack:
+<pre>
+if (player == this.owner)
+    this.stacked = {};
+    this.on_top_of = {};
+    this.supports = {};
+    this:announce_all("Nothing is setting on anything now.");
+else
+    player:tell(E_PERM);
+endif
+.
+
+</pre>
+<BR>
+supports:
+<pre>
+"return list of things supported by an object";
+if (i = this:stack_index(args[1]))
+    return this.supports[i];
+else
+    return {};
+endif
+.
+
+</pre>
+<BR>
+on_top_of:
+<pre>
+"return what an object is directly on top of";
+if (i = this:stack_index(args[1]))
+    return this.on_top_of[i];
+else
+    return $nothing;
+endif
+.
+
+</pre>
+<BR>
+sit:
+<pre>
+if (player.location != this)
+    player:tell("You cannot sit in a room you aren't located in.");
+    return;
+endif
+if ((!valid(iobj)) || (iobj.location != this))
+    player:tell("There is no ", iobjstr, " in this room.");
+    return;
+endif
+if (is_player(iobj))
+    player:tell("You can't sit on someone.");
+    return;
+endif
+if (this:do_stack(player, iobj))
+    this:announce_all(player.name, " sits on ", iobj.name, ".");
+endif
+.
+
+</pre>
+<BR>
+stand:
+<pre>
+if (player.location != this)
+    player:tell("You cannot stand up in a room you aren't located in.");
+    return;
+endif
+if (this:on_top_of(player) == this)
+    player:tell("You are already standing up.");
+else
+    this:pull_stacked(player);
+    this:announce_all(player.name, " stands up.");
+endif
+.
+
+</pre>
+<BR>
+olook_self:
+<pre>
+player:tell(this:title());
+desc = this:description();
+if (desc)
+    player:tell_lines(desc);
+else
+    player:tell("You see nothing special.");
+endif
+contents = this:contents();
+things = people = {};
+cstr = "";
+for thing in (contents)
+    if ((i = thing in this.stacked) && (this.supports[i] || (this.on_top_of[i] != 
+this)))
+        s = this.supports[i];
+        if (s)
+            ison = (length(s) == 1) ? " is on " | " are on ";
+            cstr = ((((cstr + "  ") + $string_utils:title_listc(s)) + ison) + thing.name) 
++ ".";
+        endif
+    elseif (is_player(thing))
+        people = {@people, thing};
+    else
+        things = {@things, thing};
+    endif
+endfor
+people = setremove(people, player);
+if (things)
+    cstr = ((cstr + "  You see ") + $string_utils:title_list(things)) + " here.";
+endif
+if (people)
+    ishere = (length(people) == 1) ? " is here." | " are here.";
+    cstr = ((cstr + "  ") + $string_utils:title_listc(people)) + ishere;
+endif
+if (cstr)
+    player:tell(cstr[3..length(cstr)]);
+endif
+.
+
+</pre>
+<BR>
+desc_sitting:
+<pre>
+onwhat = args[1];
+onlist = args[2];
+if ($object_utils:has_property(onwhat, "sitting_msg"))
+    msg = onwhat.sitting_msg;
+else
+    msg = "are sitting on the %t.";
+endif
+if (i = index(msg, " "))
+    v = msg[1..i - 1];
+    msg = msg[i..length(msg)];
+else
+    v = msg;
+    msg = "";
+endif
+if (length(onlist) == 1)
+    lv = length(v);
+    if (v[lv] in {"s", "x", "o", "u", "i"})
+        v = v + "es";
+    elseif ((lv >= 2) && (v[lv - 1..lv] in {"ch", "sh"}))
+        v = v + "es";
+    elseif ((lv >= 2) && (v[lv - 1..lv] in {"ay", "ey", "oy", "uy"}))
+        v = v + "s";
+    elseif (v[lv] == "y")
+        v = v[1..lv - 1] + "ies";
+    elseif (i = v in {"are", "have"})
+        v = {"is", "has"}[i];
+    else
+        v = v + "s";
+    endif
+endif
+msg = (($string_utils:title_listc(onlist) + " ") + v) + msg;
+return $string_utils:pronoun_sub(msg, player, onwhat);
+.
+
+</pre>
+<BR>
+look_self:
+<pre>
+player:tell(this:title());
+notstacked = contents = this:contents();
+stacking = "";
+for thing in (contents)
+    if ((i = thing in this.stacked) && (this.supports[i] || (this.on_top_of[i] != 
+this)))
+        s = this.supports[i];
+        if (s)
+            stacking = (stacking + this:desc_sitting(thing, s)) + this.look_sep_msg;
+            notstacked = $set_utils:difference(notstacked, s, {thing});
+        endif
+    endif
+endfor
+desc = this:description();
+if (desc)
+    if (typeof(desc) == STR)
+        desc = (desc + this.look_sep_msg) + stacking;
+    else
+        desc[length(desc)] = (tostr(desc[length(desc)]) + this.look_sep_msg) + stacking;
+    endif
+else
+    desc = "You see nothing special.";
+endif
+player:tell_lines(desc);
+this:tell_contents(setremove(notstacked, player), this.ctype);
+this:tell_exits();
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp stacked
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp supports
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp on_top_of
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000226.htm">Terrace</A> <A HREF="HTM_000304.htm">Zoo storeroom</A> <A HREF="HTM_000514.htm">den</A> <A HREF="HTM_000831.htm">A Private Room</A> <A HREF="HTM_000830.htm">A Private Place</A> <A HREF="HTM_001369.htm">a Forest</A> <A HREF="HTM_001027.htm">the muck</A> <A HREF="HTM_000816.htm">a tangle of wild flowers</A> <A HREF="HTM_002016.htm">Behind the Fetish</A> <A HREF="HTM_002106.htm">Pattern Room</A> <A HREF="HTM_001998.htm">Generic Performance Room</A> <A HREF="HTM_001435.htm">a snowflake</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

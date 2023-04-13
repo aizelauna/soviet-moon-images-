@@ -1,0 +1,61 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Papa Room</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Papa Room (#1593)</H3>
+(an instance of <A HREF="HTM_000262.htm">Generic Secured Post-Apocalypse Room</A> made by <A HREF="HTM_001286.htm">Drummer</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe owner of this Club room has not yet described it (see the @describe command by typing help @describe . . .
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+announce*_all_but:
+<pre>
+if (!this.owner:gag_p())
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+accept:
+<pre>
+return ((!is_player(args[1])) || (args[1].gender == "male")) ? pass(@args) | 0;
+.
+
+</pre>
+<BR>
+title:
+<pre>
+if (valid(player))
+    if (valid(player.location))
+        return ((parent(player.location) == #1289) || (parent(player.location) == 
+#1593)) ? this.name | "The Club";
+    endif
+endif
+return "The Club";
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_001290.htm">the Shithouse</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

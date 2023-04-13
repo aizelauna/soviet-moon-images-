@@ -1,0 +1,55 @@
+<HTML>
+<HEAD>
+<TITLE>The_Mayor</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> The_Mayor (#2)</H3>
+(an instance of <A HREF="HTM_000058.htm">generic wizard</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see the young mayor whose dark hair is starting to turn grey.  Most of his staff has abandoned the city, except for a few of the most loyal.  They maintain a trace of control amidst the anarchy of Bellona.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000186.htm">Mayor's Office</A>.
+<BR>
+<BR>
+<BR>
+The_Mayor owns <A HREF="HTM_000186.htm">Mayor's Office</A> <A HREF="HTM_000414.htm">medal</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@citizens:
+<pre>
+p = players();
+n = {};
+for i in (p)
+    n = listinsert(n, i.name);
+endfor
+player:tell($string_utils:print(n));
+.
+
+</pre>
+<BR>
+@whither:
+<pre>
+p = players();
+for i in (p)
+    player:tell(i.name, "  ", i.email_address);
+endfor
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,240 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Lycanthropic Thespian PC</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Lycanthropic Thespian PC (#1223)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Lycanthrope, prone to changing in the weather, phasing with the moon.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp rainingit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp It has a wolvish touch, under a crescent moon, and growing more so.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis is a modification of the Scorpion pc. As a lycanthrope, 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspits description and that of its worn objects can phase with the 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspmoon, as well as with daytime and weather.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbsp#1223, the Generic Lycanthropic Thespian PC, is a child of #153, the themely Scorpion 
+PC, with a couple of added capabilities.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAs a lycanthropic descendent of #1223, you may include markup strings in your description 
+which will cycle or phase:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp  time of day        it
+&nbsp&nbsp&nbsp&nbsp&nbsp  MOO-weather        raining
+&nbsp&nbsp&nbsp&nbsp&nbsp  phase of the moon  It has a wolvish touch, under a crescent moon,
+&nbsp&nbsp&nbsp&nbsp&nbsp  waxing or waning?   and growing more so.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspIf included in your description, these strings will be substituted with appropriate 
+messages.
+&nbsp&nbsp&nbsp&nbsp&nbspType @messages me to see the current settings for messages (the default messages 
+@day, @full_moon etc. describe the parent lycanthrope).
+&nbsp&nbsp&nbsp&nbsp&nbsp(The same set of messages, when found on a worn object or on a costume, will also 
+substitute into the @worn message or @role_desc to appear in your description. Make 
+yourself a wearable with a full set of weather messages and you can have that wet 
+hat.)
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAs thespians, descendents of #1223 may wear costumes.
+&nbsp&nbsp&nbsp&nbsp&nbspCostumes are descendents of #1226 (the Generic Costume, q.v.) which will alter your 
+appearance while you are dressed in them.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+description:
+<pre>
+if (valid(costume = this.costume))
+    if (costume.location == this)
+        desc = costume.role_desc_msg;
+    else
+        this.costume = $nothing;
+        desc = this.description;
+    endif
+else
+    desc = this.description;
+endif
+costume ? referend = costume | (referend = this);
+if (typeof(desc) == STR)
+    desc = this:phase_sub(desc, referend);
+elseif (typeof(desc) == LIST)
+    for l in [1..length(desc)]
+        desc[l] = this:phase_sub(desc[l], referend);
+    endfor
+endif
+if (worn = this:get_worn())
+    if (typeof(desc) == STR)
+        wmsgs = "";
+        for w in (worn)
+            wmsgs = (wmsgs + " ") + this:phase_sub(this:is_wearable(w), w);
+        endfor
+        return desc + wmsgs;
+    elseif (typeof(desc) == LIST)
+        wmsgs = {};
+        for w in (worn)
+            wmsgs = {@wmsgs, this:phase_sub(this:is_wearable(w), w)};
+        endfor
+        if (wmsgs)
+            return $list_utils:append(desc, wmsgs);
+        else
+            return desc;
+        endif
+    else
+        return desc;
+    endif
+else
+    return desc;
+endif
+.
+
+</pre>
+<BR>
+phase_sub:
+<pre>
+" Performs a string substitution on a line from the description. ";
+" args[2], the referend, is either the player, eir costume, or a worn object";
+" The routine presumes that the existence of @day and @full_moon messages indicate 
+full sets of corresponding sub properties on referend. ";
+line = args[1];
+referend = args[2];
+if ($object_utils:has_property(referend, "day_msg"))
+    line = #1000:weather_daytime(line, referend);
+endif
+if ($object_utils:has_property(referend, "full_moon_msg"))
+    line = #932:moon_phase(line, referend);
+endif
+return $string_utils:pronoun_sub(line, this, referend);
+.
+
+</pre>
+<BR>
+costume:
+<pre>
+costume = args[1];
+if (costume.location == this)
+    if ($object_utils:has_property(costume, "role_msg") && $object_utils:has_property(costume, 
+"role_desc_msg"))
+        this.costume = costume;
+        this:tell(costume:dress_msg(this));
+        this.location:announce(costume:odress_msg(this));
+    else
+        player:tell("The costume keeps slipping off. Forget it.");
+    endif
+else
+    player:tell("You have to be holding the costume to wear it.");
+endif
+.
+
+</pre>
+<BR>
+uncostume:
+<pre>
+costume = args[1];
+player:tell(costume:remove_msg());
+player.location:announce(costume:oremove_msg());
+this.costume = $nothing;
+.
+
+</pre>
+<BR>
+titlec:
+<pre>
+costumed = pass(@args);
+if (valid(costume = this.costume))
+    if ((costume.location == this) && costume.role_msg)
+        costumed = ((costumed + " [") + costume.role_msg) + "]";
+    endif
+else
+    this.costume = $nothing;
+endif
+return costumed;
+.
+
+</pre>
+<BR>
+remove:
+<pre>
+target = player:my_match_object(dobjstr);
+if (target == this.costume)
+    this:uncostume(target);
+else
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+wear:
+<pre>
+target = player:my_match_object(dobjstr);
+if ($object_utils:has_property(target, "role_desc_msg"))
+    this:costume(target);
+else
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp day_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp night_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp morning_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp evening_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp warm_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp raining_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cool_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp snowing_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp new_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp full_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp half_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp crescent_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gibbous_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp moon_waxing_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp moon_waning_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp costume
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000887.htm">Zenith</A> <A HREF="HTM_000860.htm">Symantica</A> <A HREF="HTM_001301.htm">Nausea</A> <A HREF="HTM_000812.htm">Marcus</A> <A HREF="HTM_001618.htm">V.Dentata</A> <A HREF="HTM_001457.htm">Trismegistos</A> <A HREF="HTM_001551.htm">Kalessin</A> <A HREF="HTM_002027.htm">Dragonfly</A> <A HREF="HTM_002019.htm">Corwin</A> <A HREF="HTM_001460.htm">Gaijin</A> <A HREF="HTM_002177.htm">Avon</A> <A HREF="HTM_002179.htm">Steelgrave</A> <A HREF="HTM_002083.htm">Silvia</A> <A HREF="HTM_001248.htm">aghari</A> <A HREF="HTM_002175.htm">Sweetheart</A> <A HREF="HTM_002219.htm">Lachesis</A> <A HREF="HTM_001021.htm">Boudicea</A> <A HREF="HTM_002230.htm">Puzur</A> <A HREF="HTM_002245.htm">Stoan</A> <A HREF="HTM_002112.htm">Uptown</A> <A HREF="HTM_002565.htm">donnelly</A> <A HREF="HTM_002509.htm">Caesar</A> <A HREF="HTM_002592.htm">Cleo</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

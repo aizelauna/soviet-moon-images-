@@ -1,0 +1,362 @@
+<HTML>
+<HEAD>
+<TITLE>building utilities</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> building utilities (#21)</H3>
+(an instance of <A HREF="HTM_000124.htm">Generic Utilities Package</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspVerbs useful for building.  For a complete description of a given verb, do `help $building_utils:verbname'.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspmake_exit(spec,source,dest[,don't-really-create]) => a new exit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp          spec is an exit-spec as described in `help @dig'
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspset_names(object, spec) - sets name and aliases for an object
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspparse_names(spec) => list of {name, aliases}
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp          in both of these, spec is of the form
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp            <name>[[,:]<alias>,<alias>,...]
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp          (as described in `help @rename')
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsprecreate(object, newparent) - effectively recycle and recreate object
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp          as a child of newparent
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+make_exit:
+<pre>
+"make_exit(spec, source, dest[, use-$recycler-pool [, kind]])";
+"Uses $recycler by default; supplying fourth arg as 0 suppresses this.";
+"Optional 5th arg gives a parent for the object to be created";
+"(i.e., distinct from $exit)";
+"Returns the object number as a list if successful, 0 if not.";
+set_task_perms(caller_perms());
+spec = args[1];
+source = args[2];
+dest = args[3];
+exit_kind = $exit;
+if (length(args) > 3)
+    if (length(args) > 4)
+        exit_kind = args[5];
+    endif
+endif
+exit = player:_create(exit_kind);
+if (typeof(exit) == ERR)
+    player:tell(exit);
+    return;
+endif
+$building_utils:set_names(exit, spec);
+exit.source = source;
+exit.dest = dest;
+source_ok = source:add_exit(exit);
+dest_ok = dest:add_entrance(exit);
+move(exit, $nothing);
+via = $string_utils:from_value(setadd(exit.aliases, exit.name), 1);
+if (source_ok)
+    player:tell("Exit from ", source.name, " (", source, ") to ", dest.name, " (", 
+dest, ") via ", via, " created with id ", exit, ".");
+    if (!dest_ok)
+        player:tell("However, I couldn't add ", exit, " as a legal entrance to ", 
+dest.name, ".  You may have to get its owner, ", dest.owner.name, " to add it for 
+you.");
+    endif
+    return {exit};
+elseif (dest_ok)
+    player:tell("Exit to ", dest.name, " (", dest, ") via ", via, " created with 
+id ", exit, ".  However, I couldn't add ", exit, " as a legal exit from ", source.name, 
+".  Get its owner, ", source.owner.name, " to add it for you.");
+    return {exit};
+elseif (0)
+    "I considered using this for awhile. -- Lambda";
+    player:tell("Exit to ", dest.name, " (", dest, ") via ", via, " created with 
+id ", exit, ".  However, I couldn't add ", exit, " as EITHER a legal exit from ", 
+source.name, " OR as a legal entrance to ", dest.name, ".  Get their owners, ", source.owner.name, 
+" and ", dest.owner.name, ", respectively, to add it for you.");
+    return 0;
+else
+    player:_recycle(exit);
+    player:tell("I couldn't add a new exit as EITHER a legal exit from ", source.name, 
+" OR as a legal entrance to ", dest.name, ".  Get their owners, ", source.owner.name, 
+" and ", dest.owner.name, ", respectively, to add it for you.");
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+set_names:
+<pre>
+"$building_utils:set_names(object, spec)";
+set_task_perms(caller_perms());
+object = args[1];
+names = this:parse_names(args[2]);
+name = names[1] || object.name;
+return object:set_name(name) && object:set_aliases(names[2]);
+.
+
+</pre>
+<BR>
+recreate:
+<pre>
+":recreate(object,newparent) -- effectively recycle and recreate the specified object 
+as a child of parent.  Returns true if successful.";
+object = args[1];
+parent = args[2];
+who = caller_perms();
+if (!(valid(object) && valid(parent)))
+    return E_INVARG;
+elseif (who.wizard)
+    "no problemo";
+elseif ((who != object.owner) || ((who != parent.owner) && (!parent.f)))
+    return E_PERM;
+endif
+"Chparent any children to their grandparent instead of orphaning them horribly.  
+Have to do the chparent with wizperms, in case the children are owned by others, 
+so do this before set_task_perms.";
+for c in (children(object))
+    chparent(c, parent(object));
+endfor
+set_task_perms(who);
+if ($object_utils:has_callable_verb(object, "recycle"))
+    object:recycle();
+endif
+chparent(object, #-1);
+for p in (properties(object))
+    delete_property(object, p);
+endfor
+for v in (verbs(object))
+    delete_verb(object, "0");
+endfor
+for item in (object.contents)
+    move(item, #-1);
+endfor
+chparent(object, parent);
+object.name = "";
+if ($object_utils:has_verb(parent, "initialize"))
+    object:initialize();
+endif
+object.r = 0;
+object.f = 0;
+object.w = 0;
+return 1;
+.
+
+</pre>
+<BR>
+transfer_ownership(useless):
+<pre>
+"transfer_ownership(object, oldowner, newowner)";
+"Transfer ownership of object from oldowner to newowner.";
+if (!((caller == this) || caller_perms().wizard))
+    return E_PERM;
+endif
+what = args[1];
+if (valid(from = args[2]) && (typeof(from.owned_objects) == LIST))
+    from.owned_objects = setremove(from.owned_objects, what);
+endif
+if (valid(to = args[3]) && (typeof(from.owned_objects) == LIST))
+    to.owned_objects = setadd(to.owned_objects, what);
+    $wiz_utils:set_owner(what, to);
+endif
+.
+
+</pre>
+<BR>
+parse_names:
+<pre>
+"$building_utils:parse_names(spec)";
+"Return {name, {alias, alias, ...}} from name,alias,alias or name:alias,alias";
+spec = args[1];
+if (!(colon = index(spec, ":")))
+    aliases = $string_utils:explode(spec, ",");
+    name = aliases[1];
+else
+    aliases = $string_utils:explode(spec[colon + 1..length(spec)], ",");
+    name = spec[1..colon - 1];
+endif
+return {name, $list_utils:map_arg($string_utils, "trim", aliases)};
+.
+
+</pre>
+<BR>
+audit_object_category:
+<pre>
+cl = {$player, $room, $exit, $note, $container, $thing, $feature, $mail_recipient, 
+$generic_help, $generic_db, $generic_utils, $generic_options};
+cs = {"p", "R", "E", "N", "C", "T", "F", "M", "H", "D", "U", "O"};
+if (is_player(OBJ = args[1]))
+    return "P";
+endif
+while (valid(OBJ))
+    if (i = OBJ in cl)
+        return cs[i];
+    endif
+    OBJ = parent(OBJ);
+endwhile
+return " ";
+.
+
+</pre>
+<BR>
+object_audit_string:
+<pre>
+o = args[1];
+if ((length(args) == 2) && args[2])
+    kids = 0;
+    for k in (children(o))
+        $command_utils:suspend_if_needed(0);
+        if (k.owner != o.owner)
+            kids = 2;
+        elseif (kids == 0)
+            kids = 1;
+        endif
+    endfor
+    "The verbs() call below might fail, but that's OK";
+    v = verbs(o);
+    if (v)
+        vstr = tostr("[", $string_utils:right(length(v), 3), "] ");
+    else
+        vstr = "      ";
+    endif
+    if (o.r && o.f)
+        r = "f";
+    elseif (o.r)
+        r = "r";
+    elseif (o.f)
+        r = "F";
+    else
+        r = " ";
+    endif
+    vstr = tostr(" kK"[kids + 1], r, $building_utils:audit_object_category(o), vstr);
+else
+    vstr = "";
+endif
+if (valid(o.location))
+    loc = ((((o.location.owner == o.owner) ? " " | "*") + "[") + o.location.name) 
++ "]";
+elseif ($object_utils:has_property(o, "dest") && $object_utils:has_property(o, "source"))
+    if (typeof(o.source) != OBJ)
+        source = " <non-object> ";
+    elseif (!valid(o.source))
+        source = "<invalid>";
+    else
+        source = o.source.name;
+        if (o.source.owner != o.owner)
+            source = "*" + source;
+        endif
+    endif
+    if (typeof(o.dest) != OBJ)
+        destin = " <non-object> ";
+    elseif (!valid(o.dest))
+        destin = "<invalid>";
+    else
+        destin = o.dest.name;
+        if (o.dest.owner != o.owner)
+            destin = "*" + destin;
+        endif
+    endif
+    srclen = (length(source) < 20) ? length(source) | 19;
+    destlen = (length(destin) < 20) ? length(destin) | 19;
+    loc = ((" " + source[1..srclen]) + "->") + destin[1..destlen];
+elseif ($object_utils:isa(o, $room))
+    loc = "";
+    for x in (o.entrances)
+        if (((((typeof(x) == OBJ) && valid(x)) && (x.owner != o.owner)) && $object_utils:has_property(x, 
+"dest")) && (x.dest == o))
+            loc = ((loc + (loc ? ", " | "")) + "<-*") + x.name;
+        endif
+    endfor
+else
+    loc = " [Nowhere]";
+endif
+if (length(loc) > 41)
+    loc = loc[1..37] + "..]";
+endif
+namelen = (length(o.name) < 30) ? length(o.name) | 29;
+return tostr(vstr, $string_utils:right(o, 6), " ", $string_utils:left(o.name[1..namelen], 
+30), loc);
+.
+
+</pre>
+<BR>
+do_audit do_prospectus:
+<pre>
+":do_audit(who, start, end, match)";
+"audit who, with objects from start to end that match 'match'";
+":do_prospectus(...)";
+"same, but with verb counts";
+who = args[1];
+start = args[2];
+end = args[3];
+match = args[4];
+player:tell(tostr("Objects owned by ", who.name, " (from #", start, " to #", end, 
+match ? " matching " + match | "", ")", ":"));
+count = 0;
+if (typeof(who.owned_objects) == LIST)
+for o in (who.owned_objects)
+    $command_utils:suspend_if_needed(0);
+    if ((tonum(o) >= start) && (tonum(o) <= end))
+        count = count + this:do_audit_item(o, match, verb == "do_prospectus");
+    endif
+endfor
+else
+for i in [start..end]
+    $command_utils:suspend_if_needed(0);
+    count = count + this:do_audit_item(o, match, verb == "do_prospectus");
+endfor
+endif
+player:tell($string_utils:left(tostr("-- ", count, " object", (count == 1) ? "." 
+| "s."), player:linelen() - 1, "-"));
+.
+
+</pre>
+<BR>
+do_audit_item:
+<pre>
+o = args[1];
+match = args[2];
+pros = args[3];
+found = match ? 0 | 1;
+names = {o.name, @o.aliases};
+while (names && (!found))
+    if (index(names[1], match) == 1)
+        found = 1;
+    endif
+    names = listdelete(names, 1);
+endwhile
+if (found)
+    player:tell(this:object_audit_string(o, pros));
+    return 1;
+endif
+return 0;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

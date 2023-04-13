@@ -1,0 +1,185 @@
+<HTML>
+<HEAD>
+<TITLE>a newspaper</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a newspaper (#10)</H3>
+(an instance of <A HREF="HTM_000009.htm">generic note</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIt's the latest issue of the Bellona Times, datad dobject.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000011.htm">River bank</A>.
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspMYSTERIOUS DISASTER BEFALLS ONCE-GREAT CITY
+&nbsp&nbsp&nbsp&nbsp&nbsp        BELLONA (VPI) -- The city of Bellona as been incommunicado for some weeks 
+now, following a cataclysmic rift in the fabric of space-time.  Most of its surviving 
+population has escaped via the single remaining bridge to the outside world.
+&nbsp&nbsp&nbsp&nbsp&nbsp        Cameras and radios have been unable to relay any images or information from 
+the city, but fleeing residents report power failures, endlessly burning fires, and 
+roaming gangs of youths, called ``scorpions'', who wear holographic costumes.  Although 
+roadblocks have been abandon now, a police spokesman still urges the curious to stay 
+out.  ``At least tour the caves before attempting to enter'', said one officer.  
+[Jan 26, 1994]
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspINTERZONE
+&nbsp&nbsp&nbsp&nbsp&nbsp        BELLONA (VPI) -- Bellona, once home to a million people, is now estimated 
+to contain less than a thousand.  Reports are sparse.  A clearing in the park has 
+become a commune for new comers.  *Graffiti is used as a forum for public discussion. 
+ A drug called simply "the ticket" is rumored to be the key to a new world called 
+Interzone.  [Feb 20, 1994]
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspDHALGREN'S HOST CHANGES
+&nbsp&nbsp&nbsp&nbsp&nbsp        BELLONA (VPI) -- In a sudden, lurching shift in space and time, Dhalgren 
+suddenly moves to The University of Washington at 7pm on January 12.  Strangely, 
+the world appears just as it did at 8pm on the previous night in Princeton.  Residents 
+recover, and life returns to normal -- such as it is in Bellona.  [Jan 12, 1995]
+</pre>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+description:
+<pre>
+raw = ctime(this.last_write_time);
+"         111111111122222";
+"123456789012345678901234";
+"Fri Nov 30 14:31:21 1990";
+date = (raw[1..10] + ",") + raw[20..24];
+desc = "Type 'news' to see the latest issue of the Bellona Times, dated %d.";
+return strsub(desc, "%d", date);
+.
+
+</pre>
+<BR>
+read:
+<pre>
+pass(@args);
+pos = player in this.readers;
+if (pos)
+    this.readtimes[pos] = time();
+elseif (!$object_utils:isa(player, $guest))
+    this.readers = {@this.readers, player};
+    this.readtimes = {@this.readtimes, time()};
+endif
+.
+
+</pre>
+<BR>
+check:
+<pre>
+who = caller;
+pos = who in this.readers;
+if (pos)
+    if (this.readtimes[pos] < this.last_write_time)
+        this:announce_new_edition(who);
+    endif
+else
+    who:notify("Don't forget to take a look at the newspaper.  Type 'news' to see 
+it.");
+endif
+.
+
+</pre>
+<BR>
+touch:
+<pre>
+if ($perm_utils:controls(valid(caller_perms()) ? caller_perms() | player, this))
+    this.last_write_time = time();
+    for p in (connected_players())
+        this:announce_new_edition(p);
+    endfor
+    if (callers() == {})
+        player:notify("The newspaper has been marked as newly-edited.");
+    endif
+else
+    player:notify("Permission denied.");
+endif
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    pass();
+    this:set_text({"There's no news unless you write it."});
+    this.description = "It's the latest issue of the MOO Herald-Examiner, dated %d.";
+    this.take_failed_msg = "Realizing that the newspaper is to be shared among all 
+of the players, you change your mind about picking it up.";
+    this.readtimes = this.readers = this.writers = {};
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+announce_new_edition:
+<pre>
+if (caller == this)
+    args[1]:notify("There's a new edition of the newspaper.  Type 'news' to see it.");
+endif
+.
+
+</pre>
+<BR>
+gc garbage_collect:
+<pre>
+if (!$perm_utils:controls(player, this))
+    player:tell("Sorry, you can't hack on the newspaper.");
+else
+    original = length(this.readers);
+    newplayers = {};
+    newtimes = {};
+    index = 0;
+    for p in (this.readers)
+        index = index + 1;
+        if (valid(p) && is_player(p))
+            newplayers = {@newplayers, p};
+            newtimes = {@newtimes, this.readtimes[index]};
+        endif
+        $command_utils:suspend_if_needed(0);
+    endfor
+    this.readers = newplayers;
+    this.readtimes = newtimes;
+    player:tell("Done.  Removed ", original - length(this.readtimes), " bogus readers.");
+endif
+.
+
+</pre>
+<BR>
+set_text:
+<pre>
+if (this:is_writable_by(caller_perms()))
+    this.last_write_time = time();
+    return pass(@args);
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp readtimes
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp readers
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp last_write_time
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

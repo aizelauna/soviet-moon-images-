@@ -1,0 +1,140 @@
+<HTML>
+<HEAD>
+<TITLE>Biker Bob</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Biker Bob (#2088)</H3>
+(an instance of <A HREF="HTM_001044.htm">Generic Speaking Wandering Automaton</A> made by <A HREF="HTM_000538.htm">Eclipse</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspBiker Bob is a big man.  Not fat, but built with the firm muscle of someone you wouldn't want to come up against in a fight.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspBob's well-toned body is crowned by a shiny, bald dome.  His eyes remain hidden by sunglasses with nearly black lenses, and his face is tanned and somewhat unshaven.Both of his ears are pierced several times with dangling crosses, feathers, eagles, and silver hoops.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspHe seems to favour black clothing, with very few exceptions.  Under his black leather coat, you can see orange print reading "Harley Davidson" on his black t-shirt.  His black jeans are full of holes, and his black boots look heavy enough to crush a coconut.  Various heavy chains dangle from Bob's jacket and pockets, and solid-looking necklaces and rings adorn his neck and fingers.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspNot surprisingly, Bob is also well-adorned with many tattoos.  On his arms, you can see a heart inscribed with "Mom", several nude women, and an Indian chief, and other tattoos disapear up under the sleeves of his jacket.  He also seems to bear a sizeable amount of scars, and you notice  the large hunting knife strapped onto his black leather belt.
+<BR>
+<BR>
+Biker Bob has some things to say:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Unless you're asking for a tattoo, don't bug me. I ain't got time for chit-chat.
+<BR>
+<BR>
+Biker Bob is carrying <A HREF="HTM_002086.htm">tattoo gun</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002128.htm">Tattoo Chamber</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+ask:
+<pre>
+if ((room = player.location) != this.location)
+    player:tell(this.name, " can't hear you from there.");
+    return;
+endif
+$you:say_action(tostr("%N %<asks> %t for ", $string_utils:a_or_an(iobjstr), " ", 
+iobjstr, "."));
+if (iobjstr != "tattoo")
+    room:announce_all(this.name, " says, \"Hey man, I thought you came here for a 
+tattoo.\"");
+elseif (($code_utils:task_valid(this.victim_task) && (this.victim in connected_players())) 
+&& (this.victim.location == this.location))
+    room:announce_all(this.name, " says, \"Hey, ", player.name, ", wait till I'm 
+done with ", this.victim.name, ".\"");
+else
+    this.victim_task = task_id();
+    this.victim = player;
+    cu = $command_utils;
+    room:announce_all(this.name, " says, \"So, ", player.name, ", what kind of tattoo 
+do you want?\"");
+    ok = 0;
+    while (!ok)
+        if (player.location != room)
+            room:announce_all(this.name, " shrugs.  \"I guess ", player.name, " changed 
+", player.pp, " mind.\"");
+            return;
+        endif
+        ok = (tname = cu:read("the name of your tattoo")) && cu:yes_or_no(tostr(this.name, 
+" asks, \"You really want a tattoo of ", tname, "?\""));
+    endwhile
+    room:announce(player.name, " asks ", this.name, " for a tattoo of ", tname, ".");
+    room:announce_all(this.name, " says, \"Ok.  Describe how you want the tattoo 
+to look.\"");
+    ok = 0;
+    while (!ok)
+        if (player.location != room)
+            room:announce_all(this.name, " shrugs.  \"I guess ", player.name, " changed 
+", player.pp, " mind.\"");
+            return;
+        endif
+        if (tdesc = cu:read_lines())
+            player:tell(this.name, " says, \"Your tattoo will be described as --");
+            player:tell_lines(tdesc);
+            ok = cu:yes_or_no("-- is this ok?\"");
+        endif
+    endwhile
+    room:announce(player.name, " describes ", tname, " in great detail.");
+    room:announce_all(this.name, " says, \"Beautiful!  Now, where on your body would 
+you like the tattoo?\"");
+    ok = 0;
+    while (!ok)
+        if (player.location != room)
+            room:announce_all(this.name, " shrugs.  \"I guess ", player.name, " changed 
+", player.pp, " mind.\"");
+            return;
+        endif
+        ok = (tloc = cu:read("a location on your body")) && cu:yes_or_no(tostr(this.name, 
+" asks, \"You want a tattoo of ", tname, " on your ", tloc, "?\""));
+    endwhile
+    room:announce("With a grin, ", player.name, " points to ", player.pp, " ", tloc, 
+".");
+    tattoo = this.gun:generate_tattoo(player, tname, tdesc, tloc);
+    if (typeof(tattoo) == OBJ)
+        room:announce_all(this.name, " whips out his tattoo gun, bares ", player.name, 
+"'s ", tloc, " and goes to work, ignoring ", player.name, "'s tears and cries of 
+pain.");
+        room:announce_all("After a short while, ", this.name, " wipes the sweat from 
+his brow and beams with pride, showing all the magnificant picture of ", tname, ". 
+ He seems oblivious to the blood dripping from ", player.name, "'s ", tloc, ".");
+    elseif (tattoo == E_QUOTA)
+        room:announce_all(this.name, " frowns.  \"It seems I'm all out of ink.  You'll 
+have to come back later after my next shipment comes in.\"");
+        $mail_agent:send_message(this, this.owner, tostr("error: ", tattoo), {tostr(this.name, 
+" was unable to give ", player.name, " a tattoo: ", tattoo)});
+    else
+        room:announce_all(this.name, " scratches his head in confusion.  \"That's 
+odd.  There seems to be a problem with my tattoo gun (", tattoo, ").  You'll have 
+to come back later after I've had it serviced.\"");
+        $mail_agent:send_message(this, this.owner, tostr("error: ", tattoo), {tostr(this.name, 
+" was unable to give ", player.name, " a tattoo: ", tattoo)});
+    endif
+    this.victim = $nothing;
+    this.victim_task = 0;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp victim
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gun
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp victim_task
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,170 @@
+<HTML>
+<HEAD>
+<TITLE>The Hermaphrodite</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> The Hermaphrodite (#1499)</H3>
+(an instance of <A HREF="HTM_000955.htm">Generic Room with Seats</A> made by <A HREF="HTM_001551.htm">Kalessin</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe tent flaps creak and hiss as you push through them into this space.  Murmurs whisper through the outer tent fabric from the phantasmal crowds outside, and it takes a while for your attention to focus on the stage.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspFaded, dirty carnival signs proclaim various bargains for your buck, centered around this freakish resident's androgynous attributes.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe stage holds a stool with a sign on it, depicting what looks like a half black and half white person on it.  It's difficult to tell without a closer look.  A single, yellowish spotlight pierces the murky tent filtered light, illumniating the sign.  About two dozen folding chairs are arranged in a small semi-circle around the stage, and it looks like these chairs would put you at a perfect height to peer under someone's skirt, were such a person seated on the stool.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+<BR>
+You sit on the stool, feeling tingly and courageous.  It is no small thing, sitting on this stool.
+<BR>
+<BR>
+í
+<BR>
+You are holding <A HREF="HTM_002029.htm">Newborn</A>.<BR>
+<BR>
+You notice some details:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp The stool is medium height, made from old, dark stained, white paint splattered, cracked and taped wood.  It looks creaky and unstable.  There's a sign taped to it.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp The sign on the stool depicts an artist's conception of a formally dressed hermaphrodite about to marry eirself.  One side of this person is dressed as a bridegroom, including tails and top hat, a single lensed pair of spectacles, and an elegant curled mustache.  The other side is dressed as a virginal bride, including laced veil, flowers, modest lipstick and a huge billowing skirt.  The details of the interface between the two are suitably obscured and uneventful.  The single couple is shown dancing a waltz with eirself.  Who can tell who's leading and who's not?
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp The posters hanging on the tent walls are old, faded and weather-stained.  They look like they barely survived a downpour in a dusty field.  Perhaps they did.  The signs hawk the experience of seeing the hermaphrodite and hint at seeing the very thing that indicates eir nebulous gender - its genitalia.  Though you know the vice squad would be here in a second if that were true, you can't help but wonder and hope.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp The chairs look about as stable as the stool.  Perhaps you'd better stand.
+<BR>
+<BR>
+You see <A HREF="HTM_002043.htm">half-page</A>, <A HREF="HTM_002048.htm">half-page</A>, <A HREF="HTM_002033.htm">Coat Rack</A> and <A HREF="HTM_001551.htm">Kalessin</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ west ] <A HREF="HTM_000923.htm">The House of Freaks</A>.
+You push through the flaps to the west.
+<BR>
+<BR>
+This place has a certain ambiance...
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspCrackling, the murmur outside gets steadily louder.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe murmur outside cracks a little, then gets quieter.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe murmur ceases, with a crackle, leaving the tent sounding hollow and too loud.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA fly bothers your ear.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou hear someone scuffling around outside.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA cat meows, then there's an insane crackle and a hiss, mechanical.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA dog barks, seemingly far away and underground.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou hear glass clanking or smashing at some indeterminate distance.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA distorted scream rings far away.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou hear the hiss of a tape recording and then a crowd cheering, faintly.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA metallic shot rings out, like in a movie.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA train whistles in the distance, hissy and distorted.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou hear hysterical laughter somewhere nearby.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe air cracks, pops and hisses, like a bad tape recording.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA sound hisses into silence, just in time for you to notice.
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+peek peer:
+<pre>
+wearer = #2022.location;
+wearname = #2022.location.name;
+peerer = player;
+peername = player.name;
+looked = iobjstr;
+if (looked in #2022.aliases)
+    if (#2022 in #2022.location.worn)
+        if (#1499.sitting[1])
+            if (#1499.sitting[1][1] == #2022.location)
+                if (#1499.sitting[2])
+                    if (peerer in #1499.sitting[2])
+                        player:tell("Yay!!! You can look up the dress!!!");
+                    else
+                        player:tell("Nope, yer not sitting in the chairs.  Close, 
+but no cigar, Jack.  Nyah nyah.");
+                    endif
+                else
+                    peerer:tell(((("Try as you might, you can't seem to get the right 
+angle to look up " + wearname) + "'s ") + looked) + ".  Maybe you need a different 
+perspective.");
+                    wearer:tell(((("You notice " + peername) + " trying to look up 
+your ") + looked) + ", but it doesn't seem so rude now that you have that warm spotlight 
+on you.");
+                endif
+            else
+                wearer:tell($string_utils:pronoun_sub(((peername + " just tried to 
+look up your ") + looked) + "!!!  You slap %o silly."));
+                peerer:tell($string_utils:pronoun_sub(((wearname + " caught you trying 
+to sneak a look up %p ") + looked) + "!  You didn't escape unharmed.  Many of %p 
+slaps smacked you soundly.", wearer));
+                this:announce_all_but({peerer, wearer}, $string_utils:pronoun_sub(((((wearname 
++ " just caught ") + peername) + " trying to look up %p ") + looked) + "!  Several 
+forceful smacks strike their marks.", wearer));
+            endif
+        else
+            wearer:tell($string_utils:pronoun_sub(((peername + " just tried to look 
+up your ") + looked) + "!!!  How rude!  You slap %o away."));
+            peerer:tell($string_utils:pronoun_sub(((wearname + " just caught you 
+trying to look up %p ") + looked) + "!!!  %S seems a little miffed.  Maybe that slap 
+mark will fade later.", wearer));
+            this:announce_all_but({peerer, wearer}, $string_utils:pronoun_sub(((((wearname 
++ " just caught ") + peername) + " trying to look up %p ") + looked) + "!  A loud 
+slap resounds in the room.", wearer));
+        endif
+    else
+        if (#2022.location == #1499)
+            player:tell(("The " + looked) + " is lying on the stage.  Do you really 
+think the view would be very interesting?");
+        else
+            if (#2022.location == player)
+                player:tell("You're carrying the dress.  Try look, instead.");
+            else
+                player:tell($string_utils:pronoun_sub(((#2022.location.name + " isn't 
+wearing the ") + looked) + ".  Ask %o to wear it for you.", #2022.location));
+            endif
+        endif
+    endif
+else
+    player:tell("Try peering under something else.  There's a hint in the room description.");
+endif
+.
+
+</pre>
+<BR>
+test:
+<pre>
+#2033:dispense_item();
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp worn
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,1064 @@
+#.file  #data.s"
+#.line 2
+#
+#       data - lisp data segment
+#       D.P.Mitchell  80/03/20.
+#
+#       Copyright © 1980, 2003 Don P. Mitchell.  All rights reserved.
+#
+#       This software is being provided "as is", without any express or implied
+#       warranty.  I make no representation of warranty of any kind concerning the
+#       merchantability of this software or its fitness for any particular purpose.
+#
+        .align  2               # get ld to not screw address alignment
+etext:                          # end of text segment
+        .data
+        .align  2
+
+output: .long   3,1,(output+16),512
+        .space  512
+input:  .long   3,-1,(input+16),0       # an illegal file descriptor
+                                        # to trigger file open on first getc
+        .space  512
+break:  .long   1,200000        # memory allocation
+Open:   .long   2,sysin,0       # input file
+sysin:  .byte   0x73,0x79,0x73,0x70,0x69,0x74,0x00
+sigint: .long   2,SIGINT,sigcatch
+sigfpe: .long   2,SIGFPE,sigcatch
+sigbus: .long   2,SIGBUS,sigcatch
+sigsegv:.long   2,SIGSEGV,sigcatch
+argc:   .long   0
+argv:   .long   0
+envp:   .long   0
+margin: .long   78              # maximum line length
+room:   .long   78              # room left on current line
+gencon: .long   0               # gensym constant
+dummy:  .long   undef,  8:0,23:12,1:1
+nilnam: .byte   0x6e,0x69,0x6c,0x00
+tmp1:   .long   0
+tmp2:   .long   0
+log2:   .float  0d0.30102999566
+        .align  2
+tentab: .double 0d1.0e1
+        .double 0d1.0e2
+        .double 0d1.0e4
+        .double 0d1.0e8
+        .double 0d1.0e16
+        .double 0d1.0e32
+toplev: .long   0
+fhead:  .long   8:2,23:532,1:1
+#
+#       begining of list space.  absolutely must be quadword aligned.
+#       single letter apvals.
+#
+        .align  2
+apval:  .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x0
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x1
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x2
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x3
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x4
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x5
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x6
+        .align  2
+bell:   .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x7
+        .align  2
+bspace: .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x8
+        .align  2
+tab:    .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x9
+        .align  2
+newline:.long   undef,  8:0,23:13,1:1,  0
+        .byte   0xa
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0xb
+        .align  2
+newpage:.long   undef,  8:0,23:13,1:1,  0
+        .byte   0xc
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0xd
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0xe
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0xf
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x10
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x11
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x12
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x13
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x14
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x15
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x16
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x17
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x18
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x19
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x1a
+        .align  2
+esc:    .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x1b
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x1c
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x1d
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x1e
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x1f
+        .align  2
+blank:  .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x20
+        .align  2
+bang:   .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x21
+        .align  2
+dquote: .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x22
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x23
+        .align  2
+dollar: .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x24
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x25
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x26
+        .align  2
+squote: .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x27
+        .align  2
+lpar:   .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x28
+        .align  2
+rpar:   .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x29
+        .align  2
+star:   .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x2a
+        .align  2
+pluss:  .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x2b
+        .align  2
+comma:  .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x2c
+        .align  2
+dash:   .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x2d
+        .align  2
+period: .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x2e
+        .align  2
+slash:  .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x2f
+        .align  2
+zero:   .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x30
+        .align  2
+one:    .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x31
+        .align  2
+two:    .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x32
+        .align  2
+three:  .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x33
+        .align  2
+four:   .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x34
+        .align  2
+five:   .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x35
+        .align  2
+six:    .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x36
+        .align  2
+seven:  .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x37
+        .align  2
+eight:  .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x38
+        .align  2
+nine:   .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x39
+        .align  2
+colon:  .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x3a
+        .align  2
+semicol:.long   undef,  8:0,23:13,1:1,  0
+        .byte   0x3b
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x3c
+        .align  2
+eqsign: .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x3d
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x3e
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x3f
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x40
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x41
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x42
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x43
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x44
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x45
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x46
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x47
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x48
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x49
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x4a
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x4b
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x4c
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x4d
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x4e
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x4f
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x50
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x51
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x52
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x53
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x54
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x55
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x56
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x57
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x58
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x59
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x5a
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x5b
+        .align  2
+bslash: .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x5c
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x5d
+        .align  2
+arrow:  .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x5e
+        .align  2
+underba:.long   undef,  8:0,23:13,1:1,  0
+        .byte   0x5f
+        .align  2
+acute:  .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x60
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x61
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x62
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x63
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x64
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x65
+        .align  2
+f:      .long   0,      8:0,23:13,1:1,  0
+        .byte   0x66
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x67
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x68
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x69
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x6a
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x6b
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x6c
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x6d
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x6e
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x6f
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x70
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x71
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x72
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x73
+        .align  2
+t:      .long   t,      8:0,23:13,1:1,  0
+        .byte   0x74
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x75
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x76
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x77
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x78
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x79
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x7a
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x7b
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x7c
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x7d
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x7e
+        .align  2
+        .long   undef,  8:0,23:13,1:1,  0
+        .byte   0x7f
+#
+#       other apvals and functions
+#
+        .align  2
+dot:    .long   undef,  8:0,23:15,1:1,  0
+        .byte   0x20,0x2e,0x20
+        .align  2
+lambda: .long   undef,  8:0,23:18,1:1,  0
+        .byte   0x6c,0x61,0x6d,0x62,0x64,0x61
+        .align  2
+eof:    .long   undef,  8:0,23:15,1:1,  0
+        .byte   0x65,0x6f,0x66
+        .align  2
+undef:  .long   undeff, 8:0,23:21,1:1,  0
+        .byte   0x75,0x6e,0x64,0x65,0x66,0x69,0x6e,0x65,0x64
+        .align  2
+#
+#       functions
+#
+        .long   atom,   8:0,23:16,1:1,  0
+        .byte   0x61,0x74,0x6f,0x6d
+        .align  2
+        .long   car,    8:0,23:15,1:1,  0
+        .byte   0x63,0x61,0x72
+        .align  2
+        .long   cdr,    8:0,23:15,1:1,  0
+        .byte   0x63,0x64,0x72
+        .align  2
+        .long   cond,   8:1,23:16,1:1,  0
+        .byte   0x63,0x6f,0x6e,0x64
+        .align  2
+        .long   cons,   8:0,23:16,1:1,  0
+        .byte   0x63,0x6f,0x6e,0x73
+        .align  2
+        .long   eq,     8:0,23:14,1:1,  0
+        .byte   0x65,0x71
+        .align  2
+        .long   null,   8:0,23:16,1:1,  0
+        .byte   0x6e,0x75,0x6c,0x6c
+        .align  2
+quote:  .long   car,    8:1,23:17,1:1,  0
+        .byte   0x71,0x75,0x6f,0x74,0x65
+        .align  2
+        .long   setq,   8:1,23:16,1:1,  0
+        .byte   0x73,0x65,0x74,0x71
+        .align  2
+        .long   eval,   8:0,23:16,1:1,  0
+        .byte   0x65,0x76,0x61,0x6c
+        .align  2
+        .long   read,   8:0,23:16,1:1,  0
+        .byte   0x72,0x65,0x61,0x64
+        .align  2
+        .long   print,  8:0,23:17,1:1,  0
+        .byte   0x70,0x72,0x69,0x6e,0x74
+        .align  2
+        .long   oblist, 8:0,23:18,1:1,  0
+        .byte   0x6f,0x62,0x6c,0x69,0x73,0x74
+        .align  2
+        .long   null,   8:0,23:15,1:1,  0
+        .byte   0x6e,0x6f,0x74
+        .align  2
+        .long   eval,   8:1,23:19,1:1,  0
+        .byte   0x66,0x75,0x6e,0x63,0x61,0x6c,0x6c
+        .align  2
+        .long   princ,  8:0,23:17,1:1,  0
+        .byte   0x70,0x72,0x69,0x6e,0x63
+        .align  2
+        .long   ratom,  8:0,23:17,1:1,  0
+        .byte   0x72,0x61,0x74,0x6f,0x6d
+        .align  2
+        .long   terpri, 8:0,23:18,1:1,  0
+        .byte   0x74,0x65,0x72,0x70,0x72,0x69
+        .align  2
+        .long   progn,  8:1,23:17,1:1,  0
+        .byte   0x70,0x72,0x6f,0x67,0x6e
+        .align  2
+        .long   rplaca, 8:0,23:18,1:1,  0
+        .byte   0x72,0x70,0x6c,0x61,0x63,0x61
+        .align  2
+        .long   rplacd, 8:0,23:18,1:1,  0
+        .byte   0x72,0x70,0x6c,0x61,0x63,0x64
+        .align  2
+        .long   set,    8:0,23:15,1:1,  0
+        .byte   0x73,0x65,0x74
+        .align  2
+        .long   readch, 8:0,23:18,1:1,  0
+        .byte   0x72,0x65,0x61,0x64,0x63,0x68
+        .align  2
+        .long   equal,  8:0,23:17,1:1,  0
+        .byte   0x65,0x71,0x75,0x61,0x6c
+        .align  2
+        .long   and,    8:1,23:15,1:1,  0
+        .byte   0x61,0x6e,0x64
+        .align  2
+        .long   or,     8:1,23:14,1:1,  0
+        .byte   0x6f,0x72
+        .align  2
+        .long   caar,   8:0,23:16,1:1,  0
+        .byte   0x63,0x61,0x61,0x72
+        .align  2
+        .long   cadr,   8:0,23:16,1:1,  0
+        .byte   0x63,0x61,0x64,0x72
+        .align  2
+        .long   cdar,   8:0,23:16,1:1,  0
+        .byte   0x63,0x64,0x61,0x72
+        .align  2
+        .long   cddr,   8:0,23:16,1:1,  0
+        .byte   0x63,0x64,0x64,0x72
+        .align  2
+        .long   explode,        8:0,23:19,1:1,  0
+        .byte   0x65,0x78,0x70,0x6c,0x6f,0x64,0x65
+        .align  2
+        .long   implode,        8:0,23:19,1:1,  0
+        .byte   0x69,0x6d,0x70,0x6c,0x6f,0x64,0x65
+        .align  2
+        .long   copy,   8:0,23:16,1:1,  0
+        .byte   0x63,0x6f,0x70,0x79
+        .align  2
+        .long   gensym, 8:0,23:18,1:1,  0
+        .byte   0x67,0x65,0x6e,0x73,0x79,0x6d
+        .align  2
+rparer: .long   undef,  8:0,23:26,1:1,  0
+        .byte   0x75,0x6e,0x6d,0x61,0x74,0x63,0x68,0x65,0x64,0x20,0x72,0x70,0x61,0x72
+        .align  2
+        .long   getpl,  8:0,23:17,1:1,  0
+        .byte   0x67,0x65,0x74,0x70,0x6c
+        .align  2
+        .long   setpl,  8:0,23:17,1:1,  0
+        .byte   0x73,0x65,0x74,0x70,0x6c
+        .align  2
+        .long   bell,   8:0,23:16,1:1,  0
+        .byte   0x62,0x65,0x6c,0x6c
+        .align  2
+        .long   bspace, 8:0,23:18,1:1,  0
+        .byte   0x62,0x73,0x70,0x61,0x63,0x65
+        .align  2
+        .long   tab,    8:0,23:15,1:1,  0
+        .byte   0x74,0x61,0x62
+        .align  2
+        .long   newline,        8:0,23:19,1:1,  0
+        .byte   0x6e,0x65,0x77,0x6c,0x69,0x6e,0x65
+        .align  2
+        .long   esc,    8:0,23:15,1:1,  0
+        .byte   0x65,0x73,0x63
+        .align  2
+        .long   blank,  8:0,23:17,1:1,  0
+        .byte   0x62,0x6c,0x61,0x6e,0x6b
+        .align  2
+        .long   dollar, 8:0,23:18,1:1,  0
+        .byte   0x64,0x6f,0x6c,0x6c,0x61,0x72
+        .align  2
+        .long   squote, 8:0,23:18,1:1,  0
+        .byte   0x73,0x71,0x75,0x6f,0x74,0x65
+        .align  2
+        .long   lpar,   8:0,23:16,1:1,  0
+        .byte   0x6c,0x70,0x61,0x72
+        .align  2
+        .long   rpar,   8:0,23:16,1:1,  0
+        .byte   0x72,0x70,0x61,0x72
+        .align  2
+        .long   star,   8:0,23:16,1:1,  0
+        .byte   0x73,0x74,0x61,0x72
+        .align  2
+        .long   pluss,  8:0,23:17,1:1,  0
+        .byte   0x70,0x6c,0x75,0x73,0x73
+        .align  2
+        .long   comma,  8:0,23:17,1:1,  0
+        .byte   0x63,0x6f,0x6d,0x6d,0x61
+        .align  2
+        .long   dash,   8:0,23:16,1:1,  0
+        .byte   0x64,0x61,0x73,0x68
+        .align  2
+        .long   period, 8:0,23:18,1:1,  0
+        .byte   0x70,0x65,0x72,0x69,0x6f,0x64
+        .align  2
+        .long   slash,  8:0,23:17,1:1,  0
+        .byte   0x73,0x6c,0x61,0x73,0x68
+        .align  2
+        .long   eqsign, 8:0,23:18,1:1,  0
+        .byte   0x65,0x71,0x73,0x69,0x67,0x6e
+        .align  2
+        .long   caaar,  8:0,23:17,1:1,  0
+        .byte   0x63,0x61,0x61,0x61,0x72
+        .align  2
+        .long   caadr,  8:0,23:17,1:1,  0
+        .byte   0x63,0x61,0x61,0x64,0x72
+        .align  2
+        .long   cadar,  8:0,23:17,1:1,  0
+        .byte   0x63,0x61,0x64,0x61,0x72
+        .align  2
+        .long   caddr,  8:0,23:17,1:1,  0
+        .byte   0x63,0x61,0x64,0x64,0x72
+        .align  2
+        .long   cdaar,  8:0,23:17,1:1,  0
+        .byte   0x63,0x64,0x61,0x61,0x72
+        .align  2
+        .long   cdadr,  8:0,23:17,1:1,  0
+        .byte   0x63,0x64,0x61,0x64,0x72
+        .align  2
+        .long   cddar,  8:0,23:17,1:1,  0
+        .byte   0x63,0x64,0x64,0x61,0x72
+        .align  2
+        .long   cdddr,  8:0,23:17,1:1,  0
+        .byte   0x63,0x64,0x64,0x64,0x72
+        .align  2
+        .long   car,    8:1,23:20,1:1,  0
+        .byte   0x66,0x75,0x6e,0x63,0x74,0x69,0x6f,0x6e
+        .align  2
+        .long   add1,   8:0,23:16,1:1,  0
+        .byte   0x61,0x64,0x64,0x31
+        .align  2
+        .long   sub1,   8:0,23:16,1:1,  0
+        .byte   0x73,0x75,0x62,0x31
+        .align  2
+        .long   nadd1,  8:0,23:17,1:1,  0
+        .byte   0x6e,0x61,0x64,0x64,0x31
+        .align  2
+        .long   nsub1,  8:0,23:17,1:1,  0
+        .byte   0x6e,0x73,0x75,0x62,0x31
+        .align  2
+        .long   eqn,    8:0,23:15,1:1,  0
+        .byte   0x65,0x71,0x6e
+        .align  2
+_plus:  .long   plus,   8:0,23:16,1:1,  0
+        .byte   0x70,0x6c,0x75,0x73
+        .align  2
+        .long   nplus,  8:0,23:17,1:1,  0
+        .byte   0x6e,0x70,0x6c,0x75,0x73
+        .align  2
+        .long   diff,   8:0,23:16,1:1,  0
+        .byte   0x64,0x69,0x66,0x66
+        .align  2
+        .long   ndiff,  8:0,23:17,1:1,  0
+        .byte   0x6e,0x64,0x69,0x66,0x66
+        .align  2
+_times: .long   times,  8:0,23:17,1:1,  0
+        .byte   0x74,0x69,0x6d,0x65,0x73
+        .align  2
+        .long   ntimes, 8:0,23:18,1:1,  0
+        .byte   0x6e,0x74,0x69,0x6d,0x65,0x73
+        .align  2
+_quoti: .long   quotien,        8:0,23:20,1:1,  0
+        .byte   0x71,0x75,0x6f,0x74,0x69,0x65,0x6e,0x74
+        .align  2
+        .long   nquoti, 8:0,23:21,1:1,  0
+        .byte   0x6e,0x71,0x75,0x6f,0x74,0x69,0x65,0x6e,0x74
+        .align  2
+        .long   numberp,        8:0,23:19,1:1,  0
+        .byte   0x6e,0x75,0x6d,0x62,0x65,0x72,0x70
+        .align  2
+        .long   minusp, 8:0,23:18,1:1,  0
+        .byte   0x6d,0x69,0x6e,0x75,0x73,0x70
+        .align  2
+_diff:  .long   diff,   8:0,23:22,1:1,  0
+        .byte   0x64,0x69,0x66,0x66,0x65,0x72,0x65,0x6e,0x63,0x65
+        .align  2
+        .long   zerop,  8:0,23:17,1:1,  0
+        .byte   0x7a,0x65,0x72,0x6f,0x70
+        .align  2
+        .long   onep,   8:0,23:16,1:1,  0
+        .byte   0x6f,0x6e,0x65,0x70
+        .align  2
+        .long   evenp,  8:0,23:17,1:1,  0
+        .byte   0x65,0x76,0x65,0x6e,0x70
+        .align  2
+_minus: .long   minus,  8:0,23:17,1:1,  0
+        .byte   0x6d,0x69,0x6e,0x75,0x73
+        .align  2
+        .long   nminus, 8:0,23:18,1:1,  0
+        .byte   0x6e,0x6d,0x69,0x6e,0x75,0x73
+        .align  2
+        .long   recip,  8:0,23:17,1:1,  0
+        .byte   0x72,0x65,0x63,0x69,0x70
+        .align  2
+        .long   nrecip, 8:0,23:18,1:1,  0
+        .byte   0x6e,0x72,0x65,0x63,0x69,0x70
+        .align  2
+        .long   entier, 8:0,23:18,1:1,  0
+        .byte   0x65,0x6e,0x74,0x69,0x65,0x72
+        .align  2
+        .long   nentier,        8:0,23:19,1:1,  0
+        .byte   0x6e,0x65,0x6e,0x74,0x69,0x65,0x72
+        .align  2
+        .long   ndiff,  8:0,23:23,1:1,  0
+        .byte   0x6e,0x64,0x69,0x66,0x66,0x65,0x72,0x65,0x6e,0x63,0x65
+        .align  2
+        .long   address,        8:0,23:19,1:1,  0
+        .byte   0x61,0x64,0x64,0x72,0x65,0x73,0x73
+        .align  2
+        .long   length, 8:0,23:18,1:1,  0
+        .byte   0x6c,0x65,0x6e,0x67,0x74,0x68
+        .align  2
+        .long   peekch, 8:0,23:18,1:1,  0
+        .byte   0x70,0x65,0x65,0x6b,0x63,0x68
+        .align  2
+#       .long   mapcar, 8:0,23:18,1:1,  0
+#       .byte   0x6d,0x61,0x70,0x63,0x61,0x72
+#       .align  2
+        .long   greater,        8:0,23:20,1:1,  0
+        .byte   0x67,0x72,0x65,0x61,0x74,0x65,0x72,0x70
+        .align  2
+        .long   lessp,  8:0,23:17,1:1,  0
+        .byte   0x6c,0x65,0x73,0x73,0x70
+        .align  2
+        .long   member, 8:0,23:18,1:1,  0
+        .byte   0x6d,0x65,0x6d,0x62,0x65,0x72
+        .align  2
+        .long   dquote, 8:0,23:18,1:1,  0
+        .byte   0x64,0x71,0x75,0x6f,0x74,0x65
+        .align  2
+        .long   bslash, 8:0,23:18,1:1,  0
+        .byte   0x62,0x73,0x6c,0x61,0x73,0x68
+        .align  2
+        .long   colon,  8:0,23:17,1:1,  0
+        .byte   0x63,0x6f,0x6c,0x6f,0x6e
+        .align  2
+        .long   semicol,        8:0,23:21,1:1,  0
+        .byte   0x73,0x65,0x6d,0x69,0x63,0x6f,0x6c,0x6f,0x6e
+        .align  2
+        .long   newpage,        8:0,23:19,1:1,  0
+        .byte   0x6e,0x65,0x77,0x70,0x61,0x67,0x65
+        .align  2
+        .long   digit,  8:0,23:17,1:1,  0
+        .byte   0x64,0x69,0x67,0x69,0x74
+        .align  2
+        .long   liter,  8:0,23:17,1:1,  0
+        .byte   0x6c,0x69,0x74,0x65,0x72
+        .align  2
+        .long   zero,   8:0,23:16,1:1,  0
+        .byte   0x7a,0x65,0x72,0x6f
+        .align  2
+        .long   one,    8:0,23:15,1:1,  0
+        .byte   0x6f,0x6e,0x65
+        .align  2
+        .long   two,    8:0,23:15,1:1,  0
+        .byte   0x74,0x77,0x6f
+        .align  2
+        .long   three,  8:0,23:17,1:1,  0
+        .byte   0x74,0x68,0x72,0x65,0x65
+        .align  2
+        .long   four,   8:0,23:16,1:1,  0
+        .byte   0x66,0x6f,0x75,0x72
+        .align  2
+        .long   five,   8:0,23:16,1:1,  0
+        .byte   0x66,0x69,0x76,0x65
+        .align  2
+        .long   six,    8:0,23:15,1:1,  0
+        .byte   0x73,0x69,0x78
+        .align  2
+        .long   seven,  8:0,23:17,1:1,  0
+        .byte   0x73,0x65,0x76,0x65,0x6e
+        .align  2
+        .long   eight,  8:0,23:17,1:1,  0
+        .byte   0x65,0x69,0x67,0x68,0x74
+        .align  2
+        .long   nine,   8:0,23:16,1:1,  0
+        .byte   0x6e,0x69,0x6e,0x65
+        .align  2
+        .long   reverse,        8:0,23:19,1:1,  0
+        .byte   0x72,0x65,0x76,0x65,0x72,0x73,0x65
+        .align  2
+        .long   append, 8:0,23:18,1:1,  0
+        .byte   0x61,0x70,0x70,0x65,0x6e,0x64
+        .align  2
+        .long   list,   8:0,23:16,1:1,  0
+        .byte   0x6c,0x69,0x73,0x74
+        .align  2
+        .long   define, 8:0,23:18,1:1,  0
+        .byte   0x64,0x65,0x66,0x69,0x6e,0x65
+        .align  2
+        .long   arrow,  8:0,23:17,1:1,  0
+        .byte   0x61,0x72,0x72,0x6f,0x77
+        .align  2
+        .long   startre,        8:0,23:21,1:1,  0
+        .byte   0x73,0x74,0x61,0x72,0x74,0x72,0x65,0x61,0x64
+        .align  2
+lparer: .long   undef,  8:0,23:26,1:1,  0
+        .byte   0x75,0x6e,0x6d,0x61,0x74,0x63,0x68,0x65,0x64,0x20,0x6c,0x70,0x61,0x72
+        .align  2
+        .long   ncons,  8:0,23:17,1:1,  0
+        .byte   0x6e,0x63,0x6f,0x6e,0x73
+        .align  2
+interr: .long   undef,  8:0,23:23,1:1,  0
+        .byte   0x69,0x6e,0x74,0x65,0x72,0x72,0x75,0x70,0x74,0x65,0x64
+        .align  2
+fpeerr: .long   undef,  8:0,23:36,1:1,  0
+        .byte   0x66,0x6c,0x6f,0x61,0x74,0x69,0x6e,0x67,0x20,0x70
+        .byte   0x6f,0x69,0x6e,0x74,0x20,0x65,0x78,0x63,0x65,0x70,0x74,0x69,0x6f,0x6e
+        .align  2
+buserr: .long   undef,  8:0,23:21,1:1,  0
+        .byte   0x62,0x75,0x73,0x20,0x65,0x72,0x72,0x6f,0x72
+        .align  2
+segverr:.long   undef,  8:0,23:24,1:1,  0
+        .byte   0x6d,0x65,0x6d,0x6f,0x72,0x79,0x20,0x66,0x61,0x75,0x6c,0x74
+        .align  2
+fileerr:.long   undef,  8:0,23:20,1:1,  0
+        .byte   0x62,0x61,0x64,0x20,0x66,0x69,0x6c,0x65
+        .align  2
+garbage:.long   undef,  8:0,23:21,1:1,  0
+        .byte   0x3c,0x67,0x61,0x72,0x62,0x61,0x67,0x65,0x3e
+        .align  2
+        .long   reclaim,        8:0,23:19,1:1,  0
+        .byte   0x72,0x65,0x63,0x6c,0x61,0x69,0x6d
+        .align  2
+stkerr: .long   undef,  8:0,23:26,1:1,  0
+        .byte   0x73,0x74,0x61,0x63,0x6b,0x20,0x6f,0x76,0x65,0x72,0x66,0x6c,0x6f,0x77
+        .align  2
+        .long   open,   8:0,23:16,1:1,  0
+        .byte   0x6f,0x70,0x65,0x6e
+        .align  2
+        .long   mread,  8:0,23:17,1:1,  0
+        .byte   0x6d,0x72,0x65,0x61,0x64
+        .align  2
+        .long   free,   8:0,23:16,1:1,  0
+        .byte   0x66,0x72,0x65,0x65
+        .align  2
+        .long   memq,   8:0,23:16,1:1,  0
+        .byte   0x6d,0x65,0x6d,0x71
+        .align  2
+        .long   nconc,  8:0,23:17,1:1,  0
+        .byte   0x6e,0x63,0x6f,0x6e,0x63
+        .align  2
+        .long   last,   8:0,23:16,1:1,  0
+        .byte   0x6c,0x61,0x73,0x74
+        .align  2
+        .long   max,    8:0,23:15,1:1,  0
+        .byte   0x6d,0x61,0x78
+        .align  2
+        .long   min,    8:0,23:15,1:1,  0
+        .byte   0x6d,0x69,0x6e
+        .align  2
+        .long   apply,  8:0,23:17,1:1,  0
+        .byte   0x61,0x70,0x70,0x6c,0x79
+        .align  2
+        .long   mapc,   8:0,23:16,1:1,  0
+        .byte   0x6d,0x61,0x70,0x63
+        .align  2
+        .long   map,    8:0,23:15,1:1,  0
+        .byte   0x6d,0x61,0x70
+        .align  2
+        .long   mapcar, 8:0,23:18,1:1,  0
+        .byte   0x6d,0x61,0x70,0x63,0x61,0x72
+        .align  2
+        .long   caaaar, 8:0,23:18,1:1,  0
+        .byte   0x63,0x61,0x61,0x61,0x61,0x72
+        .align  2
+        .long   caaadr, 8:0,23:18,1:1,  0
+        .byte   0x63,0x61,0x61,0x61,0x64,0x72
+        .align  2
+        .long   caadar, 8:0,23:18,1:1,  0
+        .byte   0x63,0x61,0x61,0x64,0x61,0x72
+        .align  2
+        .long   caaddr, 8:0,23:18,1:1,  0
+        .byte   0x63,0x61,0x61,0x64,0x64,0x72
+        .align  2
+        .long   cadaar, 8:0,23:18,1:1,  0
+        .byte   0x63,0x61,0x64,0x61,0x61,0x72
+        .align  2
+        .long   cadadr, 8:0,23:18,1:1,  0
+        .byte   0x63,0x61,0x64,0x61,0x64,0x72
+        .align  2
+        .long   caddar, 8:0,23:18,1:1,  0
+        .byte   0x63,0x61,0x64,0x64,0x61,0x72
+        .align  2
+        .long   cadddr, 8:0,23:18,1:1,  0
+        .byte   0x63,0x61,0x64,0x64,0x64,0x72
+        .align  2
+        .long   cdaaar, 8:0,23:18,1:1,  0
+        .byte   0x63,0x64,0x61,0x61,0x61,0x72
+        .align  2
+        .long   cdaadr, 8:0,23:18,1:1,  0
+        .byte   0x63,0x64,0x61,0x61,0x64,0x72
+        .align  2
+        .long   cdadar, 8:0,23:18,1:1,  0
+        .byte   0x63,0x64,0x61,0x64,0x61,0x72
+        .align  2
+        .long   cdaddr, 8:0,23:18,1:1,  0
+        .byte   0x63,0x64,0x61,0x64,0x64,0x72
+        .align  2
+        .long   cddaar, 8:0,23:18,1:1,  0
+        .byte   0x63,0x64,0x64,0x61,0x61,0x72
+        .align  2
+        .long   cddadr, 8:0,23:18,1:1,  0
+        .byte   0x63,0x64,0x64,0x61,0x64,0x72
+        .align  2
+        .long   cdddar, 8:0,23:18,1:1,  0
+        .byte   0x63,0x64,0x64,0x64,0x61,0x72
+        .align  2
+        .long   cddddr, 8:0,23:18,1:1,  0
+        .byte   0x63,0x64,0x64,0x64,0x64,0x72
+        .align  2
+#       .long   deriv,  8:0,23:17,1:1,  0
+#       .byte   0x64,0x65,0x72,0x69,0x76
+#       .align  2
+_log:   .long   undef,  8:0,23:15,1:1,  0
+        .byte   0x6c,0x6f,0x67
+        .align  2
+_expt:  .long   undef,  8:0,23:16,1:1,  0
+        .byte   0x65,0x78,0x70,0x74
+        .align  2
+        .long   spread, 8:1,23:18,1:1,  0
+        .byte   0x73,0x70,0x72,0x65,0x61,0x64
+        .align  2
+        .long   fzero,  8:0,23:17,1:1,  0
+        .byte   0x66,0x7a,0x65,0x72,0x6f
+        .align  2
+        .long   fone,   8:0,23:16,1:1,  0
+        .byte   0x66,0x6f,0x6e,0x65
+        .align  2
+        .long   ftwo,   8:0,23:16,1:1,  0
+        .byte   0x66,0x74,0x77,0x6f
+        .align  2
+        .long   underba,        8:0,23:20,1:1,  0
+        .byte   0x75,0x6e,0x64,0x65,0x72,0x62,0x61,0x72
+        .align  2
+        .long   acute,  8:0,23:17,1:1,  0
+        .byte   0x61,0x63,0x75,0x74,0x65
+        .align  2
+        .long   bang,   8:0,23:16,1:1,  0
+        .byte   0x62,0x61,0x6e,0x67
+        .align  2
+        .long   xchanga,        8:0,23:20,1:1,  0
+        .byte   0x65,0x78,0x63,0x68,0x61,0x6e,0x67,0x61
+        .align  2
+        .long   xchangd,        8:0,23:20,1:1,  0
+        .byte   0x65,0x78,0x63,0x68,0x61,0x6e,0x67,0x64
+        .align  2
+        .long   alphale,        8:0,23:22,1:1,  0
+        .byte   0x61,0x6c,0x70,0x68,0x61,0x6c,0x65,0x73,0x73,0x70
+        .align  2
+        .long   error,  8:0,23:17,1:1,  0
+        .byte   0x65,0x72,0x72,0x6f,0x72
+        .align  2
+        .long   trace,  8:0,23:17,1:1,  0
+        .byte   0x74,0x72,0x61,0x63,0x65
+        .align  2
+        .long   untrace,        8:0,23:19,1:1,  0
+        .byte   0x75,0x6e,0x74,0x72,0x61,0x63,0x65
+        .align  2
+        .long   setflag,        8:0,23:19,1:1,  0
+        .byte   0x73,0x65,0x74,0x66,0x6c,0x61,0x67
+        .align  2
+        .long   clrflag,        8:0,23:19,1:1,  0
+        .byte   0x63,0x6c,0x72,0x66,0x6c,0x61,0x67
+        .align  2
+        .long   flag,   8:0,23:16,1:1,  0
+        .byte   0x66,0x6c,0x61,0x67
+        .align  2
+LINK:   .long   0,0             # end of predefined atoms
+fzero:  .long   fzero,  8:128,23:16,1:1
+        .double 0d0.0
+fone:   .long   fone,   8:128,23:16,1:1
+        .double 0d1.0
+ftwo:   .long   ftwo,   8:128,23:16,1:1
+        .double 0d2.0
+#
+#       object list
+#
+oblist:
+        .long   oblist+8,       apval+0,        oblist+16,      apval+16
+        .long   oblist+24,      apval+32,       oblist+32,      apval+48
+        .long   oblist+40,      apval+64,       oblist+48,      apval+80
+        .long   oblist+56,      apval+96,       oblist+64,      apval+112
+        .long   oblist+72,      apval+128,      oblist+80,      apval+144
+        .long   oblist+88,      apval+160,      oblist+96,      apval+176
+        .long   oblist+104,     apval+192,      oblist+112,     apval+208
+        .long   oblist+120,     apval+224,      oblist+128,     apval+240
+        .long   oblist+136,     apval+256,      oblist+144,     apval+272
+        .long   oblist+152,     apval+288,      oblist+160,     apval+304
+        .long   oblist+168,     apval+320,      oblist+176,     apval+336
+        .long   oblist+184,     apval+352,      oblist+192,     apval+368
+        .long   oblist+200,     apval+384,      oblist+208,     apval+400
+        .long   oblist+216,     apval+416,      oblist+224,     apval+432
+        .long   oblist+232,     apval+448,      oblist+240,     apval+464
+        .long   oblist+248,     apval+480,      oblist+256,     apval+496
+        .long   oblist+264,     apval+512,      oblist+272,     apval+528
+        .long   oblist+280,     apval+544,      oblist+288,     apval+560
+        .long   oblist+296,     apval+576,      oblist+304,     apval+592
+        .long   oblist+312,     apval+608,      oblist+320,     apval+624
+        .long   oblist+328,     apval+640,      oblist+336,     apval+656
+        .long   oblist+344,     apval+672,      oblist+352,     apval+688
+        .long   oblist+360,     apval+704,      oblist+368,     apval+720
+        .long   oblist+376,     apval+736,      oblist+384,     apval+752
+        .long   oblist+392,     apval+768,      oblist+400,     apval+784
+        .long   oblist+408,     apval+800,      oblist+416,     apval+816
+        .long   oblist+424,     apval+832,      oblist+432,     apval+848
+        .long   oblist+440,     apval+864,      oblist+448,     apval+880
+        .long   oblist+456,     apval+896,      oblist+464,     apval+912
+        .long   oblist+472,     apval+928,      oblist+480,     apval+944
+        .long   oblist+488,     apval+960,      oblist+496,     apval+976
+        .long   oblist+504,     apval+992,      oblist+512,     apval+1008
+        .long   oblist+520,     apval+1024,     oblist+528,     apval+1040
+        .long   oblist+536,     apval+1056,     oblist+544,     apval+1072
+        .long   oblist+552,     apval+1088,     oblist+560,     apval+1104
+        .long   oblist+568,     apval+1120,     oblist+576,     apval+1136
+        .long   oblist+584,     apval+1152,     oblist+592,     apval+1168
+        .long   oblist+600,     apval+1184,     oblist+608,     apval+1200
+        .long   oblist+616,     apval+1216,     oblist+624,     apval+1232
+        .long   oblist+632,     apval+1248,     oblist+640,     apval+1264
+        .long   oblist+648,     apval+1280,     oblist+656,     apval+1296
+        .long   oblist+664,     apval+1312,     oblist+672,     apval+1328
+        .long   oblist+680,     apval+1344,     oblist+688,     apval+1360
+        .long   oblist+696,     apval+1376,     oblist+704,     apval+1392
+        .long   oblist+712,     apval+1408,     oblist+720,     apval+1424
+        .long   oblist+728,     apval+1440,     oblist+736,     apval+1456
+        .long   oblist+744,     apval+1472,     oblist+752,     apval+1488
+        .long   oblist+760,     apval+1504,     oblist+768,     apval+1520
+        .long   oblist+776,     apval+1536,     oblist+784,     apval+1552
+        .long   oblist+792,     apval+1568,     oblist+800,     apval+1584
+        .long   oblist+808,     apval+1600,     oblist+816,     apval+1616
+        .long   oblist+824,     apval+1632,     oblist+832,     apval+1648
+        .long   oblist+840,     apval+1664,     oblist+848,     apval+1680
+        .long   oblist+856,     apval+1696,     oblist+864,     apval+1712
+        .long   oblist+872,     apval+1728,     oblist+880,     apval+1744
+        .long   oblist+888,     apval+1760,     oblist+896,     apval+1776
+        .long   oblist+904,     apval+1792,     oblist+912,     apval+1808
+        .long   oblist+920,     apval+1824,     oblist+928,     apval+1840
+        .long   oblist+936,     apval+1856,     oblist+944,     apval+1872
+        .long   oblist+952,     apval+1888,     oblist+960,     apval+1904
+        .long   oblist+968,     apval+1920,     oblist+976,     apval+1936
+        .long   oblist+984,     apval+1952,     oblist+992,     apval+1968
+        .long   oblist+1000,    apval+1984,     oblist+1008,    apval+2000
+        .long   oblist+1016,    apval+2016,     0,              apval+2032
+#
+#       start of free storage
+#
+fstart:

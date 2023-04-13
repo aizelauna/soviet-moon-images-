@@ -1,0 +1,1572 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Editor</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Editor (#51)</H3>
+(an instance of <A HREF="HTM_000003.htm">generic room</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+say:
+<pre>
+if ((caller != player) && (caller_perms() != player))
+    return E_PERM;
+endif
+if (!(who = this:loaded(player)))
+    player:tell(this:nothing_loaded_msg());
+else
+    this:insert_line(who, argstr);
+endif
+.
+
+</pre>
+<BR>
+emote:
+<pre>
+if ((caller != player) && (caller_perms() != player))
+    return E_PERM;
+endif
+if (!(who = this:loaded(player)))
+    player:tell(this:nothing_loaded_msg());
+else
+    this:append_line(who, argstr);
+endif
+.
+
+</pre>
+<BR>
+enter:
+<pre>
+if (!this:loaded(player))
+    player:tell(this:nothing_loaded_msg());
+else
+    lines = $command_utils:read_lines();
+    if (typeof(lines) == ERR)
+        player:notify(tostr(lines));
+        return;
+    endif
+    this:insert_line(this:loaded(player), lines, 0);
+endif
+.
+
+</pre>
+<BR>
+lis*t view:
+<pre>
+nonum = 0;
+if (verb == "view")
+    if (!args)
+        l = {};
+        for i in [1..length(this.active)]
+            if (this.readable[i])
+                l = {@l, this.active[i]};
+            endif
+        endfor
+        if (l)
+            player:tell("Players having readable texts in this editor:  ", $string_utils:names_of(l));
+        else
+            player:tell("No one has published anything in this editor.");
+        endif
+        return;
+    elseif ($command_utils:player_match_result(plyr = $string_utils:match_player(args[1]), 
+args[1])[1])
+        "...no such player";
+        return;
+    elseif ((!(who = this:loaded(plyr))) || (!this:readable(who)))
+        player:tell(plyr.name, "(", plyr, ") has not published anything in this editor.");
+        return;
+    endif
+    args = listdelete(args, 1);
+elseif (!(who = this:loaded(player)))
+    player:tell(this:nothing_loaded_msg());
+    return;
+endif
+len = length(this.texts[who]);
+ins = this.inserting[who];
+window = 8;
+if (len < (2 * window))
+    default = {"1-$"};
+elseif (ins <= window)
+    default = {tostr("1-", 2 * window)};
+else
+    default = {tostr(window, "_-", window, "^"), tostr(2 * window, "$-$")};
+endif
+if (typeof(range = this:parse_range(who, default, @args)) != LIST)
+    player:tell(tostr(range));
+elseif (range[3] && (!(nonum = "nonum" == $string_utils:trim(range[3]))))
+    player:tell("Don't understand this:  ", range[3]);
+elseif (nonum)
+    player:tell_lines(this.texts[who][range[1]..range[2]]);
+else
+    for line in [range[1]..range[2]]
+        this:list_line(who, line);
+        if ($command_utils:running_out_of_time())
+            suspend(0);
+            if (!(who = this:loaded(player)))
+                player:tell("ack!  something bad happened during a suspend...");
+                return;
+            endif
+        endif
+    endfor
+    if ((ins > len) && (len == range[2]))
+        player:tell("^^^^");
+    endif
+endif
+.
+
+</pre>
+<BR>
+ins*ert n*ext p*revious .:
+<pre>
+if (i = index(argstr, "\""))
+    text = argstr[i + 1..length(argstr)];
+    argstr = argstr[1..i - 1];
+else
+    text = 0;
+endif
+spec = $string_utils:trim(argstr);
+if (index("next", verb) == 1)
+    verb = "next";
+    spec = "+" + (spec || "1");
+elseif (index("prev", verb) == 1)
+    verb = "prev";
+    spec = "-" + (spec || "1");
+else
+    spec = spec || ".";
+endif
+if (!(who = this:loaded(player)))
+    player:tell(this:nothing_loaded_msg());
+elseif (ERR == typeof(number = this:parse_insert(who, spec)))
+    if (verb in {"next", "prev"})
+        player:tell("Argument must be a number.");
+    else
+        player:tell("You must specify an integer or `$' for the last line.");
+    endif
+elseif ((number > (max = length(this.texts[who]) + 1)) || (number < 1))
+    player:tell("That would take you out of range (to line ", number, "?).");
+else
+    this.inserting[who] = number;
+    if (typeof(text) == STR)
+        this:insert_line(who, text);
+    else
+        if (verb != "next")
+            (number > 1) ? this:list_line(who, number - 1) | player:tell("____");
+        endif
+        if (verb != "prev")
+            (number < max) ? this:list_line(who, number) | player:tell("^^^^");
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+del*ete:
+<pre>
+if (!(who = this:loaded(player)))
+    player:tell(this:nothing_loaded_msg());
+elseif (typeof(range = this:parse_range(who, {"_", "1"}, @args)) != LIST)
+    player:tell(range);
+elseif (range[3])
+    player:tell("Junk at end of cmd:  ", range[3]);
+else
+    player:tell_lines((text = this.texts[who])[from = range[1]..to = range[2]]);
+    player:tell("---Line", (to > from) ? "s" | "", " deleted.  Insertion point is 
+before line ", from, ".");
+    this.texts[who] = {@text[1..from - 1], @text[to + 1..length(text)]};
+    if (!this.changes[who])
+        this.changes[who] = 1;
+        this.times[who] = time();
+    endif
+    this.inserting[who] = from;
+endif
+.
+
+</pre>
+<BR>
+f*ind:
+<pre>
+if (callers() && (caller != this))
+    return E_PERM;
+endif
+if (!(who = this:loaded(player)))
+    player:tell(this:nothing_loaded_msg());
+elseif (typeof(subst = this:parse_subst(argstr && (argstr[1] + argstr), "c", "Empty 
+search string?")) != LIST)
+    player:tell(tostr(subst));
+elseif (typeof(start = subst[4] ? this:parse_insert(who, subst[4]) | this.inserting[who]) 
+== ERR)
+    player:tell("Starting from where?", subst[4] ? ("  (can't parse " + subst[4]) 
++ ")" | "");
+else
+    search = subst[2];
+    case = !index(subst[3], "c", 1);
+    text = this.texts[who];
+    tlen = length(text);
+    while ((start <= tlen) && (!index(text[start], search, case)))
+        start = start + 1;
+    endwhile
+    if (start > tlen)
+        player:tell("`", search, "' not found.");
+    else
+        this.inserting[who] = start + 1;
+        this:list_line(who, start);
+    endif
+endif
+.
+
+</pre>
+<BR>
+s*ubst:
+<pre>
+if (callers() && (caller != this))
+    return E_PERM;
+endif
+if (!(who = this:loaded(player)))
+    player:tell(this:nothing_loaded_msg());
+elseif (typeof(subst = this:parse_subst(argstr)) != LIST)
+    player:tell(tostr(subst));
+elseif (typeof(range = this:parse_range(who, {"_", "1"}, @$string_utils:explode(subst[4]))) 
+!= LIST)
+    player:tell(range);
+elseif (range[3])
+    player:tell("Junk at end of cmd:  ", range[3]);
+else
+    fromstr = subst[1];
+    tostr = subst[2];
+    global = index(subst[3], "g", 1);
+    case = !index(subst[3], "c", 1);
+    munged = {};
+    text = this.texts[who];
+    changed = {};
+    for line in [from = range[1]..to = range[2]]
+        t = t0 = text[line];
+        if (!fromstr)
+            t = tostr + t;
+        elseif (global)
+            t = strsub(t, fromstr, tostr, case);
+        elseif (i = index(t, fromstr, case))
+            t = (t[1..i - 1] + tostr) + t[i + length(fromstr)..length(t)];
+        endif
+        if (strcmp(t0, t))
+            changed = {@changed, line};
+        endif
+        munged = {@munged, t};
+    endfor
+    if (!changed)
+        player:tell("No changes in line", (from == to) ? tostr(" ", from) | tostr("s 
+", from, "-", to), ".");
+    else
+        this.texts[who] = {@text[1..from - 1], @munged, @text[to + 1..length(text)]};
+        if (!this.changes[who])
+            this.changes[who] = 1;
+            this.times[who] = time();
+        endif
+        for line in (changed)
+            this:list_line(who, line);
+        endfor
+    endif
+endif
+.
+
+</pre>
+<BR>
+m*ove c*opy:
+<pre>
+verb = (is_move = verb[1] == "m") ? "move" | "copy";
+if (!(who = this:loaded(player)))
+    player:tell(this:nothing_loaded_msg());
+    return;
+endif
+wargs = args;
+t = to_pos = 0;
+while (t = "to" in (wargs = wargs[t + 1..length(wargs)]))
+    to_pos = to_pos + t;
+endwhile
+range_args = args[1..to_pos - 1];
+if ((!to_pos) || (ERR == typeof(dest = this:parse_insert(who, $string_utils:from_list(wargs, 
+" ")))))
+    player:tell(verb, " to where? ");
+elseif ((dest < 1) || (dest > ((last = length(this.texts[who])) + 1)))
+    player:tell("Destination (", dest, ") out of range.");
+elseif (("from" in range_args) || ("to" in range_args))
+    player:tell("Don't use that kind of range specification with this command.");
+elseif (typeof(range = this:parse_range(who, {"_", "^"}, @args[1..to_pos - 1])) != 
+LIST)
+    player:tell(range);
+elseif (range[3])
+    player:tell("Junk before `to':  ", range[3]);
+elseif ((is_move && (dest >= range[1])) && (dest <= (range[2] + 1)))
+    player:tell("Destination lies inside range of lines to be moved.");
+else
+    from = range[1];
+    to = range[2];
+    ins = this.inserting[who];
+    text = this.texts[who];
+    if (!is_move)
+        this.texts[who] = {@text[1..dest - 1], @text[from..to], @text[dest..last]};
+        if (ins >= dest)
+            this.inserting[who] = ((ins + to) - from) + 1;
+        endif
+    else
+        "oh shit... it's a move";
+        if (dest < from)
+            newtext = {@text[1..dest - 1], @text[from..to], @text[dest..from - 1], 
+@text[to + 1..last]};
+            if ((ins >= dest) && (ins <= to))
+                ins = (ins > from) ? (ins - from) + dest | (((ins + to) - from) + 
+1);
+            endif
+        else
+            newtext = {@text[1..from - 1], @text[to + 1..dest - 1], @text[from..to], 
+@text[dest..last]};
+            if ((ins > from) && (ins < dest))
+                ins = (ins <= to) ? ((ins + dest) - to) - 1 | (((ins - to) + from) 
+- 1);
+            endif
+        endif
+        this.texts[who] = newtext;
+        this.inserting[who] = ins;
+    endif
+    if (!this.changes[who])
+        this.changes[who] = 1;
+        this.times[who] = time();
+    endif
+    player:tell("Lines ", is_move ? "moved." | "copied.");
+endif
+.
+
+</pre>
+<BR>
+join*literal:
+<pre>
+if (!(who = this:loaded(player)))
+    player:tell(this:nothing_loaded_msg());
+elseif (typeof(range = this:parse_range(who, {"_-^", "_", "^"}, @args)) != LIST)
+    player:tell(range);
+elseif (range[3])
+    player:tell("Junk at end of cmd:  ", range[3]);
+elseif (!(result = this:join_lines(who, @range[1..2], length(verb) <= 4)))
+    player:tell((result == 0) ? "Need at least two lines to join." | result);
+else
+    this:list_line(who, range[1]);
+endif
+.
+
+</pre>
+<BR>
+fill:
+<pre>
+fill_column = 70;
+if (!(who = this:loaded(player)))
+    player:tell(this:nothing_loaded_msg());
+elseif (typeof(range = this:parse_range(who, {"_", "1"}, @args)) != LIST)
+    player:tell(range);
+elseif (range[3] && ((range[3][1] != "@") || ((fill_column = tonum(range[3][2..length(range[3])])) 
+< 10)))
+    player:tell("Usage:  fill [<range>] [@ column]   (where column >= 10).");
+else
+    join = this:join_lines(who, @range[1..2], 1);
+    newlines = this:fill_string((text = this.texts[who])[from = range[1]], fill_column);
+    if (fill = ((nlen = length(newlines)) > 1) || (newlines[1] != text[from]))
+        this.texts[who] = {@text[1..from - 1], @newlines, @text[from + 1..length(text)]};
+        if (((insert = this.inserting[who]) > from) && (nlen > 1))
+            this.inserting[who] = (insert + nlen) - 1;
+        endif
+    endif
+    if (fill || join)
+        for line in [from..(from + nlen) - 1]
+            this:list_line(who, line);
+        endfor
+    else
+        player:tell("No changes.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+pub*lish perish unpub*lish depub*lish:
+<pre>
+if (!(who = this:loaded(player)))
+    player:tell(this:nothing_loaded_msg());
+    return;
+endif
+if (typeof(e = this:set_readable(who, index("publish", verb) == 1)) == ERR)
+    player:tell(e);
+elseif (e)
+    player:tell("Your text is now globally readable.");
+else
+    player:tell("Your text is read protected.");
+endif
+.
+
+</pre>
+<BR>
+w*hat:
+<pre>
+if (!(this:ok(who = player in this.active) && (typeof(this.texts[who]) == LIST)))
+    player:tell(this:nothing_loaded_msg());
+else
+    player:tell("You are editing ", this:working_on(who), ".");
+    player:tell("Your insertion point is ", (this.inserting[who] > length(this.texts[who])) 
+? "after the last line: next line will be #" | "before line ", this.inserting[who], 
+".");
+    player:tell(this.changes[who] ? this:change_msg() | this:no_change_msg());
+    if (this.readable[who])
+        player:tell("Your text is globally readable.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+abort:
+<pre>
+if (!this.changes[who = player in this.active])
+    player:tell("No changes to throw away.  Editor cleared.");
+else
+    player:tell("Throwing away session for ", this:working_on(who), ".");
+endif
+this:reset_session(who);
+if (this.exit_on_abort)
+    this:done();
+endif
+.
+
+</pre>
+<BR>
+done q*uit pause:
+<pre>
+if (!(caller in {this, player}))
+    return E_PERM;
+elseif (!valid(origin = this.original[who = player in this.active]))
+    player:tell("I don't know where you came here from.");
+else
+    player:moveto(origin);
+    if (player.location == this)
+        player:tell("Hmmm... the place you came from doesn't want you back.");
+    else
+        if (msg = this:return_msg())
+            player.location:announce($string_utils:pronoun_sub(msg));
+        endif
+        return;
+    endif
+endif
+player:tell("You'll have to use 'home' or a teleporter.");
+.
+
+</pre>
+<BR>
+huh2:
+<pre>
+"This catches subst and find commands that don't fit into the usual model, e.g., 
+s/.../.../ without the space after the s, and find commands without the verb `find'. 
+ Still behaves in annoying ways (e.g., loses if the search string contains multiple 
+whitespace), but better than before.";
+set_task_perms(caller_perms());
+if ((c = callers()) && ((c[1][1] != this) || (length(c) > 1)))
+    return pass(@args);
+endif
+verb = args[1];
+v = 1;
+vmax = min(length(verb), 5);
+while ((v <= vmax) && (verb[v] == "subst"[v]))
+    v = v + 1;
+endwhile
+argstr = $code_utils:argstr(verb, args[2]);
+if (((v > 1) && (v <= length(verb))) && (((vl = verb[v]) < "A") || (vl > "Z")))
+    argstr = (verb[v..length(verb)] + (argstr && " ")) + argstr;
+    return this:subst();
+elseif ("/" == verb[1])
+    argstr = (verb + (argstr && " ")) + argstr;
+    return this:find();
+else
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+insertion:
+<pre>
+return this:ok(who = args[1]) && this.inserting[who];
+.
+
+</pre>
+<BR>
+set_insertion:
+<pre>
+return this:ok(who = args[1]) && ((((ins = tonum(args[2])) < 1) ? E_INVARG | ((ins 
+<= (max = length(this.texts[who]) + 1)) || (ins = max))) && (this.inserting[who] 
+= ins));
+.
+
+</pre>
+<BR>
+changed retain_session_on_exit:
+<pre>
+return this:ok(who = args[1]) && this.changes[who];
+.
+
+</pre>
+<BR>
+set_changed:
+<pre>
+return this:ok(who = args[1]) && (((unchanged = !args[2]) || (this.times[who] = time())) 
+&& (this.changes[who] = !unchanged));
+.
+
+</pre>
+<BR>
+origin:
+<pre>
+return this:ok(who = args[1]) && this.original[who];
+.
+
+</pre>
+<BR>
+set_origin:
+<pre>
+return this:ok(who = args[1]) && (((valid(origin = args[2]) && (origin != this)) 
+|| ((origin == $nothing) || E_INVARG)) && (this.original[who] = origin));
+.
+
+</pre>
+<BR>
+readable:
+<pre>
+return (((who = args[1]) < 1) || (who > length(this.active))) ? E_RANGE | this.readable[who];
+.
+
+</pre>
+<BR>
+set_readable:
+<pre>
+return this:ok(who = args[1]) && (this.readable[who] = !(!args[2]));
+.
+
+</pre>
+<BR>
+text:
+<pre>
+return (this:readable(who = args[1] || (player in this.active)) || this:ok(who)) 
+&& this.texts[who];
+.
+
+</pre>
+<BR>
+load:
+<pre>
+texts = args[2];
+if (!(fuckup = this:ok(who = args[1])))
+    return fuckup;
+elseif (typeof(texts) == STR)
+    texts = {texts};
+elseif ((typeof(texts) != LIST) || (length(texts) && (typeof(texts[1]) != STR)))
+    return E_TYPE;
+endif
+this.texts[who] = texts;
+this.inserting[who] = length(texts) + 1;
+this.changes[who] = 0;
+this.readable[who] = 0;
+this.times[who] = time();
+.
+
+</pre>
+<BR>
+working_on:
+<pre>
+"Dummy routine.  The child editor should provide something informative";
+return this:ok(who = args[1]) && (("something [in " + this.name) + "]");
+.
+
+</pre>
+<BR>
+ok:
+<pre>
+who = args[1];
+if ((who < 1) || (who > length(this.active)))
+    return E_RANGE;
+elseif ((length(c = callers()) < 2) ? player == this.active[who] | ((c[2][1] == this) 
+|| ($perm_utils:controls(c[2][3], this.active[who]) || (c[2][3] == $generic_editor.owner))))
+    return 1;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+loaded:
+<pre>
+return ((who = args[1] in this.active) && (typeof(this.texts[who]) == LIST)) && who;
+.
+
+</pre>
+<BR>
+list_line:
+<pre>
+if (this:ok(who = args[1]))
+    f = 1 + ((line = args[2]) in {(ins = this.inserting[who]) - 1, ins});
+    player:tell($string_utils:right(line, 3, " _^"[f]), ":_^"[f], " ", this.texts[who][line]);
+endif
+.
+
+</pre>
+<BR>
+insert_line:
+<pre>
+":insert_line([who,] line or list of lines [,quiet])";
+"  inserts the given text at the insertion point.";
+"  returns E_NONE if the session has no text loaded yet.";
+if (typeof(who = args[1]) != NUM)
+    args = {player in this.active, @args};
+endif
+if (!(fuckup = this:ok(who = args[1])))
+    return fuckup;
+elseif (typeof(text = this.texts[who]) != LIST)
+    return E_NONE;
+else
+    if (typeof(lines = args[2]) != LIST)
+        lines = {lines};
+    endif
+    p = this.active[who];
+    quiet = (length(args) >= 3) ? args[3] | p:edit_option("quiet_insert");
+    insert = this.inserting[who];
+    this.texts[who] = {@text[1..insert - 1], @lines, @text[insert..length(text)]};
+    this.inserting[who] = insert + length(lines);
+    if (lines)
+        if (!this.changes[who])
+            this.changes[who] = 1;
+            this.times[who] = time();
+        endif
+        if (!quiet)
+            if (length(lines) != 1)
+                p:tell("Lines ", insert, "-", (insert + length(lines)) - 1, " added.");
+            else
+                p:tell("Line ", insert, " added.");
+            endif
+        endif
+    else
+        p:tell("No lines added.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+append_line:
+<pre>
+":append_line([who,] string)";
+"  appends the given string to the line before the insertion point.";
+"  returns E_NONE if the session has no text loaded yet.";
+if (typeof(who = args[1]) != NUM)
+    args = {player in this.active, @args};
+endif
+if (!(fuckup = this:ok(who = args[1])))
+    return fuckup;
+elseif ((append = this.inserting[who] - 1) < 1)
+    return this:insert_line(who, {args[2]});
+elseif (typeof(text = this.texts[who]) != LIST)
+    return E_NONE;
+else
+    this.texts[who][append] = text[append] + args[2];
+    if (!this.changes[who])
+        this.changes[who] = 1;
+        this.times[who] = time();
+    endif
+    p = this.active[who];
+    if (!p:edit_option("quiet_insert"))
+        p:tell("Appended to line ", append, ".");
+    endif
+endif
+.
+
+</pre>
+<BR>
+join_lines:
+<pre>
+if (!(fuckup = this:ok(who = args[1])))
+    return fuckup;
+elseif ((from = args[2]) >= (to = args[3]))
+    return 0;
+else
+    nline = "";
+    for line in ((text = this.texts[who])[from..to])
+        if (!(english = args[4]))
+            nline = nline + line;
+        else
+            len = length(line) + 1;
+            while ((len = len - 1) && (line[len] == " "))
+            endwhile
+            if (len > 0)
+                nline = (nline + line) + (index(".:", line[len]) ? "  " | " ");
+            endif
+        endif
+    endfor
+    this.texts[who] = {@text[1..from - 1], nline, @text[to + 1..length(text)]};
+    if ((insert = this.inserting[who]) > from)
+        this.inserting[who] = (insert <= to) ? from + 1 | ((insert - to) + from);
+    endif
+    if (!this.changes[who])
+        this.changes[who] = 1;
+        this.times[who] = time();
+    endif
+    return to - from;
+endif
+.
+
+</pre>
+<BR>
+parse_number:
+<pre>
+"parse_number(who,string,before)   interprets string as a line number.  In the event 
+that string is `.', `before' tells us which line to use.  Return 0 if string is bogus.";
+if (!(fuckup = this:ok(who = args[1])))
+    return fuckup;
+endif
+last = length(this.texts[who]);
+ins = this.inserting[who] - 1;
+string = args[2];
+after = !args[3];
+if (!string)
+    return 0;
+elseif ("." == string)
+    return ins + after;
+elseif (!(i = index("_^$", string[slen = length(string)])))
+    return tonum(string);
+else
+    start = {ins + 1, ins, last + 1}[i];
+    n = 1;
+    if ((slen > 1) && (!(n = tonum(string[1..slen - 1]))))
+        return 0;
+    elseif (i % 2)
+        return start - n;
+    else
+        return start + n;
+    endif
+endif
+.
+
+</pre>
+<BR>
+parse_range:
+<pre>
+"parse_range(who,default,@args) => {from to rest}";
+numargs = length(args);
+if (!(fuckup = this:ok(who = args[1])))
+    return fuckup;
+elseif (!(last = length(this.texts[who])))
+    return this:no_text_msg();
+endif
+default = args[2];
+r = 0;
+while (default && (LIST != typeof(r = this:parse_range(who, {}, default[1]))))
+    default = listdelete(default, 1);
+endwhile
+if (typeof(r) == LIST)
+    from = r[1];
+    to = r[2];
+else
+    from = to = 0;
+endif
+saw_from_to = 0;
+not_done = 1;
+a = 2;
+while (((a = a + 1) <= numargs) && not_done)
+    if (args[a] == "from")
+        if ((a == numargs) || (!(from = this:parse_number(who, args[a = a + 1], 0))))
+            return "from ?";
+        endif
+        saw_from_to = 1;
+    elseif (args[a] == "to")
+        if ((a == numargs) || (!(to = this:parse_number(who, args[a = a + 1], 1))))
+            return "to ?";
+        endif
+        saw_from_to = 1;
+    elseif (saw_from_to)
+        a = a - 1;
+        not_done = 0;
+    elseif (i = index(args[a], "-"))
+        from = this:parse_number(who, args[a][1..i - 1], 0);
+        to = this:parse_number(who, args[a][i + 1..length(args[a])], 1);
+        not_done = 0;
+    elseif (f = this:parse_number(who, args[a], 0))
+        from = f;
+        if ((a == numargs) || (!(to = this:parse_number(who, args[a + 1], 1))))
+            to = from;
+        else
+            a = a + 1;
+        endif
+        not_done = 0;
+    else
+        a = a - 1;
+        not_done = 0;
+    endif
+endwhile
+if (from < 1)
+    return tostr("from ", from, "?  (out of range)");
+elseif (to > last)
+    return tostr("to ", to, "?  (out of range)");
+elseif (from > to)
+    return tostr("from ", from, " to ", to, "?  (backwards range)");
+else
+    return {from, to, $string_utils:from_list(args[a..numargs], " ")};
+endif
+.
+
+</pre>
+<BR>
+parse_insert:
+<pre>
+"parse_ins(who,string)  interprets string as an insertion point, i.e., a position 
+between lines and returns the number of the following line or 0 if bogus.";
+if (!(fuckup = this:ok(who = args[1])))
+    return fuckup;
+endif
+who = args[1];
+last = length(this.texts[who]) + 1;
+ins = this.inserting[who];
+string = args[2];
+if (i = index("-+", string[1]))
+    rest = string[2..length(string)];
+    return ((n = tonum(rest)) || (rest == "0")) ? {ins - n, ins + n}[i] | E_INVARG;
+else
+    if (!(j = index(string, "^") || index(string, "_")))
+        offset = 0;
+    else
+        offset = (j == 1) || tonum(string[1..j - 1]);
+        if (!offset)
+            return E_INVARG;
+        elseif (string[j] == "^")
+            offset = -offset;
+        endif
+    endif
+    rest = string[j + 1..length(string)];
+    if (i = rest in {".", "$"})
+        return offset + {ins, last}[i];
+    elseif (!(n = tonum(rest)))
+        return E_INVARG;
+    else
+        return (offset + (j && (string[j] == "^"))) + n;
+    endif
+endif
+.
+
+</pre>
+<BR>
+parse_subst:
+<pre>
+recognized_flags = (length(args) >= 2) ? args[2] | "gc";
+null_subst_msg = (length(args) >= 3) ? args[3] | "Null substitution?";
+cmd = args[1];
+if (!cmd)
+    return "/xxx/yyy[/[g][c]] [<range>] expected..";
+endif
+bchar = cmd[1];
+cmd = cmd[2..length(cmd)];
+fromstr = cmd[1..(b2 = index(cmd + bchar, bchar, 1)) - 1];
+cmd = cmd[b2 + 1..length(cmd)];
+tostr = cmd[1..(b2 = index(cmd + bchar, bchar, 1)) - 1];
+cmd = cmd[b2 + 1..length(cmd)];
+cmdlen = length(cmd);
+b2 = 0;
+while (((b2 = b2 + 1) <= cmdlen) && index(recognized_flags, cmd[b2]))
+endwhile
+return ((fromstr == "") && (tostr == "")) ? null_subst_msg | {fromstr, tostr, cmd[1..b2 
+- 1], cmd[b2..cmdlen]};
+.
+
+</pre>
+<BR>
+invoke:
+<pre>
+":invoke(...)";
+"to find out what arguments this verb expects,";
+"see this editor's parse_invoke verb.";
+new = args[1];
+if ((!(caller in {this, player})) && (!$perm_utils:controls(caller_perms(), player)))
+    "...non-editor/non-player verb trying to send someone to the editor...";
+    return E_PERM;
+endif
+if ((who = this:loaded(player)) && this:changed(who))
+    if (!new)
+        if (this:suck_in(player))
+            player:tell("You are working on ", this:working_on(who));
+        endif
+        return;
+    elseif (player.location == this)
+        player:tell("You are still working on ", this:working_on(who));
+        if (msg = this:previous_session_msg())
+            player:tell(msg);
+        endif
+        return;
+    endif
+    "... we're not in the editor and we're about to start something new,";
+    "... but there's still this pending session...";
+    player:tell("You were working on ", this:working_on(who));
+    if (!$command_utils:yes_or_no("Do you wish to delete that session?"))
+        if (this:suck_in(player))
+            player:tell("Continuing with ", this:working_on(player in this.active));
+            if (msg = this:previous_session_msg())
+                player:tell(msg);
+            endif
+        endif
+        return;
+    endif
+    "... note session number may have changed => don't trust `who'";
+    this:kill_session(player in this.active);
+endif
+spec = this:parse_invoke(@args);
+if (typeof(spec) == LIST)
+    if ((player:edit_option("local") && $object_utils:has_verb(this, "local_editing_info")) 
+&& (info = this:local_editing_info(@spec)))
+        this:invoke_local_editor(@info);
+    elseif (this:suck_in(player))
+        this:init_session(player in this.active, @spec);
+    endif
+endif
+.
+
+</pre>
+<BR>
+suck_in:
+<pre>
+"The correct way to move someone into the editor.";
+if (((loc = (who_obj = args[1]).location) != this) && (caller == this))
+    this.invoke_task = task_id();
+    who_obj:moveto(this);
+    if (who_obj.location == this)
+        fork (0)
+            "...forked, just in case loc:announce is broken...";
+            if (valid(loc) && (msg = this:depart_msg()))
+                loc:announce($string_utils:pronoun_sub(msg));
+            endif
+        endfork
+    else
+        who_obj:tell("For some reason, I can't move you.   (?)");
+        this:exitfunc(who_obj);
+    endif
+    this.invoke_task = 0;
+endif
+return who_obj.location == this;
+.
+
+</pre>
+<BR>
+new_session:
+<pre>
+"WIZARDLY";
+who_obj = args[1];
+from = args[2];
+if ($object_utils:isa(from, $generic_editor))
+    "... never put an editor in .original, ...";
+    if (w = who_obj in from.active)
+        from = from.original[w];
+    else
+        from = #-1;
+    endif
+endif
+if (caller != this)
+    return E_PERM;
+elseif (who = (who_obj = args[1]) in this.active)
+    "... edit in progress here...";
+    if (valid(from))
+        this.original[who] = from;
+    endif
+    return -1;
+else
+    for p in ({{"active", who_obj}, {"original", valid(from) ? from | $nothing}, 
+{"times", time()}, @this.stateprops})
+        this.(p[1]) = {@this.(p[1]), p[2]};
+    endfor
+    return length(this.active);
+endif
+.
+
+</pre>
+<BR>
+kill_session:
+<pre>
+"WIZARDLY";
+if (!(fuckup = this:ok(who = args[1])))
+    return fuckup;
+else
+    for p in ({@this.stateprops, {"original"}, {"active"}, {"times"}})
+        this.(p[1]) = listdelete(this.(p[1]), who);
+    endfor
+    return who;
+endif
+.
+
+</pre>
+<BR>
+reset_session:
+<pre>
+"WIZARDLY";
+if (!(fuckup = this:ok(who = args[1])))
+    return fuckup;
+else
+    for p in (this.stateprops)
+        this.(p[1])[who] = p[2];
+    endfor
+    this.times[who] = time();
+    return who;
+endif
+.
+
+</pre>
+<BR>
+kill_all_sessions:
+<pre>
+"WIZARDLY";
+if ((caller != this) && (!caller_perms().wizard))
+    return E_PERM;
+else
+    for victim in (this.contents)
+        victim:tell("Sorry, ", this.name, " is going down.  Your editing session 
+is hosed.");
+        victim:moveto(((who = victim in this.active) && valid(origin = this.original[who])) 
+? origin | (valid(victim.home) ? victim.home | $player_start));
+    endfor
+    for p in ({@this.stateprops, {"original"}, {"active"}, {"times"}})
+        this.(p[1]) = {};
+    endfor
+    return 1;
+endif
+.
+
+</pre>
+<BR>
+acceptable:
+<pre>
+return is_player(who_obj = args[1]) && (who_obj.wizard || pass(@args));
+.
+
+</pre>
+<BR>
+enterfunc:
+<pre>
+who_obj = args[1];
+if (who_obj.wizard && (!(who_obj in this.active)))
+    this:accept(who_obj);
+endif
+pass(@args);
+if (this.invoke_task == task_id())
+    "Means we're about to load something, so be quiet.";
+    this.invoke_task = 0;
+elseif (who = this:loaded(who_obj))
+    who_obj:tell("You are working on ", this:working_on(who), ".");
+elseif (msg = this:nothing_loaded_msg())
+    who_obj:tell(msg);
+endif
+.
+
+</pre>
+<BR>
+exitfunc:
+<pre>
+if (!(who = (who_obj = args[1]) in this.active))
+elseif (this:retain_session_on_exit(who))
+    if (msg = this:no_littering_msg())
+        who_obj:tell_lines(msg);
+    endif
+else
+    this:kill_session(who);
+endif
+pass(@args);
+.
+
+</pre>
+<BR>
+@flush:
+<pre>
+"@flush <editor>";
+"@flush <editor> at <month> <day>";
+"@flush <editor> at <weekday>";
+"The first form removes all sessions from the editor; the other two forms remove 
+everything older than the given date.";
+if (!$perm_utils:controls(player, this))
+    player:tell("Only the owner of the editor can do a ", verb, ".");
+    return;
+endif
+if (!prepstr)
+    player:tell("Trashing all sessions.");
+    this:kill_all_sessions();
+elseif (prepstr != "at")
+    player:tell("Usage:  ", verb, " ", dobjstr, " [at [mon day|weekday]]");
+else
+    p = prepstr in args;
+    if (t = $time_utils:from_day(iobjstr, -1))
+    elseif (t = $time_utils:from_month(args[p + 1], -1))
+        if (length(args) > (p + 1))
+            if (!(n = tonum(args[p + 2])))
+                player:tell(args[p + 1], " WHAT?");
+                return;
+            endif
+            t = t + ((n - 1) * 86400);
+        endif
+    else
+        player:tell("couldn't parse date");
+        return;
+    endif
+    for i in [-length(this.active)..-1]
+        if (this.times[-i] < t)
+            player:tell(this.active[-i].name, "(", this.active[-i], ") ", ctime(this.times[-i]));
+            this:kill_session(-i);
+        endif
+    endfor
+endif
+.
+
+</pre>
+<BR>
+@stateprop:
+<pre>
+if (!$perm_utils:controls(player, this))
+    player:tell(E_PERM);
+    return;
+endif
+if (i = index(dobjstr, "="))
+    default = dobjstr[i + 1..length(dobjstr)];
+    prop = dobjstr[1..i - 1];
+    if (argstr[1 + index(argstr, "=")] == "\"")
+    elseif (default[1] == "#")
+        default = toobj(default);
+    elseif (index("0123456789", default[1]))
+        default = tonum(default);
+    elseif (default == "{}")
+        default = {};
+    endif
+else
+    default = 0;
+    prop = dobjstr;
+endif
+if (typeof(result = this:set_stateprops(prop, default)) == ERR)
+    player:tell((result == E_RANGE) ? tostr(".", prop, " needs to hold a list of 
+the same length as .active (", length(this.active), ").") | ((result != E_NACC) ? 
+result | (prop + " is already a property on an ancestral editor.")));
+else
+    player:tell("Property added.");
+endif
+.
+
+</pre>
+<BR>
+@rmstateprop:
+<pre>
+if (!$perm_utils:controls(player, this))
+    player:tell(E_PERM);
+elseif (typeof(result = this:set_stateprops(dobjstr)) == ERR)
+    player:tell((result != E_NACC) ? result | (dobjstr + " is already a property 
+on an ancestral editor."));
+else
+    player:tell("Property removed.");
+endif
+.
+
+</pre>
+<BR>
+initialize:
+<pre>
+if ($perm_utils:controls(caller_perms(), this))
+    pass(@args);
+    this:kill_all_sessions();
+endif
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    pass();
+    this:kill_all_sessions();
+    this.help = $editor_help;
+endif
+.
+
+</pre>
+<BR>
+set_stateprops:
+<pre>
+remove = length(args) < 2;
+if ((caller != this) && (!$perm_utils:controls(caller_perms(), this)))
+    return E_PERM;
+elseif (!(length(args) in {1, 2}))
+    return E_ARGS;
+elseif (typeof(prop = args[1]) != STR)
+    return E_TYPE;
+elseif (i = $list_utils:iassoc(prop, this.stateprops))
+    if (!remove)
+        this.stateprops[i] = {prop, args[2]};
+    elseif ($object_utils:has_property(parent(this), prop))
+        return E_NACC;
+    else
+        this.stateprops = listdelete(this.stateprops, i);
+    endif
+elseif (remove)
+elseif (prop in properties(this))
+    if (this:_stateprop_length(prop) != length(this.active))
+        return E_RANGE;
+    endif
+    this.stateprops = {{prop, args[2]}, @this.stateprops};
+else
+    return $object_utils:has_property(this, prop) ? E_NACC | E_PROPNF;
+endif
+return 0;
+.
+
+</pre>
+<BR>
+description:
+<pre>
+is_look_self = 1;
+for c in (callers())
+    if (is_look_self && (c[2] in {"enterfunc", "confunc"}))
+        return {"", "Do a 'look' to get the list of commands, or 'help' for assistance.", 
+"", @this.description};
+    elseif (c[2] != "look_self")
+        is_look_self = 0;
+    endif
+endfor
+d = {"Commands:", ""};
+col = {{}, {}};
+for c in [1..2]
+    for cmd in (this.commands2[c])
+        cmd = this:commands_info(cmd);
+        col[c] = {cmdargs = $string_utils:left(cmd[1] + " ", 12) + cmd[2], @col[c]};
+    endfor
+endfor
+i1 = length(col[1]);
+i2 = length(col[2]);
+right = 0;
+while (i1 || i2)
+    if (!((i1 && (length(col[1][i1]) > 35)) || (i2 && (length(col[2][i2]) > 35))))
+        d = {@d, $string_utils:left(i1 ? col[1][i1] | "", 40) + (i2 ? col[2][i2] 
+| "")};
+        i1 && (i1 = i1 - 1);
+        i2 && (i2 = i2 - 1);
+        right = 0;
+    elseif (right && i2)
+        d = {@d, (length(col[2][i2]) > 35) ? $string_utils:right(col[2][i2], 75) 
+| ($string_utils:space(40) + col[2][i2])};
+        i2 = i2 - 1;
+        right = 0;
+    elseif (i1)
+        d = {@d, col[1][i1]};
+        i1 = i1 - 1;
+        right = 1;
+    else
+        right = 1;
+    endif
+endwhile
+return {@d, "", "----  Do `help <cmdname>' for help with a given command.  ----", 
+"", "  <ins> ::= $ (the end) | [^]n (above line n) | _n (below line n) | . (current)", 
+"<range> ::= <lin> | <lin>-<lin> | from <lin> | to <lin> | from <lin> to <lin>", 
+"  <lin> ::= n | [n]$ (n from the end) | [n]_ (n before .) | [n]^ (n after .)", "`help 
+insert' and `help ranges' describe these in detail.", @this.description};
+.
+
+</pre>
+<BR>
+commands_info:
+<pre>
+cmd = args[1];
+if (pc = $list_utils:assoc(cmd, this.commands))
+    return pc;
+elseif (this == $generic_editor)
+    return {cmd, "<<<<<======= Need to add this to .commands"};
+else
+    return parent(this):commands_info(cmd);
+endif
+.
+
+</pre>
+<BR>
+match_object:
+<pre>
+who = {@args, player}[2];
+objstr = args[1];
+origin = this;
+while ((where = player in origin.active) && ($recycler:valid(origin = origin.original[where]) 
+&& (origin != this)))
+    if (!$object_utils:isa(origin, $generic_editor))
+        return origin:match_object(args[1], who);
+    endif
+endwhile
+return who:my_match_object(objstr, #-1);
+.
+
+</pre>
+<BR>
+who_location_msg:
+<pre>
+who = args[1];
+where = {#-1, @this.original}[1 + (who in this.active)];
+return strsub(this.who_location_msg, "%L", where:who_location_msg(who));
+return $string_utils:pronoun_sub(this.who_location_msg, who, this, where);
+.
+
+</pre>
+<BR>
+nothing_loaded_msg no_text_msg change_msg no_change_msg no_littering_msg depart_msg 
+return_msg previous_session_msg:
+<pre>
+return this.(verb);
+.
+
+</pre>
+<BR>
+announce announce_all announce_all_but tell_contents:
+<pre>
+return;
+.
+
+</pre>
+<BR>
+fill_string:
+<pre>
+"fill(string,width[,prefix])";
+"tries to cut <string> into substrings of length < <width> along word boundaries. 
+ Prefix, if supplied, will be prefixed to the 2nd..last substrings.";
+if (length(args) < 2)
+    width = 2 + player:linelen();
+    prefix = "";
+else
+    width = args[2] + 1;
+    prefix = {@args, ""}[3];
+endif
+if (width < (3 + length(prefix)))
+    return E_INVARG;
+endif
+string = ("$" + args[1]) + " $";
+len = length(string);
+if (len <= width)
+    last = len - 1;
+    next = len;
+else
+    last = rindex(string[1..width], " ");
+    if (last < ((width + 1) / 2))
+        last = width + index(string[width + 1..len], " ");
+    endif
+    next = last;
+    while (string[next = next + 1] == " ")
+    endwhile
+endif
+while (string[last = last - 1] == " ")
+endwhile
+ret = {string[2..last]};
+width = width - length(prefix);
+minlast = (width + 1) / 2;
+while (next < len)
+    string = "$" + string[next..len];
+    len = (len - next) + 2;
+    if (len <= width)
+        last = len - 1;
+        next = len;
+    else
+        last = rindex(string[1..width], " ");
+        if (last < minlast)
+            last = width + index(string[width + 1..len], " ");
+        endif
+        next = last;
+        while (string[next = next + 1] == " ")
+        endwhile
+    endif
+    while (string[last = last - 1] == " ")
+    endwhile
+    if (last > 1)
+        ret = {@ret, prefix + string[2..last]};
+    endif
+endwhile
+return ret;
+.
+
+</pre>
+<BR>
+here_huh:
+<pre>
+"This catches subst and find commands that don't fit into the usual model, e.g., 
+s/.../.../ without the space after the s, and find commands without the verb `find'. 
+ Still behaves in annoying ways (e.g., loses if the search string contains multiple 
+whitespace), but better than before.";
+if ((caller != this) && (caller_perms() != player))
+    return E_PERM;
+endif
+verb = args[1];
+args = args[2];
+v = 1;
+vmax = min(length(verb), 5);
+while ((v <= vmax) && (verb[v] == "subst"[v]))
+    v = v + 1;
+endwhile
+argstr = $code_utils:argstr(verb, args);
+if ((v > 1) && ((v <= length(verb)) && (((vl = verb[v]) < "A") || (vl > "Z"))))
+    argstr = (verb[v..length(verb)] + (argstr && " ")) + argstr;
+    this:subst();
+    return 1;
+elseif ("/" == verb[1])
+    argstr = (verb + (argstr && " ")) + argstr;
+    this:find();
+    return 1;
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+match:
+<pre>
+return $failed_match;
+.
+
+</pre>
+<BR>
+get_room:
+<pre>
+":get_room([player])  => correct room to match in on invocation.";
+who = {@args, player}[1];
+if (who.location != this)
+    return who.location;
+else
+    origin = this;
+    while ((where = player in origin.active) && (valid(origin = origin.original[where]) 
+&& (origin != this)))
+        if (!$object_utils:isa(origin, $generic_editor))
+            return origin;
+        endif
+    endwhile
+    return this;
+endif
+.
+
+</pre>
+<BR>
+invoke_local_editor:
+<pre>
+":invoke_local_editor(name, text, upload)";
+"Spits out the magic text that invokes the local editor in the player's client.";
+"NAME is a good human-readable name for the local editor to use for this particular 
+piece of text.";
+"TEXT is a string or list of strings, the initial body of the text being edited.";
+"UPLOAD, a string, is a MOO command that the local editor can use to save the text 
+when the user is done editing.  The local editor is going to send that command on 
+a line by itself, followed by the new text lines, followed by a line containing only 
+`.'.  The UPLOAD command should therefore call $command_utils:read_lines() to get 
+the new text as a list of strings.";
+if (caller != this)
+    return;
+endif
+name = args[1];
+text = args[2];
+upload = args[3];
+if (typeof(text) == STR)
+    text = {text};
+endif
+notify(player, tostr("#$# edit name: ", name, " upload: ", upload));
+":dump_lines() takes care of the final `.' ...";
+for line in ($command_utils:dump_lines(text))
+    notify(player, line);
+endfor
+.
+
+</pre>
+<BR>
+_stateprop_length:
+<pre>
+"+c properties on children cannot necessarily be read, so we need this silliness...";
+if (caller != this)
+    return E_PERM;
+else
+    return length(this.(args[1]));
+endif
+.
+
+</pre>
+<BR>
+print:
+<pre>
+txt = this:text(player in this.active);
+if (typeof(txt) == LIST)
+    player:tell_lines(txt);
+else
+    player:tell("Text unreadable:  ", txt);
+endif
+player:tell("--------------------------");
+.
+
+</pre>
+<BR>
+accept:
+<pre>
+return this:acceptable(who_obj = args[1]) && this:new_session(who_obj, who_obj.location);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp readable
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp times
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp commands2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp no_text_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp commands
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp invoke_task
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp exit_on_abort
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp previous_session_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp stateprops
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp depart_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp return_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp no_littering_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp no_change_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp change_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp nothing_loaded_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp texts
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp active
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp changes
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp inserting
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp original
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000050.htm">Verb Editor</A> <A HREF="HTM_000049.htm">Note Editor</A> <A HREF="HTM_000048.htm">Mail Room</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

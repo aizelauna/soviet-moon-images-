@@ -1,0 +1,579 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Container Room</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Container Room (#1016)</H3>
+(an instance of <A HREF="HTM_000955.htm">Generic Room with Seats</A> made by <A HREF="HTM_000907.htm">melusina</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe GCR is both a room and container.  You can set opacity, toggle outside listening, and assorted other container-roomlike things.  A note of caution:  the 'look outside' message needs to be set to "Outside," or else it doesn't work.  Sorry.  This room also has a look_msg, for handy integration.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp-------
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis child of the PARC allows you to make custom seats of any amount, holding a custom amount of people each. The owner can create seats fitting for their room environment and theme. See `help #955'.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+p*ut in*sert d*rop:
+<pre>
+if ((this.location != player) && (this.location != player.location))
+    player:tell("You can't get at ", this.name, ".");
+elseif (dobj == $nothing)
+    player:tell("What do you want to put ", prepstr, " ", this.name, "?");
+elseif ($command_utils:object_match_failed(dobj, dobjstr))
+elseif ((dobj.location != player) && (dobj.location != player.location))
+    player:tell("You don't have ", dobj.name, ".");
+elseif (!this.opened)
+    player:tell(this.name, " is closed.");
+else
+    set_task_perms(callers() ? caller_perms() | player);
+    dobj:moveto(this);
+    if (dobj.location == this)
+        player:tell(this:put_msg());
+        if (msg = this:oput_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    else
+        player:tell(this:put_fail_msg());
+        if (msg = this:oput_fail_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+re*move ta*ke g*et:
+<pre>
+if (!this.opened)
+    player:tell(this.name, " is not open.");
+elseif (this.dark)
+    player:tell("You can't see into ", this.name, " to remove anything.");
+elseif ((dobj = this:match_object(dobjstr)) == $nothing)
+    player:tell("What do you want to take from ", this.name, "?");
+elseif ($command_utils:object_match_failed(dobj, dobjstr))
+elseif (!(dobj in this:contents()))
+    player:tell(dobj.name, " isn't in ", this.name, ".");
+else
+    dobj:moveto(player);
+    if (dobj.location == player)
+        player:tell(this:remove_msg());
+        if (msg = this:oremove_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    else
+        dobj:moveto(this.location);
+        if (dobj.location == this.location)
+            player:tell(this:remove_msg());
+            if (msg = this:oremove_msg())
+                player.location:announce(player.name, " ", msg);
+            endif
+            player:tell("You can't pick up ", dobj.name, ", so it tumbles onto the 
+floor.");
+        else
+            player:tell(this:remove_fail_msg());
+            if (msg = this:oremove_fail_msg())
+                player.location:announce(player.name, " ", msg);
+            endif
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+open:
+<pre>
+if (this.opened)
+    player:tell("It's already open.");
+    "elseif (this:is_openable_by(player))";
+elseif (this:is_openable_by(callers() ? caller_perms() | player))
+    this:set_opened(1);
+    player:tell(this:open_msg());
+    if (msg = this:oopen_msg())
+        player.location:announce(player.name, " ", msg);
+    endif
+else
+    player:tell(this:open_fail_msg());
+    if (msg = this:oopen_fail_msg())
+        player.location:announce(player.name, " ", msg);
+    endif
+endif
+.
+
+</pre>
+<BR>
+@lock_for_open:
+<pre>
+set_task_perms(player);
+key = $lock_utils:parse_keyexp(iobjstr, player);
+if (typeof(key) == STR)
+    player:tell("That key expression is malformed:");
+    player:tell("  ", key);
+else
+    res = this.open_key = key;
+    if (typeof(res) == ERR)
+        player:tell(res, ".");
+    else
+        player:tell("Locked opening of ", this.name, " with this key:");
+        player:tell("  ", $lock_utils:unparse_key(key));
+    endif
+endif
+.
+
+</pre>
+<BR>
+is_openable_by:
+<pre>
+return (this.open_key == 0) || $lock_utils:eval_key(this.open_key, args[1]);
+.
+
+</pre>
+<BR>
+close:
+<pre>
+if (!this.opened)
+    player:tell("It's already closed.");
+else
+    this:set_opened(0);
+    player:tell(this:close_msg());
+    if (msg = this:oclose_msg())
+        player.location:announce(player.name, " ", msg);
+    endif
+endif
+.
+
+</pre>
+<BR>
+@unlock_for_open:
+<pre>
+set_task_perms(player);
+res = dobj.open_key = 0;
+if (typeof(res) == ERR)
+    player:tell(res, ">");
+else
+    player:tell("Unlocked ", dobj.name, " for opening.");
+endif
+.
+
+</pre>
+<BR>
+tell_contents:
+<pre>
+pass(@args);
+if ((msg = this:empty_msg()) && (this.contents == {}))
+    player:tell(msg);
+endif
+.
+
+</pre>
+<BR>
+set_opened:
+<pre>
+if (!$perm_utils:controls(caller.owner, this))
+    return E_PERM;
+else
+    this.opened = opened = !(!args[1]);
+    this.dark = this.opaque > opened;
+    return opened;
+endif
+.
+
+</pre>
+<BR>
+@opacity:
+<pre>
+if (!$perm_utils:controls(player, this))
+    player:tell("Can't set opacity of something you don't own, now can you?");
+elseif ((iobjstr != "0") && (!tonum(iobjstr)))
+    player:tell("Opacity must be an integer (0, 1, 2).");
+else
+    player:tell("Opacity changed:  Now " + {"transparent.", "opaque.", "a black hole."}[1 
++ this:set_opaque(tonum(iobjstr))]);
+endif
+.
+
+</pre>
+<BR>
+set_opaque:
+<pre>
+if (!$perm_utils:controls(caller.owner, this))
+    return E_PERM;
+elseif (typeof(number = args[1]) != NUM)
+    return E_INVARG;
+else
+    number = (number < 0) ? 0 | ((number > 2) ? 2 | number);
+    this.dark = number > this.opened;
+    return this.opaque = number;
+endif
+.
+
+</pre>
+<BR>
+enter:
+<pre>
+if (!this.opened)
+    player:tell(this:oput_fail_msg() || (this.name + " is closed."));
+else
+    loc = player.location;
+    if (loc == this)
+        player:tell("You're already inside ", this:title(), ".");
+    else
+        if (this:accept(player))
+            player:tell(this:arrive_succeeded_msg() || (("You enter " + this:title()) 
++ "."));
+            player:moveto(this);
+            fail = 0;
+        else
+            fail = 1;
+        endif
+        this:announce(player.name + " ", this:oarrive_succeeded_msg() || "enters.");
+        loc:announce_all_but({this}, player.name + " ", this:arrive_outside_msg() 
+|| (("disappears into " + this.name) + "."));
+    endif
+    if (fail)
+        player:tell(this:arrive_failed_msg() || (("Unfortunately, " + this:title()) 
++ " doesn't let you enter."));
+        if (omsg = this:oarrive_failed_msg())
+            loc:announce(player:title(), " ", omsg);
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+description:
+<pre>
+if (player.location == this)
+    return this:inside_description(@args);
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+oclose_msg close_msg oopen_msg open_msg oput_fail_msg put_fail_msg oremove_fail_msg 
+oremove_msg remove_fail_msg remove_msg oput_msg put_msg oopen_fail_msg empty_msg 
+arrive_failed_msg oarrive_failed_msg arrive_succeeded_msg oarrive_succeeded_msg arrive_outside_msg 
+leave_succeeded_msg oleave_succeeded_msg leave_outside_msg leave_failed_msg oleave_failed_msg:
+<pre>
+msg = this.(verb);
+return msg ? $string_utils:pronoun_sub(msg, @args) | "";
+.
+
+</pre>
+<BR>
+exit leave out:
+<pre>
+if ((loc = this.location) == $nothing)
+    player:tell("There's nothing out there.");
+    return;
+endif
+if (player.location == this)
+    if (loc:accept(player))
+        player:tell(this:leave_succeeded_msg() || "You exit.");
+        player:moveto(loc);
+        fail = 0;
+    else
+        fail = 1;
+    endif
+    if (player.location != loc)
+        fail = 1;
+    else
+        this:announce(player.name + " ", this:oleave_succeeded_msg() || "vanishes.");
+        loc:announce_all_but({this, player}, player.name + " ", this:leave_outside_msg() 
+|| (("appears after exiting " + this.name) + "."));
+    endif
+    if (fail)
+        player:tell(this:leave_failed_msg() || "You can't seem to leave.");
+        if (msg = this:oleave_failed_msg())
+            this:announce(player.name + " ", msg);
+        endif
+    endif
+else
+    player:tell("You're not in ", this.name, ".");
+endif
+.
+
+</pre>
+<BR>
+inside_description:
+<pre>
+return this.inside_description;
+.
+
+</pre>
+<BR>
+set_inside_description:
+<pre>
+if (!(caller == this))
+    return E_PERM;
+elseif (typeof(desc = args[1]) in {LIST, STR})
+    this.inside_description = desc;
+else
+    return E_TYPE;
+endif
+.
+
+</pre>
+<BR>
+yell:
+<pre>
+"Yell -- yells a message to the outside world.";
+stuff = "";
+if (player.location == this)
+    if (this.location == $nothing)
+        stuff = "For some reason, nobody outside seems to hear.";
+    else
+        this.location:announce_all_but({this}, player.name, " yells from inside ", 
+this.name, ", \"", argstr, "\"");
+    endif
+    player:tell("You yell, \"", argstr, "\"");
+    this:announce(player.name, " yell, \"", argstr, "\"");
+    if (stuff)
+        this:announce_all(stuff);
+    endif
+endif
+.
+
+</pre>
+<BR>
+@listen:
+<pre>
+"@listen -- enables the container room to hear the outside environment.";
+"possible arguments: \"on\" or \"off\"";
+choices = {"on", "off"};
+if (!argstr)
+    player:tell("Listen is currently ", this.listen, ".");
+    return;
+endif
+if (!(argstr in choices))
+    player:tell("Usage:  @listen on|off");
+else
+    this.listen = argstr;
+    player:tell("Listen is now ", this.listen, ".");
+endif
+.
+
+</pre>
+<BR>
+@describe_inside:
+<pre>
+if ($perm_utils:controls(player, this))
+    this:set_inside_description(iobjstr);
+    player:tell("Interior description set.");
+else
+    player:tell("Only the owner may modify the interior description.");
+endif
+.
+
+</pre>
+<BR>
+l*ook:
+<pre>
+name = this:outside_msg();
+if (((!prepstr) && (dobj == $failed_match)) && index(name, dobjstr))
+    this:look_outside();
+else
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+location:
+<pre>
+if (!valid(this.location))
+    return $nothing;
+elseif (is_player(this.location))
+    return this.location.location;
+else
+    return this.location;
+endif
+.
+
+</pre>
+<BR>
+look_outside:
+<pre>
+if (args)
+    player = args[1];
+endif
+player:tell("");
+player:tell($string_utils:capitalize(this:outside_msg() + " "), this.name, ", you 
+see:");
+player:tell("");
+where = this.location;
+if (where == $nothing)
+    player:tell(this:("$nothing_msg")());
+    return;
+endif
+if ((loc = this:location()) != where)
+    player:tell(where:title(), " holding ", this:title(), " in...");
+endif
+if (args)
+    player:tell_lines(where:title());
+    player:tell_lines(where:description());
+else
+    loc:look_self();
+endif
+.
+
+</pre>
+<BR>
+announce_move:
+<pre>
+from = args[1];
+to = args[2];
+this:announce_all(this:teleport_msg() || (this.name + "moves."));
+if (room = $object_utils:isa(to, $room))
+    for person in (this.contents)
+        if (is_player(person))
+            this:look_outside(person);
+        endif
+    endfor
+endif
+if (!(callers()[2][2] in this.silent_actions))
+    speak = $object_utils:isa(from, $room) ? "announce_all" | "tell";
+    if (msg = this:teleport_outside_msg(from))
+        from:(speak)(msg);
+    endif
+    speak = room ? "announce_all" | "tell";
+    if (msg = this:oteleport_outside_msg(to))
+        msg = index(msg, this.name) ? msg | ((this.name + " ") + msg);
+        to:(speak)(msg);
+    endif
+endif
+.
+
+</pre>
+<BR>
+tell:
+<pre>
+if (this.listen != "off")
+    this:announce_all("Outside:", tostr(@args));
+endif
+.
+
+</pre>
+<BR>
+look_self:
+<pre>
+player:tell(this:title());
+if (!(args && args[1]))
+    desc = this:description();
+    if (desc)
+        player:tell_lines(desc);
+    else
+        player:tell("You see nothing special.");
+    endif
+    if (!this.dark)
+        if (player.location != this)
+            player:tell(this:inside_description());
+        endif
+        this:tell_contents(setremove(this:contents(), player), this.ctype);
+        this:tell_exits();
+    endif
+endif
+.
+
+</pre>
+<BR>
+outside_msg:
+<pre>
+"Copied from Generic Journeying SPARC (#1066):outside_msg by genna (#352) Fri May 
+ 6 02:56:11 1994 EDT";
+return this.(verb);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oclose_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp close_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oopen_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp open_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oput_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp put_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oremove_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oremove_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp remove_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp remove_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oput_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp put_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oopen_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp open_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp empty_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp opaque
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp opened
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp tell_contents
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp inside_description
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp open_key
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp arrive_failed_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp arrive_succeeded_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oarrive_failed_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp arrive_outside_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oarrive_succeeded_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp leave_outside_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp leave_failed_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp leave_succeeded_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oleave_succeeded_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oleave_failed_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp listen
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp outside_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp look_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000953.htm">a large glass tank</A> <A HREF="HTM_001066.htm">Generic Journeying SPARC</A> <A HREF="HTM_001481.htm">Dinghy</A> <A HREF="HTM_001378.htm">Left Stall</A> <A HREF="HTM_001377.htm">a bathtub</A> <A HREF="HTM_002520.htm">Toadstool</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

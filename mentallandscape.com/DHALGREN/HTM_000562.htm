@@ -1,0 +1,113 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Auditorium</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Auditorium (#562)</H3>
+(an instance of <A HREF="HTM_000110.htm">Generic Post-Apocalypse Room</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA large auditorium with lockable announce
+<BR>
+<BR>
+You see <A HREF="HTM_000804.htm">microphone</A> here.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@mute:
+<pre>
+if (player != this.owner)
+    player:tell(E_PERM);
+    return;
+endif
+key = $lock_utils:parse_keyexp(dobjstr, player);
+if (typeof(key) == STR)
+    player:tell("That key expression is malformed:");
+    player:tell("  ", key);
+else
+    res = this.announce_key = key;
+    if (typeof(res) == ERR)
+        player:tell(res, ".");
+    else
+        player:tell("Mute-locked ", this.name, " with this key:");
+        player:tell("  ", $lock_utils:unparse_key(key));
+    endif
+endif
+.
+
+</pre>
+<BR>
+@unmute:
+<pre>
+if (player != this.owner)
+    player:tell(E_PERM);
+    return;
+endif
+this.announce_key = 0;
+player:tell("Unmuted ", this.name);
+.
+
+</pre>
+<BR>
+announce:
+<pre>
+key = this.announce_key;
+if ((key == 0) || $lock_utils:eval_key(key, player))
+    pass(@args);
+else
+    player:tell(this.announce_failed);
+endif
+.
+
+</pre>
+<BR>
+announce_all:
+<pre>
+key = this.announce_key;
+if ((key == 0) || $lock_utils:eval_key(key, player))
+    pass(@args);
+else
+    player:tell(this.announce_failed);
+endif
+.
+
+</pre>
+<BR>
+announce_all_but:
+<pre>
+key = this.announce_key;
+if ((key == 0) || $lock_utils:eval_key(key, player))
+    pass(@args);
+else
+    player:tell(this.announce_failed);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp announce_key
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp announce_failed
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000808.htm">Bellona Auditorium</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

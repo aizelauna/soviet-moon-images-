@@ -1,0 +1,629 @@
+<HTML>
+<HEAD>
+<TITLE>Generic pile of stuff</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic pile of stuff (#449)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000448.htm">Snap</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA pile of anything...try HELP GPS for more info.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000448.htm">Snap</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspIf you want some sort of dispenser, package of little objects, pile of stuff or any 
+other thing that gives out objects, Generic pile of stuff may be the right parent!
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspHere are some examples of things you can make by setting a few properties:
+&nbsp&nbsp&nbsp&nbsp&nbspA rose tree that lets you pick roses that look and smell randomly.
+&nbsp&nbsp&nbsp&nbsp&nbspA box of valentines chocolate, each one a different flavor.
+&nbsp&nbsp&nbsp&nbsp&nbspA pile of laundry. Pick up any item and try it on. Pick up all the laundry and the 
+pile is gone. Drop some laundry and it is back in the pile.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAfter you have made a pile, you prime it with the generic you would like it to produce. 
+For each property on the generic that you want set in a special way, you add a list 
+of values to the parent. 
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspMany custom options and fancy ways to set the produced object's properties.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspHelp-with example on #449   shows you what it takes to make a very fancy pile of 
+random comic books. Here is an example of what the player sees:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp>look
+&nbsp&nbsp&nbsp&nbsp&nbspMessy room
+&nbsp&nbsp&nbsp&nbsp&nbspThis is a messy room. The floor is covered with all sorts of cArrot's junk.
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a pile of comic books here.
+&nbsp&nbsp&nbsp&nbsp&nbsp>take a comic from pile.
+&nbsp&nbsp&nbsp&nbsp&nbspYou take Tales of Terror #234 from a pile of comic books.
+&nbsp&nbsp&nbsp&nbsp&nbsp>look at comic
+&nbsp&nbsp&nbsp&nbsp&nbspRatMan has a run-in with an anti-polarity beam that makes him loose his super powers! 
+Mollusca somehow convinces the citizens to elect him as mayor! At the last minute, 
+RatMan manages to trick Mollusca into using his own giant deli-slicer against himself. 
+A rare issue 234! This one must be worth a mint!
+&nbsp&nbsp&nbsp&nbsp&nbspFOR MORE HELP:
+&nbsp&nbsp&nbsp&nbsp&nbsphelp-with [general, props, example, or verbs]  on #449
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+get_prop_vals:
+<pre>
+object = args[1];
+this_props = this:protected_verbs("properties", this);
+props_to_set = {};
+for prop in (this_props)
+    if (index(prop, "set_indirect") == 1)
+        pset = prop[14..length(prop)];
+        prop_list = this.(prop)[1].(this.(prop)[2]);
+        props_to_set = {@props_to_set, {pset, prop_list[random(length(prop_list))]}};
+    elseif (index(prop, "set_") == 1)
+        pset = prop[5..length(prop)];
+        prop_list = this.(prop);
+        props_to_set = {@props_to_set, {pset, prop_list[random(length(prop_list))]}};
+    endif
+endfor
+for v in (this:protected_verbs("verbs", this))
+    if (index(v, "set_") == 1)
+        pset = v[5..length(v)];
+        props_to_set = {@props_to_set, {pset, tostr(this:(v)(object))}};
+    endif
+endfor
+change1 = 1;
+change2 = 1;
+while (change2)
+    while (change1)
+        change1 = 0;
+        for iprop in [1..length(props_to_set)]
+            i = props_to_set[iprop];
+            if (a = index(i[2], "%SUB("))
+                b = a + 5;
+                while ((b < length(i[2])) && (i[2][b] != ")"))
+                    b = b + 1;
+                endwhile
+                prop = i[2][a + 5..b - 1];
+                rval = $list_utils:assoc(prop, props_to_set);
+                if (!rval)
+                    player:tell("Error: set_", prop, " not found in: ", $string_utils:english_list(this_props));
+                    return;
+                endif
+                v = rval[2];
+                if (strcmp("S", i[2][a + 1]) == 0)
+                    v = $string_utils:capitalize(v);
+                endif
+                props_to_set[iprop][2] = $string_utils:substitute(i[2], {{("%SUB(" 
++ prop) + ")", v}});
+                change1 = 1;
+            endif
+        endfor
+    endwhile
+    change1 = 1;
+    change2 = 0;
+    while (change1)
+        change1 = 0;
+        for iprop in [1..length(props_to_set)]
+            i = props_to_set[iprop];
+            if (a = index(i[2], "%VERB("))
+                b = a + 6;
+                while ((b < length(i[2])) && (i[2][b] != ")"))
+                    b = b + 1;
+                endwhile
+                prop = $string_utils:explode(old_str = i[2][a + 6..b - 1], ",");
+                do_verb_loc = toobj(prop[1]);
+                do_verb = prop[2];
+                rval = $list_utils:assoc(prop[3], props_to_set);
+                if (!rval)
+                    player:tell("Error: set_", prop, " not found in: ", $string_utils:english_list(this_props));
+                    return;
+                endif
+                do_arg = rval[2];
+                v = tostr(do_verb_loc:(do_verb)(do_arg));
+                if (strcmp("V", i[2][a + 1]) == 0)
+                    v = $string_utils:capitalize(v);
+                endif
+                props_to_set[iprop][2] = $string_utils:substitute(i[2], {{("%verb(" 
++ old_str) + ")", v}});
+                change1 = 1;
+                change2 = 1;
+            endif
+        endfor
+    endwhile
+endwhile
+return props_to_set;
+.
+
+</pre>
+<BR>
+set_prop:
+<pre>
+OBJ = args[1];
+prop = args[2];
+val = args[3];
+if (prop == "name")
+    $building_utils:set_names(object, val);
+else
+    object.prop = val;
+endif
+.
+
+</pre>
+<BR>
+set_prop_vals:
+<pre>
+object = args[1];
+plist = this:get_prop_vals(object);
+this_props = {@this:protected_verbs("all_properties", object), "name"};
+for p in (plist)
+    if (p[1] in this_props)
+        this:protected_verbs("set_prop", object, p[1], p[2]);
+    endif
+endfor
+.
+
+</pre>
+<BR>
+protected_verbs:
+<pre>
+if ((caller != this.generic) && (caller != this))
+    return E_PERM;
+endif
+if (args[1] == "set_prop")
+    object = args[2];
+    prop = args[3];
+    val = args[4];
+    if (prop == "name")
+        $building_utils:set_names(object, val);
+    else
+        object.(prop) = val;
+    endif
+elseif (args[1] == "create")
+    return $recycler:_create(this.generic_object);
+elseif (args[1] == "verbs")
+    object = args[2];
+    return verbs(object);
+elseif (args[1] == "verb_info")
+    object = args[2];
+    STR = args[3];
+    return verb_info(object, STR);
+elseif (args[1] == "properties")
+    object = args[2];
+    return properties(object);
+elseif (args[1] == "all_properties")
+    object = args[2];
+    return $object_utils:all_properties(object);
+elseif (args[1] == "recycle")
+    object = args[2];
+    if (valid(object) && (parent(object) == this.generic_object))
+        $recycler:_recycle(object);
+    endif
+elseif (args[1] == "verb_name")
+    if (!this.take_name)
+        my_verb_info = verb_info(this.generic, "take");
+        my_verb_code = verb_code(this.generic, "take");
+        my_verb_args = verb_args(this.generic, "take");
+        add_verb(this, my_verb_info, my_verb_args);
+        set_verb_code(this, strsub(my_verb_info[3][1..index(my_verb_info[3] + " ", 
+" ") - 1], "*", ""), my_verb_code);
+        this.take_name = "take";
+    endif
+    if (typeof(info = verb_info(this, this.take_name)) == ERR)
+        return info;
+    else
+        what = args[2];
+        val = set_verb_info(this, this.take_name, {@info[1..2], what});
+        this.take_name = strsub(what[1..index(what + " ", " ") - 1], "*", "");
+        return val;
+    endif
+endif
+.
+
+</pre>
+<BR>
+announce:
+<pre>
+object = args[1];
+pmsg = $string_utils:pronoun_sub(args[2], player, object, this.location);
+omsg = $string_utils:pronoun_sub(args[3], player, object, this.location);
+if (pmsg)
+    player:tell(pmsg);
+endif
+if (omsg)
+    if (object.location == player)
+        where = player.location;
+    else
+        where = object.location;
+    endif
+    if (valid(where))
+        where:announce(omsg);
+    endif
+endif
+.
+
+</pre>
+<BR>
+title:
+<pre>
+return $string_utils:substitute(this.name, {{"%size", this.pile_size}});
+.
+
+</pre>
+<BR>
+g*et t*ake:
+<pre>
+this:do_take(@args);
+.
+
+</pre>
+<BR>
+@prime:
+<pre>
+if ($command_utils:object_match_failed(iobj = $command_utils:match_object(iobjstr), 
+iobjstr))
+elseif ((this != this.generic) && (caller == this.owner))
+    this.generic_object = iobj;
+    player:tell("Your \"", this:title(), "\" will now produce \"", this.generic_object.name, 
+"\"s.");
+    this.object_names = this.generic_object.aliases;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+@take_verb:
+<pre>
+"@take_verb <this> is \"<take_verb_1> <take_verb_2>[.....]\"";
+"Sets the aliases of the verb used to take an item from the pile to take_verb_1, 
+take_verb_2, etc.";
+if (player != this.owner)
+    return E_PERM;
+elseif (!iobjstr)
+    player:tell("Syntax :@take_verb ", dobjstr, " is \"<take_verbname_1> <take_verbname_2>[...]\"");
+elseif (index(iobjstr + " ", "* "))
+    player:tell("Aliases ending in an asterisk are not allowed.");
+elseif (typeof(val = this:protected_verbs("set_take", iobjstr) == ERR))
+    player:tell("Syntax :@take_verb ", dobjstr, " is \"<take_verbname_1> <take_verbname_2>[...]\"");
+    return val;
+else
+    player:tell("take verb of ", this:title(), " set to ", $string_utils:from_value(iobjstr, 
+1, -1), ".");
+endif
+.
+
+</pre>
+<BR>
+recycle_object:
+<pre>
+if ((caller != this) && (caller != this.generic))
+    return E_PERM;
+endif
+object = args[1];
+dobj = args[1];
+if ($object_utils:has_property(object, "old_recycle_msg"))
+    pmsg = object.old_recycle_msg;
+else
+    pmsg = args[2];
+endif
+if ($object_utils:has_property(object, "oold_recycle_msg"))
+    omsg = object.oold_recycle_msg;
+else
+    omsg = args[3];
+endif
+pmsg = $string_utils:pronoun_sub(pmsg, player, object, this.location);
+omsg = $string_utils:pronoun_sub(omsg, player, object, this.location);
+if ((valid(object) && (parent(object) == this.generic_object)) && (object in this.created))
+    if ($object_utils:isa(object.location, $player) && pmsg)
+        object.location:tell(pmsg);
+    elseif ($object_utils:isa(object.location, $room) && omsg)
+        object.location:announce_all(omsg);
+    endif
+    args[1]:moveto(#-1);
+    this:protected_verbs("recycle", args[1]);
+endif
+if (this.full_description_msg)
+    this.description = this.full_description_msg;
+endif
+this.created = setremove(this.created, object);
+.
+
+</pre>
+<BR>
+tell:
+<pre>
+"This listens for objects being dropped that need to be returned to the pile.";
+c = callers();
+fork (0)
+    if (((this.return_dropped && (length(c) >= 2)) && (c[2][1] in this.created)) 
+&& (this:protected_verbs("verb_info", c[2][4], c[2][2])[3] == "d*rop th*row"))
+        iobj = this;
+        this:recycle_object(c[2][1], this.return_to_pile_msg, this.oreturn_to_pile_msg);
+    endif
+endfork
+.
+
+</pre>
+<BR>
+@round_robin @return_dropped @generic_object @object_dest @go_away @recycle_time 
+@max_objects @pile_adjectives @object_names:
+<pre>
+if (caller != this.owner)
+    return E_PERM;
+endif
+"**** Flags ****";
+if ((verb == "@round_robin") || (verb == "@return_dropped"))
+    if ((iobjstr != "on") && (iobjstr != "off"))
+        player:tell("Usage: ", verb, " ", this.name, " is ", " [on | off]");
+        return;
+    else
+        if ((verb == "@round_robin") && (iobjstr == "on"))
+            this.round_robin = 1;
+            player:tell("Objects will now be recycled after too many have been created.");
+        elseif ((verb == "@round_robin") && (iobjstr == "off"))
+            this.round_robin = 0;
+            player:tell("Objects will no longer be recycled if too many have been 
+created.");
+        elseif ((verb == "@return_dropped") && (iobjstr == "on"))
+            this.return_dropped = 1;
+            player:tell("Dropped objects will return to the pile if dropped in the 
+same room as the pile.");
+        elseif ((verb == "@return_dropped") && (iobjstr == "off"))
+            this.return_dropped = 0;
+            player:tell("Dropped objects will not return to the pile.");
+        endif
+    endif
+elseif (((verb == "@generic_object") || (verb == "@object_dest")) || (verb == "@go_away"))
+    if ($command_utils:object_match_failed(iobj = $command_utils:match_object(iobjstr), 
+iobjstr))
+    else
+        if (verb == "@generic_object")
+            this.generic_object = iobj;
+            player:tell("Your \"", this:title(), "\" will now produce \"", this.generic_object.name, 
+"\"s.");
+        elseif (verb == "@object_dest")
+            this.object_dest = iobj;
+            player:tell("Objects from the pile will now end up at ", this.object_dest.name, 
+" when created.");
+        elseif (verb == "@go_away")
+            this.go_away = iobj;
+            player:tell("When the pile is empty, it will now go to ", this.object_dest.name, 
+".");
+        endif
+    endif
+elseif ((verb == "@recycle_time") || (verb == "@max_objects"))
+    if ((!tonum(iobjstr)) && (iobjstr != "0"))
+        player:tell("Usage: ", verb, " ", this.name, " is [number]");
+    elseif (verb == "@recycle_time")
+        this.recycle_time = tonum(iobjstr);
+        player:tell("Objects will now live for ", this.recycle_time, " seconds before 
+being recycled.");
+    elseif (verb == "@max_objects")
+        this.max_objects = tonum(iobjstr);
+        player:tell("No more than ", this.max_objects, " will be created at a time.");
+    endif
+elseif ((verb == "@pile_adjectives") || (verb == "@object_names"))
+    names = $string_utils:explode(iobjstr, ",");
+    for i in [1..length(names)]
+        names[i] = $string_utils:trim(names[i]);
+    endfor
+    if (!names)
+        player:tell("Usage: ", verb, " ", this.name, " is [list of words seperated 
+with commas]");
+    elseif (verb == "@pile_adjectives")
+        this.object_names = names;
+        player:tell("The list of adjectives used to describe the size of your pile 
+are now: ", iobjstr);
+    elseif ("@object_names")
+        this.object_names = names;
+        player:tell("Acceptable names for taking objects from the pile is now set 
+to: ", iobjstr);
+    endif
+endif
+.
+
+</pre>
+<BR>
+help-with:
+<pre>
+topics = {"general", "props", "example", "verbs"};
+if (!(args[1] in topics))
+    player:tell("usage: ", verb, " [", $string_utils:english_list(topics, "nothing", 
+" or "), "]  on ", tostr(this));
+else
+    player:tell_lines(this.(args[1] + "_help"));
+endif
+.
+
+</pre>
+<BR>
+kill_old:
+<pre>
+if ((caller != this) && (caller != this.generic))
+    return E_PERM;
+endif
+if (this.kill && ((expire = this.kill[1][2]) <= time()))
+    object = this.kill[1][1];
+    this:recycle_object(object, this.old_recycle_msg, this.oold_recycle_msg);
+    this.kill = listdelete(this.kill, 1);
+endif
+if (this.kill)
+    fork (((t = this.kill[1][2] - time()) > 0) ? t | 0)
+        this:kill_old();
+    endfork
+endif
+.
+
+</pre>
+<BR>
+do_take:
+<pre>
+for o in (this.created)
+    if ((!valid(o)) || (parent(o) != this.generic_object))
+        this.created = setremove(this.created, o);
+    endif
+endfor
+objects_left = this.max_objects - length(this.created);
+"**** Valid object name? ****";
+if (!(args[1] in this.object_names))
+    this:announce(this.generic_object, this.wrong_object_name_msg, "");
+    "**** No more stuff? ****";
+elseif ((!valid(this.generic_object)) || ((!objects_left) && (!this.round_robin)))
+    this:announce(this.generic_object, this.out_of_stuff_msg, this.oout_of_stuff_msg);
+else
+    "**** Do the round_robin recycle if we need more objects ****";
+    if (this.round_robin)
+        while (length(this.created) >= this.max_objects)
+            this:recycle_object(this.created[1], this.robin_recycle_msg, this.orobin_recycle_msg);
+        endwhile
+        if (this.full_description_msg)
+            this.description = this.full_description_msg;
+        endif
+    endif
+    object = this:protected_verbs("create");
+    if (typeof(object) != ERR)
+        "**** A new object! ****";
+        if (this.recycle_time)
+            "**** Recycle the object someday ****";
+            this.kill = {@this.kill, {object, this.recycle_time + time()}};
+            if (length(this.kill) == 1)
+                this:kill_old();
+            endif
+        endif
+        this.created = {@this.created, object};
+        this:set_prop_vals(object);
+        $quota_utils:object_bytes(object);
+        "**** Put the object where it belongs ****";
+        if (this.object_dest == "player")
+            object:moveto(player);
+        elseif (this.object_dest == "here")
+            object:moveto(this.location);
+        elseif (typeof(this.object_dest) == OBJ)
+            object:moveto(this.object_dest);
+        else
+            object:moveto(player);
+        endif
+        "**** Describe the size of the pile ****";
+        this.pile_size = this.pile_adjectives[length(this.pile_adjectives) - (((length(this.pile_adjectives) 
+- 1) * objects_left) / this.max_objects)];
+        if (this.round_robin)
+            this.pile_size = this.pile_adjectives[1];
+        endif
+        "**** Tell what happened and make the pile go away if it is empty and it 
+is that sort of pile ****";
+        if ((!objects_left) && (this.go_away != 0))
+            this:announce(object, this.last_take_msg, this.olast_take_msg);
+            this:moveto(this.go_away);
+        else
+            if ((!objects_left) && this.empty_description_msg)
+                this.description = this.empty_description_msg;
+            endif
+            this:announce(object, this.take_msg, this.otake_msg);
+        endif
+    else
+        this:announce(object, this.take_fail_msg, this.otake_fail_msg);
+    endif
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp pile_size
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp object_names
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp wrong_object_name_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp out_of_stuff_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oout_of_stuff_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp max_objects
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp created
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp full_description
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp empty_description
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp generic_object
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp recycle_time
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp old_recycle_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oold_recycle_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp robin_recycle_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp orobin_recycle_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp object_dest
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp last_take_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp olast_take_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp take_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp otake_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp take_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp generic
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp round_robin
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp pile_adjectives
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp take_name
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp go_away
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp full_description_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp empty_description_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp return_dropped
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp return_to_pile_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oreturn_to_pile_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp trouble-shooting_help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp general_help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp props_help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp example_help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp verbs_help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp kill
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000450.htm">a %size pile of comic books</A> <A HREF="HTM_000470.htm">Pile of Clothes</A> <A HREF="HTM_000931.htm">Hash'O'Matic</A> <A HREF="HTM_002455.htm">stuff</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

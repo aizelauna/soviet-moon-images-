@@ -1,0 +1,332 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Wandering Automaton</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Wandering Automaton (#502)</H3>
+(an instance of <A HREF="HTM_000192.htm">Generic Automaton</A> made by <A HREF="HTM_000103.htm">Zon</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a homeless, nomadic robot.   Its memory circuits were affected by being stored too close to a television set and may now be seen roaming about shouting "Exterminate!  Exterminate!".  
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Wandering Automaton is a wandering version of the Generic Automaton, 
+which is described below.  A child of the Generic Wandering Automaton will randomly 
+wander from room to room, unless it has been interacted with during its last cycle 
+(see @setcycle below).
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspCommands to Generic Wandering Automata:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@start <name of automaton>
+&nbsp&nbsp&nbsp&nbsp&nbsp   This causes the automaton to begin wandering.  It will pick a random exit in the 
+room it is currently in and take it every 120 seconds (the default).  If someone 
+has interacted with the automaton during that 120 seconds (or the time set by @setcycle), 
+it will not take an exit. 
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@stop <automaton name>
+&nbsp&nbsp&nbsp&nbsp&nbsp	This causes the automaton to stop wandering.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@setcycle <automaton name> to <number of seconds>
+&nbsp&nbsp&nbsp&nbsp&nbsp	This sets the move interval of the automaton
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspshoo <automaton name>
+&nbsp&nbsp&nbsp&nbsp&nbsp	This cause the automaton to leave the current location and not
+&nbsp&nbsp&nbsp&nbsp&nbsp	to come back for a while.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspProgramming note:
+&nbsp&nbsp&nbsp&nbsp&nbsp	The ways_out property of the Generic Wandering Automaton contains
+&nbsp&nbsp&nbsp&nbsp&nbspa list of exit names that the automaton will try to use when leaving
+&nbsp&nbsp&nbsp&nbsp&nbspa room.  By modifying this, and giving the exits in a particular area
+&nbsp&nbsp&nbsp&nbsp&nbspmatching names, the area of movement of the automaton can be constrained.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAlso note that the act verb may be overridden to periodically perform some action, 
+other than or in addition to moving the 'bot around.
+&nbsp&nbsp&nbsp&nbsp&nbsp------------------------------------------------------------------------
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspHelp for Generic Automaton
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Automaton is an easy-to-program robot which responds to simple commands. 
+ It can have multiple MOODS, each one of which has a different description and set 
+of RESPONSES.  Commands trigger an announced response and can also trigger a TRANSITION 
+to another mood. For example, a trivial robot might be made as follows:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   @create #192 named robot
+&nbsp&nbsp&nbsp&nbsp&nbsp   @describe robot as "A crash-test dummy."
+&nbsp&nbsp&nbsp&nbsp&nbsp   @setresponse robot with hug,kiss: pets the Generic Wandering Automaton.  It smiles.
+&nbsp&nbsp&nbsp&nbsp&nbsp   @setresponse robot with hit,kick: pets the Generic Wandering Automaton.  It frowns.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe pattern pet will be substituted with the verb name, and pets will be substituted 
+with the third-person form of the verb.  So, if Calkins types "kiss robot" or "hit 
+robot", we will see:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   Calkins kisses the robot.  It smiles.
+&nbsp&nbsp&nbsp&nbsp&nbsp   Calkins hits the robot.  It smiles.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThis trivial automaton has only one mood (called "initial"), but things don't really 
+get interesting until multiple moods are created.  Moods and transitions between 
+moods form a sort of MENTAL LANDSCAPE or personality which other players can explore, 
+somewhat like rooms and exits.  To make a new mood (or switch to an existing mood), 
+use @setmood.  For example, we can make our trivial robot slightly more interesting:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   @setmood robot to initial
+&nbsp&nbsp&nbsp&nbsp&nbsp   @transition robot with hit,kick:angry
+&nbsp&nbsp&nbsp&nbsp&nbsp   @setmood robot to angry
+&nbsp&nbsp&nbsp&nbsp&nbsp   @describe robot as "A very angry test dummy."
+&nbsp&nbsp&nbsp&nbsp&nbsp   @setresponse robot with hug,kiss: pets the Generic Wandering Automaton.  It relaxes.
+&nbsp&nbsp&nbsp&nbsp&nbsp   @transition robot with hug,kiss:initial
+&nbsp&nbsp&nbsp&nbsp&nbsp   @setresponse robot with hit,kick: pets the Generic Wandering Automaton.  It pets 
+visitor!
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNow kicking the robot will make it mad, and when it's mad it will react more violently 
+to being kicked again.  Kissing or hugging it will calm it down (transition to initial 
+mood).  If an automaton is left alone in a room, it automatically returns to the 
+"initial" mood, if it has one.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspTo design an automaton think of what moods or states it should have. Pick a set of 
+basic commands to trigger responses and mood transitions. Draw a TRANSITION DIAGRAM! 
+ Complex automatons have over a dozen moods and are impossible to design without 
+making a diagram. Here is the diagram of a three-mood stray dog:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp               +-------<---------------<---------------+
+&nbsp&nbsp&nbsp&nbsp&nbsp               |                                       |
+&nbsp&nbsp&nbsp&nbsp&nbsp  feed +---+   V        +-->--+        +---+           |
+&nbsp&nbsp&nbsp&nbsp&nbsp   pet |   |   |        | pet |        |   | kick      |
+&nbsp&nbsp&nbsp&nbsp&nbsp       \   V   |        \     V   pet  \   V           |
+&nbsp&nbsp&nbsp&nbsp&nbsp       HAPPY---+        INITIAL<---<---ANGRY------>----+
+&nbsp&nbsp&nbsp&nbsp&nbsp       |   ^            |     |        ^   ^     feed
+&nbsp&nbsp&nbsp&nbsp&nbsp       |   |   feed     |     |  kick  |   |
+&nbsp&nbsp&nbsp&nbsp&nbsp       |   +---<-----<--+     +--->----+   |
+&nbsp&nbsp&nbsp&nbsp&nbsp       +------->------->------->------->---+
+&nbsp&nbsp&nbsp&nbsp&nbsp                       kick
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspBesides setting responses and transitions, you can use @rminputs to erase a response 
+and @actions <robot> to review the programming of a given mood. @rmmoods will erase 
+whole moods, and @cpmood will copy the responses and transisions of another mood 
+to the current mood (sometimes a convenient starting point for a mood that is similar). 
+ Once the basic logic of an automaton is finished, @alias can be used to beef up 
+the number of verbs the robot will respond to:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   @alias robot with slug,punch,slap=hit
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAliases apply to all moods, but are overridden by any set responses in any particular 
+mood. Useful tip: if you are using @notedit, beware that the automaton will return 
+to its "initial" mood when you depart to the note editor.  So it is a good idea to 
+be carrying the robot while you are programming it.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+find_exits:
+<pre>
+"find_exits() -- return a list of exit object numbers that are valid for the bot 
+to take from the current room.  If the bot doesn't set ways_out, those exits are 
+the obvious_exits() - 'banned exits'.  Otherwise, they are the exits named by ways_out 
+- 'banned exits'.    ";
+exits = {};
+room = this:this_room();
+if (this.ways_out != {})
+    for name in (this.ways_out)
+        exit = room:match_exit(name);
+        if ((valid(exit) && (!(exit in exits))) && (!this:banned(exit.dest)))
+            exits = listappend(exits, exit);
+        endif
+    endfor
+else
+    obvious_exits = room:obvious_exits();
+    for exit in (obvious_exits)
+        if (valid(exit) && (!this:banned(exit.dest)))
+            exits = listappend(exits, exit);
+        endif
+    endfor
+endif
+return exits;
+.
+
+</pre>
+<BR>
+act_loop:
+<pre>
+if (!this.stopped)
+    fork (0)
+        this:act();
+        suspend(this.act_interval);
+        this:act_loop();
+    endfork
+endif
+.
+
+</pre>
+<BR>
+act:
+<pre>
+"act(): the repeating action of the automaton goes here.  It can be a movement, as 
+here, or be overridden to do some other repeating action";
+if (this.should_act && ($object_utils:has_property(this.location, "exits") || is_player(this.location)))
+    exits = this:find_exits();
+    if (length(exits))
+        destination = exits[random(length(exits))];
+        destination:move(this);
+    endif
+else
+    this.should_act = 1;
+endif
+.
+
+</pre>
+<BR>
+@start:
+<pre>
+if (player != this.owner)
+    player:tell("Only the owner of ", this.name, " can start it.");
+    return;
+endif
+if (this.stopped)
+    player:tell(this.name, " is now running.");
+    this.stopped = 0;
+    this.should_act = 1;
+    this:act_loop();
+else
+    player:tell(this.name, " is already running.");
+endif
+.
+
+</pre>
+<BR>
+@stop:
+<pre>
+if (player != this.owner)
+    player:tell("Only the owner of ", this.name, " can stop it.");
+    return;
+endif
+if (this.stopped)
+    player:tell(this.name, " is already stopped.");
+else
+    this.stopped = 1;
+    player:tell(this.name, " is now stopped.");
+endif
+.
+
+</pre>
+<BR>
+accept_input:
+<pre>
+"accept_input(): this keeps the Wandering automaton from walking off (acting), if 
+it has recently accepted input";
+this.should_act = 0;
+return pass(@args);
+.
+
+</pre>
+<BR>
+@setc*ycle:
+<pre>
+if (player != this.owner)
+    player:tell("Only the owner of ", this.name, " can set its cycle time");
+    return;
+endif
+cycletime = tonum(iobjstr);
+if (cycletime < 30)
+    player:tell("Cycle times must be greater than 30 seconds.");
+    return;
+endif
+this.act_interval = cycletime;
+player:tell("Cycle time of ", this.name, " set to ", cycletime, " seconds ");
+.
+
+</pre>
+<BR>
+shoo:
+<pre>
+current_room = this:this_room();
+if (this.stopped)
+    player:tell(this.name, " isn't wandering, so can't be shoo'ed away.");
+    return;
+endif
+if (current_room in this.banned_rooms)
+    player:tell(this.name, " has already been shoo'ed away from ", current_room.name);
+else
+    this.banned_rooms = setadd(this.banned_rooms, current_room);
+    this.ban_times = setadd(this.ban_times, time());
+    player:tell("You shoo ", this.name, " away from ", current_room.name, " for a 
+while.");
+    current_room:announce(player.name, " shoo's ", this.name, " away from ", current_room.name, 
+" for a while.");
+    this.should_act = 1;
+    this:act();
+    this.should_act = 0;
+endif
+.
+
+</pre>
+<BR>
+banned:
+<pre>
+"Boolean banned(room object #) -- is the room in the banned list?";
+position = args[1] in this.banned_rooms;
+if (position == 0)
+    return 0;
+endif
+"if the bots ban interval has expired, delete ban info and return 0, else return 
+1";
+if ((time() - this.ban_times[position]) > this.ban_interval)
+    this.banned_rooms = listdelete(this.banned_rooms, position);
+    this.ban_times = listdelete(this.ban_times, position);
+    return 0;
+else
+    return 1;
+endif
+.
+
+</pre>
+<BR>
+this_room:
+<pre>
+"is someone holding the wanderer?";
+if (is_player(this.location))
+    return this.location.location;
+else
+    return this.location;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ways_out
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp should_act
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp stopped
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp act_interval
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ban_times
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp banned_rooms
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ban_interval
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000555.htm">robot</A> <A HREF="HTM_000594.htm">Strays</A> <A HREF="HTM_000954.htm">mangy cat</A> <A HREF="HTM_001044.htm">Generic Speaking Wandering Automaton</A> <A HREF="HTM_001047.htm">brown goat</A> <A HREF="HTM_002147.htm">Jeweled Scorpion</A> <A HREF="HTM_001246.htm">lithe and winsome Afsheeni</A> <A HREF="HTM_002332.htm">Breast Implants</A> <A HREF="HTM_002392.htm">Hugo</A> <A HREF="HTM_002338.htm">emma</A> <A HREF="HTM_002462.htm">Lancelot</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,601 @@
+<HTML>
+<HEAD>
+<TITLE>Network Utilities</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Network Utilities (#72)</H3>
+(an instance of <A HREF="HTM_000001.htm">Root Class</A> made by <A HREF="HTM_000096.htm">Dredful</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspUtilities for dealing with network connections
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp---------------
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspCreating & tracking hosts:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:open(host, port [, connect-connection-to]) => connection
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp    open a network connection (using open_network_connection).
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp    If 'connect-connection-to' is a player object, the
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp    connection will be connected to that object when it
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp    gets the first line of input.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:close(connection)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     closes the connection & cleans up data
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp------------------
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspParsing network things:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:invalid_email_address(email)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     return "" or string saying why 'email' is invalid.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     uses .valid_email_regexp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:invalid_hostname(host)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     return "" or string saying why 'host' doesn't look
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     like a valid internet host name
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:local_domain(host)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     returns the 'important' part of a host name, e.g.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     golden.parc.xerox.com => parc.xerox.com
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp-------------------
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSending mail
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:sendmail(to, subject, @lines)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     send mail to the email address 'to' with indicated subject.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     header fields like 'from', 'date', etc. are filled in.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     lines can start with additional header lines.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp:raw_sendmail(to, @lines)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     used by :sendmail. Send mail to given user at host, just
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     as specified, no error checking.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp================================================================
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspParameters:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp.active If 0, disabled sending of mail.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp.site   Where does this MOO run?
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        (Maybe MOOnet will use it later).
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp.port   The network port this MOO listens on.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp.large_domains 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        A list of sites where more than 2 levels of host name are
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        significant, e.g., if you want 'parc.xerox.com' to be
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        different than 'cinops.xerox.com', put "xerox.com" as an
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        element in .large_domains.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp.postmaster
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        Email address to which problems with MOO mail should
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        go. This should be a real email address that someone reads.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp.maildrop
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        Hostname to connect to for dropping off mail. Usually can
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        just be "localhost".
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp.reply_address
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        If a MOO character sends email, where does a reply go?
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        Inserted in 'From:' for mail from characters without
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        registration addresses.        
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp.trusts
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        List of (non-wizard) programmers who can call
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        :open, :sendmail, :close
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+parse_address:
+<pre>
+"Given an email address, return {userid, site}.";
+"Valid addresses are of the form `userid[@site]'.";
+"At least for now, if [@site] is left out, site will be returned as blank.";
+"Should be a default address site, or something, somewhere.";
+address = args[1];
+return (at = index(address, "@")) ? {address[1..at - 1], address[at + 1..length(address)]} 
+| {address, ""};
+.
+
+</pre>
+<BR>
+local_domain:
+<pre>
+"given a site, try to figure out what the `local' domain is.";
+"if site has a @ or a % in it, give up and return E_INVARG.";
+"blank site is returned as is; try this:local_domain(this.localhost) for the answer 
+you probably want.";
+site = args[1];
+if (index(site, "@") || index(site, "%"))
+    return E_INVARG;
+elseif (match(site, "^[0-9.]+$"))
+    return E_INVARG;
+elseif (!site)
+    return "";
+elseif (!(dot = rindex(site, ".")))
+    dot = rindex(site = this.site, ".");
+endif
+if ((!dot) || (!(dot = rindex(site[1..dot - 1], "."))))
+    return site;
+else
+    domain = site[dot + 1..length(site)];
+    site = site[1..dot - 1];
+    while (site && (domain in this.large_domains))
+        if (dot = rindex(site, "."))
+            domain = tostr(site[dot + 1..length(site)], ".", domain);
+            site = site[1..dot - 1];
+        else
+            return tostr(site, ".", domain);
+        endif
+    endwhile
+    return domain;
+endif
+.
+
+</pre>
+<BR>
+open:
+<pre>
+":open(address, port, [connect-connection-to])";
+"Open a network connection to address/port.  If the connect-connection-to is passed, 
+then the connection will be connected to that object when $login gets ahold of it. 
+ If not, then the connection is just ignored by $login, i.e. not bothered by it with 
+$welcome_message etc.";
+"The object specified by connect-connection-to has to be a player (though it need 
+not be a $player).";
+"Returns the (initial) connection or an error, as in open_network_connection";
+if (!this:trust(caller_perms()))
+    return E_PERM;
+endif
+address = args[1];
+port = args[2];
+if (length(args) < 3)
+    connect_to = $nothing;
+elseif ((typeof(connect_to = args[3]) == OBJ) && (valid(connect_to) && is_player(connect_to)))
+else
+    return E_INVARG;
+endif
+if (typeof(connection = open_network_connection(address, port)) != ERR)
+    if (valid(connect_to))
+        this.connect_connections_to = {@this.connect_connections_to, {connection, 
+connect_to}};
+    endif
+endif
+return connection;
+.
+
+</pre>
+<BR>
+close:
+<pre>
+if (!this:trust(caller_perms()))
+    return E_PERM;
+endif
+con = args[1];
+boot_player(con);
+if (i = $list_utils:iassoc(con, $network.connect_connections_to))
+    $network.connect_connections_to = listdelete($network.connect_connections_to, 
+i);
+endif
+return 1;
+.
+
+</pre>
+<BR>
+sendmail:
+<pre>
+"sendmail(to, subject, line1, line2, ...)";
+"  sends mail to internet address 'to', with given subject.";
+"  It fills in various fields, such as date, from (from player), etc.";
+"  the rest of the arguments are remaining lines of the message, and may begin with 
+additional header fields.";
+"  (must match RFC822 specification).";
+"Requires $network.trust to call (no anonymous mail from MOO).";
+"Returns 0 if successful, or else error condition or string saying why not.";
+if (!this:trust(caller_perms()))
+    return E_PERM;
+endif
+mooname = this.MOO_name;
+mooinfo = tostr(mooname, " (", this.site, " ", this.port, ")");
+if (reason = this:invalid_email_address(to = args[1]))
+    return reason;
+endif
+return this:raw_sendmail(to, "Date: " + ctime(), "From: " + this:return_address_for(player), 
+"To: " + to, "Subject: " + args[2], "X-Mail-Agent: " + mooinfo, @args[3..length(args)]);
+.
+
+</pre>
+<BR>
+trust:
+<pre>
+return (who = args[1]).wizard || (who in this.trusts);
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    pass(@args);
+    this.active = 0;
+    this.reply_address = "moomailreplyto@yourhost";
+    this.site = "yoursite";
+    this.postmaster = "postmastername@yourhost";
+    this.MOO_name = "YourMOO";
+    this.maildrop = "localhost";
+    this.port = 7777;
+    this.large_domains = {};
+    this.trusts = {};
+    this.connect_connections_to = {};
+endif
+.
+
+</pre>
+<BR>
+raw_sendmail:
+<pre>
+"rawsendmail(to, @lines)";
+"sends mail without processing. Returns 0 if successful, or else reason why not.";
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+if (!this.active)
+    return "Networking is disabled.";
+endif
+debugging = this.debugging;
+address = args[1];
+body = listdelete(args, 1);
+data = {"HELO " + this.site, ("MAIL FROM:<" + this.postmaster) + ">", ("RCPT TO:<" 
++ address) + ">", "DATA"};
+blank = 0;
+for x in (body)
+    $command_utils:suspend_if_needed(0);
+    if (!(blank || match(x, "[a-z0-9-]*: ")))
+        if (x)
+            data = {@data, ""};
+        endif
+        blank = 1;
+    endif
+    data = {@data, (x == ".") ? "." + x | x};
+endfor
+data = {@data, ".", "QUIT", ""};
+suspend(0);
+target = $network:open(this.maildrop, 25);
+if (typeof(target) == ERR)
+    return tostr("Cannot open connection to maildrop ", this.maildrop, ": ", target);
+endif
+fork (0)
+    for line in (data)
+        $command_utils:suspend_if_needed(0);
+        if (debugging)
+            notify(this.owner, "SEND:" + line);
+        endif
+        notify(target, line);
+    endfor
+endfork
+expect = {"2", "2", "2", "2", "3", "2"};
+while (expect && (typeof(line = read(target)) != ERR))
+    if (line)
+        if (debugging)
+            notify(this.owner, "GET: " + line);
+        endif
+        "The line[4] check suggested from MOO-cows. Originally just if (!index(23..";
+        if (line[4] == "-")
+        elseif (!index("23", line[1]))
+            $network:close(target);
+            return line;
+            "error return";
+        else
+            if (line[1] != expect[1])
+                expect = {@expect, "2", "2", "2", "2", "2"};
+            else
+                expect = listdelete(expect, 1);
+            endif
+        endif
+    endif
+endwhile
+$network:close(target);
+return 0;
+.
+
+</pre>
+<BR>
+invalid_email_address:
+<pre>
+"invalid_email_address(email) -- check to see if email looks like a valid email address. 
+Return reason why not.";
+address = args[1];
+if (!address)
+    return "no email address supplied";
+endif
+if (!(at = rindex(address, "@")))
+    return ("'" + address) + "' doesn't look like a valid internet email address";
+endif
+name = address[1..at - 1];
+host = address[at + 1..length(address)];
+if (match(name, "^in%%"))
+    return tostr("'", name, "' doesn't look like a valid username (try removing the 
+'in%')");
+endif
+if (!match(host, $network.valid_host_regexp))
+    return tostr("'", host, "' doesn't look like a valid internet host");
+endif
+if (!match(name, $network.valid_email_regexp))
+    return tostr("'", name, "' doesn't look like a valid user name for internet mail");
+endif
+return "";
+.
+
+</pre>
+<BR>
+invalid_hostname:
+<pre>
+return match(args[1], this.valid_host_regexp) ? "" | tostr("'", args[1], "' doesn't 
+look like a valid internet host name");
+.
+
+</pre>
+<BR>
+email_will_fail:
+<pre>
+":email_will_fail(email-address[, display?]) => Makes sure the email-address is one 
+that can actually be used by $network:sendmail().";
+reason = this:invalid_email_address(args[1]);
+if (reason && {@args, 0}[2])
+    player:tell("Invalid email address: ", reason);
+endif
+return reason;
+"following is code from OpalMOO, not used here";
+"Possible situations where the address would be unusable are when the address is 
+invalid or we can't connect to the site to send mail.";
+"If <display> is true, error messages are displayed to the player and 1 is returned 
+when address is unuable.  If <display> is false and address is unusable, the error 
+message is returned.  If the address is usable, 0 is always returned.";
+if (!this:approved_for_network(caller_perms()))
+    return E_PERM;
+endif
+if (!this:valid_email_address(email = args[1]))
+    msg = tostr("Your email address (", email, ") is not a usable account.");
+elseif ((result = this:verify_email_address(email)) == E_INVARG)
+    msg = tostr("Unable to connect to ", this:parse_address(email)[2], ".");
+elseif (typeof(result) == STR)
+    msg = tostr("The site ", (parse = this:parse_address(email))[2], " does not recognize 
+", parse[1], " as a valid account.");
+else
+    return 0;
+endif
+if ({@args, 0}[2])
+    player:tell(msg);
+    return 1;
+else
+    return msg;
+endif
+"Last modified Tue Jun 15 00:19:01 1993 EDT by Ranma (#200).";
+.
+
+</pre>
+<BR>
+read:
+<pre>
+"for trusted players, they can read from objects they own or open connections";
+if (!this:trust(caller_perms()))
+    return E_PERM;
+elseif (valid(x = args[1]))
+    if ((x.owner == x) || (x.owner != caller_perms()))
+        return E_INVARG;
+    endif
+elseif (!this:is_outgoing_connection(x))
+    return E_PERM;
+endif
+return read(x);
+.
+
+</pre>
+<BR>
+is_open:
+<pre>
+":is_open(object)";
+"return true if the object is somehow connected, false otherwise.";
+return typeof(idle_seconds(@args)) == NUM;
+"Relies on test in idle_seconds, and the fact that the verb is !d";
+.
+
+</pre>
+<BR>
+incoming_connection:
+<pre>
+"Peer at an incoming connection.  Decide if it should be connected to something, 
+return that object. If it should be ignored (outbound connection), return 1. Called 
+only by #0:do_login_command";
+if (caller != #0)
+    return;
+endif
+what = args[1];
+"this code for unix servers >= 1.7.5 only";
+if (index(connection_name(what), " to "))
+    "outbound connection";
+    if (ct = $list_utils:assoc(what, this.connect_connections_to))
+        this.connect_connections_to = setremove(this.connect_connections_to, ct);
+        return ct[2];
+    else
+        return 1;
+    endif
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+return_address_for:
+<pre>
+":return_address_for(player) => string of 'return address'. Currently inbound mail 
+doesn't work, so this is a bogus address.";
+who = args[1];
+if (valid(who) && is_player(who))
+    return tostr("(", who.name, ") ", tonum(who), "@", this.moo_name, ".moo.mud.org");
+else
+    return tostr("(non-player ", who, ") ", $login.registration_address);
+endif
+.
+
+</pre>
+<BR>
+server_started:
+<pre>
+"called when restarting to clean out state.";
+if (caller != #0)
+    return E_PERM;
+endif
+this.connect_connections_to = {};
+.
+
+</pre>
+<BR>
+is_outgoing_connection:
+<pre>
+return index(connection_name(args[1]), " to ");
+.
+
+</pre>
+<BR>
+notify:
+<pre>
+"for trusted players, they can write to connections";
+if (!this:trust(caller_perms()))
+    return E_PERM;
+elseif (valid(x = args[1]))
+    return E_INVARG;
+elseif (!this:is_outgoing_connection(x))
+    return E_PERM;
+endif
+return notify(x, args[2]);
+.
+
+</pre>
+<BR>
+suspend_if_needed:
+<pre>
+"$command_utils:suspend_if_needed but chowned to player";
+if ($command_utils:running_out_of_time())
+    set_task_perms(caller_perms().wizard ? player | caller_perms());
+    return $command_utils:suspend_if_needed(@args);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp site
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp large_domains
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp connect_connections_to
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp postmaster
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp port
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp MOO_name
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp valid_host_regexp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp maildrop
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp trusts
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp reply_address
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp active
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp valid_email_regexp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp invalid_userids
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp debugging
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

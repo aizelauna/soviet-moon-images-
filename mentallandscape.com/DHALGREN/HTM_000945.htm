@@ -1,0 +1,57 @@
+<HTML>
+<HEAD>
+<TITLE>knucklebones</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> knucklebones (#945)</H3>
+(an instance of <A HREF="HTM_000550.htm">Generic Wearable Thing</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA string of knuckles, disconcertingly human-looking, tied together on a nylon cord.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000812.htm">Marcus</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+toss roll:
+<pre>
+if (iobjstr == "")
+    player:tell("You've got to declare what you're rolling for! (Intelligence, Charisma, 
+whatever...)");
+else
+    tally = 0;
+    tallystr = "...0...0...0......";
+    for dice in [1..3]
+        die = random(6);
+        tallystr[dice * 4] = tostr(die);
+        tally = tally + die;
+    endfor
+    comment = this.comments[tally - 2];
+    player:tell("You roll the bones for ", iobjstr, "...");
+    suspend(2);
+    player:tell(tallystr, tally, "...!  ", comment);
+    player.location:announce(player.name, " rolls the bones for ", iobjstr, ": ", 
+tallystr, tally, "...!  ", comment);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp comments
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,125 @@
+<HTML>
+<HEAD>
+<TITLE>O.o.f. Theater</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> O.o.f. Theater (#819)</H3>
+(an instance of <A HREF="HTM_000955.htm">Generic Room with Seats</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspOnce  this was quite a luxurious palace  for muses of acting
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp and  terpsichory. Seating for hundreds  still accommodates,
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp all  scuffed and torn. Plaster work in  the ceiling is vast
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp and  grand and falling. Before you the  stage, broad enough
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp for  all the Rockettes in line.
+<BR>
+<BR>
+You find a seat not too tattered. It squeaks.
+<BR>
+<BR>
+You see <A HREF="HTM_001168.htm">Playbill</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ stage ] <A HREF="HTM_000820.htm">Stage</A>.
+You mount the stage.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ southwest ] <A HREF="HTM_000161.htm">Broadway</A>.
+You exit the theater and go through the lobby. You come out onto the street again.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+announce:
+<pre>
+if (!#819.dark)
+    pass(@args);
+else
+    player:tell("Shhh...the theater is dark...no one notices you...");
+endif
+.
+
+</pre>
+<BR>
+announce_all:
+<pre>
+if (!#819.dark)
+    pass(@args);
+else
+    player:tell("Shhh...the theater is dark...no one notices you...");
+endif
+.
+
+</pre>
+<BR>
+announce_all_but:
+<pre>
+if (!#819.dark)
+    pass(@args);
+else
+    player:tell("Shhh...the theater is dark...no one notices you...");
+endif
+.
+
+</pre>
+<BR>
+ap*plaud clap:
+<pre>
+player:tell("You applaud ", argstr, ".");
+for audience in (setremove(player.location:contents(), player))
+    audience:tell(player.name, " applauds ", argstr, "!");
+endfor
+if (#820.curtain || #819.dark)
+    for onstage in (#820:contents())
+        onstage:tell("Someone in the audience is applauding ", argstr, "!");
+    endfor
+else
+    for onstage in (#820:contents())
+        onstage:tell("Someone's applauding!  It's ", player.name, " cheering ", argstr, 
+".");
+    endfor
+endif
+.
+
+</pre>
+<BR>
+announce_anyway:
+<pre>
+for audience in (this:contents())
+    audience:tell(@args);
+endfor
+.
+
+</pre>
+<BR>
+do_sit:
+<pre>
+pass(@args);
+this.log = {@this.log, player.name};
+suspend(15);
+#820:play();
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp log
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

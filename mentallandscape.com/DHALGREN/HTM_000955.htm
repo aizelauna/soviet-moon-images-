@@ -1,0 +1,435 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Room with Seats</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Room with Seats (#955)</H3>
+(an instance of <A HREF="HTM_000262.htm">Generic Secured Post-Apocalypse Room</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis child of the PARC allows you to make custom seats of any amount, holding a custom amount of people each. The owner can create seats fitting for their room environment and theme. See `help #955'.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThis child of the PARC allows you to define virtual seats in your room of any size. 
+
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspOwner only verbs:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@seats
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspTells you what seats are available, by what names. How many they can hold, and what 
+messages are set that aren't the default.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@add-seat <name:alias,alias,...> for <amount>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAdds the named seat, with aliases specified to the room that can hold up to the <amount> 
+specified. Amount must be greater than 0. Aliases are optional.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@rm-seat <seatname>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspCompletely removes the specified seat, if it exists, from the room.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@sit/@osit/@stand/@ostand/@ositting <seat> is [message|default]
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspUse this command to see and set the messages for your seats. With no indirect
+&nbsp&nbsp&nbsp&nbsp&nbspobject string (i.e. `@sit <seat> is'), you will be told the current message. If
+&nbsp&nbsp&nbsp&nbsp&nbspyou use the word `default' as the message, the message will be cleared back to
+&nbsp&nbsp&nbsp&nbsp&nbspdefault values. Otherwise, the new [message] is set for that seat. Note that in
+&nbsp&nbsp&nbsp&nbsp&nbspaddition to standard pronoun substitutions, the word chaise longue will be replaced
+&nbsp&nbsp&nbsp&nbsp&nbspwith the name of the seat in your message.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp----
+&nbsp&nbsp&nbsp&nbsp&nbspThe last command manipulates the messages associated with each seat you create:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp  sit     - the player sees this when he sits down on the seat.
+&nbsp&nbsp&nbsp&nbsp&nbsp  osit    - the room sees this when the player sits on the seat.
+&nbsp&nbsp&nbsp&nbsp&nbsp  stand   - the player sees this when he stands up from the seat.
+&nbsp&nbsp&nbsp&nbsp&nbsp  ostand  - the room sees this when the player stands up from the seat.
+&nbsp&nbsp&nbsp&nbsp&nbsp  sitting - when someone looks, this message is displayed about those sitting.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspIn these messages, normal pronoun substitutions are used in addition to these:
+&nbsp&nbsp&nbsp&nbsp&nbsp  chaise longue - the name of the seat
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspFor @sitting ONLY:
+&nbsp&nbsp&nbsp&nbsp&nbsp  sheitter - the name of the person, or people if more than one, in the seat.
+&nbsp&nbsp&nbsp&nbsp&nbsp  <verb> - conjugated for sheitter. (i.e. sheitter <sits>, sheitter <is>, 
+&nbsp&nbsp&nbsp&nbsp&nbsp            sheitter <lounges>, etc.) Start out with singular in your message. 
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThese are the defaults for these messages:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp  sit     - You sit on the chaise longue.
+&nbsp&nbsp&nbsp&nbsp&nbsp  osit    - Visitor sits on the chaise longue.
+&nbsp&nbsp&nbsp&nbsp&nbsp  stand   - You get up from the chaise longue.
+&nbsp&nbsp&nbsp&nbsp&nbsp  ostand  - Visitor gets up from the chaise longue.
+&nbsp&nbsp&nbsp&nbsp&nbsp  sitting - sheitter <is> sitting on the chaise longue.
+&nbsp&nbsp&nbsp&nbsp&nbsp----
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@seats:
+<pre>
+"Usage: @seats";
+"";
+"Tells you what seats are available, by what names. How many they can hold, and what 
+messages are set that aren't the default.";
+if (!$perm_utils:controls(player, this))
+    player:tell(E_PERM);
+    return;
+endif
+if (this.seats)
+    player:tell("----------");
+    for seat in [1..length(this.seats)]
+        set = this.seats[seat];
+        player:tell("\"", set[1][1], "\"", (length(set[1]) > 1) ? tostr(" ", $string_utils:print(set[1][2..length(set[1])])) 
+| "", " holding up to ", set[2], (set[2] == 1) ? " person." | " people.");
+        found = 1;
+        for msg in ({"sit_msg", "osit_msg", "stand_msg", "ostand_msg", "sitting_msg"})
+            if (this.(msg)[seat])
+                player:tell("  ", this:(msg)(seat, {player}));
+                found = 0;
+            endif
+        endfor
+        if (found)
+            player:tell("  Using all default messages.");
+        endif
+    endfor
+    player:tell("----------");
+else
+    player:tell("No seats defined.");
+endif
+.
+
+</pre>
+<BR>
+@add-seat:
+<pre>
+"Usage: @add-seat <name:alias,alias,...> for <amount>";
+"";
+"Adds the named seat, with aliases specified to the room that can hold up to the 
+<amount> specified. Amount must be greater than 0. Aliases are optional.";
+if ((!$perm_utils:controls(valid(cp = caller_perms()) ? cp | player, this)) && (caller 
+!= this))
+    player:tell(E_PERM);
+    return;
+endif
+if (names = $building_utils:parse_names(dobjstr))
+    if (amt = tonum(iobjstr))
+        player:tell("Adding seat named \"", names[1], "\" and alias", (length(names[2]) 
+> 1) ? "es " | " ", $string_utils:print(names[2]), " to hold up to ", amt, " people.");
+        this.seats = {@this.seats, {{names[1], @setremove(names[2], names[1])}, amt}};
+        this:load_new();
+    else
+        player:tell("You need to specify some number greater than 0.");
+    endif
+else
+    player:tell("Could not figure out the name: ", dobjstr, ".");
+endif
+.
+
+</pre>
+<BR>
+@rm-seat:
+<pre>
+"Usage: @rm-seat <seatname>";
+"";
+"Completely removes the specified seat, if it exists, from the room. Naturally, only 
+the owner can use this.";
+if ((!$perm_utils:controls(valid(cp = caller_perms()) ? cp | player, this)) && (caller 
+!= this))
+    player:tell(E_PERM);
+    return;
+endif
+if (seat = this:match_seat(dobjstr))
+    oldinfo = this.seats[seat][1];
+    player:tell("Removing seat named \"", oldinfo[1], "\" and alias", (length(oldinfo) 
+> 2) ? "es " | " ", $string_utils:print(oldinfo), ".");
+    this.seats = listdelete(this.seats, seat);
+    this.sitting = listdelete(this.sitting, seat);
+    this.sit_msg = listdelete(this.sit_msg, seat);
+    this.osit_msg = listdelete(this.osit_msg, seat);
+    this.stand_msg = listdelete(this.stand_msg, seat);
+    this.ostand_msg = listdelete(this.ostand_msg, seat);
+    this.sitting_msg = listdelete(this.sitting_msg, seat);
+else
+    player:tell("Could not find seat named \"", dobjstr, "\".");
+endif
+.
+
+</pre>
+<BR>
+sit:
+<pre>
+"Usage: sit on <seat>";
+"";
+"If the seat is defined on the room, you naturally will sit in it if there is room.";
+if (seat = this:match_seat(iobjstr))
+    if (player in this.sitting[seat])
+        player:tell("You are already sitting there!");
+        return;
+    endif
+    if (length(this.sitting[seat]) < this.seats[seat][2])
+        if (oldseat = this:find_sitter(player))
+            this:do_stand(oldseat);
+        endif
+        this:do_sit(seat);
+    else
+        player:tell("There isn't enough room in that seat.");
+    endif
+else
+    player:tell("You find no such place to sit on.");
+endif
+.
+
+</pre>
+<BR>
+stand:
+<pre>
+"Usage: stand";
+"";
+"If you are sitting in a seat defined in the room, well, you stand up. Duh";
+if (oldseat = this:find_sitter(player))
+    this:do_stand(oldseat);
+else
+    player:tell("You aren't sitting!");
+endif
+.
+
+</pre>
+<BR>
+match_seat:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+seatname = args[1];
+for seat in [1..length(this.seats)]
+    try_ = $string_utils:from_list(this.seats[seat][1], "%|");
+    if (match(seatname, try_))
+        return seat;
+    endif
+endfor
+return 0;
+.
+
+</pre>
+<BR>
+load_new:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+this.sit_msg = {@this.sit_msg, ""};
+this.osit_msg = {@this.osit_msg, ""};
+this.stand_msg = {@this.stand_msg, ""};
+this.ostand_msg = {@this.ostand_msg, ""};
+this.sitting_msg = {@this.sitting_msg, ""};
+this.sitting = {@this.sitting, {}};
+.
+
+</pre>
+<BR>
+sit_msg osit_msg stand_msg ostand_msg sitting_msg:
+<pre>
+ind = args[1];
+if (!(msg = this.(verb)[ind]))
+    vlist = $string_utils:words(verb_info(#955, verb)[3]);
+    vind = verb in vlist;
+    msg = this.defaults[vind];
+endif
+if (verb == "sitting_msg")
+    wholist = args[2];
+    fverb = "";
+    for word in ($string_utils:words(msg))
+        if ((length(word) > 1) && (word[1..2] == "%<"))
+            fverb = word[3..length(word) - 1];
+        endif
+    endfor
+    if (fverb)
+        wverb = $gender_utils:get_conj(fverb, @(length(wholist) > 1) ? {this} | wholist);
+        msg = strsub(msg, tostr("%<", fverb, ">"), wverb);
+    endif
+    msg = strsub(msg, "%sitter", $string_utils:title_list(wholist));
+endif
+return $string_utils:pronoun_sub(strsub(msg, "%seat", this.seats[ind][1][1]));
+.
+
+</pre>
+<BR>
+find_sitter:
+<pre>
+":find_sitter(OBJ player) - if player is sitting down in a seat, returns the index 
+of the seat in .seats. Returns 0 if not sitting.";
+who = args[1];
+for d in [1..length(this.sitting)]
+    if (who in this.sitting[d])
+        return d;
+    endif
+endfor
+return 0;
+.
+
+</pre>
+<BR>
+@sit @osit @stand @ostand @sitting:
+<pre>
+"Usage: @sit/@osit/@stand/@ostand/@ositting <seat> is [message|default]";
+"";
+"Use this command to see and set the messages for your seats. With no indirect object 
+string (i.e. `@sit <seat> is'), you will be told the current message. If you use 
+the word `default' as the message, the message will be cleared back to default values. 
+Otherwise, the new [message] is set for that seat. Note that in addition to standard 
+pronoun substitutions, the word %seat will be replaced with the name of the seat 
+in your message.";
+if ((!$perm_utils:controls(valid(cp = caller_perms()) ? cp | player, this)) && (caller 
+!= this))
+    return E_PERM;
+endif
+if (seat = this:match_seat(dobjstr))
+    mesnam = tostr(verb[2..length(verb)], "_msg");
+    if (iobjstr)
+        if (iobjstr == "default")
+            player:tell("You clear the \"", mesnam[1..length(mesnam) - 4], "\" message 
+of seat \"", this.seats[seat][1][1], "\" back to default values.");
+            this.(mesnam)[seat] = "";
+        else
+            player:tell("You set the \"", mesnam[1..length(mesnam) - 4], "\" message 
+of seat \"", this.seats[seat][1][1], "\".");
+            this.(mesnam)[seat] = iobjstr;
+        endif
+    else
+        player:tell("The \"", mesnam[1..length(mesnam) - 4], "\" message of seat 
+\"", this.seats[seat][1][1], "\":");
+        if (!(msg = this.(mesnam)[seat]))
+            vlist = $string_utils:words(verb_info(#955, mesnam)[3]);
+            vind = mesnam in vlist;
+            msg = this.defaults[vind];
+        endif
+        player:tell(msg);
+    endif
+else
+    player:tell("Seat \"", dobjstr, "\" not found.");
+endif
+.
+
+</pre>
+<BR>
+exitfunc:
+<pre>
+pass(@args);
+who = args[1];
+if (seat = this:find_sitter(who))
+    this.sitting[seat] = setremove(this.sitting[seat], who);
+endif
+.
+
+</pre>
+<BR>
+tell_contents:
+<pre>
+contents = args[1];
+ctype = args[2];
+if (this.seats)
+    for thing in (contents)
+        if (ind = this:find_sitter(thing))
+            contents = setremove(contents, thing);
+        endif
+    endfor
+    newmsg = "";
+    for seat in [1..length(this.sitting)]
+        if (wholist = this.sitting[seat])
+            newmsg = (newmsg + this:sitting_msg(seat, wholist)) + this.look_sep_msg;
+        endif
+    endfor
+    if (newmsg)
+        player:tell(newmsg);
+    endif
+    pass(contents, ctype);
+else
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+do_sit do_stand:
+<pre>
+"removes or adds player to the correct seat. Allows children to hack into the sitting 
+and standing process. Must be called by this, and expects seat index as args.";
+if (caller != this)
+    return E_PERM;
+endif
+seat = args[1];
+verb = verb[4..length(verb)];
+player:tell(this:(tostr(verb, "_msg"))(seat));
+this:announce(this:(tostr("o", verb, "_msg"))(seat));
+this.sitting[seat] = (verb == "sit") ? setadd(this.sitting[seat], player) | setremove(this.sitting[seat], 
+player);
+.
+
+</pre>
+<BR>
+set_sitting:
+<pre>
+"Allows children, or any verb owned by the owner of the child room, to set the .sitting 
+property directly so they can do fun things.";
+"This verb does NOT check to make sure that you are giving the data in the right 
+format.";
+"The proper format is: {{object1 in seat1, object2 in seat1, ...}, {object1 in seat2, 
+object2 in seat2, ...}, ...}";
+if ((caller == this) || $perm_utils:controls(caller_perms(), this))
+    if (args)
+        return this.(verb[5..length(verb)]) = args[1];
+    else
+        return E_INVARG;
+    endif
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp seats
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sitting
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sit_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp osit_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp stand_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ostand_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sitting_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp defaults
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gender
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000154.htm">D.E.W.</A> <A HREF="HTM_000298.htm">a room</A> <A HREF="HTM_000947.htm">Dr Benway's Clinic</A> <A HREF="HTM_000969.htm">Little Park</A> <A HREF="HTM_000485.htm">Hiding Place</A> <A HREF="HTM_000920.htm">The Whirligig</A> <A HREF="HTM_001049.htm">Mossy rocks</A> <A HREF="HTM_000799.htm">Anril's Abode</A> <A HREF="HTM_001016.htm">Generic Container Room</A> <A HREF="HTM_001058.htm">Under a Tree</A> <A HREF="HTM_000898.htm">Stage Manager's Office</A> <A HREF="HTM_000493.htm">Club Can't Tell</A> <A HREF="HTM_001159.htm">Mael's Office</A> <A HREF="HTM_000204.htm">Meet Cafe</A> <A HREF="HTM_000819.htm">O.o.f. Theater</A> <A HREF="HTM_000938.htm">The Manticore</A> <A HREF="HTM_001213.htm">Randomhaus</A> <A HREF="HTM_001282.htm">Floating Music</A> <A HREF="HTM_001303.htm">Widor's</A> <A HREF="HTM_001310.htm">Le Cafe' Fetish</A> <A HREF="HTM_001387.htm">The Pit</A> <A HREF="HTM_001463.htm">Dockside</A> <A HREF="HTM_001499.htm">The Hermaphrodite</A> <A HREF="HTM_002061.htm">Generic Room with Surfaces</A> <A HREF="HTM_002159.htm">Cave</A> <A HREF="HTM_002249.htm">#17</A> <A HREF="HTM_000523.htm">Ben's Place</A> <A HREF="HTM_002193.htm">Removal Chamber</A> <A HREF="HTM_002130.htm">Tattoo Den (waiting room)</A> <A HREF="HTM_002128.htm">Tattoo Chamber</A> <A HREF="HTM_000991.htm">Tower Chamber (window ledge)</A> <A HREF="HTM_000998.htm">Tower Chamber</A> <A HREF="HTM_002248.htm">Grrl Island</A> <A HREF="HTM_002322.htm">Confession Booth</A> <A HREF="HTM_002325.htm">Scabby Little Room</A> <A HREF="HTM_002333.htm">Boiler Room</A> <A HREF="HTM_000996.htm">307</A> <A HREF="HTM_001490.htm">Red metal poison</A> <A HREF="HTM_001444.htm">The Ajax</A> <A HREF="HTM_002200.htm">Inside the Pothole</A> <A HREF="HTM_000584.htm">Morte Delizioso</A> <A HREF="HTM_002500.htm">Bianco</A> <A HREF="HTM_002255.htm">Proto-Generic Aspect Seated Secured Post-Apocalypse Room</A> <A HREF="HTM_000903.htm">Burrow</A> <A HREF="HTM_000841.htm">a compost heap</A> <A HREF="HTM_002568.htm">3-J</A> <A HREF="HTM_002599.htm">Back Lot</A> <A HREF="HTM_002603.htm">cardboard box</A> <A HREF="HTM_002609.htm">High Cliff</A> <A HREF="HTM_002612.htm">Old Church</A> <A HREF="HTM_000189.htm">Lobby of Labry Apartments</A> <A HREF="HTM_002605.htm">A small Crypt</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,298 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Conversational Wandering Automaton</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Conversational Wandering Automaton (#2383)</H3>
+(an instance of <A HREF="HTM_001044.htm">Generic Speaking Wandering Automaton</A> made by <A HREF="HTM_001457.htm">Trismegistos</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAn unprogrammed, unmodified humanoid 'bot chassis, quietly skeletal in gleaming chrome.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000874.htm">Machine Shop</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspGENERIC CONVERSATIONAL WANDERING AUTOMATON by Trism
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspFor additional help on this robot's features, see: help #192, help #502, and help 
+#1044 
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThis child of the Speakin' Wanderin' Automaton has the virtue of responding to actual 
+say- and emote- statements, rather than using the verb "talk" or "talk to." Like 
+all bots, it's only as good as its programming ...
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspaddpat <robot name>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp allows you to input a response pattern. First it will ask you for a list of
+&nbsp&nbsp&nbsp&nbsp&nbsp words that will set off that particular response. The bot ignores (i.e.,
+&nbsp&nbsp&nbsp&nbsp&nbsp removes) any punctuation marks or dashes, but keeps underscores (_).
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThen, the bot asks for a list of responses, from which it will choose randomly
+&nbsp&nbsp&nbsp&nbsp&nbsp whenever it "hears" any of the appropriate keywords spoken. Responses
+&nbsp&nbsp&nbsp&nbsp&nbsp preceded by a : will be emoted by the bot, with the appropriate
+&nbsp&nbsp&nbsp&nbsp&nbsp substitutions. All other responses will be spoken.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNote that the robot does not respond to canned social verbs. Why not, is a
+&nbsp&nbsp&nbsp&nbsp&nbsp mystery to me. However, it's not entirely a bad feature.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspIf a given utterance contains more than one of the robot's keywords, a random
+&nbsp&nbsp&nbsp&nbsp&nbsp response will be chosen from the entire set of possible responses to all the
+&nbsp&nbsp&nbsp&nbsp&nbsp spoken keys.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspkeys <robot name>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspGives a (possibly very lengthy) list of keywords and responses on the robot.
+&nbsp&nbsp&nbsp&nbsp&nbsp Available only to the owner of the bot.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsprmpat <robot name>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAllows the owner of the bot to delete entire response patterns. (More detailed
+&nbsp&nbsp&nbsp&nbsp&nbsp adding and removing or keys and responses is a possible future improvement.)
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsptalky <robot name>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspMakes the robot conversational, but does not otherwise control spontaneous spoken 
+messages, 'talk to' responses, or action-verb responses.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsphush <robot name>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspMakes the robot refrain from responding to player dialogue or emotes.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsppolite <robot name>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspOrders the robot to only respond to utterances containing its own name,
+&nbsp&nbsp&nbsp&nbsp&nbsp included directed say's. A good way to cut down on robot spam.
+&nbsp&nbsp&nbsp&nbsp&nbspBy default, the robot starts out as polite when it is told to be talky.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspnosy <robot name>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAllows a polite robot to respond to all utterances once more.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+talky:
+<pre>
+if (this.talky)
+    player:tell(this.name, " is already feeling conversational!");
+else
+    this.talky = 1;
+    this.location:announce_all(this.name, " becomes interested in conversation.");
+endif
+.
+
+</pre>
+<BR>
+hush:
+<pre>
+if (this.talky == 0)
+    player:tell(this.name, " is already hushed!");
+else
+    this.talky = 0;
+    player.location:announce_all_but({this}, this.name, " loses all interest in talking.");
+endif
+.
+
+</pre>
+<BR>
+nosy:
+<pre>
+if (this.talky == 2)
+    player:tell(this.name, " is already nosy!");
+else
+    this.talky = 2;
+    player.location:announce_all(this.name, " becomes interested in other people's 
+conversations.");
+endif
+.
+
+</pre>
+<BR>
+polite:
+<pre>
+if (this.talky == 1)
+    player:tell(this.name, " is already polite!");
+else
+    this.talky = 1;
+    player.location:announce_all_but({this}, this.name, " stops eavesdropping on 
+other people's conversations.");
+endif
+.
+
+</pre>
+<BR>
+addpat:
+<pre>
+if ((this.owner != player) || ((!player) in this.teachers))
+    player:tell("Sorry, you must be the owner of ", this.name, " to add a new  word...");
+    player:tell(this.name, " resists your attempts to mess with ", this.pp, "  mind.");
+endif
+player:tell("Type in key word on line 1, and any aliases on subsequent lines  -- 
+single or hyphenated words only: (Don't use quotes) ");
+w = $command_utils:read_lines();
+player:tell("Type in list of random responses to key word, one per line:   (Don't 
+use quotes)  :");
+player:tell("NOTE: Beginning a response with ':' will cause the bot to emote  that 
+response, substituting %n for the player's name and %s, etc. for the  player's pronouns.");
+player:tell("So, ':kisses %n on %p cheek.' when activated on the bot Fred by  the 
+player Wilma leads to 'Fred kisses Wilma on her cheek.'");
+r = $command_utils:read_lines();
+if (w && r)
+    this.mkeys[1] = listappend(this.mkeys[1], w);
+    this.mkeys[2] = listappend(this.mkeys[2], r);
+else
+    player:tell("Command aborted.");
+endif
+player.location:announce_all(player.name, " teaches ", this.name, " a new  word.");
+.
+
+</pre>
+<BR>
+rmpat:
+<pre>
+if (player == this.owner)
+    player:tell("Enter number of pattern to be edited (don't know it? @abort and 
+ type 'keys ", this.name, "'):");
+    pat = $command_utils:read();
+    if ($string_utils:is_numeric(pat))
+        pat = tonum(pat);
+        if (pat <= length(this.mkeys[1]))
+            player:tell("Pattern ", pat, " keywords:");
+            n = 1;
+            for key in (this.mkeys[1][pat])
+                player:tell(n, ": ", key);
+                n = n + 1;
+            endfor
+            player:tell("");
+            player:tell("Pattern ", pat, " responses:");
+            n = 1;
+            if (this.mkeys[2][pat])
+                for key in (this.mkeys[2][pat])
+                    player:tell(n, ": ", key);
+                    n = n + 1;
+                endfor
+            endif
+            abort = 0;
+            while (!abort)
+                player:tell("To remove the entire pattern type 'rm all'; to abort 
+type  '.'");
+                input = $command_utils:read();
+                if (input[1] == ".")
+                    abort = 1;
+                    player:tell("Pattern editing over.");
+                elseif (input == "rm all")
+                    this.mkeys[1] = listdelete(this.mkeys[1], pat);
+                    this.mkeys[2] = listdelete(this.mkeys[2], pat);
+                    player:tell("Pattern removed.");
+                    return;
+                endif
+            endwhile
+        else
+            player:tell("That is not a valid pattern. Type 'keys ", this.name, " 
+for  numbers of valid patterns.");
+        endif
+    else
+        player:tell("You must enter the NUMBER of the pattern. That is not a  number.");
+    endif
+else
+    player:tell("Sorry.. see ", this.owner.name, " for help in deleting  keywords...");
+endif
+.
+
+</pre>
+<BR>
+tell:
+<pre>
+if (this.talky)
+    argystring = $string_utils:strip_chars(argstr, ",?]')[(:;.!-");
+    words = $string_utils:words(argystring);
+    if ($set_utils:intersection(this.aliases, words) || (this.talky == 2))
+        pat = {};
+        for w in [1..length(words)]
+            if (ticks_left() < 1000)
+                suspend(3);
+                if (this.mull_msg)
+                    this.location:announce_all_but({this}, $string_utils:pronoun_sub(this.mull_msg));
+                endif
+            endif
+            for y in [1..length(this.mkeys[1])]
+                if ((y != this.lastkey[1]) || (this.lastkey[2] < (time() - 30)))
+                    if ((x = words[w] in this.mkeys[1][y]) && this.mkeys[2][y])
+                        pat = {@pat, this.mkeys[2][y][random(length(this.mkeys[2][y]))]};
+                        this.lastkey = {y, time()};
+                    endif
+                endif
+            endfor
+        endfor
+        if (pat)
+            speech = pat[random(length(pat))];
+            fork (5)
+                if (player.location == this.location)
+                    if (speech[1] == ":")
+                        speech[1] = " ";
+                        player.location:announce_all_but({this}, $string_utils:capitalize(this.name), 
+$string_utils:pronoun_sub(speech));
+                    else
+                        player.location:announce_all_but({this}, $string_utils:capitalize(this.name), 
+" [to ", player.name, "]: ", speech);
+                    endif
+                endif
+                return;
+            endfork
+        endif
+    endif
+endif
+pass(@args);
+.
+
+</pre>
+<BR>
+keys:
+<pre>
+if (player == this.owner)
+    player:tell("You scrutinize ", this.name, "'s key word list.");
+    for x in [1..length(this.mkeys[1])]
+        player:tell(x, ") Responds to: ", $string_utils:english_list(this.mkeys[1][x]));
+        player:tell("     with: \"", $string_utils:from_list(this.mkeys[2][x], "\",\""), 
+"\"");
+    endfor
+else
+    player:tell(this.name, " doesn't appreciate that kind of scrutiny.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mkeys
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp talky
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp lastkey
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mull_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp teachers
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_002138.htm">Kim</A> <A HREF="HTM_002398.htm">the Novelist</A> <A HREF="HTM_002399.htm">Grimaldi</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

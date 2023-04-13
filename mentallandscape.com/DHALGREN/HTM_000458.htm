@@ -1,0 +1,98 @@
+<HTML>
+<HEAD>
+<TITLE>Jafaar</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Jafaar (#458)</H3>
+(an instance of <A HREF="HTM_000099.htm">Useful Utilitarian PC</A> made by <A HREF="HTM_000458.htm">Jafaar</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspTall, dark, sinister, with a beard falling from his chin in demented angles, Jafaar eyes you warily, before assuming a submissive demeanor and humbling himself before you.  "My only wish is to serve," he drones.  You sense, however, that this magician, this wizard (if you will), is more than he seems.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000017.htm">The Body Bag</A>.
+<BR>
+<BR>
+<BR>
+Jafaar owns <A HREF="HTM_000458.htm">Jafaar</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+focus:
+<pre>
+"focus on <object>";
+"  Sets <object> as the present focus of your attention.";
+if (caller != this)
+    player:tell("You can't use ", this:title(), "'s ", verb, " command!");
+    return E_PERM;
+endif
+iobj = player:my_match_object(iobjstr);
+if ($command_utils:object_match_failed(iobj, iobjstr))
+    return;
+endif
+if (typeof(result = this:set_focused(iobj)) == ERR)
+    player:tell(tostr(result));
+else
+    player:tell("You are now focusing on ", $string_utils:nn(iobj), ".");
+endif
+.
+
+</pre>
+<BR>
+my_match_object:
+<pre>
+return (args[1] == "it") ? this.focused | pass(@args);
+.
+
+</pre>
+<BR>
+set_focused:
+<pre>
+if ((caller == this) || $perm_utils:controls(caller_perms(), this))
+    if (typeof(o = args[1]) != OBJ)
+        return E_TYPE;
+    else
+        this.focused = o;
+        return 1;
+    endif
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+my_huh:
+<pre>
+set_task_perms(caller_perms());
+return pass(@args) || this:focusing_huh(@args);
+.
+
+</pre>
+<BR>
+focusing_huh:
+<pre>
+if (typeof(set_task_perms(caller_perms())) == ERR)
+    return E_PERM;
+endif
+vrb = args[1];
+pass = args[2];
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp focused
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

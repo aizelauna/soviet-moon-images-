@@ -1,0 +1,47 @@
+<HTML>
+<HEAD>
+<TITLE>test dispenser</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> test dispenser (#848)</H3>
+(an instance of <A HREF="HTM_001488.htm">Generic Dispenser</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001119.htm">Den</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+kick boot:
+<pre>
+set_task_perms(player);
+this:dispense_item(argstr);
+.
+
+</pre>
+<BR>
+pre_dispense:
+<pre>
+this:set_new_name("duh");
+this:set_new_aliases({"duh"});
+this:set_new_desc("You're not quite sure what it is.");
+args[1]:tell("You prepare to give the dispenser a big kick.");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

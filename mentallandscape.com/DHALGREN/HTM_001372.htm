@@ -1,0 +1,132 @@
+<HTML>
+<HEAD>
+<TITLE>Coffee Flask</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Coffee Flask (#1372)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_001358.htm">Johnathon</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA white flask with the word "COFFEE" written in big red letters on the side.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_001358.htm">Johnathon</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+look_self:
+<pre>
+pass(@args);
+if (this.full)
+    player:tell("It is full of steaming black coffee.");
+else
+    player:tell("It is empty.");
+endif
+.
+
+</pre>
+<BR>
+f*ill:
+<pre>
+if (this.full)
+    player:tell("It is not empty.");
+else
+    locn = this.location;
+    if (is_player(locn))
+        locn = locn.location;
+    endif
+    iobj = locn:match_object(iobjstr);
+    if ((iobj == this.fill_from) && iobj:has_coffee())
+        this.full = iobj.value;
+        iobj:use();
+        player:tell_lines(this:fill_ok_msg());
+        player.location:announce(this:ofill_ok_msg());
+    else
+        player:tell_lines(this:fill_fail_msg());
+        player.location:announce(this:ofill_fail_msg());
+    endif
+endif
+.
+
+</pre>
+<BR>
+drink:
+<pre>
+if (this.full)
+    player:tell_lines(this:drink_ok_msg());
+    player.location:announce(this:odrink_ok_msg());
+    this.full = this.full - 1;
+else
+    player:tell_lines(this:drink_fail_msg());
+    player.location:announce(this:odrink_fail_msg());
+endif
+.
+
+</pre>
+<BR>
+e*mpty:
+<pre>
+if (this.full)
+    player:tell_lines(this:empty_ok_msg());
+    player.location:announce(this:oempty_ok_msg());
+    this.full = 0;
+else
+    player:tell_lines(this:empty_fail_msg());
+    player.location:announce(this:oempty_fail_msg());
+endif
+.
+
+</pre>
+<BR>
+fill_ok_msg ofill_ok_msg ofill_fail_msg fill_fail_msg drink_fail_msg odrink_fail_msg 
+odrink_ok_msg drink_ok_msg empty_ok_msg oempty_ok_msg empty_fail_msg oempty_fail_msg:
+<pre>
+return $string_utils:pronoun_sub(this.(verb));
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp full
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp fill_ok_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ofill_ok_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp fill_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ofill_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp empty_ok_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oempty_ok_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp empty_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oempty_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp drink_ok_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp odrink_ok_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp drink_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp odrink_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp fill_from
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

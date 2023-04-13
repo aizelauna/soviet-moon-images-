@@ -1,0 +1,155 @@
+<HTML>
+<HEAD>
+<TITLE>Features Feature Object</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Features Feature Object (#111)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000096.htm">Dredful</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis feature is meant to be the holder of all features. It has verbs for keeping track of what features exist and which of those are ready to be used. When a feature is finished, it should be registered with this feature. See `help features' to see what features are.
+<BR>
+<BR>
+Features Feature Object contains <A HREF="HTM_000109.htm">Login Watcher</A>, <A HREF="HTM_000125.htm">Player Information Feature</A>, <A HREF="HTM_000126.htm">Carrot's Rosette Feature Object</A>, <A HREF="HTM_000127.htm">Thinking Feature</A>, <A HREF="HTM_000319.htm">Second Character Registry</A>, <A HREF="HTM_000452.htm">Social Shortcuts Feature</A>, <A HREF="HTM_000466.htm">Improved redirected say and whisper</A>, <A HREF="HTM_000542.htm">Size-Prospectus FO</A>, <A HREF="HTM_000536.htm">Lag Feature</A>, <A HREF="HTM_000112.htm">Stage Talk FO</A>, <A HREF="HTM_001055.htm">Pasting Feature</A>, <A HREF="HTM_001188.htm">Repetitive Stress Injuries feature</A>, <A HREF="HTM_001257.htm">Liquor FO</A> and <A HREF="HTM_002391.htm">Info Feature</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000218.htm">paper bag</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThis feature is to be used as a repository for all existing ready to be used features. 
+Type `@add-feature #111' to have access to these verbs:
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+accept:
+<pre>
+what = args[1];
+result = this:acceptable(what);
+if (!result)
+    player:tell("Either ", what.name, " is not a feature, or it does not have its 
+.feature_ok set to 1. ", this.name, " only accepts usable children of $feature.");
+endif
+return result;
+.
+
+</pre>
+<BR>
+@whatfea*tures @what-fea*tures @wf:
+<pre>
+"Usage: @whatfeatures";
+"";
+"This verb compares all the valid features found in its contents with those that 
+you have already added. Those that you don't have, it will list. It also lists what 
+features are not in its contents. These are usually incomplete features. If you have 
+any of these incomplete features added, this verb will say so.";
+list1 = player.features;
+unadded = $set_utils:diff(this.contents, list1);
+if (unadded)
+    player:tell("These are valid features that you haven't added yet:");
+    player:tell_lines($string_utils:nanl(unadded));
+else
+    player:tell("You have already added all the valid features contained in this 
+feature.");
+endif
+player:tell("----------");
+all = setremove($object_utils:descendants($feature), this);
+differ = $set_utils:diff(all, this.contents);
+if (differ)
+    player:tell("These are children of $feature, but aren't in ", this.name, ". Most 
+likely because they aren't finished:");
+    player:tell_lines($string_utils:nanl(differ));
+    has = $set_utils:intersection(differ, player.features);
+    if (has)
+        player:tell("----------");
+        player:tell("Note: of the features just listed as 'not ready' you have added: 
+");
+        player:tell_lines($string_utils:nanl(has));
+    endif
+else
+    player:tell("All existing features are valid and contained in ", this.name, ".");
+endif
+player:tell("-- Finished");
+.
+
+</pre>
+<BR>
+@fregister:
+<pre>
+"Usage: @register <feature>";
+"";
+"This verb is used to put a feature into the Features Feature Object. It will then 
+be ready to be accounted for when people look for usable features.";
+target = player:my_match_object(dobjstr);
+if (!$command_utils:object_match_failed(target, dobjstr))
+    if ($perm_utils:controls(player, target) && $object_utils:isa(target, $feature))
+        target:moveto(this);
+        if (target.location == this)
+            player:tell(target.name, " is now registered and ready for use by ", 
+this.name, " and the general populace.");
+        endif
+    else
+        player:tell("Either that object isn't yours or isn't a feature.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+acceptable:
+<pre>
+what = args[1];
+return $object_utils:isa(what, $feature) && what.feature_ok;
+.
+
+</pre>
+<BR>
+moveto:
+<pre>
+return 0;
+.
+
+</pre>
+<BR>
+@unfregister:
+<pre>
+"Usage: @unfregister <feature>";
+"";
+"Removes the <feature> from this object back to the player, only if the feature is 
+owned by the player or the player is a wizard. This removes it from public circulation 
+according to the @wf verb.";
+target = this:match_object(dobjstr);
+if (valid(target) && (target.location == this))
+    if ($perm_utils:controls(player, target))
+        target:moveto(player);
+        player:tell($string_utils:nn(target), " has been removed from the Features 
+Feature Object registry. It is now in your inventory.");
+    else
+        player:tell(E_PERM);
+    endif
+else
+    player:tell("Either ", dobjstr, " isn't registered in the FFO, or it doesn't 
+exist.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

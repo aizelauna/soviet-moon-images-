@@ -1,0 +1,116 @@
+<HTML>
+<HEAD>
+<TITLE>Dhalgren_utils</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Dhalgren_utils (#1000)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspAn icosahedral crystal containing a number of userful local verbs.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp:third_person(string,verb)      => substitute kick and kicks in string
+&nbsp&nbsp&nbsp&nbsp&nbsp:weather_daytime(string,object) => substitute it and raining
+&nbsp&nbsp&nbsp&nbsp&nbsp:audience(object)               => is object with a connected player?
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000556.htm">Steamer Trunk</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+third_person:
+<pre>
+" third_person(<string>, <verb>) substitutes the verb for %v in the string.  %vs 
+is substituted by the third-person form of the verb, with some intelligence.";
+s = args[1];
+v = args[2];
+lv = length(v);
+if (v[lv] in {"s", "x", "o", "u", "i"})
+    vs = v + "es";
+elseif ((lv >= 2) && (v[lv - 1..lv] in {"ch", "sh"}))
+    vs = v + "es";
+elseif ((lv >= 2) && (v[lv - 1..lv] in {"ay", "ey", "oy", "uy"}))
+    vs = v + "s";
+elseif (v[lv] == "y")
+    vs = v[1..lv - 1] + "ies";
+elseif (i = v in {"be", "have"})
+    vs = {"is", "has"}[i];
+else
+    vs = v + "s";
+endif
+s = strsub(s, "%vs", vs);
+return strsub(s, "%v", v);
+.
+
+</pre>
+<BR>
+weather_daytime:
+<pre>
+" weather_daytime(<string>, <object>) looks for weather and daytime messages on <object> 
+and substitutes %daytime and %weather in the string accordingly.  Weather is computed 
+as a pseudorandom function of time.";
+s = args[1];
+what = args[2];
+hour = tonum(ctime(clock = time())[12..13]);
+if ((hour < 6) || (hour > 20))
+    daytime = what.night_msg;
+elseif (hour < 9)
+    daytime = what.morning_msg;
+elseif (hour < 18)
+    daytime = what.day_msg;
+else
+    daytime = what.evening_msg;
+endif
+noise = abs((((clock / 3600) / 8) * 1103515245) + 12345) % 3;
+climate = abs(((clock / 3600) / 24) + noise) % 11;
+if (climate == 2)
+    weather = what.raining_msg;
+elseif (climate < 6)
+    weather = what.warm_msg;
+elseif (climate == 8)
+    weather = what.snowing_msg;
+else
+    weather = what.cool_msg;
+endif
+s = strsub(s, "%weather", weather);
+s = strsub(s, "%daytime", daytime);
+return s;
+.
+
+</pre>
+<BR>
+audience:
+<pre>
+" audience(<object>) indicate if a listening player (not self) is in the room with 
+the object.";
+what = args[1];
+if ($object_utils:connected(what.location))
+    return 1;
+else
+    for c in (what.location.contents)
+        if ((c != what) && $object_utils:connected(c))
+            return 1;
+        endif
+    endfor
+endif
+return 0;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

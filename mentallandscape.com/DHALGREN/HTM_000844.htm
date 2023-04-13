@@ -1,0 +1,163 @@
+<HTML>
+<HEAD>
+<TITLE>calliope</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> calliope (#844)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000905.htm">polyhymnia</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA large pipe organ, steam driven and started with a lever, stands in the center of 
+the merry-go-round. You could reach it from one of the animals.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000920.htm">The Whirligig</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+riding_msg:
+<pre>
+" args[1] is the number of the seat in this.location.seats = steed in lists of riding 
+msgs [this.riding]; args[2] is the list of people in it";
+steed = args[1];
+riders = args[2];
+msg = this.riding[steed];
+fverb = "";
+for word in ($string_utils:words(msg))
+    if ((length(word) > 1) && (word[1..2] == "%<"))
+        fverb = word[3..length(word) - 1];
+    endif
+endfor
+if (fverb)
+    wverb = $gender_utils:get_conj(fverb, @(length(riders) > 1) ? {this} | riders);
+    msg = strsub(msg, tostr("%<", fverb, ">"), wverb);
+endif
+msg = strsub(msg, "%rider", $string_utils:title_list(riders));
+return $string_utils:pronoun_sub(msg);
+.
+
+</pre>
+<BR>
+riders:
+<pre>
+" Lists the players sitting (to consider them riders).";
+riders = {};
+for seat in (this.location.sitting)
+    for rider in (seat)
+        riders = setadd(riders, rider);
+    endfor
+endfor
+return riders;
+.
+
+</pre>
+<BR>
+go_round:
+<pre>
+carousel = this.location;
+steed = 0;
+sound = random(length(this.music));
+while (this.going && (riders = this:riders()))
+    (steed < length(carousel.seats)) ? steed = steed + 1 | (steed = 1);
+    if (wholist = carousel.sitting[steed])
+        ridingmsg = this:riding_msg(steed, wholist);
+        " this:riding_msg returns the proper line of this.riding with wholist substituted 
+in...";
+    else
+        ridingmsg = this.unridden[steed];
+    endif
+    carousel:announce_all_but(riders, ridingmsg);
+    suspend(this.interval);
+    if (!(steed % 4))
+        (sound < length(this.music)) ? sound = sound + 1 | (sound = 1);
+        carousel:announce_all(this.music[sound]);
+        suspend(this.interval);
+    endif
+endwhile
+" this.slowing is a property with a list of messages to be played to the room as 
+the carousel slows down.";
+for line in [1..length(this.slowing)]
+    suspend(this.interval + line);
+    this.location:announce_all(this.slowing[line]);
+endfor
+this.going = 0;
+.
+
+</pre>
+<BR>
+start play:
+<pre>
+if (!$object_utils:has_property(this.location, "seats"))
+    player:tell("Sorry, the calliope only plays in a room where there's someplace 
+to sit down.");
+elseif (!(length(this.location.seats) == length(this.riding)))
+    player:tell("Oops...the calliope isn't set up for this room. Tell the owner to 
+check calliope.passing against the seats defined here.");
+elseif (player in this:riders())
+    if (!this.going)
+        player:tell($string_utils:pronoun_sub(this.starting_msg));
+        this.location:announce($string_utils:pronoun_sub(this.ostarting_msg));
+        this.going = 1;
+        fork (0)
+            this:go_round();
+        endfork
+    else
+        player:tell("The calliope's running...");
+    endif
+else
+    player:tell("You can't reach the controls. You've got to be on the ride. Sit 
+on an animal!");
+endif
+.
+
+</pre>
+<BR>
+stop halt:
+<pre>
+if (!(player in this:riders()))
+    player:tell("You have to be on the merry-go-round to stop it.");
+else
+    player:tell($string_utils:pronoun_sub(this.stopping_msg));
+    this.location:announce($string_utils:pronoun_sub(this.ostopping_msg));
+    this.going = 0;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp riding
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp unridden
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp music
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp slowing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp starting_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ostarting_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp stopping_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ostopping_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp going
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp interval
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

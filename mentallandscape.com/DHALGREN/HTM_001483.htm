@@ -1,0 +1,59 @@
+<HTML>
+<HEAD>
+<TITLE>a gargoyle</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a gargoyle (#1483)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_001457.htm">Trismegistos</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspCorded muscles cast in black iron; goathorned, barbtailed and dragonwinged, with 
+the leering face of a satyr.
+&nbsp&nbsp&nbsp&nbsp&nbspA preindustrial concept with postindustrial modular prostheses, a lawn jockey gone 
+Maroon and satanic with a techno-hoodoo whammy for massa.  
+&nbsp&nbsp&nbsp&nbsp&nbspIt looks entirely inanimate, as such a thing should rightly be.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_001603.htm">Filling Station</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+tell:
+<pre>
+"Copied from Fly on the Wall (#842):tell by Marcus (#812) Mon Aug 29 22:16:57 1994 
+EDT";
+pass(@args);
+master = this.owner;
+if ((this.location != master.location) && (this.location != master))
+    this.owner:tell("[", this.name, " reports:] ", @args);
+endif
+.
+
+</pre>
+<BR>
+feed:
+<pre>
+player:tell("The gargoyle apparently prefers hydrocarbons to carbohydrates.");
+player.location:announce(player.name, " tries to feed the gargoyle, to no avail.");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp look_msg
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

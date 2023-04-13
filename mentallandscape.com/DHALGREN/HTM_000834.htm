@@ -1,0 +1,207 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Litter</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Litter (#834)</H3>
+(an instance of <A HREF="HTM_000009.htm">generic note</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA fairly non-descript piece of litter. It has print on it.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbsp                 KEEP OUR CITY CLEAN!
+</pre>
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbsp                    GENERIC LITTER
+&nbsp&nbsp&nbsp&nbsp&nbsp  Generic Litter is very simple:  it's a note, which blows
+&nbsp&nbsp&nbsp&nbsp&nbsp  from place to place.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp  Make your own by typing @create #834 named <anything>.
+&nbsp&nbsp&nbsp&nbsp&nbsp  Use @notedit for an easy way to write on your litter.
+&nbsp&nbsp&nbsp&nbsp&nbsp  Use @setinterval to set the time litter will take to blow
+&nbsp&nbsp&nbsp&nbsp&nbsp  from one place to the next (in seconds). The minimum
+&nbsp&nbsp&nbsp&nbsp&nbsp  interval allowed is 180 seconds.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp  The only other thing you need to know is how to ban the
+&nbsp&nbsp&nbsp&nbsp&nbsp  litter from a certain place. (The wind blows oddly in
+&nbsp&nbsp&nbsp&nbsp&nbsp  Bellona.)  Type ban <name> from <place> to do it. Use the
+&nbsp&nbsp&nbsp&nbsp&nbsp  object number of the place.  @rmban <place> from <name> will
+&nbsp&nbsp&nbsp&nbsp&nbsp  allow the litter back in.  (You can also ban other people's 
+&nbsp&nbsp&nbsp&nbsp&nbsp  litter from your own spaces.)  This function may also be 
+&nbsp&nbsp&nbsp&nbsp&nbsp  used to delimit a territory within which the litter may 
+&nbsp&nbsp&nbsp&nbsp&nbsp  blow, if you like.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp  @messages to set on Generic Litter are @blow_in and @blow_out.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+d*rop th*row:
+<pre>
+pass(@args);
+if (!$code_utils:task_valid(this.blow_task))
+    this.blowing = 1;
+    this:blow_around();
+endif
+.
+
+</pre>
+<BR>
+@setinterval:
+<pre>
+if (player != this.owner)
+    player:tell("You can't do that, it's not yours.");
+else
+    interval = tonum(iobjstr);
+    if (interval < 180)
+        player:tell("Sorry--the interval has to be at least 180. (It's not THAT windy!)");
+    else
+        this.interval = interval;
+        player:tell("You set the delay on ", this.name, " to ", interval, " seconds.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+blow_around:
+<pre>
+"blow_around: a loop to blow the litter.  First invoked by :drop";
+if (this.blowing)
+    fork blowtask (this.interval)
+        this:blow();
+        this:blow_around();
+    endfork
+    this.blow_task = blowtask;
+endif
+.
+
+</pre>
+<BR>
+blow:
+<pre>
+"blow(): the basic verb to make the litter blow from one place to the next.  Invoked 
+by :blow_around.";
+if ($object_utils:has_property(this.location, "exits"))
+    exits = this:find_exits();
+    if (length(exits))
+        destination = exits[random(length(exits))];
+        this.location:announce_all($string_utils:pronoun_sub(this.blow_out_msg));
+        this:moveto(destination);
+        this.location:announce_all($string_utils:pronoun_sub(this.blow_in_msg));
+    else
+        this.blowing = 0;
+    endif
+else
+    this.blowing = 0;
+endif
+.
+
+</pre>
+<BR>
+find_exits:
+<pre>
+exits = {};
+obvious_exits = this.location:obvious_exits();
+for exit in (obvious_exits)
+    if (valid(exit) && (!(exit.dest in this.banned_rooms)))
+        exits = listappend(exits, exit.dest);
+    endif
+endfor
+return exits;
+.
+
+</pre>
+<BR>
+ban:
+<pre>
+if ($object_utils:isa(place = player:my_match_object(iobjstr), $room))
+    if ((player == place.owner) || (player == this.owner))
+        this.banned_rooms = setadd(this.banned_rooms, place);
+        player:tell("Okay, you have banned ", this.name, " from ", place.name, ". 
+Once it's gone it won't come back.");
+    else
+        player:tell("You have to be the owner of ", this.name, "or of the room to 
+ban it from places.");
+    endif
+else
+    player:tell("Sorry, ", this.name, " can only be banned from a room...");
+endif
+.
+
+</pre>
+<BR>
+@rmban:
+<pre>
+if ($object_utils:isa(place = player:my_match_object(dobjstr), $room))
+    if (!(place in this.banned_rooms))
+        player:tell(this.name, " is not presently banned from ", place.name, ".");
+    elseif ((player == place.owner) || (player == this.owner))
+        this.banned_rooms = setremove(this.banned_rooms, place);
+        player:tell("You have taken ", this.name, " off the banned list for ", place.name, 
+".");
+    else
+        player:tell("You have to be the owner of ", this.name, "or of the room to 
+control its access.");
+    endif
+else
+    player:tell("Sorry, how could ", this.name, " be banned from ", place.name, "?");
+endif
+.
+
+</pre>
+<BR>
+take:
+<pre>
+pass(@args);
+this.when_taken = ctime(time());
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp blowing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp interval
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp banned_rooms
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp blow_out_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp blow_in_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp blow_task
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp when_taken
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp look_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000867.htm">a piece of litter</A> <A HREF="HTM_000869.htm">a scrap of scripture</A> <A HREF="HTM_000877.htm">a scrap of poetry</A> <A HREF="HTM_001079.htm">a printed page</A> <A HREF="HTM_001151.htm">a small notebook</A> <A HREF="HTM_001152.htm">a vanilla page</A> <A HREF="HTM_001153.htm">a crumpled page</A> <A HREF="HTM_001187.htm">a yellow frisbee</A> <A HREF="HTM_001194.htm">a paper plate</A> <A HREF="HTM_001250.htm">Fantasy</A> <A HREF="HTM_001259.htm">some computer paper</A> <A HREF="HTM_002043.htm">half-page</A> <A HREF="HTM_002048.htm">half-page</A> <A HREF="HTM_002053.htm">half-page</A> <A HREF="HTM_002129.htm">torn page</A> <A HREF="HTM_002148.htm">a torn leaf</A> <A HREF="HTM_001447.htm">Rebel Rebel</A> <A HREF="HTM_002453.htm">a little page</A> <A HREF="HTM_002622.htm">crumpled page</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

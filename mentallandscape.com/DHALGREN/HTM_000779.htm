@@ -1,0 +1,52 @@
+<HTML>
+<HEAD>
+<TITLE>a mirror</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a mirror (#779)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000448.htm">Snap</A>)
+<BR>
+<BR>
+<pre>
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000448.htm">Snap</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+tell:
+<pre>
+call_verb = callers()[length(callers())][2];
+this.owner:tell(call_verb);
+seen = "";
+for mood in (this.mood)
+    for word in (mood[2])
+        if (index(argstr, word))
+            seen = mood[1];
+        endif
+    endfor
+endfor
+if (seen)
+    this.owner:tell("You seem to be ", seen);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mood
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

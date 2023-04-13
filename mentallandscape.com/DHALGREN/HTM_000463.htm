@@ -1,0 +1,54 @@
+<HTML>
+<HEAD>
+<TITLE>Malquist</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Malquist (#463)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_000463.htm">Malquist</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspBefore you is the bastard son of the Ninth Earl of Malquist (and as such, unable to inherit the title). Like most offspring of nobility, he shows signs of inbreeding: over-accentuated features, pale skin, and disturbing thinness. Only his mother's genes save Malquist from utter unpleasantness.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspMalquist wears a fur-collared, leather jacket (in the style of W.W. 1 aviators), Wellington boots, black trousers, and a white, silk shirt. There is a blue lily in the upper button-hole of his jacket. His left eye is robotic.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000017.htm">The Body Bag</A>.
+<BR>
+<BR>
+<BR>
+Malquist owns <A HREF="HTM_000463.htm">Malquist</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+moveto:
+<pre>
+"Copied from Carrot's Rosette Feature Object (#126):moveto by Carrot (#448) Tue Feb 
+22 15:26:57 1994 EST";
+pass(@args);
+if ($object_utils:has_property(this, "features") && (#126 in this.features))
+    used = $list_utils:assoc(player, #126.read);
+    if ((used != {}) && ("a" in used[3]))
+        rose = #126:genrose(player.location, used[3]);
+        if (typeof(rose) == LIST)
+            player:tell_lines(rose);
+        endif
+    endif
+endif
+return;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

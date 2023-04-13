@@ -1,0 +1,5017 @@
+<HTML>
+<HEAD>
+<TITLE>graffiti</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> graffiti (#107)</H3>
+(an instance of <A HREF="HTM_000046.htm">Generic Mail Recipient</A> made by <A HREF="HTM_000096.htm">Dredful</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis mail list is for announcements of a general nature. Here, people can talk about new generics and other creations and updates. Usually not related to the core, but adding on to the hierarchy.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000047.htm">Mail Distribution Center</A>.
+<BR>
+<BR>
+MAIL MESSAGES:
+<BR>
+<BR>
+<BR>
+Date: 1994 Jan 24, 10:21:53 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: This list
+<BR>
+
+<BR>
+This list is mainly going to be used to announce new creations and other important stuff that may not end up in the newspaper.
+<BR>
+
+<BR>
+For instance, I have just begun a couple of PCs:
+<BR>
+
+<BR>
+The Basic Local PC #98 is sandwiched in between $player and $builder much like Frand's PC on Lambda. We'll be adding local specific stuff to this class that everyone needs to have.
+<BR>
+
+<BR>
+The Useful Utilitarian PC #99 is a child of $programmer and provides some useful programmer verbs. Anyone can become a child of this, but it's not mandatory or anything.
+<BR>
+
+<BR>
+More on the way.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Jan 24, 10:58:29 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: Login Watcher
+<BR>
+
+<BR>
+I just ported over my infallible wizardly login watcher.
+<BR>
+
+<BR>
+It's #109 and is used as a feature. It has help and all that.
+<BR>
+
+<BR>
+So @addfeature #109 today!
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Jan 24, 11:45:38 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: Features feature
+<BR>
+
+<BR>
+I have created the Featuress Feature #111. 
+<BR>
+
+<BR>
+With this feature added and by typing @wf (@whatfeature) you will see a listing of what features exist and which of those you haven't added. It will also tell you which are ready for the public and which aren't. 
+<BR>
+
+<BR>
+When you create a new feature, by using @fregister (on #111), your feature will be moved to #111 for safekeeping and be listed as ready for public use.
+<BR>
+
+<BR>
+This should help keep track of all the features.
+<BR>
+
+<BR>
+Dredful (already @fregistered #109 Login Watcher. More features coming soon)
+<BR>
+<BR>
+Date: 1994 Jan 24, 12:15:45 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: Stage Talk
+<BR>
+
+<BR>
+I was going crazy without stage talk feature #112.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Jan 24, 01:45:09 p.m. PST
+<BR>
+From: Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: Generic Post-Apocalypse Room
+<BR>
+
+<BR>
+I created a new room class (#110) which I recommend.  Right now it just has "night" and "day" messages which will replace "%time" in the desc.  I plan to continue to upgrade this room class to includethings like details and integration
+<BR>
+<BR>
+Date: 1994 Jan 25, 09:45:44 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: New feature
+<BR>
+
+<BR>
+I ported over another feature of mine from TTM. 
+<BR>
+
+<BR>
+The Player Information feature #125. It gives you information about a player based on their objects and how they relate to you and what you have created. Also, you can see how long a player has been idle with a simple command, and you can check out their aliases with another simple command.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Jan 25, 09:54:43 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: Carrot's Rosette Feature Ported
+<BR>
+
+<BR>
+I just love this feature. With Carrot's permission, it is now ported over here.
+<BR>
+
+<BR>
+The number is #126 and it displays a nice little compass rose of the room you are in. Or any room for that matter, as long as the exit is obvious, it will show up.
+<BR>
+
+<BR>
+(I should have made a *features list, heh)
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Jan 25, 03:55:16 p.m. PST
+<BR>
+From: Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: look_self vs. description()
+<BR>
+
+<BR>
+Hmmm, I think we need to switch the exit integration stuff from #3:look_self to #3:description().  Otherwise it is going to be hard for future room classes to incrementally change the room description with time, weather, etc.
+<BR>
+I'm thinking we should have description doing
+<BR>
+ desc = pass(@args) + localstuff();
+<BR>
+<BR>
+Date: 1994 Jan 25, 11:54:50 p.m. PST
+<BR>
+From: Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: container for generics
+<BR>
+
+<BR>
+Let's put generic objects into #120, a broken wooden box sitting in an alley.   This alley is likely to be discovered quickly by newcomers.  I figured it could be our non-fascist version of the marble MOO museum.  :-)  Maybe features can be put in the alley in some funny way too.
+<BR>
+<BR>
+Date: 1994 Jan 26, 01:38:37 a.m. PST
+<BR>
+From: Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: theme
+<BR>
+
+<BR>
+I skimmed the first 100 page of Dahlgren.  The north-south street you hit off the bridge is Broadway and extends into the city.  Near the park (the crossroads?) is a sorta gay bar called "Teddy's", which featured a male cage dancer in the book (wearing a silver G-string).  Just what legba was about to build!
+<BR>
+ Continuing north, Is Jackson avenue, suburban homes, and then Brisbain avenue and "The Heights" where the newspaper owner has a large walled estate.  I think I will change "Mayor" to "RogerCalkins" who seems to be the unseen force in Dhalgren (the newspaper owner).
+<BR>
+<BR>
+Date: 1994 Jan 28, 09:37:03 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: Generic Automaton
+<BR>
+
+<BR>
+I put Generic Automaton into the box in the alley.  It's ready for folks to try to fiddle with.  Please give me feedback on its help script and its user interface.  If something seems hard to do, let me know and I will think some more about it.
+<BR>
+<BR>
+Date: 1994 Jan 30, 02:59:03 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: PARC has details
+<BR>
+
+<BR>
+I added a basic detail mechanism to the Post-Apolalypse Room Class.  Do help #110 for details.  Details can be weather and time dependant.
+<BR>
+<BR>
+Date: 1994 Feb  2, 10:22:50 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: Generic Edible Object
+<BR>
+
+<BR>
+I changed Generic Sensual Object into Generic Edible Object.  Check out help on #101.  The main addition is a delayed_eat_msg.  The nutmeg fruit is now fully psycho-active!  :-)
+<BR>
+<BR>
+Date: 1994 Feb  3, 08:22:17 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: New generic
+<BR>
+
+<BR>
+I made a new generic, The Generic Boomerang Thing #261.
+<BR>
+
+<BR>
+A child of $thing, this generic has the ability to return to its home after it has been removed after a settable period of time. Kinda like a RL boomerang.
+<BR>
+
+<BR>
+Look at or do help #261 for details.
+<BR>
+
+<BR>
+Dred(ful)
+<BR>
+<BR>
+Date: 1994 Feb  4, 06:32:12 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: theme
+<BR>
+
+<BR>
+I wrote a new "help theme".  Feedback?
+<BR>
+<BR>
+Date: 1994 Feb  6, 03:11:03 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: going home
+<BR>
+
+<BR>
+I modified the :home on the scorpion PC (#153) to use the standard teleport messages that @go or @join use.  People were complaining about the silly clicking-heels message, and it seems unecessary to add special messages to the PC just for :home.
+<BR>
+<BR>
+Date: 1994 Feb  7, 10:03:53 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: Re: going home
+<BR>
+
+<BR>
+>  From:     Calkins (#150)
+<BR>
+
+<BR>
+>  I modified the :home on the scorpion PC (#153) to use the standard
+<BR>
+>  teleport messages that @go or @join use.  People were complaining
+<BR>
+>  about the silly clicking-heels message, and it seems unecessary to
+<BR>
+>  add special messages to the PC just for :home.
+<BR>
+
+<BR>
+How about making an option? Maybe someone likes the default messages, or maybe they want to set their own? I dunno. It's a suggestion to think about.
+<BR>
+If you need help with setting up a $generic_options, I can give a hand.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Feb  9, 09:05:43 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: Boomerang #261
+<BR>
+
+<BR>
+I've changed the Generic Boomerang Thing #261 so that you must use the
+<BR>
+
+<BR>
+@home <boomerang> is <place>
+<BR>
+
+<BR>
+verb to set its home. A little security measure.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Feb 10, 01:06:11 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Information (#107) and *Quota-Requests (#327)
+<BR>
+Subj: Quota Request mailing list
+<BR>
+
+<BR>
+Need more quota? Send your request to the *Quota-Requests mailing list.
+<BR>
+
+<BR>
+A wizard will look it over and grant you more quota if they feel you deserve it.
+<BR>
+Please keep in mind that we prefer themely areas that can be or are already connected to the rest of the MOO.
+<BR>
+
+<BR>
+While you may send to this list, only the wizzes can read it. So they can discuss it if the need arises.
+<BR>
+<BR>
+Date: 1994 Feb 11, 06:34:16 a.m. PST
+<BR>
+From: Kashka (#215)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: New Residents or connections
+<BR>
+
+<BR>
+I've been building a series of tunnels and catacombs underground from my
+<BR>
+church.  I'd love to have some input, and have some residents either in
+<BR>
+the rooms, or attached to the tunnels.  Anyone game to live underground?
+<BR>
+Send me mail.... Kashka
+<BR>
+<BR>
+Date: 1994 Feb 13, 12:34:45 a.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: New-comer tutorial
+<BR>
+
+<BR>
+I have finished the first draft of our new-comer tutorial.  From the river bank (#11), new users are encouraged to go west, where they can have a simple and educational adventure in a system of caves.  Please check it out and provide feedback!
+<BR>
+<BR>
+Date: 1994 Feb 15, 10:29:13 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: $quota_utils
+<BR>
+
+<BR>
+I've ported over the Object oriented $quota_utils and installed them here.
+<BR>
+
+<BR>
+We're still on object based quota, but I've changed a lot of code references.
+<BR>
+
+<BR>
+Please mail all bug reports related to any kind of building, recycling, property addition, verb addition, and so on to me directly.
+<BR>
+
+<BR>
+Thanks
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Feb 17, 08:01:45 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Information (#107)
+<BR>
+Subj: Ambient noise room #176
+<BR>
+
+<BR>
+I've made a modification to the Generic Ambient Noise room #176.
+<BR>
+
+<BR>
+I noticed that the tasks continued to run when people logged out in there. Since the room was technically occupied by a player.
+<BR>
+
+<BR>
+So I changed it so that the ambient noise tasks only run when connected players are in the room. If your home is such a room, it will start up when you connect in it.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Feb 19, 08:31:11 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Scorpion PC and Automaton
+<BR>
+
+<BR>
+I rewrote the help on Generic Automaton (#192).  Hope it will be more up to date and helpful now.
+<BR>
+The Scorpion Player Class now has a movable_msg which is set to "NO" by default.  Other players cannot move you if this is set to "NO", and you are notified if they try.
+<BR>
+<BR>
+Date: 1994 Feb 20, 02:29:09 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Wizard-Mail (#102) and *graffiti (#107)
+<BR>
+Subj: line wrap
+<BR>
+
+<BR>
+Line wrap is now ON by default on players.  Type @wrap OFF if you are using a client and don't want the MOO to do linewrap.
+<BR>
+<BR>
+Date: 1994 Feb 22, 12:29:20 p.m. PST
+<BR>
+From: Dred (#100)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Responding
+<BR>
+
+<BR>
+I've installed responding on my Utilitarian PC #99. 
+<BR>
+
+<BR>
+You can use:
+<BR>
+
+<BR>
+= <message> or res <message>
+<BR>
++ <emote> or ++ <emote>
+<BR>
+' <message>
+<BR>
+
+<BR>
+And the appropriate message will get sent to the last player who paged you, or you paged. I might muck with it more to make it more selectable how the respond-to gets set.
+<BR>
+
+<BR>
+Dred
+<BR>
+<BR>
+Date: 1994 Feb 22, 05:36:41 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Places to build
+<BR>
+
+<BR>
+Several people have asked about places to build.  Check out the rough map (#406).  Folks could build urban warehouse/storefront stuff by the loading dock.  Labry Apartments can be taken over (I only built the lobby).  Wanna build a working elevator for the office building?  The stone building in the park is up for grabs as is the space south of it.  Jackson Avenue is unbilt and is supposed to contain abandoned houses.  Brisbain avenue is the former rich neighborhood -- abandoned mansions.
+<BR>
+That's the Bellona section, anyway.  The theme is Delany or Virtual-Light-Gibson sorta stuff.
+<BR>
+For William Burroughs fans, we are starting an Interzone section.  This will be reachable only via virtual drug abuse.  It is exotic and sensual, both a place and an altered state of consciousness.  Rent the movie "Naked Lunch" if you want to see what it is all about.  Look at #421.
+<BR>
+<BR>
+Date: 1994 Feb 22, 09:19:51 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Help for #98
+<BR>
+
+<BR>
+I finally got around to putting in help topics for pertinent usable verbs on #98, the Basic Local PC.
+<BR>
+
+<BR>
+Most of this stuff regular MOOers will already know. If you are new, there is now help for:
+<BR>
+
+<BR>
+@add-room, @rooms, @rmroom, @join, @go, @nn, @measure, teleport-messages (well, almost. I have to finish this one)
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Feb 23, 10:25:11 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Byte Quota
+<BR>
+
+<BR>
+This should go in the newspaper, but I think everyone reads this.
+<BR>
+
+<BR>
+We have now switched over to byte quota instead of object quota. To see how much quota you have, type @quota.
+<BR>
+
+<BR>
+To see how to measure your objects, type `help @measure'.
+<BR>
+
+<BR>
+Most everyone has 25k of byte quota now. Those of you who received more quota previously under the old system got 2k more per object above the default of 7 that you had. So if you had a quota of 15, you now have 25k + 8*2k = 41k.
+<BR>
+
+<BR>
+I'm going to port over a few nice utilities from Lambda in a bit to help see where your space is being used up in.
+<BR>
+
+<BR>
+If you decide you need more quota, please send your request to *Quota-Requests. One of the wizzes will take a look at it and decide whether to give you more.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Feb 23, 01:19:37 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107) and *Core-Updates (#108)
+<BR>
+Subj: Responsible Paranoid Data
+<BR>
+
+<BR>
+I've ported over the $paranoid_db from LambdaMOO. This object will keep track of everyone's anti-spoofer data so that it won't cost against their quota.
+<BR>
+
+<BR>
+If you had @paranoid on before, you'll need to reset it again so that the database will know to keep track of you. See `help @paranoid' for details.
+<BR>
+
+<BR>
+All responsible data is cleared when you log out.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Feb 24, 09:58:50 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Recompiled server
+<BR>
+
+<BR>
+Dhalgren is running a hopefully improved server compiled with R4000 optimizations and SGI's faster version of malloc.  SGI claims that standard malloc degrades in long-running processes that do a lot of allocation and deallocation.  And we have observed some unusual server bloat and a little sluggishness after Dhalgren has been up for a week or so.
+<BR>
+Keep your fingers crossed.  If the server bombs, we can quickly restore the old version.
+<BR>
+The "lag" that people have noticed is not really due to this.  That is a problem with the overloaded internet, not the MOO.
+<BR>
+<BR>
+Date: 1994 Feb 25, 08:17:32 a.m. PST
+<BR>
+From: Dred (#100)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: @lag feature
+<BR>
+
+<BR>
+I just whipped up the @lag feature #536. 
+<BR>
+
+<BR>
+It only has the @lag verb on it, and it uses the login mechanism lag computations. I doubt we'll lag much here anyway, but at least we can see for sure now.
+<BR>
+
+<BR>
+Dred
+<BR>
+<BR>
+Date: 1994 Feb 25, 08:57:00 a.m. PST
+<BR>
+From: Dred (#100)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: help teleport-messages
+<BR>
+
+<BR>
+I finally got around to writing `help teleport-messages'.
+<BR>
+
+<BR>
+You ought to read it. There is some different behavior in my version as opposed to the Lambda version some of you may be familiar with.
+<BR>
+
+<BR>
+Dred
+<BR>
+<BR>
+Date: 1994 Feb 25, 10:19:27 a.m. PST
+<BR>
+From: Dred (#100)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Help for Useful Utilitarian
+<BR>
+
+<BR>
+I've put together a help database for the Useful Utilitarian PC, #99.
+<BR>
+
+<BR>
+As a child of this class, you can do `help UUPC-Index' to see what topics there are and then do `help <topic>' to read about that topic.
+<BR>
+
+<BR>
+There's probably some interesting aspects about UUPC you haven't discovered yet, so take a gander.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Feb 25, 12:07:22 p.m. PST
+<BR>
+From: Dred (#100)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Size-Prospectus FO
+<BR>
+
+<BR>
+With Grump's permission, I've ported the Size-Prospectus FO #542 from Lambda to here. 
+<BR>
+
+<BR>
+It's very useful in seeing what you have and how much room it takes up byte-wise.
+<BR>
+
+<BR>
+The verb is @size-prospectus (@sp for short) and there is help as usual.
+<BR>
+
+<BR>
+Dred
+<BR>
+<BR>
+Date: 1994 Feb 28, 01:08:35 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: help
+<BR>
+
+<BR>
+By popular demand, I redid the help summary (type "help" to see it).  This is more like the help summary on FurryMUCK, which I think is more useful for new players.
+<BR>
+<BR>
+Date: 1994 Mar  2, 09:23:29 a.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Generic Room with Stacking (#563)
+<BR>
+
+<BR>
+A new room class has been created that allows objects to be stacked on top of each other.  You can use this room to treat objects as furnature or whatever.  The three commands supported so far are:
+<BR>
+
+<BR>
+   put <anything> on <anything>
+<BR>
+   sit <anything>
+<BR>
+   stand
+<BR>
+
+<BR>
+Let me know if you find a problem.  Oh, if you make object furnature, you might want to @lock them.  Otherwise if someone picks up a sofa, everyone sitting on it will fall on the floor.  :-)
+<BR>
+<BR>
+Date: 1994 Mar  2, 01:02:49 p.m. PST
+<BR>
+From: Jafaar (#458)
+<BR>
+To:&nbsp&nbsp Patro (#78) and *graffiti (#107)
+<BR>
+Subj: Re: Generic Room with Stacking (#563)
+<BR>
+
+<BR>
+>  Date:     Wed Mar  2 12:23:29 1994 EST
+<BR>
+>  From:     Patro (#78)
+<BR>
+>  To:       *graffiti (#107)
+<BR>
+>  Subject:  Generic Room with Stacking (#563)
+<BR>
+
+<BR>
+I would consider making a child of this if it were readable.
+<BR>
+<BR>
+Date: 1994 Mar  3, 11:39:25 a.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: returning to old malloc
+<BR>
+
+<BR>
+Well after watching the server grow from 1126 pages to 2348 in six days, I decided to return to the old version of malloc.  Of course malloc fragmentation might not have been the cause of this memory leak.  (Yes, we DO have Pavel's latest memory-leak-fix installed)
+<BR>
+<BR>
+Date: 1994 Mar  4, 01:09:34 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: server reboots
+<BR>
+
+<BR>
+OK, no more reboots.  Our system administrators rebooted our machines today, and then an X-window debacle forced us to reboot again.  We expect Dhalgren to run for weeks and weeks now.  Sorry.
+<BR>
+By the way, for those who don't know this, X-windows sucks bit time.
+<BR>
+<BR>
+Date: 1994 Mar  7, 06:36:25 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Interzone
+<BR>
+
+<BR>
+The Interzone section of the MOO is now linked to Bellona.  To get there, find the Bellona Bus Depot (#609) on Broadway just south of the stone lions.  William Burroughs fans can build and link here.  Enjoy!
+<BR>
+(Rent the movie "Naked Lunch" if you want to see what Interzone is about)
+<BR>
+<BR>
+Date: 1994 Mar  8, 03:59:17 p.m. PST
+<BR>
+From: Zon (#103)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Generic Wandering Automaton
+<BR>
+
+<BR>
+I've created a Generic Wandering Automaton class that builds on the
+<BR>
+Generic Automaton.  It allows you to create an automaton that will
+<BR>
+roam from room to room randomly, pausing while people are interacting
+<BR>
+with it.  The three commands it currently has on it are:
+<BR>
+
+<BR>
+@start <automaton name>   -- starts the wandering behavior
+<BR>
+@stop  <automaton name>   -- stops the wandering
+<BR>
+@setcycle <automaton name> -- sets the interval between moves
+<BR>
+
+<BR>
+Try help #502 for details.  Let me know if you find any problems.
+<BR>
+My thanks to Calkins for much hacking advice.
+<BR>
+<BR>
+Date: 1994 Mar 11, 09:10:11 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: map
+<BR>
+
+<BR>
+The map of Bellona (#406) is updated to show some new connections.  Let me know if I missed anyone who is linked in.
+<BR>
+<BR>
+Date: 1994 Mar 13, 07:28:41 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: taxi service
+<BR>
+
+<BR>
+Taxi service is now available on Dhalgren.  This is an idea borrowed from FurryMUCK, and it's also a way to point out interesting places to new players.  You should be able to type "taxi" (an exit name) on most streets in Dhalgren.
+<BR>
+<BR>
+Date: 1994 Mar 14, 01:51:13 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: restart
+<BR>
+
+<BR>
+I just did a shutdown/restart of Dhalgren.  The server process seems to grow by about 400K per day, due perhaps to memory leaks.  So I'll probably do a restart every few days just to avoid eating the swap space on my SGI Indy.
+<BR>
+<BR>
+Date: 1994 Mar 16, 10:15:17 a.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: system crash
+<BR>
+
+<BR>
+Our machines crashed this morning due to a prolonged power failure.
+<BR>
+<BR>
+Date: 1994 Mar 23, 01:19:57 p.m. PST
+<BR>
+From: Zon (#103)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: those pesky bots..
+<BR>
+
+<BR>
+Those pesky bots getting you down?  Have no fear.  Now you can do:
+<BR>
+shoo <bot name>
+<BR>
+to any bot descended from the Generic Wandering Automaton object (#502).
+<BR>
+This will cause the bot to leave the room and not come back for
+<BR>
+a while. 
+<BR>
+
+<BR>
+Zon
+<BR>
+<BR>
+Date: 1994 Mar 29, 08:24:58 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Generic Auditorium
+<BR>
+
+<BR>
+Generic Auditorium (#562) allows you to lock the announce verbs of a room using the @mute <key-expression> command.  It uses the same mechanism as @lock or @encrypt.  Check out Bellona Auditorium, northwest of the Labry Apartments.  In that room, you must be holding the microphone in order to talk or emote.
+<BR>
+<BR>
+Date: 1994 Apr  4, 02:47:51 p.m. PST
+<BR>
+From: El (#299)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Ideas
+<BR>
+
+<BR>
+Ok...
+<BR>
+
+<BR>
+I've got several ideas for projects and the like which I'd like to bounce around for y'all to consider.  I haven't read Dhalgren (just ordered it today) and only a bit of Dick or Burroughs, so some of it may be unthemely.  I'd like your opinions, just post here if you have any.  This list has been kinda quiet lately anyhow.  Now, on with the ideas...
+<BR>
+
+<BR>
+1.  A "Fluid" Player Class, which I've already begun a bit of work on.  One of the most annoying and least convincing aspects of MOO to me is the aspect of having a static, unchanging desc.  What I'm envisioning is a PC that would allow you to define a slew of "desc snippets" which would be randomly shuffled and placed into your desc whenever :look() is called.  This appears to me to be an easy hack, as it's all just randomization, and message setting.  I have a lot of ideas re: customization, but the question I'm asking is where it should be in the hierarchy.  Should it be a kid of UUPC or Scorpion?  Would there be enough interest in such a PC to place it between UUPC and Scorpion in the hierarchy?
+<BR>
+
+<BR>
+2.  Areas to build.  For some reason, I really like the idea of an espresso stand/tattoo parlor.  How about Bellona's City Hall?  I can envision the City Hall being something akin to either a boardinghouse or market/temple.  Good idea?  Bad idea?
+<BR>
+
+<BR>
+3.  Literary stuff.  I've read a smattering of PKD's most paranoid novels, mainly the Valis books, and am wondering if these could be fit into Dhalgren at all.  This is where I get a bit hazy on theme... Would a Valis satellite, floating in geo-synchronous orbit over Bellona be feasible?  How to tie the two together?
+<BR>
+
+<BR>
+4.  Cults, secret societies.  The theme of Dhalgren mentions "secret cults;" a MOO idea which I love, in theory, but can never figure out how to implement.  I considered creating an area on CyberSphere ruled by cult members, but ran into the same problem that others there had with developing corporations and the like -- how does one create incentive to join a "MOO organization?"  And, doesn't this create a level of hassle that this place would most rather ignore?  The idea of people running around VRs, scheming and conniving is a really sexy one to me.  It adds a layer of mystery and intrigue, a feeling of never quite knowing exactly what's going on.  We need cults!
+<BR>
+
+<BR>
+5.  New bot idea.  How about bots that walk around, exchanging gossip and information about players?  They can overhear snippets of conversations, wander around the MOO, bump into one another and randomly trade bits of information.  Just an idea, could be interesting.
+<BR>
+
+<BR>
+Well, that's about it for now.  Like I said, I'm still not sure I'm fitting into the theme particularly well yet, so feel free to ding any of the previous ideas if they appear to be at odds with what this MOO is all about.
+<BR>
+
+<BR>
+..
+<BR>
+El
+<BR>
+<BR>
+Date: 1994 Apr  4, 07:09:22 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: re: ideas
+<BR>
+
+<BR>
+Good ideas from El!  The fluid player player class might be based on a program that substitutes random words into text.  :description() could call that, as could other things.  I could write my Insulting FO with such a tool.
+<BR>
+Some sort of market area (and "Agora") would be cool.  This could go in Interzone too (just reminding folks of that Willima Burroughs area).  Or it could go in Bellona.
+<BR>
+I really like the idea of a VALIS satellite.  Horselover also mentioned this.  You all should do it!  A pink laser beam could zap people in outdoor locations.
+<BR>
+Cults -- by all means.  Start a new secular religion.  Marlowe and I have talked about that some.  I'd love to chat about it.
+<BR>
+A wondering gosiping bot sounds cool.  Marcus had a similar idea -- litter, wandering notes that you can read and write on.
+<BR>
+<BR>
+Date: 1994 Apr  5, 06:57:40 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: #176 Change
+<BR>
+
+<BR>
+I've modified The Generic Ambient Noise Room #176 so that the owner can just turn the whole noise behavior off without clearing the noise property.
+<BR>
+
+<BR>
+This may be useful for debugging or for just taking a break from the noises.
+<BR>
+
+<BR>
+It's done by setting the .active property to 0. To turn it back on, change the prop back to 1 and use the new `@restart' verb.
+<BR>
+
+<BR>
+Dred
+<BR>
+<BR>
+Date: 1994 Apr 25, 08:08:53 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: #955, PARC with Seats
+<BR>
+
+<BR>
+I've just created the PARC with Seats. You can define any number of virtual seats in your room with customized messages.
+<BR>
+
+<BR>
+See `help #955' for details on how it works and what you need to do to set them up.
+<BR>
+
+<BR>
+Note: The room makes no attempt to put the seats in the description. That's up to you. When someone is sitting in the seat, that does show up in the description when someone looks.
+<BR>
+
+<BR>
+You can use the PARC's @detail command to give your seat a description that people see when they do `look <seat>'.
+<BR>
+
+<BR>
+Dred(ful)
+<BR>
+<BR>
+Date: 1994 Apr 27, 03:11:48 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: gateway down
+<BR>
+
+<BR>
+Princeton's internet gateway went down in the electrical storm this afternoon.  If your reading this now, that means its back up.  :-)
+<BR>
+<BR>
+Date: 1994 May  1, 11:43:45 a.m. PST
+<BR>
+From: Eclipse (#538)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Generic Speaking Wandering Automaton (GSWA)
+<BR>
+
+<BR>
+The Generic Speaking Wandering Automaton, or GSWA for short, is now available for use.  A child of the Generic Wandering Automaton, players can talk to this bot as it wanders through lovely downtown Bellona (or any other area), and it will talk back.
+<BR>
+See 'help #1044' for more info.
+<BR>
+have fun.
+<BR>
+Eclipse
+<BR>
+<BR>
+Date: 1994 May  1, 10:46:19 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Neveryona
+<BR>
+
+<BR>
+I wonder if it might be interesting to create a realm here based on Delany's Neveryona.  A sensual fantasy area but with a postmodern twist.
+<BR>
+<BR>
+Date: 1994 May  2, 06:32:35 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: New FO
+<BR>
+
+<BR>
+I was getting sick of not having a good way of pasting text around, so I created the Pasting Feature #1055.
+<BR>
+
+<BR>
+This is really only useful if you have good local editing and such in your client program.
+<BR>
+
+<BR>
+See help #1055 for details.
+<BR>
+
+<BR>
+Dred(ful)
+<BR>
+<BR>
+Date: 1994 May  2, 07:49:38 p.m. PST
+<BR>
+From: El (#299)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Login message
+<BR>
+
+<BR>
+I'm sorry to be such a goofball, but I really dislike the look of the DHALGREN welcoming message.  #'s and all.  Anyone have any prettier ideas?
+<BR>
+
+<BR>
+00
+<BR>
+<BR>
+Date: 1994 May  2, 08:32:42 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: login banner
+<BR>
+
+<BR>
+Yep, the login message is just the unix "banner" command's output.  I started once to make a ruined-city skyline.  A light shield?  A cooler banner?  I'll experiment a little.
+<BR>
+<BR>
+Date: 1994 May  4, 09:25:58 a.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Down Monday Morning
+<BR>
+
+<BR>
+Dhalgren will be down Monday morning while we install a new version of the operating system on actinic.
+<BR>
+<BR>
+Date: 1994 May  5, 07:39:52 a.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: crash
+<BR>
+
+<BR>
+The machine Dhalgren runs on crashed last night at 1am.  Just one of the reasons we want to upgrade the operating system!  The first version of the SGI Indy OS is somewhat inefficient and unstable.
+<BR>
+<BR>
+Date: 1994 May  5, 09:02:44 p.m. PST
+<BR>
+From: genna (#352)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: new portable room
+<BR>
+
+<BR>
+A new generic room:
+<BR>
+#1066    The Generic Journeying SPARC
+<BR>
+It journeys, it's a container, it can be @secured. AND.. it has seats. Not to mention weather. All the comforts of home on the road. Enjoy.
+<BR>
+Remember... Buckle up for safety!
+<BR>
+<BR>
+Date: 1994 May  9, 12:18:53 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: OS upgrade
+<BR>
+
+<BR>
+The OS upgrade on Dhalgren's host machine will happen tomorrow morning (tuesday).
+<BR>
+<BR>
+Date: 1994 May 12, 05:53:55 p.m. PST
+<BR>
+From: Marcus (#812)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Generic Litter Available
+<BR>
+
+<BR>
+Any MOOers with literary ambitions but who know well enough
+<BR>
+not to value their work may be interested in Generic Litter
+<BR>
+#834. Basically a $note which doesn't quit when you thow it
+<BR>
+away...
+<BR>
+It's been product-tested but nothing's guaranteed in this
+<BR>
+world! any problems, complain to
+<BR>
+Marcus
+<BR>
+<BR>
+Date: 1994 May 19, 09:58:48 a.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Dhalgren to coast for a week
+<BR>
+
+<BR>
+The archwiz will be out of town May 20-27, and Dhalgren will be sort of coasting.  I'll see if I can get one of my cs-staff friends here to keep an eye on the MUD in case the machine goes down.
+<BR>
+<BR>
+Date: 1994 May 19, 12:46:31 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *graffiti (#107) and *Wizard-Mail (#102)
+<BR>
+Subj: quota and programming policy
+<BR>
+
+<BR>
+We've had a few discussions about policy and I've thought some about this.  Let me make a couple quick comments to clarify the situation with quota and prog bits.
+<BR>
+
+<BR>
+Dhalgren runs on a very fast machine (the MIPS R4400 is faster than LambdaMOO's CPU), but one that has relatively little RAM (32 megabytes).  For the time being we hope to keep the database down below 5 or 6 meg.  Its 2.7 meg now.  Players start out with 25K, which is enough to build a number of rooms and toys.  We hope people will concentrate on making a few quality things rather than a lot of scenery.  Any wizard can give you 50K if they like what you do, and more than 50 is possible with some inter-wizard discussion.
+<BR>
+
+<BR>
+Prob bits are given out pretty freely.  Unlike LambdaMOO and PostModernCulture, we do not allow anti-social verbs here.  We encourage free artistic expression, but this does not include programs designed to attack or annoy players.  Sexual harassment is a toadable offense.  Spamming people, making them fart or vomit or other such action spoofs will get prog bits turned off.  Creating provocative objects is OK.  A player can go into a museum and see a Maplethorp picture and get pissed off -- but he can't go in a museum and have something out of a malplethorp picture HAPPEN to him.
+<BR>
+
+<BR>
+Well, this isn't written by a lawyer, so I hope the intension is clear.  The difference between "provocative" and "hostile" is subjective, and since we have really had no problems yet, let's just leave it at this for now.
+<BR>
+<BR>
+Date: 1994 Jun  5, 01:35:51 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: crash
+<BR>
+
+<BR>
+We had a crash Saturday morning.  Dhalgren was down for about an hour.
+<BR>
+<BR>
+Date: 1994 Jun  5, 02:28:34 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: We're famous, woo woo!
+<BR>
+
+<BR>
+Dhalgren got a mention in the June issue of _Lingua Franca,_ an academic journal: 
+<BR>
+ "DhalgrenMOO is a postapocalypse New York City, where dogs run wild and street hustlers try to make you part with whatever virtual currency you may be carrying."
+<BR>
+Don't we sound like fun?  Now we get to have hordes of confused academics wandering around looking for Jeremy!
+<BR>
+<BR>
+Date: 1994 Jun 20, 12:42:14 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: crash
+<BR>
+
+<BR>
+actinic crashed today.  Probably the system staff rebooted the machine while I was away.
+<BR>
+<BR>
+Date: 1994 Jun 28, 05:09:47 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: page
+<BR>
+
+<BR>
+I think the page verb on MOOs is broken.  Shouldn't it echo back what you paged to you (so it appears in log files).  When I speak, I see what I say.  When I page, it just disappears into the ether.  Its easy to fix, but the question is should we?
+<BR>
+<BR>
+Date: 1994 Jun 28, 06:32:24 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Re: page
+<BR>
+
+<BR>
+Well, we could certainly hack page to echo like that, but it would add to spam lots. 
+<BR>
+
+<BR>
+Though paging usually ends up as being conversation, it shouldn't really be so equal to being in the same room with your other party and just using :say.
+<BR>
+
+<BR>
+Besides, from looking at the screen:
+<BR>
+
+<BR>
+page dred this is a test
+<BR>
+Your message has been sent to Dred.
+<BR>
+
+<BR>
+Becomes something like:
+<BR>
+
+<BR>
+page dred this is a test
+<BR>
+You page, "this is a test" to Dred.
+<BR>
+Your message has been sent to Dred.
+<BR>
+
+<BR>
+I guess we could kill the second line, but then custom page_echo's go out the window. I like them, myself. And the above lines would look like I just said it to the room, or whispered to Dred who was in the same room...
+<BR>
+
+<BR>
+The distinction reduces confusion. But I do see Patro's point about logs. Although, do you mean client or MOO logs? Client logs will have the line you typed as well as the responses. We don't have too MOO log mechanisms here as far as I know.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Jun 28, 07:29:36 p.m. PST
+<BR>
+From: Marcus (#812)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Re: page
+<BR>
+
+<BR>
+You've done it again you incompetent!"
+<BR>
+Funny, Patro, I was just thinking about this very thing...
+<BR>
+
+<BR>
+I think pages should echo, not only for logging but so we can 
+<BR>
+read our own lines as they go out (some of us have a bad habit
+<BR>
+of proofreading as we go, futile as it may seem).
+<BR>
+
+<BR>
+I agree with Dred that three lines to send a page is spammy and 
+<BR>
+that page echoes are particularly nice. I also think he's dred 
+<BR>
+on when he says paging shouldn't really be the same as saying 
+<BR>
+or whispering. The distinction is very important to preserve VR.
+<BR>
+
+<BR>
+The solution might be to integrate the page_echo_msg with the 
+<BR>
+line paged, so...
+<BR>
+
+<BR>
+page marcus You've done it again you incompetent!
+<BR>
+In Stage Manager's Office, Marcus raises an eyebrow. You page, 
+<BR>
+ "You've done it again you incompetent!"
+<BR>
+
+<BR>
+This is two lines to reduce spam but the page_echo-msg 
+<BR>
+lengthens the line and signals (preserves the distinctiveness 
+<BR>
+of) paging.
+<BR>
+
+<BR>
+Hell, maybe all those args can be strung together and sent to 
+<BR>
+ who:page_echo_msg() for an optional string substitution...?
+<BR>
+
+<BR>
+Cause I always like to read my text a second time...;-)
+<BR>
+
+<BR>
+--Marcus
+<BR>
+<BR>
+Date: 1994 Jun 28, 10:55:10 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: page echo
+<BR>
+
+<BR>
+I guess I am expecting page to act like whisper.  Page echo could be sacrificed.  Page announce messages are still cool.  And people could customize a message to be returned when they are not logged in (canyou do that now?).
+<BR>
+
+<BR>
+This is just speculation, not an urgant problem.  But in fact tf doesn't seem to LOG what I type, only what is echoed back from the MOO.  So anything I page is not logged.
+<BR>
+<BR>
+Date: 1994 Jun 29, 01:57:54 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: downtime
+<BR>
+
+<BR>
+Princeton's internet gateway was knocked out today in a thunderstorm.  Sorry.
+<BR>
+<BR>
+Date: 1994 Jun 30, 12:06:29 p.m. PST
+<BR>
+From: cinnamon (#301)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Logging
+<BR>
+
+<BR>
+Are folks just customarily logging their MOO-sessions? And may I ask why?
+<BR>
+<BR>
+Date: 1994 Jun 30, 12:43:06 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: logging
+<BR>
+
+<BR>
+I rarely log MOO sessions, but some people log every minute of their MUD connect time.  I think practices vary widely.
+<BR>
+<BR>
+Date: 1994 Jul  4, 06:19:19 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: litter
+<BR>
+
+<BR>
+Hmmmm, I think litter is getting a little out of control.  Its cool, but there is so much of it now that people are starting to complain.  Any suggestions about how we could make it less intrusive?
+<BR>
+<BR>
+Date: 1994 Jul  5, 10:05:09 a.m. PST
+<BR>
+From: 99 (#429)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: re the litter...
+<BR>
+
+<BR>
+litter eating rats?
+<BR>
+<BR>
+Date: 1994 Jul  5, 11:57:54 a.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: trash bin
+<BR>
+
+<BR>
+There is a trash bin on the corner by the stone lions (the park entrance).  This is an exit to a room with no exits.  Litter and pets that wander indiscriminatnly will eventually end up here.
+<BR>
+
+<BR>
+This will give litter a nice half-life.  I like litter, but we need a sink as well as a source for it.  Folks can rescue their favorite items from the Trash Bin if they want to put it back in circulation.
+<BR>
+<BR>
+Date: 1994 Jul  5, 02:51:08 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Some virtual privacy features
+<BR>
+
+<BR>
+Looking at remote objects is a peculiar (but sometimes handy) feature of MOOs.  I have partially disabled that feature on some room and player classes now.
+<BR>
+
+<BR>
+Rooms of the Secured Post-Apocalypse Room (#262) type cannot be seen by anyone not actually in the room if its security level is not Open or its free_entry is zero.
+<BR>
+
+<BR>
+The Scorpion Player Class (#153) now has a new message.  If you are an ancestor of this class (which I recommend on Dhalgren), you can make yourself unviewable remotely by setting:
+<BR>
+
+<BR>
+       @remote_see me is NO
+<BR>
+<BR>
+Date: 1994 Jul  5, 02:58:22 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: privacy II
+<BR>
+
+<BR>
+These privacy features can be thwarted.  The idea is one of theme.  With some more thought, we could probably make the remote-see stuff truly secure.
+<BR>
+<BR>
+Date: 1994 Jul  6, 12:10:58 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: litter
+<BR>
+
+<BR>
+I should apologize to Marcus for complaining about litter publically.  It has been one of the really cool things people have made here.  Almost TOO cool.  :-)  I think a littel parameter tuning will resolve any difficulties.
+<BR>
+<BR>
+Date: 1994 Jul  6, 03:08:48 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: For a good time...
+<BR>
+
+<BR>
+     finger trisha@ramp.com
+<BR>
+
+<BR>
+The future of the internet?
+<BR>
+<BR>
+Date: 1994 Jul 11, 01:19:18 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: legal disclaimer
+<BR>
+
+<BR>
+You've no-doubt noticed the new legal disclaimer on our welcome banner.  Even FurryMUCK is now doing this.  Its a sign of the times, both because the government is on a witch-hunt to prove there are bogeymen on the network, and because IF someone wants to conspire to do something illegal here, we don't want the FBI carting actinic.princeton.edu off in a box.  Or worse yet, carting me off in a box!
+<BR>
+<BR>
+Date: 1994 Jul 14, 08:48:39 p.m. PST
+<BR>
+From: Sai (#861)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: legal disclaimer language...
+<BR>
+
+<BR>
+carting the MOO off in a box? Now you've got me thinking of Jack-In-The-Boxes....
+<BR>
+and when they cart off the box and try to open it, boing! a little puppet springs out and sings,
+<BR>
+we keep our insides in,
+<BR>
+we keep our outsides out,
+<BR>
+you take away our skin,
+<BR>
+and there's a big mess all about...
+<BR>
+a disclaimer ruins your clout!
+<BR>
+
+<BR>
+sorry. really. it just came to mind.
+<BR>
+-Sai
+<BR>
+<BR>
+Date: 1994 Jul 15, 07:00:26 a.m. PST
+<BR>
+From: El (#299)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: My Enlightenment
+<BR>
+
+<BR>
+I have returned, my children.  I have returned with a mission.
+<BR>
+
+<BR>
+From this point on, I hereby plan to devote all of my time, my quota, my spirit-fluids towards the achievement of the physical, spiritual and virtual state known as 'El'.  Towards these ends, be prepared to witness and participate in the growing, the glowing, the infusing of DhalgrenMOO with certain aspects of 'El'.  The godhead opened up to me, and ordered 'Recite!' and I shall do my best to serve as the vessel for the power of 'El'.
+<BR>
+
+<BR>
+To be continued at a later date.
+<BR>
+<BR>
+Date: 1994 Jul 15, 04:52:14 p.m. PST
+<BR>
+From: Sai (#861)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: El
+<BR>
+
+<BR>
+isn't that a subway system or something? hmm, take the El train....sounds good. Instead of Danny_the_Street we'll have El_the_Metro (theme music by Berlin, of course.)
+<BR>
+-Sai
+<BR>
+<BR>
+Date: 1994 Jul 15, 05:53:07 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Cosmic collision
+<BR>
+
+<BR>
+The pieces of that comet are starting crash into Jupiter today.  Could cause strange events in Bellona.
+<BR>
+<BR>
+Date: 1994 Jul 15, 07:13:52 p.m. PST
+<BR>
+From: Sai (#861)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: cosmic games
+<BR>
+
+<BR>
+God does not play dice with the universe...  
+<BR>
+true. God plays pool.
+<BR>
+"The comet fragments will impact on the sperical core of Jupiter. The core(known in all the sacred texts as 'yon 8-Ball of Satan') will be smacked out of its gaseous envelope and into our little corner pocket of the solar system. It will eithr impact somewhere north of Cleveland or knock the moon into an area whose center is the Dead Sea. Either way, yon 8-Ball of Satan will end almost all life on Earth.
+<BR>
+The only survivors will be (of course) the Knights Templar who have been in hiding since 1307. Emerging from their catacombs, they will ponder - until such time that the earth is completely uninhabitable - the meaning of the phrase plastered on every modern manuscript remaining: 'O.J. Did It!'
+<BR>
+
+<BR>
+being drunk may be no excuse...so I'll call it a reason,
+<BR>
+-Sai
+<BR>
+<BR>
+Date: 1994 Jul 16, 08:11:49 a.m. PST
+<BR>
+From: Marcus (#812)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Jupiter
+<BR>
+
+<BR>
+Dhalgren residents interested in celestial events might find a
+<BR>
+peregrination interesting...@go #896...
+<BR>
+<BR>
+Date: 1994 Jul 16, 08:58:21 p.m. PST
+<BR>
+From: Marcus (#812)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Littering
+<BR>
+
+<BR>
+An adjustment has been made to the ban verb on litter: now
+<BR>
+not only may the owner use ban to limit its range, but also 
+<BR>
+any player may ban given pieces of litter from eir spaces.
+<BR>
+Type 'ban <litter> from <wherever>' and the litter won't
+<BR>
+blow back in after it blows out (but you can only ban it
+<BR>
+from rooms you own).
+<BR>
+
+<BR>
+Also, the default interval between litter's blowing from room 
+<BR>
+to room has been changed from five minutes to ten.
+<BR>
+
+<BR>
+If litter appears to you as spam, however, the easy way to 
+<BR>
+clear your screen is to pick it up, thereby preventing it from 
+<BR>
+blowing around. (You might drop it again when you log off.)
+<BR>
+
+<BR>
+Any other problems with litter might be reported to the owner 
+<BR>
+of the generic, namely me, Marcus. Thanks!
+<BR>
+<BR>
+Date: 1994 Jul 18, 03:45:01 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: crash
+<BR>
+
+<BR>
+SOrry, Princeton's internet gateway went down again.
+<BR>
+<BR>
+Date: 1994 Jul 19, 12:12:13 a.m. PST
+<BR>
+From: Johnathon (#1358)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Crash
+<BR>
+
+<BR>
+Sorry guys, ( Patro, Legba ) the crash cut me off....
+<BR>
+I'll catch you some other time. ( probably when I'm more sober ! )
+<BR>
+<BR>
+Date: 1994 Jul 20, 03:33:21 a.m. PST
+<BR>
+From: Johnathon (#1358)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Fire Mural
+<BR>
+
+<BR>
+Well, I got the fire mural working. When there is more than one person logged in, #go 1365 ( Johnathon's Room ) and look at the mural...
+<BR>
+You should see the rest of the people in the game in the mural.
+<BR>
+Next step : alias @join to touching the mural.
+<BR>
+Hope you like it. 
+<BR>
+Johnathon
+<BR>
+<BR>
+Date: 1994 Jul 24, 05:45:32 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: power hit
+<BR>
+
+<BR>
+Dhalgren crashed a while ago during a lightning storm.
+<BR>
+
+<BR>
+Dhalgren will be down this wednesday during an 8-hour power shutdown at the computer science building.  I'll be out of town, but one of the CS staff here will reboot the MUD when power is restored.  That might be as late as Thursday morning.
+<BR>
+<BR>
+Date: 1994 Jul 30, 12:36:43 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: SIGGRAPH
+<BR>
+
+<BR>
+I had a good time at SIGGRAPH in Orlando.  About 30,000 people attend this conference on computer graphics.  There were several fascinating panel discussions on virtual reality (including one chaired by Kidd/Moose!).
+<BR>
+
+<BR>
+I was struck by comments (particularly by William Bricken and others) about separating "display" and "action" as concepts in virtual reality.  MUDs were pointed out as an intersting example of the central importants of action, since there is no grahpical display (an amusing fact to point out at SIGGRAPH).  Bricken talks about boundaries between spaces.  The keyboard and screen are a boundary between RL and the digital computer.  The software interface is a boundary between the computer and VR.  Most operating systems reveal a great deal of the nuts and bolts of the digital computer domain to the user -- something programs think they want but other users may not.  Ideally, the interface to VR should hide the digital domain and give the user the illusion of a single boundary between RL and VR -- direct manipulation of objects in VR and a sense of presense in VR.
+<BR>
+
+<BR>
+Brenda Laurel talked about her experimental VR system called "Placeholder" inwhich users enter the bodies of animal totems (Crow, Snake, Spider, Fish).  Each of these characters has a "body" with special strengths and weaknesses.  Their voices are altered electronically, the fish can see underwater, the snake can see infra-red.  This made me think about experiments one could do on a MUD with certain player classes and room classes.
+<BR>
+<BR>
+Date: 1994 Aug 15, 08:42:16 a.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: address change
+<BR>
+
+<BR>
+At some point in the near future, the domain name service at Princeton will be changing.  Dhalgren's address will change slightly, so keep this in mind if you find you cannot connect:
+<BR>
+
+<BR>
+old address:  actinic.princeton.edu 7777
+<BR>
+new address:  actinic.cs.princeton.edu 7777
+<BR>
+<BR>
+Date: 1994 Aug 25, 07:29:19 p.m. PST
+<BR>
+From: Gilmore (#1473)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj:  
+<BR>
+
+<BR>
+Woo woo, #1462, Generic anonymous room.  Best I could do sans wizdust.  Created at the behest of the mighty legba.
+<BR>
+<BR>
+Date: 1994 Aug 25, 08:20:23 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107) and Calkins (#150)
+<BR>
+Subj: Change to PARC
+<BR>
+
+<BR>
+I've added a :set_detail_names :set_detail_descriptions verb to the PARC #110 so that the $note_editor can be used to edit these corresponding props.
+<BR>
+
+<BR>
+This will also allow other verbs, running with the correct perms, to set them also.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Aug 26, 09:16:56 p.m. PST
+<BR>
+From: melusina (#907)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: new list.
+<BR>
+
+<BR>
+I've just made a new mailing list called *cuffs.  Take a look at the first post to see what it's about.  Thanks.
+<BR>
+
+<BR>
+mel.
+<BR>
+<BR>
+Date: 1994 Sep  7, 11:56:21 a.m. PST
+<BR>
+From: Palace (#1400)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Please @recycle.
+<BR>
+
+<BR>
+Please @recycle this character at your first opportunity.  This character's password has been changed to a long string of gibberish that I will never remember, so the character is useless and cannot be connected to.  Ergo, a waste of DB space.
+<BR>
+
+<BR>
+I thank you for your attention to this matter.
+<BR>
+
+<BR>
+--
+<BR>
+Palace
+<BR>
+<BR>
+Date: 1994 Sep  7, 08:23:27 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: New Object! Generic Dispenser #1488
+<BR>
+
+<BR>
+I've just created the Generic Dispenser #1488. This object can be used to create thematic dispensers of generics. Perhaps a better interface than using @create all the time.
+<BR>
+
+<BR>
+For example, a candy machine that gives out children of generic candy to any player who presses a button. 
+<BR>
+
+<BR>
+It will require some programming to set up a child of this generic. There is extensive help, also.
+<BR>
+
+<BR>
+Note: I will be keeping an eye on children of this object, since it has wizdust on it.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Sep  9, 06:03:25 a.m. PST
+<BR>
+From: Sick (#539)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: generic integrating room (#459)
+<BR>
+
+<BR>
+not finding it here, i created the generic integrating room (#459) as a child of $room. this parent allows objects with .look_msg properties to be integrated into the room's description along with .obvious==2 exits.
+<BR>
+i did my best to keep with the integration style $room uses for exits, appending the integration paragraphs to the endof STR descriptions, and appending the object integration message to the last line of LIST descriptions, with the exit messages appended as a new line (this is reversed if .exits_first is true, which it is by default).
+<BR>
+owners of generics descended from $room may wish to @chparent their generics to #459 for this added feature. check the help.
+<BR>
+enjoy.
+<BR>
+sick.
+<BR>
+<BR>
+Date: 1994 Sep  9, 08:37:28 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: #550 worn_msg change
+<BR>
+
+<BR>
+Okay, so I was thinking about it, and it really is confusing the way it is now for the pronoun substitutions on the Generic Wearable thing #550.
+<BR>
+
+<BR>
+So I changed them back, yet again, to what they were before. For most of you, there is no change, since I went to a new way and am now going back to the old.
+<BR>
+
+<BR>
+In the worn_msg for clothing (children of #550):
+<BR>
+
+<BR>
+%n, %o, %p, %s, %r, %q all refer to who is wearing the clothing (And assumes that they have the clothing in their inventory)
+<BR>
+%d refers to the player looking at them.
+<BR>
+%t refers to the clothing itself
+<BR>
+
+<BR>
+I went ahead and changed the messages for those people who went to my new way. Sorry about the confusion. All the children of #550 should work fine now.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Sep  9, 11:32:01 a.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: generic rooms and stuff
+<BR>
+
+<BR>
+An integrating room sounds good.  Folks interested in generics should look at the box in the alley (#120) which contains the local Dhalgren generics.  The Post-Apocalypse Room (#110) supports details and also supports the Bellona daytime and weather substitutions.  #262 is a version of PARC with security.  Another child of PARC supports Lambda-style seats (#955) and yet another supports a generalization of seats (Room with Stacking, #563).  Let's make the integrating room at least be a child of PARC so we get the MOO-wide weather/and time stuff.
+<BR>
+
+<BR>
+Player classes are also continuing to evolve.  The lit-theory folks and I have been having an endless discussion about embodiment in VR, which I hope will lead to an interesting set of PC features someday.  Right now, the main Dhalgren player class is the Scorpion PC (#153).    That's a work in progress to some extent.
+<BR>
+
+<BR>
+I'd like to generally encourage people to try new things.  Dhalgren is not LambdaMOO.  I'm certainly prepared to shower anyone with quota who wants to explore new concepts in VR, and am not very keen on porting the Lambda environment to here.
+<BR>
+<BR>
+Date: 1994 Sep  9, 11:38:09 a.m. PST
+<BR>
+From: Sick (#539)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj:  
+<BR>
+
+<BR>
+personally, i feel that integration is "useful" before ambient noises and seats and the apocalypse and all that. i'd be happier if #176 were chparented to the integrating room, rather than me sticking something so fundamental so far down the heirarchy.
+<BR>
+but that's just me.
+<BR>
+sick.
+<BR>
+<BR>
+Date: 1994 Sep  9, 02:43:09 p.m. PST
+<BR>
+From: Eclipse (#538)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: #459, #1044, and integration
+<BR>
+
+<BR>
+well, with the new integrating room that will integrate objects as well as exits, i have taken the liberty of putting a .look_msg prop on the generic speaking wandering automaton, #1044.
+<BR>
+actually, #459 was created kind of at my request, kind of for this purpose.  i wanted to see something other than 'You see fred here.' when seeing the gswa in the room.  so, since i have plans for my own child of #1044 (which is why i needed the integration), there is now @look on children of #1044.  if you @chparent a room to #459 and put the gswa in it, it's look message will be integrated by default.  for info on how to turn off integration, and switching object integration with exit integration, see 'help #459'.
+<BR>
+sorry if this is rambling.  i've had a long day, and it ain't over yet.
+<BR>
+
+<BR>
+have fun,
+<BR>
+Eclipse (budding builder!)
+<BR>
+<BR>
+Date: 1994 Sep 12, 09:03:21 p.m. PST
+<BR>
+From: Trismegistos (#1457)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Generic Music Machine
+<BR>
+
+<BR>
+Generic Music Machine (#1472) has now been added to the Wooden Box Bunch. This customizable  object can play lyrics or descriptions from a selection of songs, in the background of a room.  
+<BR>
+
+<BR>
+Enjoy, experiment, and let me know of any bugs or limitations ...
+<BR>
+                                        Trismegistos
+<BR>
+<BR>
+Date: 1994 Sep 17, 11:26:02 p.m. PST
+<BR>
+From: Patroclus (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Some ancient history
+<BR>
+
+<BR>
+Take the taxi to the "beach" and go east out into the sea.  You'll find something cool, for those interested in the ancient history of text-based VR.
+<BR>
+
+<BR>
+Jim Apsnes invented TinyMUD in 1988, and a sequence of MUDs ran at CMU in 1989 and 1990.  TinyMUD classic (Apr89-Aug90) and Islandia (Jan90-Nov90) were among the first.  Much of Islandia's population moved to FurryMUCK during the summer of 1990.  LambdaMOO started in Jan91.
+<BR>
+
+<BR>
+The MUCK and MOO servers are later stages in the evolution of TinyMUD, but if somehow one were able to look at a bit of the past, I think you'd be amazed by how much of the familiar character of MUDs appeared very early.  If you had been able to use @rose back then, you'd notice that a lot of what people program with verbs today was done back then with exist, messages, and locking.  But of course that was all long ago...
+<BR>
+<BR>
+Date: 1994 Sep 18, 05:24:58 p.m. PST
+<BR>
+From: Marcus (#812)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Lycanthropic Thespian pc
+<BR>
+
+<BR>
+Dhalgren denizens may now take themselves further out in 
+<BR>
+identity transformation... try the newly fixed-up Generic 
+<BR>
+Lycanthropic Thespian PC.
+<BR>
+
+<BR>
+As a lycanthrope, you may set your description to change 
+<BR>
+automatically by the phase of the moon (no, you don't have to 
+<BR>
+be a wolf, or even an animal). As a free bonus, it can change 
+<BR>
+with Bellona daytime and weather, too. In addition, wearables 
+<BR>
+which have appropriate properties and markup can also change 
+<BR>
+accordingly...so, for example, you can make a hat that gets 
+<BR>
+wet when it rains.
+<BR>
+
+<BR>
+More usefully, as a thespian this pc may wear costumes. 
+<BR>
+Costumes are unlike ordinary wearables in that they mask your 
+<BR>
+regular description when you wear them. See #1226, the Generic 
+<BR>
+Costume. Visit the stage at the O.o.F. Theater to have even 
+<BR>
+more fun with costumes.
+<BR>
+
+<BR>
+Any problems maybe reported to Marcus. Happy playing!
+<BR>
+<BR>
+Date: 1994 Sep 19, 08:06:08 a.m. PST
+<BR>
+From: Trismegistos (#1457)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Material MOO
+<BR>
+
+<BR>
+Talking with Gilmore about giving MOO environments more of a RL 'feel' (i.e.,
+<BR>
+no godlike powers like @create, @go, page, @move) has given me an idea for
+<BR>
+a basic Material milieu that could probably be run off a Lambdacore system.
+<BR>
+I have neither the time nor the system savvy to do anything with this, but
+<BR>
+maybe one of us can be inspired by this idea ...
+<BR>
+
+<BR>
+MaterialMOO Objects
+<BR>
+ All objects would have the following basic properties: material, size/mass,
+<BR>
+quality, form, and containment capacity (expressed in size units).
+<BR>
+I would start out with only a few simple materials -- wood, iron, gold. The 
+<BR>
+material would be included in the desc, which could be further customized by
+<BR>
+the creator. Ex. "An axe made of iron. The handle is graven with runes."
+<BR>
+Size/mass would govern players' ability to carry and wield the object, as
+<BR>
+well as containment of the object. Form is self-explanatory; if 0, the object
+<BR>
+is a hunk of raw material. Quality would be a minimum-function of the quality
+<BR>
+of raw material and the skill of the player who created it. Objects could be
+<BR>
+damaged, reduced in quality until they are scrap (unworkable raw material).
+<BR>
+
+<BR>
+Object forms: These would be master templates specifying creation and use of
+<BR>
+objects. By creation I mean what skill is needed to make the object, and the
+<BR>
+type, amount, and quality of raw material needed. Use would incorporate verbs
+<BR>
+usable by all the form's kids -- for an axe, these might be "chop <wooden obj>"
+<BR>
+and "attack <player>". Better-quality objects would be more efficient.
+<BR>
+
+<BR>
+Players: Players would have skills in crafts and fighting, possibly
+<BR>
+others such as climbing, swimming, concealment, stealth ... Combat
+<BR>
+would be fairly simple, and the victor would be given the choice of
+<BR>
+killing the defeated player, robbing him/her, or letting him/her go.
+<BR>
+
+<BR>
+Ethics would be encouraged by a "karma debt" assessed upon killing or
+<BR>
+robbing; players who die in a state of bad karma would not be
+<BR>
+recycled, but sent to a Hell, preventing the user from creating a new
+<BR>
+player. Of course this open up lots of possibilities: psychic players
+<BR>
+who can sense karma, plenary indulgences for a fee, etc.
+<BR>
+
+<BR>
+Milieu: An important feature of this MOO would be management of a
+<BR>
+player's off- time. There would be areas -- logging camps, mines, and
+<BR>
+the like -- where a player could go to and "work" while disconnected.
+<BR>
+Upon reconnecting he or she would be "paid" in materials proportional
+<BR>
+to the off-time spent there. There would also be guilds, where skills
+<BR>
+could be learned during off-time for a fee; and making objects could
+<BR>
+also require off-time involvement.
+<BR>
+ The economy would be set up initially with NPC merchants, guilds,
+<BR>
+and the like,but players could find it more advantageous to strike
+<BR>
+deals with each other.  A "swap" verb would facilitate the
+<BR>
+simultaneous exchange of goods.
+<BR>
+ "Sleeping" outside a work area or a secured building could be a
+<BR>
+perilous proposition, depending on the mercies of fellow players; but
+<BR>
+to be fair to unintentionally disconnected players, characters might
+<BR>
+be given the ability  to defend themselves automatically, or head for
+<BR>
+a secure area.
+<BR>
+
+<BR>
+Expansion: The milieu would become more interesting as the wizards --
+<BR>
+really, the "gods" -- introduced more and different materials,
+<BR>
+animals, and forms.  Master craftspeople could suggest new ideas for
+<BR>
+forms. The gods could create challenges and adventures. Etc ...
+<BR>
+
+<BR>
+                              Let me know what you think of this ...
+<BR>
+                                             Trism
+<BR>
+<BR>
+Date: 1994 Sep 20, 02:27:29 p.m. PST
+<BR>
+From: Patroclus (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: crash
+<BR>
+
+<BR>
+Sorry, our net crashed just now...
+<BR>
+<BR>
+Date: 1994 Sep 21, 11:08:43 a.m. PST
+<BR>
+From: Trismegistos (#1457)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: New Connection
+<BR>
+
+<BR>
+Just though I'd make it official: my area is now connected and ready for
+<BR>
+action. Keep walking south on Broadway, figure out how to cross the channel
+<BR>
+and the wasteland... At the end of your trek you will find a dispenser for
+<BR>
+a new, in-theme object. Vale, Trism.
+<BR>
+<BR>
+Date: 1994 Sep 22, 03:32:41 p.m. PST
+<BR>
+From: Eclipse (#538)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: new list
+<BR>
+
+<BR>
+there is a new list devoted to literature, *literature (aka *lit).
+<BR>
+it is separate from *verse because *verse describes itself as being devoted to poetry.
+<BR>
+if you're interested in *lit, `l *lit' and `@subscribe *lit'.
+<BR>
+thanx,
+<BR>
+
+<BR>
+Eclipse
+<BR>
+<BR>
+Date: 1994 Sep 24, 05:46:05 p.m. PST
+<BR>
+From: Patroclus (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Reid's new thesis
+<BR>
+
+<BR>
+Elisabeth Reid has written a masters thesis on MUDs that is well worth reading.  The title is _Cultural Formations in Text-Based Virtual Realities_ and you can obtain it via http://www.ee.mu.oz.au/papers/emr/index.html
+<BR>
+This paper gives a good history of MUDs and a critical discussion of language, politics and sex in social- and adventure-style MUDs.  You may have seen her previous paper _Electropolis: Communication and Community on Internet Relay Chat_ which was also quite interesting.
+<BR>
+<BR>
+Date: 1994 Sep 27, 08:28:58 a.m. PST
+<BR>
+From: melusina (#907)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Generic Container Room (#1016)
+<BR>
+
+<BR>
+I've added a .look_msg to this room, for those of you who might want to use it with integration.
+<BR>
+
+<BR>
+FYI, mel.
+<BR>
+<BR>
+Date: 1994 Sep 28, 07:38:15 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Login watcher update
+<BR>
+
+<BR>
+As per Eclipse's request, I've fixed up the login watcher so you can set your own message for logins and logouts.
+<BR>
+
+<BR>
+See help #109 for details.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Oct  4, 09:49:04 p.m. PST
+<BR>
+From: Eclipse (#538)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: new help on #1044
+<BR>
+
+<BR>
+a lot of changes, upgrades, and new capabilities have been added to the generic speaking wandering automaton (gswa), #1044.
+<BR>
+for more info on these changes, check out the rewritten help text, `help #1044'.
+<BR>
+a public service message (for a pretty silent public), educationally brought to you by,
+<BR>
+
+<BR>
+Eclipse
+<BR>
+<BR>
+Date: 1994 Oct  4, 11:22:46 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: stacking room
+<BR>
+
+<BR>
+Have a visit to Generic Room with Stacking (#563).  I'm gradually upgrading this room.  Objects can now have sitting_msg properties.
+<BR>
+<BR>
+Date: 1994 Oct  5, 01:53:01 a.m. PST
+<BR>
+From: Eclipse (#538)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: *lit
+<BR>
+
+<BR>
+due to the inordinate amount of public building i'm trying to do, and the dismayingly small amount of quota i find myself bound by, i had to recycle *literature.
+<BR>
+i have asked k.p., the owner of *verse, to include *lit in *verse's aliases, and to add literature to the description of *verse.  i also asked him to notify *graffiti if he does so.
+<BR>
+of course, anyone who wishes to could make a new *lit, if by chance they feel the need to or k.p. does not want to add *lit to *verse.  it's up to you.
+<BR>
+sorry, folx.  sacrifice in the name of progress.  :)
+<BR>
+
+<BR>
+Eclipse
+<BR>
+dhalgren's new slogan: "working for a better moo...together!"
+<BR>
+<BR>
+Date: 1994 Oct  5, 07:07:15 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: the map
+<BR>
+
+<BR>
+I've updated the map in the Tourist Center.  I also stuck a @map verb on the Scorpion Player so you don't have to go thru the caves just to read the map.
+<BR>
+<BR>
+Date: 1994 Oct  5, 08:21:56 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: map fixes
+<BR>
+
+<BR>
+By the way, I am sure I have missed lots of things that people built and linked to the world.  Look at the map and let me know please.
+<BR>
+<BR>
+Date: 1994 Oct  6, 11:13:57 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Refusals
+<BR>
+
+<BR>
+I've set up refusals here on Dhalgren. They reside on #396, a player class near the top of the hierarchy.
+<BR>
+
+<BR>
+Refusable actions are:
+<BR>
+        mail    move    page    whisper
+<BR>
+
+<BR>
+We might add more later. The command syntax is:
+<BR>
+
+<BR>
+        @refuse <action> from <player-list> [for <time interval>]
+<BR>
+
+<BR>
+Where:
+<BR>
+
+<BR>
+<action> is one or more of the above separated by spaces. Or the word
+<BR>
+         `everything' to mean them all.
+<BR>
+
+<BR>
+<player-list> is a list of players separeted by spaces. Or the word
+<BR>
+              `everyone' to mean everyone. If you use `guests', it will 
+<BR>
+              refer to all guests.
+<BR>
+
+<BR>
+<time interval> is the english words duration. Such as:  1 month, 2 weeks,
+<BR>
+                1 day, 5 minutes, etc. Leaving off the [for <time interval>] 
+<BR>
+                part will make it default to 1 week. Using the words
+<BR>
+                `forever' or `for ever' will mean just that.
+<BR>
+
+<BR>
+Examples:
+<BR>
+
+<BR>
+        @refuse move whisper from dredful patro for 2 weeks
+<BR>
+        @refuse everything from everyone
+<BR>
+        @refuse everything from everyone forever
+<BR>
+        @refuse everything from guests for 1 month
+<BR>
+
+<BR>
+And so on.
+<BR>
+
+<BR>
+Similarly, to remove refusals:
+<BR>
+
+<BR>
+        @unrefuse <action> from <player-list>
+<BR>
+
+<BR>
+Which works exactly the same except time-intervals are not needed.
+<BR>
+
+<BR>
+To see your refusals, simply type @refusals.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Oct  6, 11:44:58 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: more refusals
+<BR>
+
+<BR>
+I've added help topics: refusals, @refuse, @unrefuse
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Oct  7, 10:47:50 a.m. PST
+<BR>
+From: Trismegistos (#1457)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Generic Room With Surfaces (#2061)
+<BR>
+
+<BR>
+My latest post-industrial production, #2061, has been added to the wooden box bunch. It is a variant of the seated room that allows you to place objects on seats. If you rethink "seat" as "surface," this feature will allow your room to display objects in a number of interesting, customized ways. 
+<BR>
+Type help #2061 for more info. Beta-testing comments are always welcome -- drop me a line. To see kids of #2061 in action, check out the fence at River's Edge (#1485) or the Filling Station (#1603).
+<BR>
+              -- Trism
+<BR>
+<BR>
+Date: 1994 Oct  8, 08:58:17 p.m. PST
+<BR>
+From: Patroclus (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Ballard
+<BR>
+
+<BR>
+Anyone into J.G.Ballard?  He's a great writer, one of the first new-wave sci-fi authors.  I've been reading his collection of _Vermillion Sands_ stories, which would make a great sub-theme here.  Set in the near future at a desert resort.  Technology has made work pretty much obsolete and people are bored out of their minds.  Very decadent and postmodern.
+<BR>
+<BR>
+Date: 1994 Oct  9, 03:27:55 p.m. PST
+<BR>
+From: Gilmore (#1473)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: New login screen
+<BR>
+
+<BR>
+Whoa!  My compliments, whoever did it.
+<BR>
+<BR>
+Date: 1994 Oct 10, 12:03:05 a.m. PST
+<BR>
+From: Patroclus (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: new login
+<BR>
+
+<BR>
+Thanks.  It's a bit blinding, but I liked it.
+<BR>
+<BR>
+Date: 1994 Oct 10, 11:24:42 p.m. PST
+<BR>
+From: Patroclus (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: profiling Dhalgren
+<BR>
+
+<BR>
+I ran a profiling version of the MOO here for 24 hours:
+<BR>
+
+<BR>
+samples   time(%)        procedure (file)
+<BR>
+
+<BR>
+  55775 6e+02s( 20.1)    run (moo.PROFILE:execute.c)
+<BR>
+  20472 2e+02s(  7.4)    verbcasecmp (moo.PROFILE:utils.c)
+<BR>
+  10394 1e+02s(  3.7)    ll_delete_value (moo.PROFILE:ref_count.c)
+<BR>
+  10129 1e+02s(  3.6)    ll_insert_value (moo.PROFILE:ref_count.c)
+<BR>
+   8708    87s(  3.1)    free_var (moo.PROFILE:utils.c)
+<BR>
+   7896    79s(  2.8)    verb_call_setup_rt_env (moo.PROFILE:execute.c)
+<BR>
+   7867    79s(  2.8)    __malloc (libc.so.1:malloc.c)
+<BR>
+<BR>
+Date: 1994 Oct 11, 11:30:40 a.m. PST
+<BR>
+From: k.p. (#585)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: *text
+<BR>
+
+<BR>
+*Verse and *literature have spawned *text, a more general list for sharing your literary contributions to the world.
+<BR>
+
+<BR>
+Maybe we can have better quality stuff than the shit that passes for *literature on LambdaMOO?
+<BR>
+<BR>
+Date: 1994 Oct 17, 05:52:59 a.m. PST
+<BR>
+From: Amber-Jessica (#277)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: New login
+<BR>
+
+<BR>
+I agree that the new login is impressive.  However, I've been looking at it for several weeks now and I still have no clue what it says.
+<BR>
+<BR>
+Date: 1994 Oct 19, 01:42:13 p.m. PST
+<BR>
+From: Amber-Jessica (#277)
+<BR>
+To:&nbsp&nbsp Boudicea (#1021) and *graffiti (#107)
+<BR>
+Subj: Login
+<BR>
+
+<BR>
+I guessed that it was supposed to say "Dhalgren."  I just can't figure out how.  Must be something in my Ritalin.
+<BR>
+<BR>
+Date: 1994 Oct 25, 06:36:35 p.m. PST
+<BR>
+From: Marcus (#812)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Eve of All Hallows
+<BR>
+
+<BR>
+DHALGREN DENIZENS may be interested in celebrating one of the 
+<BR>
+MOOiest of holidays, imminent this week, by dressing up in 
+<BR>
+costumes. If you are a Thespian pc (#1223), you may dress up in 
+<BR>
+costumes, make em and share em with your friends. The parent 
+<BR>
+costume is #1226; its direct descendants have role and role 
+<BR>
+description settable as @messages. Alternatively, backstage in 
+<BR>
+the O.o.F. Theater the Pattern Room has a sewing machine on 
+<BR>
+which you may sew a costume which you may cut to suit yourself. 
+<BR>
+Please no vampires: not favored by certain wizards with 
+<BR>
+untested propensities to @toad....
+<BR>
+
+<BR>
+Downstairs from backstage, Below the Stage will be done in 
+<BR>
+spooky Hallowe'en decor (unless the Management is lying through 
+<BR>
+its fangs). This would be a fun place to try playing with your 
+<BR>
+costume (as would, for that matter, any descendant of the 
+<BR>
+Performance Room #1998). Creative artists with decorating ideas 
+<BR>
+for Below the Stage are welcome to contact Marcus. Post him 
+<BR>
+your knocks and moanings, your ambient noise.
+<BR>
+
+<BR>
+Contriving treats and tricks is up to you.
+<BR>
+<BR>
+Date: 1994 Oct 26, 09:24:49 a.m. PST
+<BR>
+From: melusina (#907)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: No Vampires?
+<BR>
+
+<BR>
+Well, can we be vampire victims?
+<BR>
+
+<BR>
+mel, the Devil's Concubine.
+<BR>
+<BR>
+Date: 1994 Oct 26, 12:59:33 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Harrumph
+<BR>
+
+<BR>
+Hey, don't slander the wizzes.  We love vampires and other undead things.
+<BR>
+<BR>
+Date: 1994 Oct 26, 03:08:14 p.m. PST
+<BR>
+From: Trismegistos (#1457)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Samhain Fire
+<BR>
+
+<BR>
+In keeping with the Halloweenish festivities, I have created a Samhain Fire in 
+<BR>
+the Empty Lot (#926), behind Marcus' theater. Everyone is invited to add one, two, many lines to the Fire's .burn_noise, and/or place suitable objects on the fire for (non-permanent) immolation!
+<BR>
+          Slainte, Trism
+<BR>
+<BR>
+Date: 1994 Oct 26, 04:19:06 p.m. PST
+<BR>
+From: Marcus (#812)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Vamps, fires...
+<BR>
+
+<BR>
+Well, roast me alive, why dontcha! ;-)
+<BR>
+<BR>
+Date: 1994 Oct 26, 06:20:00 p.m. PST
+<BR>
+From: melusina (#907)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Roasting Marcus
+<BR>
+
+<BR>
+I do believe they used that for witches, Marcus dear.  We'd much rather suck your blood.
+<BR>
+<BR>
+Date: 1994 Oct 27, 05:39:14 a.m. PST
+<BR>
+From: Kalessin (#1551)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: I feel it suitable to note..
+<BR>
+
+<BR>
+1) I would be happy to sit in the fire, should that be desired.
+<BR>
+2) The definition of immolation doesn't in any way imply the burning sense in which it is most often used.
+<BR>
+
+<BR>
+:grins.
+<BR>
+
+<BR>
+Kalessin
+<BR>
+<BR>
+Date: 1994 Nov 13, 05:23:04 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Dhalgren moving west
+<BR>
+
+<BR>
+Just some advanced warning that in a few weeks, Dhalgren will be moving from Princeton to the University of Washington in Seattle.  We'll send email to players about the new address.  I hope this will go smoothly, but it is possible that Dhalgren will be off the air for a few days during the switchover.  If so, don't panic!  Dhalgren has been on the air for about a year, and we are committed to the continuing existance of this cool little world.
+<BR>
+<BR>
+Date: 1994 Nov 14, 02:03:32 a.m. PST
+<BR>
+From: Patroclus (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: crash
+<BR>
+
+<BR>
+The MUD crashed (well, actinic.cs crashed) at 3am/
+<BR>
+<BR>
+Date: 1994 Nov 14, 08:08:06 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: massacre
+<BR>
+
+<BR>
+All the automaton and litter tasks were killed a while ago, hunting down sources of lag.
+<BR>
+<BR>
+Date: 1994 Nov 14, 08:08:57 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: dead puppets everywhere
+<BR>
+
+<BR>
+You can restart them.  They were not the source of lag.
+<BR>
+<BR>
+Date: 1994 Nov 15, 07:01:56 a.m. PST
+<BR>
+From: Eclipse (#538)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: btw
+<BR>
+
+<BR>
+i have added an :acceptable verb to the generic wandering speaking automaton (gswa, #1044), so now all children of it can carry objects, and have those objects locked to them.
+<BR>
+ever helpful,
+<BR>
+
+<BR>
+Eclipse
+<BR>
+<BR>
+Date: 1994 Nov 15, 10:56:20 a.m. PST
+<BR>
+From: melusina (#907)
+<BR>
+To:&nbsp&nbsp *graffiti (#107) and *coolthingstoread (#2163)
+<BR>
+Subj: Yet another list, woo woo.
+<BR>
+
+<BR>
+It seems that conversation around here often turns to the cool things we've read/mean to read when we have the time, or to the horrid things that we've suffered through reading but firmly believe that no one else should have to experience.
+<BR>
+
+<BR>
+So, in the interests of creating MORE mail for people to read, and in turning my elseReality procrastination into something productive SOMEWHERE, I've made this list.  *coolthingstoread, *cttr, or *books.  I put *books as the last alias because I wanted to indicate the flexibility of the list (heh.  Like the populace wouldn't just run with it anyway).  Anyway.  So, what are the cool things you've been reading lately?
+<BR>
+
+<BR>
+Oh yeah, this was mainly Patro's idea.
+<BR>
+
+<BR>
+hisses, mel
+<BR>
+who warns you all to give _Mina:  The Dracula Story Continues_ (Marie Kiraly (aka Elaine Bergstrom)) a miss.  Unless you're really bored.
+<BR>
+<BR>
+Date: 1994 Nov 15, 11:30:44 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp Eclipse (#538) and *graffiti (#107)
+<BR>
+Subj: Re: more mail
+<BR>
+
+<BR>
+I fixed the login watcher to automatically remove all invalid objects from your interesting list whenever accessed.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Nov 15, 01:09:28 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: #176
+<BR>
+
+<BR>
+I've just chparented #176 Generic Ambient Noise Room, over to Sick's #459 Generic Integrating Room.
+<BR>
+
+<BR>
+Now anything with a .look_msg can be integrated into the room's description. See help #459 for details.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Nov 15, 01:21:24 p.m. PST
+<BR>
+From: Eclipse (#538)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: #176 & #459
+<BR>
+
+<BR>
+for those of you who are interested/concerned, i'll make a few comments about dredful's previous post.
+<BR>
+sick (the owner of #459) and i asked dredful to move that room further up the hierarchy so that all rooms inherit integrating.  this way, if you want a room with seats that also integrates, you can have it.  it just seemed a logical option to have for all the rooms that are descended from #176.
+<BR>
+i have, at dredful's request (and a good one at that) changed the default of #459.integrating to be -1.  this means that player objects with a look_self_msg will _not_ be integrated into the room's description by default.  we decided to do this as a security measure, to avoid possible spying.
+<BR>
+what this means: all children of #459 (and now all descendents) will by default not integrate the .look_self_msg of players, although it will still do so for objects with a .look_self_msg.  to get rid of integration, set your room's .integration = 0.  to integrate players and objects, set it to 1.
+<BR>
+for those of you who have rooms parented directly to #459, if those rooms' .integration was something other than -1, chances are you're gonna have to go through the pain-inna-ass task of setting them again, to whatever they were before.  sorry.  but it's for the best, in the end.  :)
+<BR>
+also, the room owner's objects and residents of the room are `hidden' when their look_msg is a non-string, just for your information.
+<BR>
+if you still have questions, look at the help for #459, page me (Eclipse), or mail sick.
+<BR>
+changes, changes,
+<BR>
+
+<BR>
+Eclipse
+<BR>
+<BR>
+Date: 1994 Nov 15, 09:10:44 p.m. PST
+<BR>
+From: Eclipse (#538)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: it's here!
+<BR>
+
+<BR>
+fellow denizens of dhalgren:
+<BR>
+the future is here.  yes, now you can have your tattoo and wear it, too!  The Tattoo Den is here, ready and waiting to service you, the self-decorating hipsters of the post-apocalypse era.
+<BR>
+There's a bit of explaining that goes along with this, so pay attention.  :)
+<BR>
+To get to the Tattoo Den, simply go southwest from The Crossroads (#113) into the large office building.  When you enter the lobby, go east into the elevator shaft, make your way up to the fifth floor, and go west.  You are here.
+<BR>
+At the Tattoo Den, Biker Bob is waiting for you to come in and get the tattoo you've always dreamed of.  What you want is what you get: name, description, place on the body, the whole nine yards.  What's more, they're permanant.
+<BR>
+These tattoos cannot be removed from your body but by two methods: you can @eject it, or you can go back to the Tattoo Den to have Dr. Sass, our tattoo remover specialist, surgically remove your tattoo from your body with her high-tech laser gun.  These tattoos cannot me @moved by you or anyone else; nor can they be taken off, dropped, stolen, given away, or left lying around.
+<BR>
+And yes, the tattoo _will_ be integrated into your description, but here's the catch: you have to be a child of the Generic PC with Integrated Contents (#1986).  Due to circumstances beyond my control, this pc does not have the features of the Scorpion or Lycanthropic pcs.  Only children of #1986 (and it's descendents - of which there are none, yet) will be able to have their tattoo's description integrated into their own.  The GPCIC is a child of the Useful Utilitarian PC (#99), so be warned: you will be giving up the features of the Scorpion and other pc's if you @chparent to this class.
+<BR>
+However, if you don't wish to @chparent, don't be crushed just yet.  If you are not a child of #1986 and you get a tattoo, it will instead show up in your contents.  Not quite as realistic, but better than nothing.
+<BR>
+So, with this formal announcement of the opening of the Tattoo Den (#2130), I invite you to head on up there yourself and check it out.  There is a receptionist waiting to answer your questions, and there is no lack of helpful signs.
+<BR>
+Voila - tattoo you - and enjoy.
+<BR>
+the mother of necessity,
+<BR>
+
+<BR>
+Eclipse
+<BR>
+<BR>
+Date: 1994 Nov 16, 03:24:07 p.m. PST
+<BR>
+From: melusina (#907)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Apartments to Let
+<BR>
+
+<BR>
+I've just taken over the management of the Labry Apartments (north and, um, east from the Crossroads).  Although it's not a particularly well-kept building, we do have space available for prospective tenants.  If you're interested in moving in, let me know.
+<BR>
+
+<BR>
+mel the landsnakelady.
+<BR>
+<BR>
+Date: 1994 Nov 17, 10:18:36 a.m. PST
+<BR>
+From: Trismegistos (#1457)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Public Toilets
+<BR>
+
+<BR>
+The park bathrooms (north of Clearing in the Park) have recently been improved by the addition of two toilet stalls. 
+<BR>
+As of now they are fairly generic; you may hide, sit or scribble graffiti in them. Later, I may add special features.
+<BR>
+Delany, Foucault, Rechy, etc., I think, would approve ...
+<BR>
+                   -- Trism
+<BR>
+<BR>
+Date: 1994 Nov 17, 08:17:23 p.m. PST
+<BR>
+From: Arc (#2145)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: That DAMN Newspaper
+<BR>
+
+<BR>
+This doesn't seem to serve much of a purpose.  Well, at least not one very similar to the newspapers on other MOOs.  Fer chrissakes, the last thing on there is a reference to that wacky drug, 'the ticket' which never did take off like it was supposed to.  I demand a rehaul!  I demand it!  I'm demanding.  Well, yeah.
+<BR>
+
+<BR>
+--
+<BR>
+Arc
+<BR>
+<BR>
+Date: 1994 Nov 17, 08:23:27 p.m. PST
+<BR>
+From: Arc (#2145)
+<BR>
+To:&nbsp&nbsp *I'd-Rather-Be-Smashing-the-MOO (#2285) and *graffiti (#107)
+<BR>
+Subj: *I'd-Rather-Be-Smashing-the-MOO
+<BR>
+
+<BR>
+This a notice of a new MOOmail list dedicated to a similar venture as that of alt.destroy.the.internet.  Intended to foster discussions of means by which one can aid in the ultimate goal of destroying LambdaMOO, JaysHouseMOO and others.  Please, everyone, please bite the hand that feeds you.
+<BR>
+
+<BR>
+--
+<BR>
+Arc
+<BR>
+<BR>
+Date: 1994 Nov 21, 01:57:12 p.m. PST
+<BR>
+From: Patroclus (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: dhalgren.uwashington.edu
+<BR>
+
+<BR>
+Dhalgren will prolly be going off the air around December 1.  When it comes back up, it will most likely be at dhalgren.uwashington.edu 7777.  A Pentium PC with 32M of RAM will be the new home for this place.  I don't know how long of a delay there will be before we are on the air again.  It could be a week or two, but don't panic.
+<BR>
+<BR>
+Date: 1994 Nov 22, 11:53:56 p.m. PST
+<BR>
+From: Arc (#2145)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: DO YOU GIVE A DAMN CONTEST
+<BR>
+
+<BR>
+The annual DO YOU GIVE A DAMN Contest for 1994 is now underway!  Please submit all entries via MOOmail to me.  The winning entry becomes my desc and wins a very, very special virtual thingy.  Contest void where prohibited.
+<BR>
+<BR>
+Date: 1994 Dec  1, 09:10:15 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Change again in rooms
+<BR>
+
+<BR>
+After a bit of discussion, it was decided that the Generic Ambient Noise Room #176 should not be a child of generic integrating room #459 after all.
+<BR>
+
+<BR>
+I've just @chparented it back to $room. 
+<BR>
+
+<BR>
+So all your rooms which are children won't be integrating anymore. 
+<BR>
+
+<BR>
+Apologies..
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Dec  6, 11:07:06 a.m. PST
+<BR>
+From: Patroclus (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Room and Player classes
+<BR>
+
+<BR>
+I asked Dred to back us out of the integrating room because it conflicted with plans for researching this issue in the PARC room class and the Scorpion Player class.
+<BR>
+
+<BR>
+The function of PARC and Scorption in particular are to deal with placing and wearing objects in rooms/players.  Rather than port LambdaMOO's solutions to these problems, I want to continue the discussion of this problem and encourage novel approaches.
+<BR>
+<BR>
+Date: 1994 Dec 13, 11:17:37 a.m. PST
+<BR>
+From: Patroclus (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: new-site update
+<BR>
+
+<BR>
+The new Dhalgren machine is here now.  Our new home is a 66 MHz Pentium with 32 Mb of RAM and 1 Gb of disk.  We are wrestling to get UNIX to talk to its devices right now (*groan*).  So with luck, we should have our MUD up on the new site within a week.
+<BR>
+<BR>
+Date: 1994 Dec 13, 11:57:37 a.m. PST
+<BR>
+From: Patroclus (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: new site
+<BR>
+
+<BR>
+What this means is we are setting up a new machine for Dhalgren.  The new site will be dhalgren.english.washington.edu.  When it is all set up and working, we will let everyone know and then shut down the actinic.cs.princeton.edu site.  I'll try to leave a forwarding message on the old site for a while.
+<BR>
+<BR>
+Date: 1994 Dec 18, 04:42:50 p.m. PST
+<BR>
+From: Arc (#2145)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: The Crash
+<BR>
+
+<BR>
+So, why did Sick cause this crash?  He caused the one on Lambda just shortly before this one, so it looks as though he was attempting to see if the server bug was actually a bug and not a coincidendental crash.  There were around 5 or 6 others connected to Dhalgren at the time of the crash.  I lost a minute amount of stuff, I don't know what others lost.  I don't think that's the point, though.  It looks to me as though he was testing the bug on "the lesser MOOs," and that looks like a malicious disregard towards the other members of this MOO.
+<BR>
+
+<BR>
+After recycling my previous character, I created a mess for the wizards to deal with, which I have apologized for.  When I got this character, I was denied a progbit for several months, due to my malicious disregard of the havoc that my recycling incurred on the db.  Therefore, I suggest that, at the very least, Sick be deprogged due to this.  I don't think that, qualitatively, anyone would argue that crashing the server (which then, obviously, remained down for several days) is a more minor offense than recycling one's self.
+<BR>
+
+<BR>
+I don't think that the players of Dhalgren would appreciate others using this server and db as a testing ground for server bugs.  Do you?
+<BR>
+
+<BR>
+--
+<BR>
+Arc
+<BR>
+<BR>
+Date: 1994 Dec 18, 04:59:32 p.m. PST
+<BR>
+From: Patroclus (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: The Crash
+<BR>
+
+<BR>
+SOrry the MUD was down all weekend.  I didn't know it had crashed until legba called me a few hours ago.  On the new Dhalgren machine, all the wizards will have sufficient access to restart the server.
+<BR>
+<BR>
+Date: 1994 Dec 19, 05:08:05 a.m. PST
+<BR>
+From: Dead_Can_MOO (#2082)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: New Mailing List
+<BR>
+
+<BR>
+I created a new mailing list geared towards announcing new things on the MOO.  This includes new generics, new FOs, and even announcements about new public areas on the MOO.
+<BR>
+
+<BR>
+   Dead_Can_MOO
+<BR>
+<BR>
+Date: 1994 Dec 19, 09:04:43 a.m. PST
+<BR>
+From: Patroclus (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: announcements
+<BR>
+
+<BR>
+Actually, *graffiti is exactly such a mailing list.  There isn't a lot of public conversation yet, and pretty much anything anyone wants to announce or discuss or unveil can be sent to *g.
+<BR>
+<BR>
+Date: 1994 Dec 19, 07:11:44 p.m. PST
+<BR>
+From: Eclipse (#538)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: sick
+<BR>
+
+<BR>
+well, arc wanted to lead the lynch mob, and it seems he got his what he wanted.  since he was kind enough to reveal the identity of the programmer who crashed dhalgren, maybe we can get an explanation of the reasoning behind the decision to remove sick's progbit?
+<BR>
+
+<BR>
+Eclipse
+<BR>
+<BR>
+Date: 1994 Dec 20, 10:11:31 a.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: The Dhalgren Crash
+<BR>
+
+<BR>
+On Friday, Dhalgren was crashed by one of the players as an experiment.  Unfortunately, I did not find out about this until Sunday, when legba called me.  I rebooted the MUD and immediately unset the prog bit of the player who caused the crash.  At this point, the matter is strictly an issue between the player and the wizards.
+<BR>
+<BR>
+Date: 1994 Dec 22, 04:15:49 p.m. PST
+<BR>
+From: Eclipse (#538)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: sorry...
+<BR>
+
+<BR>
+...to let rl intrude and to make a post so somber, but i just wanted to publicly proclaim my state of grief at the death of our kitten, Skye.  she died this afternoon due to a respiratory virus, in my arms on the way to the vet.
+<BR>
+i know that she doesn't hurt anymore, and she is in the most loving of care.  may the Mother bless her soul.  we miss her terribly and loved her dearly.
+<BR>
+life is a fragile and beautiful thing..
+<BR>
+sorrowfully,
+<BR>
+
+<BR>
+Eclipse (and Sick)
+<BR>
+<BR>
+Date: 1995 Jan 12, 10:14:55 p.m. PST
+<BR>
+From: Rebis (#875)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Dhalgren time
+<BR>
+
+<BR>
+The MOO clock seems about 20 minutes off...Maybe I'm the only one obsessive enough to care, but I thought I should point it out anyway.
+<BR>
+<BR>
+Date: 1995 Jan 22, 07:30:24 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp melusina (#907), *graffiti (#107), and *Wizard-Mail (#102)
+<BR>
+Subj: Re: @who bug?
+<BR>
+
+<BR>
+>  Player name     Last disconnect time          Location
+<BR>
+>  -----------     --------------------          --------
+<BR>
+>  dried (#2372)   Fri Jan 20 11:47:17 1995      Fucked up verbs (
+<BR>
+>  chess room )
+<BR>
+>
+<BR>
+>  but, as it turns out, it was around 3pm.  Something's wonky with
+<BR>
+>  the clock.
+<BR>
+>
+<BR>
+
+<BR>
+Heh. Dhalgren is now on the WEST coast instead of the EAST coast. Three hour time difference. All children of #98, which is everyone, who want the time to be for your local area should set your timezone with the @timezone command.
+<BR>
+
+<BR>
+See help @timezone for details.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1995 Jan 25, 09:35:16 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Downage
+<BR>
+
+<BR>
+Dhalgren went down last night because strange, gravitational forces apparently kicked the plug loose.  It's alright now though.  Sorry for the inconvenience.
+<BR>
+<BR>
+Date: 1995 Jan 26, 02:27:03 a.m. PST
+<BR>
+From: Jafaar (#458)
+<BR>
+To:&nbsp&nbsp legba (#95) and *graffiti (#107)
+<BR>
+Subj: Re: Downage
+<BR>
+
+<BR>
+>  Dhalgren went down last night because strange, gravitational
+<BR>
+>  forces apparently kicked the plug loose.  It's alright now though.
+<BR>
+>  Sorry for the inconvenience.
+<BR>
+
+<BR>
+You should upgrade.
+<BR>
+<BR>
+Date: 1995 Jan 26, 07:02:20 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp Marcus (#812) and *graffiti (#107)
+<BR>
+Subj: Re: MOOtime
+<BR>
+
+<BR>
+>    Okay, I'll go for PST. But why is it tomorrow on the MOO?
+<BR>
+>  (Or have I been missing something all along, heh!)
+<BR>
+>  yours, mrx
+<BR>
+
+<BR>
+Gah. The machine reset messed up the time and date. Yesterday I fixed the time but didn't notice that the date was off too. Bleah. Fixed now.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1995 Jan 28, 02:58:19 p.m. PST
+<BR>
+From: Arc (#2145)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: BoringMOO
+<BR>
+
+<BR>
+This MOO is, well, stagnant.  I can't think of anything to build.  Fuck, people, do something or give it up.  All anyone does is sit in their rooms and page.  Is this a MOO with its own identity or is it just a refuge from Lambda for a select few who can afford to set up their own lag-free paging environment?  So far, I don't see much evidence of any sort of self-sustaining community here; will there ever be?
+<BR>
+<BR>
+Date: 1995 Jan 29, 01:09:15 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Ahzo...
+<BR>
+
+<BR>
+Arc can't think of anything to write, so the _MOO_ is stagnant?  Whoah, I've never seen anyone blur ego boundaries with a _place_ before.  Isn't VR amazing?
+<BR>
+<BR>
+Date: 1995 Jan 29, 02:15:22 p.m. PST
+<BR>
+From: Trismegistos (#1457)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: MOOdeath
+<BR>
+
+<BR>
+Yes, legba, but you've gotta admit that this place has been more happenin'. Willies after the server move? Who nose ... perhaps we need an ad campaign to reach pomo scifi fans ...
+<BR>
+ trISm
+<BR>
+<BR>
+Date: 1995 Jan 29, 03:51:33 p.m. PST
+<BR>
+From: melusina (#907)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: MOO, The Undead
+<BR>
+
+<BR>
+So, how are we defining "more happenin'" here?  True, there haven't been consistently sizeable crowds around lately, but I'm not convinced that this means that we need to start advertising.  For as long as I've been around, there's been a big variation in the number of people who hang out here.  Do low numbers = Bad MOO?  I personally am pretty happy that we're not having the sort of population explosion that LM suffers from.    My feeling, basically, is:  if you want to build something cool, build it.  If you want your friends to come hang out, give them the address.  I'm just not sure that you can quantify how "happenin'" any given MOO is, unless you're using LM as the standard.  
+<BR>
+
+<BR>
+If we're trying to be LM, though, I guess we'll need to start filling some crucial positions.  Can I be *Sunny*?
+<BR>
+
+<BR>
+hiss,
+<BR>
+mel, dangling her prepositions from her tail.
+<BR>
+<BR>
+Date: 1995 Jan 29, 04:02:00 p.m. PST
+<BR>
+From: genna (#352)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: greedy
+<BR>
+
+<BR>
+Damn that Mel, always keeping the good ones for herself. 
+<BR>
+<BR>
+Date: 1995 Jan 29, 04:03:43 p.m. PST
+<BR>
+From: melusina (#907)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: genna honey...
+<BR>
+
+<BR>
+we can timeshare.  I couldn't -possibly- keep up with all of the work required.  I have this little thing called a life to take care of.
+<BR>
+<BR>
+Date: 1995 Jan 29, 06:53:22 p.m. PST
+<BR>
+From: Arc (#2145)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: My Take on Stagnation
+<BR>
+
+<BR>
+1.  I didn't mean to imply that since I couldn't think of something to write that therefore this MOO is boring.  Chalk that up to my poor communication skills.  Not all of us teach composition.
+<BR>
+2.  A MOO with lots of people doesn't equate with exciting to me.  Simply because I find this MOO dullsville atm doesn't necessarily mean that I want more or different people here.  I simply want to see something interesting to me.
+<BR>
+
+<BR>
+Therefore, my point (which I should've made clear before) is:  I am bored, there is little here that interests me.  This makes me sad, as I used to enjoy this MOO much more.  I wish to express this dissatisfaction with everyone with the hopes that maybe it'll spur someone on to do *something*.  Since the last interesting thing I can recall being done here was created over a month or so ago (mel's fun elevator in the Labry), then I don't think it's unfair to claim that not much (or not much that's being made public) is going on.
+<BR>
+
+<BR>
+Either post to *g with announcements of the new, neat things everyone's done, or do something.  If I could think of anything to do, I would.  This request applies to me, too.
+<BR>
+
+<BR>
+So, enough with the smartass cracks.  This was meant to be serious.
+<BR>
+<BR>
+Date: 1995 Jan 30, 11:01:47 a.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: excitement
+<BR>
+
+<BR>
+I don't really want to broadly advertise Dhalgren.  I don't think it will be that interesting to the general MUDing crowd.  Dhalgren is basically a group of like-minded folks who left LamdbaMOO because it was too crowded to support a community.  I think there are plenty of MUDs on the internet to entertain anyone who is bored here.
+<BR>
+
+<BR>
+I'd like to encourage literary-theory, media, and architecture people to come here and experiment.  I had dinner with William Mitchell at MIT (the dean of the architecture school) a few days ago, and he is very interested in the issues of how a city is designed and how to rethink that design in virtual reality.  Some friends at NYU are involved in the YORB project, which is an on-line television experiment connected with ECHO.
+<BR>
+
+<BR>
+I think a logical place to start some experiments and discussion might be to begin a new section of Dhalgren.  We have Bellona and Interzone.  The new section we have been discussing is Vermillion Sands, a near-future desert resort which is the setting for some of J.G.Ballard's short stories.  How about starting a mailing list to discuss generics and topology and other ideas for this project?
+<BR>
+<BR>
+Date: 1995 Jan 30, 03:17:22 p.m. PST
+<BR>
+From: Eclipse (#538)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: stuff
+<BR>
+
+<BR>
+to the best of my knowledge, everything new and exciting and fun and interesting that has been built for public use has been announced on this list (even stuff not so new and exciting and fun and interesting).
+<BR>
+what i'm wondering, arc, is just what is it that you want to see?  what kinds of exciting things are you looking for?  what could be built that could capture your attention and amuse and entertain you?  i know that not a few of us have projects in mind or in progress, but what would _you_ like to see?
+<BR>
+projects onna brain,
+<BR>
+
+<BR>
+Eclipse
+<BR>
+<BR>
+Date: 1995 Jan 30, 03:28:45 p.m. PST
+<BR>
+From: Arc (#2145)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Hell, I dunno!
+<BR>
+
+<BR>
+This isn't about what I want to see, in particular.  I'd just like to hear people talk about what they're doing or what they'd like to do.  Eclipse, post something!  I'd love to hear what you're thinking of doing.
+<BR>
+
+<BR>
+Btw, I like the Vermillion Sands idea without having read any Ballard.  Simply the idea of trying to incorporate other authors' "worlds" is pretty neat to me.  I used to think that doing something Dick-ish would be neat, but I'm not sure which of his books would be neat.  It'd be kinda hard to make an Ubikworld or Valisland, IMHO.  :-)
+<BR>
+
+<BR>
+<BR>
+Date: 1995 Jan 30, 03:54:47 p.m. PST
+<BR>
+From: Eclipse (#538)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: idea!
+<BR>
+
+<BR>
+arc, your last post gave me a very interesting idea.  one which, if i find that there's interest in it, i might be willing to pursue.  you (and patro) mentioned incorporating the settings of other authour's books into chalgren to expand a little.  i've read a very interesting book (and it's sequel) by a woman named joan d. vinge, whose setting, i think, would make an interesting addition to dhalgren.
+<BR>
+basically, the place i had in mind was the city of carbuncle, which more or less a city that sits in the middle of an ocean.  it's as if it was built on an island and overran the island, becoming a sort of floating city.  it's a very futuristic sort of place, where offworld technology and on-planet tradition come together (of sorts).  i'm planning on trying to explain the basic story of the book on *coolthingstoread, so if you're looking for a little more background, you might check there in a while.
+<BR>
+anyhow, i'd like to ponder this some more: how it might fit in, what it's purpose might be, where it might be located, etc.  i know this isn't much to go on just yet, but is there any interest in this sort of a place?  i know that i'd be interested in building it or seeing it built. :)
+<BR>
+nonstop,
+<BR>
+
+<BR>
+Eclipse
+<BR>
+<BR>
+Date: 1995 Jan 30, 04:38:54 p.m. PST
+<BR>
+From: Trismegistos (#1457)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: OK, jaded citizens ...
+<BR>
+
+<BR>
+ ... here's my newest thing, a child of the latest Automaton that not only walks and acts, but listens and talks.
+<BR>
+It takes multiple potential spoken or emoted inputs, and produces differentiated random responses, either spoken or acted. There's no interface with moods yet due to the opaqueness of the automaton's state property.
+<BR>
+The Generic may be found at #874, and I've placed an example at the east end of the bridge -- a sort of greeter-bot. I've enabled certain people to add patterns to the bot; if you'd like to be on this list of lit-theory lights, contact me personally. Right now its programming is sort of minimal.
+<BR>
+                           Yours, for more and better SPAM,
+<BR>
+                                                    Trism
+<BR>
+<BR>
+Date: 1995 Jan 30, 10:02:30 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Eclipse's suggestion
+<BR>
+
+<BR>
+I'd love to see something done with Vinge's Carbuncle.  Structurally it's interesting because of the spiraliness of it, and because the hall of winds would be fun to build.  Like you could try to cross over it and fall...anywhere!  Or you'd need to find a flute and play the right notes to cross over.  And I really like the use of myth that Vinge makes--the whole goddess thing could be loads of fun.
+<BR>
+<BR>
+Date: 1995 Jan 31, 08:07:00 a.m. PST
+<BR>
+From: Eclipse (#538)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: fyi
+<BR>
+
+<BR>
+i'm posting a messages to *coolthingstoread about the book that legba (hooray!  you know it!) and i are discussing.  it's a bit long, and discusses some of the plot and my ideas relating to the setting of the story.
+<BR>
+replies and/or comments about my building ideas stemming from this should prolly come back here.  i just didn't wanna discuss the plot of a book on *g when there's a list expressly for that.  :)
+<BR>
+
+<BR>
+Eclipse
+<BR>
+<BR>
+Date: 1995 Jan 31, 12:01:28 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: snow queen
+<BR>
+
+<BR>
+I've read _Snow Queen_ and liked it.  My friend brij (*sigh*) turned me on to it.  It's a lush fantasy/adventure story set on a watery planet in the distant future.  I'm not sure that fits into the overall theme of Dhalgren, which is set on Earth in the near future.
+<BR>
+
+<BR>
+Let me say a little about _Vermilion Sands_, which is the setting for a collection of short stories by J.G.Ballard.  Ballard was one of the founders of the British "new wave" science fiction, with books like _Drowned World_.  Vermilion Sands is a desert resort inhabitated by the bored and jaded people of a world where automation had pretty much left nothing for anyone to do with their time.  People build sonic sculptures, make art with clouds, breed flowers that sing and scorpions encrusted with saphires.  Its quite atmospheric, like Delany's Dhalgren book.  Not quite as punk as Dhalgren, but very postmodern -- not a technological utopia.  Technology has forced people to question their purpose, people still get into intricate interpersonal conflicts.
+<BR>
+<BR>
+Date: 1995 Jan 31, 04:38:45 p.m. PST
+<BR>
+From: Boudicea (#1021)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: jaded futures
+<BR>
+
+<BR>
+As long as one is considering futures where there's nothing to do but make decadent art, consider Michael Moorcock's "Dancers at the End of Time" trilogy, which starts with _An Alien Heat_.  It's great fun, and very MOOlike already, considering that the (very far future human) characters constantly change appearance and gender and can make anything they want with a turn of a power ring, much of which is in abominable taste.  Most of their works are somehow based on historical records, but a lot has been lost in translation, so that, for example, Jherek Carnelian's reconstruction of a British 19th-century house for the comfort of his time-traveller includes a wurlitzer and a giant aspidistra _tree_, and he serves her raw beef and neat whiskey for breakfast.
+<BR>
+I think the End of Time stuff resoundingly appropriate for MOO-modelling.
+<BR>
+<BR>
+Date: 1995 Jan 31, 05:15:48 p.m. PST
+<BR>
+From: Arc (#2145)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Perhaps...
+<BR>
+
+<BR>
+An area based upon Greg Bear's short story "Petra" would be neat.  It's not an end-of-time story, but a God-is-Dead story.  Neat half-gargoyle main character, is basically all set inside a huge cathedral.  Anyone else read this?  It's collected in _Mirrorshades_.
+<BR>
+<BR>
+Date: 1995 Jan 31, 07:14:22 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Theme schmeme scheme
+<BR>
+
+<BR>
+Actually I've never interpreted theme here as _entirely_ American, near future, as the 'near future' of Delaney, Burroughs and Dick (currently approved canonical theme-models) was actually somewhere in the late '60s, early '70s.
+<BR>
+While I'd not necessarily like to see vast, patchwork, vaguely sci-fi tinysprawl, I think there's room to open up the canon a bit as it were, to include things like SCI FI BY WOMEN WRITERS for instance.  I think that in terms of interesting architecture and interesting use of myth, Vinge is highly appropriate, if not strictly themely.
+<BR>
+I think that the usual standards for building: very well planned, very well-written and as interactive as possible should apply.
+<BR>
+<BR>
+Date: 1995 Jan 31, 07:49:14 p.m. PST
+<BR>
+From: Calkins (#150)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: women writers
+<BR>
+
+<BR>
+OK, but then I vote for Octavia Butler.  Way cooler than Vinge.
+<BR>
+<BR>
+Date: 1995 Feb  1, 08:05:21 a.m. PST
+<BR>
+From: melusina (#907)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Tiny and Sprawling
+<BR>
+
+<BR>
+As I read this discussion of What to Build, the issue that I keep returning to is this:  -Why- to Build?
+<BR>
+
+<BR>
+Let me immediately say that I think that the ideas people are tossing around sound interesting and fun.  I'm not questioning those ideas -specifically-; I'm just wanting to poke at the idea of building a new area in general.  We've currently got a pretty small core group of people who consistently hang out here, so it's not like we (imo) -need- the space of a new area, and as far as I can tell, the theme of Bellona is pretty damned flexible.  Okay, so that's part of my question, but it's a fairly silly part.  Who cares if we -need- new space if we -want- new space?  What I wonder at this point, though, is what that new space will -do-.  One of the things that I really like about this MOO is that, for me, at least, there's a definite sense of community.  Will that change if we build a big new area and half of the people like it so much they decide to @sethome over there?  I just think that's something to consider:  if we're just building because we're bored or stagnant or whatever, how is a bunch of echoing tinyscenery going to make us more exciting?
+<BR>
+
+<BR>
+Even though I've got these concerns about new building, I still like the idea.  I just think that any concept that we come up with should have some sort of more-than-just-scenic quality included on the level of the idea.  This is something that I've been thinking about lately, how to play around with narrative &c in MOOtext.  I hope to build some stuff that experiments with narrative (the elevator in the Labry is probably the kind of thing I'm thinking of here).  So that's one way to approach interactivity.  Another one, obviously, is programming.  I'm a horrid coder, so I'm trying to kind of think -around- the need for verbs, but I can imagine some amazing verbs to go along with the kinds of new areas we're talking about.
+<BR>
+
+<BR>
+Anyway, those are just a couple of actual ideas.  Of course I don't have anything more specific, heh.  I just thought I'd throw this concern into the discussion.
+<BR>
+
+<BR>
+hiss,
+<BR>
+mel (who, in the early morning, either waxes spammy and pedantic or pithy and bitchy.  Unfortunately for all of you, it's one of her bad days.).
+<BR>
+<BR>
+Date: 1995 Feb  1, 10:08:01 a.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: tinyscenery
+<BR>
+
+<BR>
+Mel is right about tinyscenery.  We are a small MUD, not running on a huge machine like FurryMUCK or LambdaMOO.  Our database could probably double in size, and after that I think we'd start to have trouble.  Quality is much more important than quantity -- if you want to build things that have an impact, a carefully crafted space like Club Dred on LMOO is worth a thousand rooms of tinyscenery that no one ever visits.
+<BR>
+
+<BR>
+One reason I have been thinking about Vermilion Sands is that some friends in the school of architecture at MIT are interested in experimenting with virtual-city design.  Topological planning for social usage is a fascinating subject.  I think Dhalgren, like most MUDs, has problems in that area, and it would be interesting to experiment with this.  I would say that Dhalgren has not yet found its social heart, its "rec room" or its "tree house" or its "living room".  Maybe this is partly because the newcomer is not really presented with an obvious place to go when he or she logs in here.  I'm hoping that the MIT people might have some cool ideas about this problem.
+<BR>
+<BR>
+Date: 1995 Feb  1, 10:52:08 a.m. PST
+<BR>
+From: Trismegistos (#1457)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Areas
+<BR>
+
+<BR>
+I generally agree with mel about the non-need for big, museum-piece areas here, though not because the topographic dispersion has any impact on the social life here -- I don't think tehre is enough of a transient popoulation here to make a 'living room' really necessary -- last year people pretty much socialized wherever they found themselves, and it was good.
+<BR>
+Or, let me rephrase that -- I am all for museum-piece areas as long as they are interestingly interactive, embodying novel VR/hyperliterary ideas. But I'm also for an intensifying of the existing space (as I've tried to do with my stalls in the park bathroom, and with my conversational 'bot-type).
+<BR>
+I don't see why we can't bring new ideas into the existing space. Patro suggested Octavia Butler -- I don't think her vision would be served so much by an area, as by the kind of modular additions to PERSONAL experience that her novels explore.
+<BR>
+(Translate this, loosely, to mean feature objects,  generics, player classes, bot-types ... character concepts ...)
+<BR>
+I'd also like to suggest getting beyond the 'replication' of other authors' concepts, and using them as inspiration for one's own personal vision, in a (gasp) post-a-modern brick-o-lage kinda way.
+<BR>
+Kinda like what I've done with Gibson's Dog Solitude, and (though more literally faithfully) what Patro's done with Interzone.
+<BR>
+           Just my 2 duckets' worth ...
+<BR>
+                       Trism
+<BR>
+PS: Before rejecting new, in-theme areas because of database constraints I would start looking seriously at the usefulness of the vintage MUD areas such as Islandia which are stored in this DB. 
+<BR>
+<BR>
+Date: 1995 Feb  1, 11:33:33 a.m. PST
+<BR>
+From: Arc (#2145)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: More Ideas
+<BR>
+
+<BR>
+First off, I should note that I was given more quota recently (by legba) for the sole purpose of building stuff and attempting to foster more community organization.  So, there seems to be a wizardly desire to get things rolling here, mel.  Patro's Vermillion Sands sounds wonderful to me.  However, although I love the Islandia and MUDClassic stuff, what purpose are they serving here?  I feel that this is a major problem with this MOO... we have all sorts of neat things lying around that no one ever uses.  In this sense, I'm afraid that no matter how many new things we build, people will just get bored with them and retreat to their rooms to page about the latest scandals.  So, I'm not sure what my point is.  Uh.
+<BR>
+Um, I guess my second point is that I wholeheartedly agree with Trism that only copying the already-created worlds of sci-fi authors is a dead end.  Perhaps that's part of the problem here?  While Bellona is undoubtedly a great framing element to this MOO, most of the major projects have been "fleshing out" projects rather than pure creating projects -- by this, I mean that they've been towards the goal of detailing something in Dhalgren or in something of Burrough's work rather than creating much out of the recesses of our own heads.  What I love about LambdaMOO is that we see much more of a non-previously-written aspect to the vr.  Take, for instance, the Barn.  A great idea, with some fun stuff inside it... as far as I know, it was inspired by something literary, but didn't confine itself to replication.  legba, what was the inspiration again?  Anyhow, I'm planning on creating a section decidedly NON-LITERARY and NON-POMO here.  Anyone else interested, please contact me.
+<BR>
+<BR>
+Date: 1995 Feb  1, 02:33:55 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: building
+<BR>
+
+<BR>
+Intersting ideas.  I think I agree that it would be better to work on Bellona rather than start a new area.  I don't believe in the idea of interactive fiction, so I don't see us using other author's work like that.  Bellona has some of the geography, language and atmosphere of Delany's book, but beyond that it is up to people's creativity.
+<BR>
+
+<BR>
+As for Islandia, I think it's interesting to those of us here who are taking an explicit interest in text-VR and its history and forms.  And besides, #2 likes it too much to delete.  :-)
+<BR>
+<BR>
+Date: 1995 Feb  1, 05:05:19 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: shyeah!
+<BR>
+
+<BR>
+I agree too, that we should probably keep things compact, and not go building Vast New Areas.  The point of the discussion though, and it was a very good one, was generating ideas, which we seem to have done a lot of.
+<BR>
+The barn on Lambda isn't a literary ref, it's out of my very own head.  Mr. Ed needed somewhere to live is all, a bunch of anarchists, queers and assorted spares needed somewhere to link and etc.  Good writing counts for a lot, and we certainly need not be derivative.
+<BR>
+So keep talking, guys, this is the most action we've had on here in awhile.
+<BR>
+<BR>
+Date: 1995 Feb  5, 05:15:50 p.m. PST
+<BR>
+From: Marcus (#812)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: MOO plots
+<BR>
+
+<BR>
+Marcus comes in late on these things...a few reactions to the 
+<BR>
+recent discussions.
+<BR>
+
+<BR>
+First off, I think we should all encourage Eclipse and whoever
+<BR>
+else to move forward and experiment. Those ideas sound really
+<BR>
+cool. I think, too, that good building happens when someone has
+<BR>
+a good idea and goes through with it, puts a personal stamp on
+<BR>
+it. Building by committee is even worse on MOO than elsewhere.
+<BR>
+I also have high regard for Ballard and would love to see some
+<BR>
+well-put-together Ballard-inspired stuff.
+<BR>
+
+<BR>
+I also have other thoughts, sort of MOO-theory in line with the
+<BR>
+excellent MOO-theory we've seen from melusina, Trismegistos,
+<BR>
+Arc--everyone, really. Fundamentally I agree with the
+<BR>
+conclusion legba and Patro have come to, that more than 'more
+<BR>
+space' what happens _within_ the spaces is the best indication
+<BR>
+of how good the MOO is (citing Club Dred as a model); yet
+<BR>
+likewise it's not just 'more happening' but 'how good' is that
+<BR>
+happening. Spammy theory in the message to follow....
+<BR>
+<BR>
+Date: 1995 Feb  5, 05:18:37 p.m. PST
+<BR>
+From: Marcus (#812)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: MOO Theory
+<BR>
+
+<BR>
+Much as it seems like a space, the MOO is of course a text
+<BR>
+ framed to emulate a space.
+<BR>
+  (Actually it's both more fluid (@go, page) and more rigid
+<BR>
+   than space--you can't turn your head and look into just any
+<BR>
+   corner.)
+<BR>
+But what we are really aiming for, after all, is a certain
+<BR>
+ expressiveness of text, and the rewards of such (a range of)
+<BR>
+ expressiveness.
+<BR>
+
+<BR>
+Looking at the issue of building--
+<BR>
+Code offers us a range of forms to write within:
+<BR>
+ Stored on properties, the texts of a given object work
+<BR>
+  together in a certain way.
+<BR>
+ So: player.name, .description, @messages;
+<BR>
+     room.description, .amb_noise, @messages;
+<BR>
+     note.text; litter.text; costume.role and role_desc,
+<BR>
+     etc. etc.
+<BR>
+Objects function as poetic forms, like sonnets, odes or
+<BR>
+ epitaphs--the only difference being they are more dynamic or
+<BR>
+ 'interactive'.
+<BR>
+  (This is just as true of a post to *graffiti--a writable db
+<BR>
+   object--as it is of a bot.)
+<BR>
+MOOBuilding = writing within these forms. (Duh.)
+<BR>
+ Not only $rooms but all our stuff.
+<BR>
+
+<BR>
+The 'action' of the MOO is merely a more immediate rhetoric, the
+<BR>
+ medley of our rhetorical performances as we gesture and chat
+<BR>
+ and play in other ways, layered on top of and mixed with the
+<BR>
+ rhetoric we perform through the server, the dynamic
+<BR>
+ publication of our programmed and built text.
+<BR>
+So good building is not only expressive text; it also helps
+<BR>
+ bring expressive text into being, by stimulating us to think
+<BR>
+ and feel a certain way, and so offering rhetorical platforms,
+<BR>
+ springboards, inspiration for our own performances.
+<BR>
+(TinyScenery is just building that fails to do this.)
+<BR>
+
+<BR>
+Which is the real action? What's the most expressive?
+<BR>
+Maybe all of it.
+<BR>
+Maybe a slow MOO (as mel suggested) isn't bad.
+<BR>
+Maybe it's just more carefully considered. It's not just an
+<BR>
+ endless party. It's not even just a 'community'.
+<BR>
+It's a collaborative work of textual art, criticism, theory,
+<BR>
+ textual experience.
+<BR>
+It's a stage, a scene.
+<BR>
+Any community is based on that collaboration.
+<BR>
+Even acknowledging the most apparent activity of a MOO to be a
+<BR>
+ certain entertaining chattiness, still I think that's not
+<BR>
+ really why we are here. (We know where to go for that.)
+<BR>
+
+<BR>
+I guess all this is merely to suggest we think about our
+<BR>
+building and creating in functional terms (yeah, which everyone
+<BR>
+seems already to be doing nicely). How is it working? what do
+<BR>
+we do with it? What kind of contacts come off here? reading,
+<BR>
+performances. What you will.
+<BR>
+
+<BR>
+Maybe the MOO isn't a space; maybe it's more like a literary
+<BR>
+anthology, of a more dynamic kind of literature than was ever
+<BR>
+possible before, created by its own audience, critiqued within
+<BR>
+its own 'pages' on the fly.
+<BR>
+
+<BR>
+And if we want more action? We only have to organize it.
+<BR>
+<BR>
+Date: 1995 Feb 13, 04:32:28 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: occasional restarts
+<BR>
+
+<BR>
+As you've noticed, Dhalgren sometimes hangs for several minutes.  This seems to start happening after the server has been up for a while, so we may just do quick shutdown/restarts a couple times a week.  Sorry.
+<BR>
+<BR>
+Date: 1995 Feb 17, 10:26:13 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Freeze update
+<BR>
+
+<BR>
+We've been trying to fix the periodic freezing that happens here.  We've updated the kernel to see if that will have an effect.  If not, we'll try open-box surgery and swap the ethernet card.   After that, we'll try therapy to stabilize our personalities.
+<BR>
+<BR>
+Date: 1995 Feb 18, 02:51:09 a.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: btw
+<BR>
+
+<BR>
+I'm not always going to be on, so I won't know about freezeups or other Bad Behavior for with the MOO Needs to be Disciplined, so if this happens and one of the wizzes isn't logged on at the time, could someone report it when the thing thaws out again?  Go ahead and report it to me personally or to *wizards.  This way we can track it a little bit.
+<BR>
+<BR>
+Date: 1995 Feb 18, 02:29:53 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *Wizard-Mail (#102) and *graffiti (#107)
+<BR>
+Subj: More techno-fixes
+<BR>
+
+<BR>
+Dhalgren froze up and subsequently crashed last night around 9pm last night.  This may not have been the fault of the machine: the net in the building in which it's located became unreachable as well.
+<BR>
+We rebuilt the kernel to 1.1.67 with NE2000 support.  If this doesn't stabilize things, the next thing might be further work on the kernel driver.
+<BR>
+Oh, and Bak made it so that the clocktime wouldn't get whacked out anymore, by making it so when the system is rebooted, it queries a time server on the net for an accurate time.
+<BR>
+<BR>
+Date: 1995 Feb 20, 03:18:06 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: More fun with home repairs
+<BR>
+
+<BR>
+We-ell, Dhalgren got totally hosed over the weekend, so we came in to see if it was a problem with the network in the building.  It appears that the problem (or a major problem anyway) was a flaky ethernet junction box that affected not only Dhalgren, but an innocent bystander PC on the same piece of wire.
+<BR>
+We, um, repaired it with lots of scotch  tape until permanent repairs can be made, and things appear to have entirely stabilized.
+<BR>
+You too can have a career in high-tech troubleshooting.
+<BR>
+
+<BR>
+-legba
+<BR>
+<BR>
+Date: 1995 Feb 20, 03:20:44 p.m. PST
+<BR>
+From: melusina (#907)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Scotch tape, hm?
+<BR>
+
+<BR>
+Would that be pastiche or bricolage?
+<BR>
+
+<BR>
+h-i-s-s,
+<BR>
+mel.
+<BR>
+<BR>
+Date: 1995 Feb 20, 05:41:38 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp Arc (#2145) and *graffiti (#107)
+<BR>
+Subj: MOO/WWW
+<BR>
+
+<BR>
+Yes, send your comments to *g.  We have been discussing for some time now, a WWW interface to Dhalgren.  Trismegistos has painted a fantastic banner image for our web page, and Bakunin has installed a web server on dhalgren.english.  The ChibaMOO and JHM codes have been discussed.  ChibaMOO is supposed to be quite straightforward, since its done in MOO-code rather than as modifications to the MOO server.
+<BR>
+<BR>
+Date: 1995 Feb 21, 02:29:25 p.m. PST
+<BR>
+From: melusina (#907)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: web page
+<BR>
+
+<BR>
+and the address is...?
+<BR>
+<BR>
+Date: 1995 Feb 21, 03:25:26 p.m. PST
+<BR>
+From: Arc (#2145)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: The recent post
+<BR>
+
+<BR>
+The recent post by Patro was re: a few suggestions I made re: the in-progress w eb pages.  I asked for Patro to @forward the relevant posts I sent to *wiz, but  I think there was some miscommunication, as he sent his response to me to *g.   So, if a wiz could send along those posts, I'm be oh-so happy.  
+<BR>
+
+<BR>
+um.
+<BR>
+
+<BR>
+And the page, which has a groovy pic done by Trism, is at http://dhalgren.english.washington.edu/
+<BR>
+
+<BR>
+--
+<BR>
+Arc
+<BR>
+<BR>
+Date: 1995 Feb 21, 06:02:53 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: [Arc (#2145):  Proposal #1]
+<BR>
+
+<BR>
+Date:     Mon Feb 20 16:22:31 1995 PST
+<BR>
+From:     Arc (#2145)
+<BR>
+To:       *Wizard-Mail (#102)
+<BR>
+Subject:  Proposal #1
+<BR>
+
+<BR>
+Heya,
+<BR>
+
+<BR>
+leggie mentioned that I should send these ideas here before posting to *g, so, here goes.
+<BR>
+
+<BR>
+I think that there's a lot of neat things that could be done wrt interfacing the Dhalgren web pages with the MOO.  Now, I don't know how this could be done, but, apparently, it's not too hard to do, as both JHM and Chiba have WWW/MOO interaction.  Here's a short list of ideas, with a more specific, themely suggestion to follow in the next post.
+<BR>
+
+<BR>
+*  We could have it so outsiders reaching the Web pages can see who are currently connected to the MOO.  This shouldn't be too hard, I'd suspect.
+<BR>
+*  How about making it so that individual denizens of the MOO can create, say, a kid of a generic HTML object.  One could then @notedit HTML-formatted text onto a prop of the object, put the object in a "web room," and have the text appear on the Web pages.  Now, this could get out of hand, so whatever is allowed in the room would have to be approved by the wizardry, of course.  I think it could be neat, if just as a way for the populace to have a place to show off their characters.
+<BR>
+*  Put individual rooms (such as, perhaps, the D.E.W.) on the Web.  Maybe there are rooms in which something like this would be more appropriate, rooms in which the decor is less interactive, more showy and where neato gifs of the contents of the room might be neat to show off.
+<BR>
+
+<BR>
+Now, I have no idea how to do any of this, but I *do* know that there has been stuff done like this before.  I have neither the time nor the knowledge to do this; I'm an idea man.  But, these are presented as barely-formed ideas at this point.  I think the public might have more interesting and outre ideas if they were posted to *g...
+<BR>
+
+<BR>
+Now, onto the next, more detailed idea.  :-)
+<BR>
+
+<BR>
+--
+<BR>
+Arc
+<BR>
+<BR>
+Date: 1995 Feb 21, 06:03:01 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: [Arc (#2145):  Proposal #2]
+<BR>
+
+<BR>
+Date:     Mon Feb 20 16:41:53 1995 PST
+<BR>
+From:     Arc (#2145)
+<BR>
+To:       *Wizard-Mail (#102)
+<BR>
+Subject:  Proposal #2
+<BR>
+
+<BR>
+Ok,
+<BR>
+
+<BR>
+Now, when I first came here, I was drawn to it partially due to the pronouncement that it would be a fun mesh of Delaney, Burroughs and Dick.  The first two have been incorporated pretty well into the MOO, but the third hasn't really been attempted (other than Valis's character and a brief flirt I had with building an Aramchek Blvd.  :-).
+<BR>
+
+<BR>
+So, what I propose is that we make a "Ubik interface" between the MOO and the Web pages.  (For those who don't know, Ubik deals with the consensual world of a bunch of possibly dead people, under the influence of a strong psychic.  In order to communicate with these people, a spray can of a substance called Ubik is used as a focus, as well as serving as a means to fight off the insane psychic.  That's a really bad summary, read the book.)
+<BR>
+
+<BR>
+So, blow-by-blow, here are my ideas re: how Ubik could be a nice themely way to interface the pages with this little consensual reality.
+<BR>
+
+<BR>
+*  Have there be (in-MOO) a Can of Ubik, which serves as something akin to the LambdaMOO/JHM picturephone.  The can stores whatever is being said within its room in a short (10-20 line) buffer... when a person connects to the Ubik page on the Web, one reads the most recent happenings in the room that the can is in.
+<BR>
+
+<BR>
+*  As added spice to the above idea, have it so that there is a forms interface on the Web pages which allows a curious webber to type in a brief (one-line) message and have it sent to the room that the can is inside.  Of course, this could be an easy tool of harassment, so as guards against such behavior, the Can is moveable by anyone, or is able to be "capped."  Also, perhaps it might be wise to have any announcements by the can (from the Web) tag on a site-info line, letting the denizens in the room know where the webber is connecting from.
+<BR>
+
+<BR>
+*  Make it so that the webber can utilize a forms interface to move the can of Ubik eirselves.  A restricted list of allowable rooms (D.E.W., The Crossroads, The Lobby of the Labry, etc.) could be chosen from, and, when the form is submitted, the Can would move to wherever the webber wished.  (Of course, in order to relieve rampant fear and paranoia that the web is always peeking over our shoulders, we could also have it so that, perhaps, the Can of Ubik would spray, letting the MOOers know that a webperson connected to the page.)
+<BR>
+
+<BR>
+I obviously really like this idea, but, as with the previous post, I know not how to do this, or if it's possible.  But, I like how this fits with the communication "between-worlds" within Dick's novel, and think it could be a fun thing.
+<BR>
+
+<BR>
+--
+<BR>
+Arc
+<BR>
+<BR>
+Date: 1995 Feb 22, 11:34:05 a.m. PST
+<BR>
+From: Marcus (#812)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Arc's latest ideas
+<BR>
+
+<BR>
+mrx opines Arc's latest brainstorm is ultra, the Ubik can in most particular.
+<BR>
+
+<BR>
+It seems the hard thing would be to have an .html property on an
+<BR>
+object (a room or container object) emend itself on the fly to allow
+<BR>
+hypertext links to whatever objects/players happen to be inside it
+<BR>
+with their own active .html props. If that could be done (how does
+<BR>
+Chiba do it?), I'd think a Ubik can would be feasible. :enterfunc/:exitfunc?
+<BR>
+(And how have webbed MOOs handled verbs? I guess I should cruise and see....)
+<BR>
+
+<BR>
+In particular, I have an interest that .html props be more than
+<BR>
+simple markups of the .description, inasmuch as the calligrammic
+<BR>
+verse of, say, the O.o.F. Theater, the stage, or Zenith's garden of
+<BR>
+wildflowers isn't going to make it across to most folks' web browsers
+<BR>
+(since typically these browsers use Times Roman or another
+<BR>
+proportionally spaced display font, not a fixed-spacing font like
+<BR>
+Courier for which this shape poetry is necessarily designed...). HTML
+<BR>
+does have a tag for fixed-spacing format, doesn't  it? Or we could
+<BR>
+_paint_ our gardens....
+<BR>
+
+<BR>
+This project seems like alot of work for someone, but very very cool if
+<BR>
+done with an eye to the neat kinds of interactive objects Arc is thinking
+<BR>
+about.... this body can foresee scanning photos from the archives and
+<BR>
+littering Bellona with them (and you thought it was bad now! ;-).
+<BR>
+
+<BR>
+This is a great idea; what we need is good programming know-how (Kid?)
+<BR>
+and, no doubt, that scarcest of riches Time....yah! Marcus
+<BR>
+<BR>
+Date: 1995 Feb 22, 01:51:48 p.m. PST
+<BR>
+From: melusina (#907)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: MOO-web interface
+<BR>
+
+<BR>
+here's Chiba's URL, FYI:  http://chiba.picosof.com/sprawl/
+<BR>
+
+<BR>
+hiss,
+<BR>
+helpful mel.
+<BR>
+<BR>
+Date: 1995 Feb 22, 02:24:27 p.m. PST
+<BR>
+From: Mosaica (#908)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Gosh
+<BR>
+
+<BR>
+ Such excitement at this most marvy MOO. Yummy ideas with WWW, &c.
+<BR>
+
+<BR>
+ Mosaica Ilianavich
+<BR>
+<BR>
+Date: 1995 Feb 22, 10:06:53 p.m. PST
+<BR>
+From: Kidd (#293)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: WWW server stuff
+<BR>
+
+<BR>
+I've implemented a couple of MOO-WWW servers.  It's very simple, really.  In the simplest form it just means adding a GET verb to the $login object.  The more robust version I use has a separate Perl script that listens to a separate port and forwards the requests onto $login:web.  Then $login:web parses the url and calls the :html verb on an object, which returns a list of strings, containing HTML formatting for that object (often just the description).
+<BR>
+ASCII art can be done with <pre> and </pre> tags.  I've done that in the Hypertext Hotel, at duke.cs.brown.edu:8888.  Visit there if you haven't already.
+<BR>
+Other stuff, like processing forms, is a little bit more work.  Forms can be done completely in-db, but it makes it a little bit simpler if some of the encoding translations can be done with a modification to the server.  That's a bit more serious, though.
+<BR>
+Overall, it's not very hard to do it.  And a MOO makes a really fun WWW server.  If you haven't visited WAXweb, at http://bug.village.virginia.edu:7777, check it out.  It shows how much it's possible to do using a MOO to generate everything dynamically, on the fly.
+<BR>
+Later,
+<BR>
+Kid (Tom Meyer)
+<BR>
+<BR>
+Date: 1995 Feb 23, 08:11:06 a.m. PST
+<BR>
+From: Trismegistos (#1457)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Re: Kid's server implementation
+<BR>
+
+<BR>
+Um, ah ... sounds nifty *scratching head in puzzlement*
+<BR>
+
+<BR>
+Any chance of throwing together a little help-script or MOOtorial, demonstrating a simple application of this capability?
+<BR>
+And, how does this relate to the Dhalgren webpage? Or, would the procedure you talk about use the Dhalgren MOO URL itself as a website?
+<BR>
+
+<BR>
+  Future Shock Trism
+<BR>
+<BR>
+Date: 1995 Feb 24, 11:27:56 a.m. PST
+<BR>
+From: Kid (#293)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: WWW server stuff
+<BR>
+
+<BR>
+Well, the MOO WWW server would be independent from the Dhalgren web page.  So we could keep that server up and have a server on port 8000.  Or we could have the MOO deliver what's up on the Dhalgren page.  Either way would be feasible.  Since the MOO can't deliver binary files, we'd have to have some sort of regular WWW server running so that we can get pictures.  But the text can all get delivered from the MOO.
+<BR>
+Uh, does that make sense?  It should make more sense once and if it all goes up.
+<BR>
+Kid
+<BR>
+<BR>
+Date: 1995 Mar  1, 06:44:23 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Crash
+<BR>
+
+<BR>
+Dhalgren crashed for some inexplicable reason at 4:16 this afternoon PST.  I just brought it up again, and nothing appears to have been lost.
+<BR>
+<BR>
+Date: 1995 Mar  5, 05:57:06 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: FurryMUCK web page
+<BR>
+
+<BR>
+If you want to see an impressive MUD web page, check out FurryMUCK's new page (which is still in progress).  Its at http://www.best.com/~tugrik/furry.
+<BR>
+
+<BR>
+Check out the art collection in avatar -- hundreds of Furries have drawn images of themselves or other players.  There is also a huge collection of (mostly pornographic) furry fiction.  Furry has a strong artistic and imaginative following, and this web page gives a good glimpse into one of the truly distinctive cultures to evolve on line.
+<BR>
+
+<BR>
+I haven't seen the same kind of true artifact-generating culture in other MUDS.  Maybe we should try making *text and available in an archive from our web page.  It also looks like the Furry folks are starting a project to make a pictorial web tour of the central sites of their MUD.
+<BR>
+<BR>
+Date: 1995 Mar  6, 01:08:06 p.m. PST
+<BR>
+From: Trismegistos (#1457)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Web ideas
+<BR>
+
+<BR>
+ It would be neat if, when the topo of the Dhalgren website gets worked out, appropriate hyperlinks were placed in various areas...
+<BR>
+
+<BR>
+ For example (and working off the list I just posted to *cool), The Rave would take you to a ravers' homepage; Interzone University would contain links to various scholarly resources; the weird building with purple lights would allow you to be mysteriously "abducted" to a randomly chosen fringe/crank/cult website ...
+<BR>
+
+<BR>
+This gives more reason for people to explore the WebMoo than if everything were glommed into one place at the outset.
+<BR>
+
+<BR>
+ -- trism
+<BR>
+<BR>
+Date: 1995 Mar  6, 04:16:22 p.m. PST
+<BR>
+From: Rebis (#875)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Websites?
+<BR>
+
+<BR>
+I wonder if it wouldnt be a good idea to start a new mailing lists devoted to interesting/cool/etc WWW sites--instead of having to post such on either *graffiti or *cttr, as is the case now?
+<BR>
+<BR>
+Date: 1995 Mar  6, 04:58:06 p.m. PST
+<BR>
+From: melusina (#907)
+<BR>
+To:&nbsp&nbsp *graffiti (#107) and *web (#2454)
+<BR>
+Subj: yet another list
+<BR>
+
+<BR>
+Because I'm the one who posted the last thing to *cttr about websites, and because I have a mailing list fetish, I've gone ahead and made a list for WWW stuff.  *web, *www, *w.  I'll go ahead and forward all of the various web-ly posts to it; future posts should be sent there, I guess.
+<BR>
+
+<BR>
+One thing I'm wondering:  should this list just be for sites &c, or should we move the discussion of the MOO-WWW interface there too?
+<BR>
+
+<BR>
+hiss,
+<BR>
+mel the public servant.
+<BR>
+<BR>
+Date: 1995 Mar 15, 04:43:21 p.m. PST
+<BR>
+From: Boudicea (#1021)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: size
+<BR>
+
+<BR>
+How do I check how big an object is here? @audit doesn't show size.
+<BR>
+<BR>
+Date: 1995 Mar 15, 08:05:18 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp Boudicea (#1021) and *graffiti (#107)
+<BR>
+Subj: Re: size
+<BR>
+
+<BR>
+>  How do I check how big an object is here? @audit doesn't show
+<BR>
+>  size.
+<BR>
+
+<BR>
+@addfeature #542 and use @sp. Our core is pretty far behind LambdaCore these days, including the size stuff. I'll bring us up to date one of these days...
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1995 Mar 20, 10:05:44 p.m. PST
+<BR>
+From: Avon (#2177)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Can't Eat WWW
+<BR>
+
+<BR>
+Mama Hunch invites you to come explore the relationship between the virtual senses and the unattainable object of lust, a decadent new provider (oh, isn't that becoming an ominous word?) for a very old addiction...the insatiable craving for chocolate.  While Mama's grand opening lasts, all desserts and drinks are free.  Later, you may find yourself paying more than you bargained for.  Morte Delizioso.  Go NW from the Interzone Plaza (#422).
+<BR>
+
+<BR>
+Avon
+<BR>
+<BR>
+Date: 1995 Mar 23, 08:12:02 p.m. PST
+<BR>
+From: cinnamon (#301)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: home
+<BR>
+
+<BR>
+Must Bellona residents always sleep in their designated homes? Are we still such good little MOOers, always in our proper places, even here?
+<BR>
+
+<BR>
+cinnamon
+<BR>
+<BR>
+Date: 1995 Mar 23, 10:24:15 p.m. PST
+<BR>
+From: Patro (#78)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: sleeping in your home
+<BR>
+
+<BR>
+That's a MOOism.  When you log off, a housekeeper (in our case, a gang of thugs) takes you home.  On MUCKs, you stay where you are, but users can always "sweep" a room clear of sleepers, sending them home.
+<BR>
+<BR>
+Date: 1995 Mar 24, 07:10:04 a.m. PST
+<BR>
+From: Marcus (#812)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: homeless...
+<BR>
+
+<BR>
+Maybe to indulge cinnamon and other vagrants, the wizzes
+<BR>
+might @set the .free_home to 1 on _all_ the public spaces and
+<BR>
+thoroughfares, anyway? not just the Clearing in the Park. Just
+<BR>
+in the way of encouraging a certain rough themeliness.
+<BR>
+  Hrm...maybe I'll set an example by doing likewise in the empty
+<BR>
+lot behind the theater, Little St., the Little Park?
+<BR>
+  Players should be forewarned that if they don't actually @sethome
+<BR>
+in the spot they hope to crash in, the gang of thugs will still haul
+<BR>
+em off....
+<BR>
+  Have fun! (sleep it off, you'll feel better tomorrow....) mrx
+<BR>
+<BR>
+Date: 1995 Apr  1, 03:51:03 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Changing servers
+<BR>
+
+<BR>
+After some careful deliberations, I've decided to change Dhalgren over to a different type of server.  Starting later this evening, we will be switching from MOO 1.78 to TinyMUCK 2.1.
+<BR>
+<BR>
+Date: 1995 Apr  1, 06:39:57 p.m. PST
+<BR>
+From: Boudicea (#1021)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: changing server
+<BR>
+
+<BR>
+why?
+<BR>
+<BR>
+Date: 1995 Apr 10, 09:16:10 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Change in hierarchy
+<BR>
+
+<BR>
+I have just changed the parent of the Generic Room with Seats (#955) from the Generic Post-Apocalypse Room (#110) to the Generic Secured Post-Apocalypse Room (#262).  One step down in the hierarchy.
+<BR>
+
+<BR>
+Now, all children of #955 now have security available to them. Everything else remains the same. If you have any questions/problems, post here.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1995 Apr 20, 05:14:51 p.m. PST
+<BR>
+From: Gaijin (#1460)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Juxtaposition Humor
+<BR>
+
+<BR>
+So I was wandering the 'zone, idling, when the following two lines
+<BR>
+appeared almost simultaneously:
+<BR>
+
+<BR>
+< disconnected: Patro. Total: 5 >
+<BR>
+A hum of sex and commerce shakes Interzone like a vast hive.
+<BR>
+
+<BR>
+I don't know.  Maybe I'm the only one who found it humorous...
+<BR>
+<BR>
+Date: 1995 Jun  5, 08:43:26 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Whee!
+<BR>
+
+<BR>
+Dhalgren crashed around 5pm today, just about 10 minutes after the checkpoint.  Nothing was lost, but you may have experienced some dizziness and disorientation.
+<BR>
+<BR>
+Date: 1995 Jun  7, 08:55:52 p.m. PST
+<BR>
+From: Arc (#2145)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Hm.
+<BR>
+
+<BR>
+So, what's going on here these days?  Are there any big projects being pursued?
+<BR>
+
+<BR>
+I rarely see more than 4 people connected at once.  I'm lonely.  Someone mail me -- I'm friendly, just ask anyone.
+<BR>
+
+<BR>
+Wistful,
+<BR>
+--
+<BR>
+Arc
+<BR>
+<BR>
+Date: 1995 Jun 16, 01:30:08 p.m. PST
+<BR>
+From: Gaijin (#1460)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Roger Zelazny
+<BR>
+
+<BR>
+I received mail today indicating that Roger Zelazny died this afternoon.
+<BR>
+I for one, am sorry.
+<BR>
+Details upon request.
+<BR>
+
+<BR>
+Gaijin
+<BR>
+<BR>
+Date: 1995 Jun 20, 02:35:52 p.m. PST
+<BR>
+From: Ledtrad (#2658)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Suggestion: @next [<n>] [on <r>]
+<BR>
+
+<BR>
+It'd be nice to be able to do ``@next 5 on *x''.
+<BR>
+
+<BR>
+Ledtrad Osa
+<BR>
+<BR>
+Date: 1995 Jun 20, 11:02:52 p.m. PST
+<BR>
+From: Gaijin (#1460)
+<BR>
+To:&nbsp&nbsp *graffiti (#107)
+<BR>
+Subj: Wired & Dhalgren
+<BR>
+
+<BR>
+Well, I just read an article in the July 1995 Wired that references not just our esteemed legba, but this MOO by name as well!
+<BR>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

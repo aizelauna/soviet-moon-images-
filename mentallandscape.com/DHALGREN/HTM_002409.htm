@@ -1,0 +1,78 @@
+<HTML>
+<HEAD>
+<TITLE>Candle</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Candle (#2409)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_001080.htm">Random</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA tall white candle.  It seems to be pyrokinetic.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_001213.htm">Randomhaus</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+light:
+<pre>
+if (player.location != this.location)
+    player:tell("You can't light that from here.");
+elseif (this.lit)
+    player:tell("The candle is already lit.");
+else
+    player:tell("You light the candle with a thought.");
+    player.location:announce(player.name, " lights a candle.");
+    this.lit = 1;
+endif
+return 0;
+.
+
+</pre>
+<BR>
+description:
+<pre>
+if (this.lit == 0)
+    return pass(@args) + "  The candle is unlit.";
+else
+    return pass(@args) + "  The candle is lit.";
+endif
+return 0;
+.
+
+</pre>
+<BR>
+snuff:
+<pre>
+if (player.location != this.location)
+    player:tell("You can't extinguish that from here.");
+elseif (this.lit == 0)
+    player:tell("The candle is already out.");
+else
+    player:tell("You snuff the candle.");
+    player.location:announce(player.name, " blows a candle out.");
+    this.lit = 0;
+endif
+return 0;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp lit
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

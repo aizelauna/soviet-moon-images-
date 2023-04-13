@@ -1,0 +1,93 @@
+<HTML>
+<HEAD>
+<TITLE>gasoline can</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> gasoline can (#1982)</H3>
+(an instance of <A HREF="HTM_001479.htm">Generic Implement of Fiery Destruction</A> made by <A HREF="HTM_000907.htm">melusina</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002445.htm">Goat</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+burn:
+<pre>
+"Copied from gasoline can (#1479):burn by Trismegistos (#1457) Sat Sep 24 18:21:34 
+1994 EDT";
+if (dobj.owner == player)
+    if (dobj.location != player.location)
+        player:tell("You must move ", dobj.name, " to where you are...");
+        return;
+    endif
+    burning = 1;
+    if (dobj != player)
+        player:tell("You douse ", dobj.name, " with gasoline, then strike a match, 
+wondering if you should really ...");
+        player.location:announce(player.name, " douses ", dobj.name, " with gasoline 
+from ", this.name, " then strikes a match.");
+        if ($command_utils:yes_or_no(("Send " + dobj.name) + " to fiery recyclement?"))
+            player.location:announce_all(player.name, " tosses the match!");
+            player.location:announce_all(#1479:prop_default(dobj, "ignite_msg", dobj.name 
++ " starts to burn."));
+            dobj.name = dobj.name + " [burning]";
+        else
+            burning = 0;
+            player:tell("You relent and blow out the match. The gasoline quickly 
+evaporates.");
+            player.location:announce(player.name, " has mercy on ", dobj.name, " 
+and blows out the match. The gasoline quickly evaporates.");
+        endif
+    else
+        player:tell("In a gesture of protest, you pour gasoline all over yourself 
+and light a match. WHOOMF!");
+        player.location:announce(player.name, " bathes in gasoline from ", this.name, 
+" then lights a match in a self-immolating act of protest. WHOOMF!");
+        player.location:announce_all(#1479:prop_default(dobj, "ignite_msg", dobj.name 
++ " starts to burn."));
+        descstore = dobj.description;
+    endif
+    if (burning)
+        dobj.description = dobj.name + " is on fire, enveloped in orange flames, 
+spewing black smoke.";
+        n = (dobj.object_size[1] / 1000) + 1;
+        for t in [1..n]
+            suspend(30);
+            dobj.location:announce_all("Flames and black smoke spiral heavenwards 
+from the burning of ", dobj.aliases[1], ".");
+            suspend(30);
+        endfor
+        if (dobj != player)
+            dobj.location:announce_all(dobj.aliases[1], " stops burning and crumbles 
+into nothingness.");
+            $recycler:_recycle(dobj);
+        else
+            player.location:announce_all(dobj.name, " finds immolation tiresome and 
+stops burning.");
+            dobj.description = descstore;
+        endif
+    endif
+else
+    player:tell("A misplaced sense of ethics prevents you from burning someone else's 
+ property.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

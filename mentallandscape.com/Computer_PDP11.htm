@@ -1,0 +1,52 @@
+<HTML>
+<HEAD>
+<TITLE>PDP 11/70</TITLE>
+<META name="author" content-"Don P. Mitchell">
+<META name="keywords" content="PDP 11/70">
+</HEAD>
+
+<BODY bgcolor=#000000 text=#99FF99>
+<FONT face="Arial, Helvetica">
+<CENTER><FONT COLOR=#FFFFFF><H1>PDP 11/70</H1></FONT></CENTER>
+<P>
+<BR>
+<CENTER><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR>
+<TD ALIGN="left" VALIGN="top" WIDTH="600">
+Less powerful but much cheaper than mainframes and supercomputers, the minicomputer took over.  Caltech's Astronomy department bought one of the first VAX computers, which literally exploded after a three-phase power supply was improperly connected.
+</TD></TR></TABLE></CENTER>
+<P>
+<BR>
+<CENTER>
+<img src="Computer_PDP11.jpg" alt="PDP 11/70">
+</CENTER>
+<P><CENTER><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR>
+<TD ALIGN="left" VALIGN="top" WIDTH="600">
+The Caltech Space Radiation Lab, where I worked, opted for a Digital Equipment PDP 11/70, cheaper and actually faster than the VAX, but only a 16-bit processor.
+Rob Pike convinced us to run Version 6 UNIX.  We programmed in C, which was very unusual for scientists who mostly used FORTRAN.
+<P>
+I got to know the kernel of V6 like the back of my hand.  I once destroyed our file system by experimenting with a faster disk device driver.  We also wrote a Monte Carlo ray tracer to simulate the Cerenkov detector in the HEAO-C cosmic ray detector.
+</TD></TR></TABLE></CENTER>
+
+<P>
+<BR>
+<CENTER>
+<img src="Computer_PDP11b.jpg" alt="Caltech Space Telemetry Tapes">
+</CENTER>
+<P><CENTER><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"><TR>
+<TD ALIGN="left" VALIGN="top" WIDTH="600">
+As you saw at the top, the PDP 11 was flanked by 8 tape drives.  Here you see why.  The PDP 11 crunched telemetry data night and day, mostly cosmic-ray and gamma-ray data.
+<P>
+The first time we tried running many tape I/O jobs, one drive spun fast, one turned slowly, and the rest stood still!  We quickly discovered that UNIX didn't schedule jobs properly, so we had to write a tape device driver that enforced round-robin scheduling of tape hardware commands.
+</TD></TR></TABLE></CENTER>
+
+<P><CENTER><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH="640">
+<A HREF="Index.htm"><FONT COLOR=#FFFFFF>Home</FONT></A>,
+<A HREF="Computer.htm"><FONT COLOR=#FFFFFF>Back to Computers</A>
+</TD></TR></TABLE></CENTER>
+
+<P><BR><CENTER>Copyright © 2003 Don P. Mitchell.  All rights reserved.</CENTER>
+
+
+</BODY>
+</HTML>

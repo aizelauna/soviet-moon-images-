@@ -1,0 +1,90 @@
+<HTML>
+<HEAD>
+<TITLE>Caesar</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Caesar (#2509)</H3>
+(an instance of <A HREF="HTM_001223.htm">Generic Lycanthropic Thespian PC</A> made by <A HREF="HTM_002509.htm">Caesar</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspTEETH.  CLAWS.  MASS.  An orange-maned lion stalks the area.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspCaesar is wearing a loose collar of bright pink leather.  He loves the girl that 
+gave it to him very much, so he wears it with pride.  It looks a bit silly, but no 
+one would say that to such a big lion.
+<BR>
+<BR>
+Caesar is carrying <A HREF="HTM_002608.htm">cc</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002603.htm">cardboard box</A>.
+<BR>
+<BR>
+<BR>
+Caesar owns <A HREF="HTM_002509.htm">Caesar</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@move:
+<pre>
+"Copied from generic player (#6):@move by The_Mayor (#2) Thu Jun  1 01:16:59 1995 
+PDT";
+"'@move <object> to <place>' - Teleport an object. Example: '@move trash to #11' 
+to move trash to the closet.";
+set_task_perms((caller == this) ? this | $no_one);
+dobj = this:my_match_object(dobjstr);
+iobj = this:my_match_object(iobjstr);
+if ($command_utils:object_match_failed(dobj, dobjstr) || ((iobj != $nothing) && $command_utils:object_match_failed(iobj, 
+iobjstr)))
+    return;
+endif
+old_loc = dobj.location;
+if (old_loc == iobj)
+    player:tell(dobj.name, " is already ", valid(iobj) ? "in " + iobj.name | "nowhere", 
+".");
+    return;
+endif
+dobj:moveto(iobj);
+if (dobj.location == iobj)
+    player:tell("Moved.");
+    if (is_player(dobj))
+        if (valid(old_loc))
+            old_loc:announce_all(dobj.name, " disappears suddenly for parts unknown.");
+            if (dobj != player)
+                dobj:tell("You have been moved by ", player.name, ".");
+            endif
+        endif
+        if (valid(dobj.location))
+            dobj.location:announce(dobj.name, " materializes out of thin air.");
+        endif
+    endif
+elseif (dobj.location == old_loc)
+    if ($object_utils:contains(dobj, iobj))
+        player:tell(iobj.name, " is inside of ", dobj.name, "!");
+    else
+        player:tell($string_utils:pronoun_sub("Either %d doesn't want to go, or %i 
+doesn't want to accept %[dpo]."));
+    endif
+elseif (dobj == player)
+    player:tell("You have been deflected from your original destination.");
+else
+    player:tell($string_utils:pronoun_sub("%D has been deflected from %[dpp] original 
+destination."));
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

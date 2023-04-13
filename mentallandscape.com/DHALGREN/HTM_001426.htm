@@ -1,0 +1,63 @@
+<HTML>
+<HEAD>
+<TITLE>a prayer-wheel</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a prayer-wheel (#1426)</H3>
+(an instance of <A HREF="HTM_000261.htm">Generic Boomerang Thing</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA finely wrought cylinder mounted in a frame, so you can turn it.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000896.htm">a peregrination</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+repeat:
+<pre>
+speed = args[1] in {"turn", "twirl", "spin"};
+if (speed)
+    number = (random(speed) + random(speed * 2)) + random(speed * 3);
+    this.delay = 3 - speed;
+    return number;
+else
+    player:tell("Spin the wheel slow, steady or fast...?");
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+turn twirl spin:
+<pre>
+player:tell("You ", verb, " the prayer wheel...!");
+this.location:announce(player:titlec(), " ", verb, "s the prayer wheel...");
+repetitions = this:repeat(verb);
+for times in [1..repetitions]
+    suspend(this.delay);
+    this.location:announce_all(this.mantra);
+endfor
+suspend(this.delay);
+this.location:announce_all("The wheel comes to a stop.");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mantra
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

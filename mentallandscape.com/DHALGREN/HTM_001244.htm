@@ -1,0 +1,57 @@
+<HTML>
+<HEAD>
+<TITLE>Shotgun</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Shotgun (#1244)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_001358.htm">Johnathon</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA mean looking, bullpup shotgun with a short barrel and drum magazine...
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_001358.htm">Johnathon</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+shoot:
+<pre>
+dobj = player.location:match_object(dobjstr);
+if (!$command_utils:object_match_failed(dobj, dobjstr))
+    if (is_player(dobj))
+        #1386:moveto(dobj);
+        player:tell(this:shoot_msg());
+        player.location:announce(this:oshoot_msg());
+    endif
+endif
+.
+
+</pre>
+<BR>
+shoot_msg oshoot_msg:
+<pre>
+return $string_utils:pronoun_sub(this.(verb));
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp shoot_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oshoot_msg
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

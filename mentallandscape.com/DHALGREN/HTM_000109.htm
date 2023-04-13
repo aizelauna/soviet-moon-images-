@@ -1,0 +1,390 @@
+<HTML>
+<HEAD>
+<TITLE>Login Watcher</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Login Watcher (#109)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000096.htm">Dredful</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis meter seems to be plugged into the heart of the MOO. With wizardly influence, it tells people (if they wish to know) when players log in or out of the MOO. This feature has help, naturally: help #109.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000111.htm">Features Feature Object</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThis feature will notify you when people login or logout. To use it, `@addfeature 
+#109' and then type `@login on'. If you wish to only watch specific people log in 
+or out, see the @interesting verb below to create a list.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspTo customize the messages the login watcher dumps to you, make a property on
+&nbsp&nbsp&nbsp&nbsp&nbspyourself called .login_watcher ... this should contain a string containing your
+&nbsp&nbsp&nbsp&nbsp&nbspmessage, with substitutions.  
+&nbsp&nbsp&nbsp&nbsp&nbsp     Login Watcher - time            dobject - date
+&nbsp&nbsp&nbsp&nbsp&nbsp     w - day of week     visitor - name of player
+&nbsp&nbsp&nbsp&nbsp&nbsp     # - object number of player
+&nbsp&nbsp&nbsp&nbsp&nbsp     m - message (connected or disconnected)
+&nbsp&nbsp&nbsp&nbsp&nbsp     c - number of connected players
+&nbsp&nbsp&nbsp&nbsp&nbspFor a message of "Dredful connected at 12:45, for 42 users online.", set your
+&nbsp&nbsp&nbsp&nbsp&nbsp.login_watcher property to "visitor m at Login Watcher, for c users online." 
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe default message is: "< m: visitor. Total: c >"
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@login:
+<pre>
+"Usage: @login on/off";
+"";
+"When on, you'll see logins/logoffs. Turn it off to stop watching.";
+if (argstr == "on")
+    if (player in this.users)
+        player:tell("You are already watching logins/logoffs.");
+    else
+        this.users = {@this.users, player};
+        player:tell("You will now see logins/logoffs.");
+    endif
+elseif (argstr == "off")
+    this.users = setremove(this.users, player);
+    player:tell("You will no longer see logins/logoffs.");
+else
+    player:tell_lines($code_utils:verb_documentation());
+endif
+.
+
+</pre>
+<BR>
+broadcast:
+<pre>
+"broadcast(LIST <people>, STR <message>)";
+if (caller != this)
+    return E_PERM;
+endif
+who = args[1];
+mesg = args[2];
+for person in (who)
+    fork (0)
+        person:tell(this:message(@mesg, person));
+    endfork
+endfor
+"Fork in case of bad :tells";
+.
+
+</pre>
+<BR>
+tell_connect:
+<pre>
+if (caller != #0)
+    return E_PERM;
+endif
+arrival = args[1];
+if (this.users)
+    this.thinks_connected = setadd(this.thinks_connected, arrival);
+    message = {1, arrival, length(connected_players())};
+    to_tell = this:get_list(arrival);
+    this:broadcast(to_tell, message);
+endif
+.
+
+</pre>
+<BR>
+tell_disconnect:
+<pre>
+if (caller != #0)
+    return E_PERM;
+endif
+departure = args[1];
+if (this.users)
+    this.thinks_connected = setremove(this.thinks_connected, departure);
+    "length(connected_players())-1 since connected_players() isn't updated until 
+:disfunc is complete";
+    numb = length(connected_players());
+    numb = args[2] ? numb - 1 | numb;
+    message = {0, departure, numb};
+    to_tell = this:get_list(departure);
+    this:broadcast(to_tell, message);
+endif
+.
+
+</pre>
+<BR>
+updating:
+<pre>
+if (!$perm_utils:controls(player, this))
+    return E_PERM;
+endif
+while (this.running)
+    before = this.thinks_connected;
+    now = connected_players();
+    "Only check for case it thinks more are connected than truly are. Aren't interested 
+in case when more are connected now than it thinks. Since $login is foolproof. It's 
+unwatched disconnects we're worried about.";
+    if (discrep = $set_utils:diff(before, now))
+        for person in (discrep)
+            this:tell_disconnect(person, 0);
+        endfor
+    endif
+    this.thinks_connected = now;
+    suspend(this.update_interval);
+endwhile
+.
+
+</pre>
+<BR>
+@inter*esting @uninter*esting:
+<pre>
+" - @interesting <player> <player> ... - adds each to your interesting list";
+" - @interesting                       - see your interesting list";
+" - @interesting on                    - watch just interesting people";
+" - @interesting off                   - watch all logins/logouts";
+" - @uninteresting <player> <player>   - removes each from the list";
+" - @uninteresting all                 - clear your interesting list";
+if (!(player in this.users))
+    player:tell("Either you don't have this feature, or you need to type `@login 
+on' first.");
+    return;
+endif
+status = player in this.interesting_only;
+mesg = status ? "interesting" | "all";
+if (((length(args) == 1) && (args[1] == "on")) && (verb[2] == "i"))
+    "stuff for @interesting on";
+    if (status)
+        player:tell("You're already watching only your interesting list.");
+        return;
+    else
+        this.interesting_only = setadd(this.interesting_only, player);
+        player:tell("Now watching people in your interesting list.");
+        if (!$list_utils:iassoc(player, this.interesting))
+            player:tell("Your interesting list is empty, however.");
+        endif
+        return;
+    endif
+elseif (((length(args) == 1) && (args[1] == "off")) && (verb[2] == "i"))
+    "stuff for @interesting off";
+    if (status)
+        this.interesting_only = setremove(this.interesting_only, player);
+        player:tell("Now listening to all logins/logouts.");
+        return;
+    else
+        player:tell("You aren't listening to your interesting list.");
+        return;
+    endif
+elseif (((length(args) == 1) && (args[1] == "all")) && (verb[2] == "u"))
+    "stuff for @uninteresting all";
+    this:set_inter(player, {}, 1);
+    player:tell("Your interesting list has been cleared.");
+    if (status)
+        player:tell("Note that you are still listening to interesting logins/logouts.");
+    else
+        player:tell("You are listening to all logins/logouts.");
+    endif
+    return;
+elseif ((!args) && (verb[2] == "i"))
+    "display interesting list";
+    ilist = this:get_inter(player);
+    if (ilist[2])
+        player:tell("Displaying interesting people to watch login/logout:");
+        "I'll make the printout prettier later.";
+        player:tell($string_utils:nanl(ilist[2][2]));
+    else
+        player:tell("Your interesting list is empty.");
+    endif
+    player:tell("You are listening to ", mesg, " logins/logouts.");
+    return;
+elseif ((length(args) >= 1) && (verb[2] == "i"))
+    "add to interesting list";
+    newpeople = $string_utils:match_player(args);
+    didfind = $command_utils:player_match_result(newpeople, args);
+    if (length(didfind) > 1)
+        this:set_inter(player, f = listdelete(didfind, 1), 1);
+        player:tell("Adding: ", $string_utils:nanl(f));
+    endif
+    player:tell("You are listening to ", mesg, " logins/logouts.");
+    return;
+elseif ((length(args) >= 1) && (verb[2] == "u"))
+    "remove from list";
+    newpeople = $string_utils:match_player(args);
+    didfind = $command_utils:player_match_result(newpeople, args);
+    if (length(didfind) > 1)
+        this:set_inter(player, f = listdelete(didfind, 1), 0);
+        player:tell("Removing: ", $string_utils:nanl(f));
+    endif
+    player:tell("You are listening to ", mesg, " logins/logouts.");
+    return;
+else
+    player:tell_lines($code_utils:verb_documentation());
+endif
+.
+
+</pre>
+<BR>
+get_list:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+who = args[1];
+newlist = setremove(this.users, who);
+for person in (this.interesting_only)
+    if (!(this:check_interesting(person, who) == 1))
+        newlist = setremove(newlist, person);
+    endif
+endfor
+return $set_utils:intersection(newlist, connected_players());
+.
+
+</pre>
+<BR>
+check_interesting:
+<pre>
+"check_interesting(OBJ player1, OBJ player2) => is player2 in player1's list?";
+if (caller != this)
+    return E_PERM;
+endif
+who = args[1];
+tester = args[2];
+inters = this:get_inter(who);
+if (inters[2][2])
+    return (tester in inters[2][2]) && 1;
+else
+    "Something's messed up. This case shouldn't occur.";
+    return -1;
+endif
+.
+
+</pre>
+<BR>
+get_inter:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+who = args[1];
+isinter = (who in this.interesting_only) && 1;
+if (fnd = $list_utils:assoc(who, this.interesting))
+    if (dead = $set_utils:diff(fnd[2], this:remove_invalids(fnd[2])))
+        this:set_inter(who, dead, 0);
+        fnd = $list_utils:assoc(who, this.interesting);
+    endif
+endif
+return {isinter, fnd};
+.
+
+</pre>
+<BR>
+set_inter:
+<pre>
+"adds or removes to list: set_inter(OBJ who, LIST newpeople, BOOL add/remove)";
+if (caller != this)
+    return E_PERM;
+endif
+who = args[1];
+new = args[2];
+flag = args[3];
+found = $list_utils:iassoc(who, this.interesting);
+if (flag)
+    if (new)
+        if (found)
+            for person in (new)
+                this.interesting[found][2] = setadd(this.interesting[found][2], person);
+            endfor
+        else
+            this.interesting = {@this.interesting, {who, new}};
+        endif
+    else
+        if (found)
+            this.interesting = listdelete(this.interesting, found);
+        endif
+    endif
+else
+    if (found)
+        for person in (new)
+            this.interesting[found][2] = setremove(this.interesting[found][2], person);
+        endfor
+    endif
+endif
+.
+
+</pre>
+<BR>
+feature_remove:
+<pre>
+who = args[1];
+if ((caller != who) || (caller_perms() != this.owner))
+    return E_PERM;
+endif
+this.users = setremove(this.users, who);
+this.interesting_only = setremove(this.interesting_only, who);
+if (f = $list_utils:iassoc(who, this.interesting))
+    this.interesting = listdelete(this.interesting, f);
+endif
+.
+
+</pre>
+<BR>
+message:
+<pre>
+":message(1|0 connect|disconnect, OBJ personnel change, NUM total connected, OBJ 
+who is being told)";
+if (caller != this)
+    return E_PERM;
+endif
+mesg = args[1] ? "connected" | "disconnected";
+change = args[2];
+numb = args[3];
+who = args[4];
+base = $object_utils:has_property(who, "login_watcher") ? who.login_watcher | this.message;
+subs = {{"%t", who:ctime(who, time())[12..19]}, {"%m", mesg}, {"%#", tostr(change)}, 
+{"%n", change.name}, {"%c", tostr(numb)}, {"%d", $time_utils:ddmmyy(time())}, {"%w", 
+$time_utils:day(time())}};
+return $string_utils:substitute(base, subs);
+.
+
+</pre>
+<BR>
+remove_invalids:
+<pre>
+people = args[1];
+for p in (people)
+    if (!is_player(p))
+        people = setremove(people, p);
+    endif
+endfor
+return people;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp thinks_connected
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp running
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp users
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp update_interval
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp interesting
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp interesting_only
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp message
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,533 @@
+<HTML>
+<HEAD>
+<TITLE>Millebornes Game</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Millebornes Game (#2598)</H3>
+(an instance of <A HREF="HTM_000003.htm">generic room</A> made by <A HREF="HTM_000539.htm">Sick</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAn incomplete Millebornes game.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000998.htm">Tower Chamber</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+join:
+<pre>
+"Usage:  join";
+"Join the game before it has been started.";
+"Once the game is in progress, a new player may join only if an existing player abandons 
+eir hand.";
+if (caller != player)
+    caller:tell(E_PERM);
+    return E_PERM;
+elseif (player in this.players)
+    player:tell("You're already playing, silly.");
+elseif (this.in_progress)
+    if (i = $nothing in this.players)
+        "... take over an abandoned hand";
+        this:announce_all(player.name, " joins the game, and takes over an abandoned 
+hand.");
+        this.players[i] = player;
+        if (i = $set_utils:count(this.players, $nothing))
+            this:announce_all("However, the game cannot resume until the ", i, " 
+remaining abandoned ", (i == 1) ? "hand is" | "hands are", " taken.");
+            this:announce_all("If you cannot find enough players, you'll have to 
+`end' the game.");
+        endif
+    else
+        player:tell("There is already a game in progress.  You'll have to wait for 
+the next game.");
+    endif
+elseif (length(this.players) >= 4)
+    player:tell("There cannot be more than 4 players, sorry.");
+    this:announce(player.name, " tries to join the game, but there are already four 
+players.");
+else
+    this:announce_all(player.name, " joins the game.");
+    if ((pnum = length(this.players = setadd(this.players, player))) == 1)
+        this:announce_all("At least one other player is needed to start the game.");
+    elseif (pnum == 2)
+        this:announce_all("Someone can `start' the game now, or find two other players.");
+    elseif (pnum == 3)
+        this:announce_all("You need one more or one less player before you can start 
+the game.");
+    elseif (pnum == 4)
+        this:announce_all("There is no room for more players. Someone should `start' 
+the game now.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+quit:
+<pre>
+"Usage:  quit";
+"Quit the game before it has been started.";
+"Once the game is in progress, a player may quit and abandon eir hand.  A new player 
+must then join to take control of the abandoned hand.";
+"If a hand is abandoned and a new player does not take over, someone must 'end' the 
+game.";
+if (caller != player)
+    caller:tell(E_PERM);
+    return E_PERM;
+elseif (!(idx = player in this.players))
+    player:tell("You aren't playing, silly.");
+elseif (this.in_progress)
+    "... abandon hand";
+    this.players[idx] = $nothing;
+    this:announce_all(player.name, " leaves the game. Someone must `join' and take 
+over ", player.name, "'s hand before the game may continue.");
+else
+    "... quit before started";
+    this:announce_all(player.name, " decides not to play.");
+    if ((pnum = length(this.players = setremove(this.players, player))) == 1)
+        this:announce_all("At least one other player is needed to start the game.");
+    elseif (pnum == 2)
+        this:announce_all("Someone can `start' the game now, or find two other players.");
+    elseif (pnum == 3)
+        this:announce_all("You need one more or one less player before you can start 
+the game.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+start:
+<pre>
+"Usage:  start";
+"Start the game once two or four players have joined.";
+if (caller != player)
+    caller:tell(E_PERM);
+    return E_PERM;
+elseif (!(player in this.players))
+    player:tell("You can only start the game if you are playing.");
+elseif ((pnum = length(this.players)) == 1)
+    player:tell("You need at least one more player before you can start the game.");
+elseif (pnum == 3)
+    player:tell("You need one more or one less player before you can start the game.");
+else
+    this:announce_all(player.name, " starts the game.");
+    this:start_game();
+endif
+.
+
+</pre>
+<BR>
+play:
+<pre>
+"Usage:  play <card> [on <player>]";
+"Plays the card.";
+"When playing hazard cards in a 4 player game, you must specify the target.  For 
+example, `play flat on bob'.";
+if (caller != player)
+    caller:tell(E_PERM);
+    return E_PERM;
+elseif (!(player in this.players))
+    player:tell("You aren't playing, silly.");
+elseif ($nothing in this.players)
+    player:tell("There is an abandoned hand.  Someone must `join' before the game 
+may continue.");
+elseif (this.current_turn != player)
+    player:tell("You can't play yet, it is ", this.current_turn.name, "'s turn.");
+elseif (!(card = this.db:match_card(dobjstr)))
+    player:tell("There are no \"", dobjstr, "\" cards.");
+elseif (!(card in this.hands[player in this.players]))
+    player:tell("You don't have ", this.db:card_title(card), " to play.");
+else
+    "... match victim";
+    if (iobjstr)
+        victim = $string_utils:match(iobjstr, this.players, "name", this.players, 
+"aliases");
+        if (victim == $ambiguous_match)
+            player:tell("\"", iobjstr, "\" can refer to more than one player.");
+            return;
+        elseif (!valid(victim))
+            player:tell("There is no one playing named \"", iobjstr, "\".");
+            return;
+        endif
+    elseif (length(this.players) == 2)
+        victim = setremove(this.players, player)[1];
+    else
+        victim = $ambigous_match;
+    endif
+    if (this:can_play(player, card, victim))
+        this:do_play(player, card, victim);
+        if (card in {"Extra Tank", "Puncture Proof", "Driving Ace", "Right of Way"})
+            this:set_turn(player);
+        else
+            this:next_turn();
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+discard:
+<pre>
+"Usage:  discard <card>";
+"Discards the card from your hand.";
+if (caller != player)
+    caller:tell(E_PERM);
+    return E_PERM;
+elseif (!(player in this.players))
+    player:tell("You aren't playing, silly.");
+elseif ($nothing in this.players)
+    player:tell("There is an abandoned hand.  Someone must `join' before the game 
+may continue.");
+elseif (this.current_turn != player)
+    player:tell("You can't discard yet, it is ", this.current_turn.name, "'s turn.");
+elseif (!(card = this.db:match_card(dobjstr)))
+    player:tell("There are no \"", dobjstr, "\" cards.");
+elseif (!(card in this.hands[player in this.players]))
+    player:tell("You don't have ", this.db:card_title(card), " to discard.");
+else
+    this:do_discard(player, card);
+    this:next_turn();
+endif
+.
+
+</pre>
+<BR>
+start_game:
+<pre>
+"Syntax:  start_game()";
+"Initialize game properties, deal hands, select first player.";
+if (caller != this)
+    return E_PERM;
+endif
+pnum = length(players = this.players);
+"... initialize properties";
+this.in_progress = 1;
+this.hands = this.safeties = this.miles = $list_utils:make(pnum, {});
+this.coups = this.limits = $list_utils:make(pnum, 0);
+this.actions = $list_utils:make(pnum, "Stop");
+this.current_turn = $nothing;
+this.discarded = {};
+this:announce_all("Shuffling the deck...");
+this.remaining = this.unplayed = this.db:random_deck();
+this:announce_all("Dealing hands...");
+for x in [1..6]
+    for who in (this.players)
+        this:deal_card(who);
+    endfor
+endfor
+who = players[random(pnum)];
+this:announce_all(who.name, " will lead the game.");
+this:set_turn(who);
+.
+
+</pre>
+<BR>
+set_turn:
+<pre>
+"Syntax:  set_turn(player);";
+"Deal the player a card and make it eir turn.";
+if (caller != this)
+    return E_PERM;
+endif
+this.current_turn = who = args[1];
+this:announce_all("It is now ", who.name, "'s turn.");
+this:deal_card(who);
+.
+
+</pre>
+<BR>
+do_discard:
+<pre>
+"Syntax:  do_discard(player, card)";
+"Discard the card from the player's hand.";
+if (caller != this)
+    return E_PERM;
+endif
+widx = (who = args[1]) in this.players;
+this:announce_all(who.name, " discards ", this.db:card_title(card = args[2]), ".");
+this.hands[widx] = setremove(this.hands[widx], card);
+this.discarded = listappend(this.discarded, card);
+this.unplayed = setremove(this.unplayed, card);
+.
+
+</pre>
+<BR>
+do_play:
+<pre>
+"Syntax:  do_play(player, card, victim)";
+"Play card from player's hand.  If hazard, play on victim.";
+if (caller != this)
+    return E_PERM;
+endif
+widx = (who = args[1]) in this.players;
+card = args[2];
+vidx = (victim = args[3]) in this.players;
+if (card in {"25 Miles", "50 Miles", "75 Miles", "100 Miles", "200 Miles"})
+    this.miles[widx] = listappend(this.miles[widx], card);
+    this:announce_all(who.name, " plays ", this.db:card_title(card), " for a total 
+of ", this:total_miles(who), ".");
+elseif (card == "End of Limit")
+    this.limits[widx] = 0;
+    this:announce_all(who.name, " plays ", this.db:card_title(card), ".");
+elseif (card in {"Gasoline", "Spare Tire", "Repairs", "Go"})
+    this.actions[widx] = ((card == "Go") || ("Right of Way" in this.safeties[widx])) 
+? "Go" | "Stop";
+    this:announce_all(who.name, " plays ", this.db:card_title(card), ".");
+elseif (card in {"Extra Tank", "Puncture Proof", "Driving Ace", "Right of Way"})
+    if (coup = (card in this.hands[widx]) != 7)
+        this.coups[widx] = this.coups[widx] + 1;
+    endif
+    this.safeties[widx] = listappend(this.safeties[widx], card);
+    this.actions[widx] = (coup || ("Right of Way" in this.safeties[widx])) ? "Go" 
+| "Stop";
+    this:announce(coup ? "* COUP FOURRE! * " | "", who.name, " plays ", this.db:card_title(card), 
+"!");
+elseif (card == "Speed Limit")
+    this.limits[vidx] = 1;
+    this:announce_all(who.name, " plays ", this.db:card_title(card), " on ", victim.name, 
+".");
+elseif (card in {"Out of Gas", "Flat Tire", "Accident", "Stop"})
+    this.actions[vidx] = card;
+    this:announce_all(who.name, " plays ", this.db:card_title(card), " on ", victim.name);
+endif
+this.hands[widx] = setremove(this.hands[widx], card);
+this.unplayed = setremove(this.unplayed, card);
+.
+
+</pre>
+<BR>
+can_play:
+<pre>
+"Syntax:  can_play(player, card, victim)  =>  0 | 1";
+"Can the player play the card (if hazard, on victim)?";
+if (caller != this)
+    return E_PERM;
+endif
+widx = (who = args[1]) in this.players;
+card = args[2];
+vidx = (victim = args[3]) in this.players;
+wact = this.actions[widx];
+vact = this.actions[vidx];
+if (card in {"25 Miles", "50 Miles", "75 Miles", "100 Miles", "200 Miles"})
+    if (wact != "Go")
+        who:tell("You must remedy your \"", wact, "\" before playing miles.");
+    elseif ((this:total_miles(who) + this:num_miles(card)) > 700)
+        who:tell("That would give you more than 700 miles!");
+    elseif ((card == "200 Miles") && ($list_utils:count(this.miles[widx], "200 Miles") 
+== 2))
+        who:tell("You can only play two 200 Miles cards.");
+    else
+        return 1;
+    endif
+elseif (card == "End of Limit")
+    if (this.limits[widx])
+        return 1;
+    else
+        who:tell("You don't have a Speed Limit!");
+    endif
+elseif (i = card in {"Gasoline", "Spare Tire", "Repairs", "Go"})
+    hazards = {"Out of Gas", "Flat Tire", "Accident", "Stop"};
+    if (this.actions[widx] == hazards[i])
+        return 1;
+    else
+        who:tell("You don't have a \"", hazards[i], "\" to remedy!");
+    endif
+elseif (card in {"Extra Tank", "Puncture Proof", "Driving Ace", "Right of Way"})
+    return 1;
+elseif (!valid(victim))
+    who:tell("You must specify a victim for that card!");
+elseif (card == "Speed Limit")
+    if (this.limits[vidx])
+        who:tell(victim.name, " already has a Speed Limit!");
+    elseif ("Right of Way" in this.safeties[vidx])
+        who:tell(victim.name, " has played the Right of Way!");
+    else
+        return 1;
+    endif
+elseif (i = card in {"Out of Gas", "Flat Tire", "Accident", "Stop"})
+    safeties = {"Extra Tank", "Puncture Proof", "Driving Ace", "Right of Way"};
+    if (safeties[i] in this.safeties[vidx])
+        who:tell(victim.name, " has played the ", safeties[i], " safety!");
+    elseif (vact != "Go")
+        who:tell(victim.name, " already has a ", vact, "!");
+    else
+        return 1;
+    endif
+else
+    who:tell("\"", card, "\"?! How did you get that?");
+endif
+.
+
+</pre>
+<BR>
+total_miles:
+<pre>
+total = 0;
+for m in (this.miles[args[1] in this.players])
+    total = total + this:num_miles(m);
+endfor
+return total;
+.
+
+</pre>
+<BR>
+num_miles:
+<pre>
+miles = args[1];
+return tonum(miles[1..index(miles, " ") - 1]);
+.
+
+</pre>
+<BR>
+deal_card:
+<pre>
+"Syntax:  deal_card(player)";
+"Deals the player a random card from the deck.";
+if (caller != this)
+    return E_PERM;
+endif
+widx = (who = args[1]) in this.players;
+card = this.remaining[i = random(length(this.remaining))];
+this.remaining = listdelete(this.remaining, i);
+this.hands[widx] = listappend(this.hands[widx], card);
+this:announce_all_but({who}, who.name, " is dealt a card from the deck.");
+who:tell("You are dealt ", this.db:card_title(card), ".");
+.
+
+</pre>
+<BR>
+next_turn:
+<pre>
+"Syntax:  next_turn()";
+"Become the next player's turn.";
+if (caller != this)
+    return E_PERM;
+endif
+if ((i = this.current_turn in this.players) == length(this.players))
+    this:set_turn(this.players[1]);
+else
+    this:set_turn(this.players[i + 1]);
+endif
+.
+
+</pre>
+<BR>
+board_description:
+<pre>
+if (this.in_progress)
+    text = {""};
+    su = $string_utils;
+    for i in [1..length(this.players)]
+        p = this.players[i];
+        if (mlist = this.miles[i])
+            total = 0;
+            miles = "";
+            for m in (mlist)
+                total = total + (n = this:num_miles(m));
+                miles = tostr(miles, "+", n);
+            endfor
+            miles[1..1] = "";
+            miles = tostr(su:right(total, 3), " (", miles, ")");
+        else
+            miles = "  0";
+        endif
+        text = {@text, tostr(su:right((p == player) ? "YOU" | (valid(p) ? p.name 
+| "<no-one>"), -10), ":", (p == this.current_turn) ? "* " | "  ", su:left(su:uppercase(this.actions[i]), 
+15), (s = this.safeties[i]) ? tostr("[ ", su:subst(su:from_list(s, " / "), {{"Right 
+of Way", "R.W"}, {"Puncture Proof", "P.P."}, {"Extra Tank", "E.T"}, {"Driving Ace", 
+"D.A"}}), " ]") | ""), tostr(su:right(this.limits[i] ? "(Speed Limit)" | "", 26), 
+"  Miles: ", miles), ""};
+    endfor
+    return {@text, tostr("Remaining:  ", su:right(length(this.unplayed), 3), "  Discarded: 
+ ", su:right(length(this.discarded), 3)), ""};
+else
+    return {"There is no game in progress."};
+endif
+.
+
+</pre>
+<BR>
+show_hand:
+<pre>
+if (this.in_progress && (i = player in this.players))
+    dealt = 0;
+    if (length(hand = this.hands[i]) > 6)
+        dealt = hand[7];
+        hand[7..7] = {};
+    endif
+    player:tell("Your hand: ", $string_utils:from_list($list_utils:sort(hand), ", 
+"));
+    dealt && player:tell("    Dealt: ", dealt);
+endif
+.
+
+</pre>
+<BR>
+look_self:
+<pre>
+player:tell(this:title());
+if (!(args && args[1]))
+    player:tell_lines(this:description());
+endif
+this:show_hand();
+player:tell("");
+this:tell_contents(setremove(this:contents(), player), this.ctype);
+this:tell_exits();
+.
+
+</pre>
+<BR>
+description:
+<pre>
+"... get .description and convert to {list}";
+(typeof(desc = pass(@args)) == LIST) || (desc = {desc});
+"... append game board";
+desc = {@desc, @this:board_description()};
+return desc;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp in_progress
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp players
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp remaining
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp discarded
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp unplayed
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp hands
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp safeties
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp miles
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp coups
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp limits
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp actions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp current_turn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp db
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

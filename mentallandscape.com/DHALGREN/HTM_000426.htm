@@ -1,0 +1,144 @@
+<HTML>
+<HEAD>
+<TITLE>Player Request Board</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Player Request Board (#426)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000096.htm">Dredful</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA board with the wizards' scribblings about player requests and creations on it.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000186.htm">Mayor's Office</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+get_request:
+<pre>
+if (!(this:trust() && (caller == this)))
+    return E_PERM;
+endif
+"Returns: time requested, connection from, name, email";
+which = args[1];
+prelim = this.registrar:get_req(which);
+full = this.registrar.(prelim[1][1][1]);
+return {prelim[1][1][3], (c = $string_utils:words(full[1]))[length(c)], (d = $string_utils:words(full[length(full)]))[2], 
+d[3]};
+.
+
+</pre>
+<BR>
+trust:
+<pre>
+return player.wizard || (player in this.trust);
+.
+
+</pre>
+<BR>
+sum*mary:
+<pre>
+if (!this:trust())
+    player:tell(E_PERM);
+    return;
+endif
+if (this.pending)
+    player:tell("Player requests pending:");
+    player:tell("");
+    player:tell("# Day Date   ", $string_utils:left("Connected from", 25, " "), " 
+ ", $string_utils:left("Name", 11, " "), "  ", $string_utils:left("Email", 25, " 
+"));
+    player:tell($string_utils:space(78, "-"));
+    for req in (this.pending)
+        info = this:get_request(req);
+        player:tell(req in this.pending, " ", tostr($time_utils:day(info[1])[1..3], 
+" ", $time_utils:mmddyy(info[1])[1..5]), "  ", $string_utils:left(info[2], 25, " 
+")[1..25], "  ", $string_utils:left(info[3], 11, " ")[1..11], "  ", $string_utils:left(info[4], 
+25, " ")[1..25]);
+    endfor
+    player:tell($string_utils:space(78, "-"));
+    player:tell("NOTE: the above info is probably incomplete. Linelength considerations 
+made it necessary to cut off the length of the fields.");
+    player:tell("To see full information on a request, type `see # on #426'");
+    player:tell("Use @make-player <name> <email>");
+else
+    player:tell("No player requests pending.");
+endif
+.
+
+</pre>
+<BR>
+add_req rem_req:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+if (verb[1..3] == "add")
+    this.pending = setadd(this.pending, args[1]);
+else
+    this.pending = setremove(this.pending, args[1]);
+endif
+.
+
+</pre>
+<BR>
+see:
+<pre>
+if (!this:trust())
+    player:tell(E_PERM);
+    return;
+endif
+which = tonum(dobjstr);
+if (which && (which <= length(this.pending)))
+    msg = this.pending[which];
+    this.registrar:display_seq_full({msg, msg + 1}, tostr("Player Request Number 
+", tostr(which), ":"));
+else
+    player:tell("There is no such request pending.");
+endif
+.
+
+</pre>
+<BR>
+find_req:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+name = args[1];
+if (!this.pending)
+    return 0;
+endif
+for req in (this.pending)
+    info = this:get_request(req);
+    if (name == info[3])
+        return req;
+    endif
+endfor
+return 0;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp registrar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp pending
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp trust
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

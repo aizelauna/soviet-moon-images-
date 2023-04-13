@@ -1,0 +1,231 @@
+<HTML>
+<HEAD>
+<TITLE>Drunks Database</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Drunks Database (#1200)</H3>
+(an instance of <A HREF="HTM_000039.htm">Generic Database</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA database that keeps track of all drunks globally and also stores all messages displayed to them as they drink and sober up.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000179.htm">Cluttered Closet</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+get_drunk:
+<pre>
+if (!$perm_utils:controls(caller_perms(), this))
+    return E_PERM;
+endif
+who = args[1];
+for d in (this.limits)
+    drunks = this:find(tostr("upto", d));
+    if (fnd = $list_utils:assoc(who, drunks))
+        return {d, @fnd};
+    endif
+endfor
+return 0;
+.
+
+</pre>
+<BR>
+add_drunk:
+<pre>
+if (!$perm_utils:controls(caller_perms(), this))
+    return E_PERM;
+endif
+who = args[1];
+amt = args[2];
+if (data = this:get_drunk(who))
+    data[3] = data[3] + amt;
+    ind = data[1];
+    this:rem_d(tostr("upto", ind), who);
+    if (ind == this.limits[length(this.limits)])
+    elseif (tonum(data[3]) > tonum(ind))
+        f = ind in this.limits;
+        ind = this.limits[f + 1];
+    endif
+    this:add_d(tostr("upto", ind), data[2..length(data)]);
+else
+    this.drunks = setadd(this.drunks, who);
+    this:add_d(tostr("upto", this.limits[1]), {who, amt, time()});
+    this:sobering();
+endif
+.
+
+</pre>
+<BR>
+add_d rem_d:
+<pre>
+if (!$perm_utils:controls(caller_perms(), this))
+    return E_PERM;
+endif
+key = args[1];
+data = args[2];
+drunks = this:find(key);
+if (verb == "add_d")
+    drunks = setadd(drunks, data);
+else
+    ind = $list_utils:iassoc(data, drunks);
+    drunks = listdelete(drunks, ind);
+endif
+this:insert(key, drunks);
+.
+
+</pre>
+<BR>
+rem_drunk:
+<pre>
+if (!$perm_utils:controls(caller_perms(), this))
+    return E_PERM;
+endif
+who = args[1];
+amt = args[2];
+if (data = this:get_drunk(who))
+    data[3] = data[3] - amt;
+    ind = data[1];
+    this:rem_d(tostr("upto", ind), who);
+    if (data[3] <= 0)
+        this.drunks = setremove(this.drunks, who);
+        return;
+    elseif (ind == this.limits[1])
+    elseif (ind == "inf")
+        ind = (data[3] <= 1500) ? "1500" | "inf";
+    elseif (tonum(data[3]) < tonum(newind = this.limits[(ind in this.limits) - 1]))
+        ind = newind;
+    endif
+    this:add_d(tostr("upto", ind), data[2..length(data)]);
+endif
+.
+
+</pre>
+<BR>
+drink_eff:
+<pre>
+if (!$perm_utils:controls(caller_perms(), this))
+    return E_PERM;
+endif
+drink = args[1];
+con_verb = args[2];
+amt = args[3];
+delay = args[4];
+if ($object_utils:isa(drink, this.drinkable_root) && drink.nonalc)
+    return;
+endif
+this:add_drunk(player, amt);
+if (result = this:get_drunk(player))
+    lvl = result[1];
+    if (result[3] > 80)
+        fork (delay)
+            this:display_eff(player, this.levels[lvl in this.limits]);
+        endfork
+    endif
+else
+    "Eeek. Shouldn't happen.";
+endif
+.
+
+</pre>
+<BR>
+display_eff:
+<pre>
+":display_eff(OBJ who to, STR category key to get data from, [NUM flag to display 
+definitely. None or 0 to use percentage]) => displays effects messages.";
+if (caller != this)
+    return E_PERM;
+endif
+who = args[1];
+which = args[2];
+flag = (length(args) > 2) ? args[3] | 0;
+if (((random(10) <= 6) || flag) && $object_utils:connected(who))
+    effx = this:find(which);
+    oeffx = this:find(tostr("o", which));
+    if (mess = effx[random(length(effx))])
+        who:tell(mess);
+    endif
+    if ($object_utils:has_callable_verb(who.location, "announce") && (mess = oeffx[random(length(oeffx))]))
+        who.location:announce($string_utils:pronoun_sub(mess, who));
+    endif
+endif
+.
+
+</pre>
+<BR>
+sobering:
+<pre>
+if (!$perm_utils:controls(caller_perms(), this))
+    return E_PERM;
+endif
+if ($code_utils:task_valid(this.sober_task))
+    return;
+endif
+fork task (0)
+    while (this.active && this.drunks)
+        for lush in (this.drunks)
+            if (result = this:get_drunk(lush))
+                if ((time() - result[4]) > this.sober_delay)
+                    this:rem_drunk(lush, this.sober_amt);
+                    if ((!(newres = this:get_drunk(lush))) || (newres[1] != result[1]))
+                        this:display_eff(lush, "sober", 1);
+                    endif
+                endif
+            else
+                this.drunks = setremove(this.drunks, lush);
+            endif
+            $command_utils:suspend_if_needed(0);
+        endfor
+        suspend(this.sober_delay);
+    endwhile
+endfork
+this.sober_task = task;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  u
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  upto1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  l
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  s
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  o
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ol
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  os
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp limits
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp levels
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp drunks
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sober_task
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sober_delay
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp active
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sober_amt
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp drinkable_root
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

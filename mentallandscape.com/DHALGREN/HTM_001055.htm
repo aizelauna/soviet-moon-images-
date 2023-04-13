@@ -1,0 +1,124 @@
+<HTML>
+<HEAD>
+<TITLE>Pasting Feature</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Pasting Feature (#1055)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis feature is useful when you have good local editing in your client program. It provides an easy interface for pasting in text for the room you are in, or just a single player, to see.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000111.htm">Features Feature Object</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThere are only 3 commands on this feature, all fairly simple to use.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+|*:
+<pre>
+"Usage: |<message>";
+"";
+"This verb is useful for pasting a single line of text to the room you are currently 
+in. There does not need to be a space after the | when executing this verb.";
+msg = (verb[2..length(verb)] + " ") + argstr;
+if (msg)
+    player.location:announce_all(player.name, " | ", msg);
+endif
+.
+
+</pre>
+<BR>
+@paste:
+<pre>
+"Usage: @paste [message]";
+"";
+"If you provide a message on the same line as the verb, it will be printed to the 
+room you are currently in exactly like the | verb. However, if you don't put in a 
+message, you will be prompted to enter in the lines you wish to paste. This is useful 
+when you have more than one line that you want to paste.";
+if (argstr)
+    player.location:announce_all(player.name, " | ", argstr);
+elseif ((msg = $command_utils:read_lines()) && (msg != ERR))
+    player.location:announce_all($string_utils:center(tostr(" Paste from ", player.name, 
+" "), wid = abs($player.linelen) - 1, "-"));
+    for line in (msg)
+        player.location:announce_all(line);
+    endfor
+    player.location:announce_all($string_utils:center(" End of Paste ", wid, "-"));
+else
+    player:tell(">> Paste failed. <<");
+endif
+.
+
+</pre>
+<BR>
+@paste-to:
+<pre>
+"Usage: @paste-to <player> [message]";
+"";
+"You must provide a player for this verb to work. If you provide a message on the 
+same line as the verb, it will be printed to that player through the paging mechanism 
+with an appropriate prefix. However, if you don't put in a message, you will be prompted 
+to enter in the lines you wish to paste. This is useful when you have more than one 
+line that you want to paste.";
+if (args)
+    target = $string_utils:match_player(args[1]);
+    if ($command_utils:player_match_failed(target, args[1]))
+        return;
+    endif
+    msg = (length(args) > 1) ? $string_utils:from_list(args[2..length(args)], " ") 
+| "";
+    if (msg)
+        msg = tostr("Private paste from ", player.name, " | ", msg);
+        this:send_paste(target, msg);
+    elseif ((msg = $command_utils:read_lines()) && (msg != ERR))
+        msg = {$string_utils:center(tostr(" Private Paste from ", player.name, " 
+"), wid = abs($player.linelen) - 1, "-"), @msg};
+        msg = {@msg, $string_utils:center(" End of Paste ", wid, "-")};
+        this:send_paste(target, msg);
+    else
+        player:tell(">> Paste failed. <<");
+    endif
+else
+    player:tell(">> Paste failed. <<");
+endif
+.
+
+</pre>
+<BR>
+send_paste:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+who = args[1];
+msg = args[2];
+val = who:receive_page(@(typeof(msg) == LIST) ? msg | {msg});
+player:tell("Paste sent to ", who.name, " and was ", (!val) ? "refused" | ((val == 
+1) ? "received" | "received but fell on sleeping ears."), ".");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

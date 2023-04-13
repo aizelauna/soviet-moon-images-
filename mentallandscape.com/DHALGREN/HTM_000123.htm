@@ -1,0 +1,157 @@
+<HTML>
+<HEAD>
+<TITLE>Core Updater</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Core Updater (#123)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000096.htm">Dredful</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspDredful's little tool to help him keep track of what core objects have been updated 
+lately.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000096.htm">Dredful</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+touch mark:
+<pre>
+if (player == this.owner)
+    target = player:my_match_object(dobjstr);
+    if (!$command_utils:object_match_failed(target, dobjstr))
+        ind = $list_utils:iassoc(target, this.core_objects);
+        if (ind && (this.core_objects[ind][1] in $core_objects()))
+            this.core_objects[ind][2] = time();
+            player:tell("Stamped ", $string_utils:nn(target), " with this time: ", 
+player:ctime());
+        elseif (ind)
+            player:tell("That object isn't a core object.");
+        else
+            player:tell("That object isn't on this object.");
+        endif
+    endif
+else
+    player:tell("You don't own this object.");
+endif
+.
+
+</pre>
+<BR>
+show:
+<pre>
+if (player == this.owner)
+    thelist = {};
+    player:tell("Beginning show: ");
+    if (dobjstr == "all")
+        thelist = this.core_objects;
+    elseif (((dobjstr == "recent") || (dobjstr == "week")) || (dobjstr == "month"))
+        ntime = $list_utils:assoc(dobjstr, {{"recent", 259200, 0}, {"week", 604800, 
+259200}, {"month", 2592000, 604800}});
+        for d in (this.core_objects)
+            if ((d[2] > (time() - ntime[2])) && (d[2] < (time() - ntime[3])))
+                thelist = {@thelist, d};
+            endif
+        endfor
+    elseif (dobjstr == "never")
+        for d in (this.core_objects)
+            if (!d[2])
+                thelist = {@thelist, d};
+            endif
+        endfor
+    elseif (((!(target = player:match_object(dobjstr))) && (!$command_utils:object_match_failed(target, 
+dobjstr))) && (ind = $list_utils:iassoc(target, this.core_objects)))
+        thelist = {this.core_objects[ind]};
+    else
+        player:tell("Specify: all, never, recent, week, month");
+        return;
+    endif
+    for d in (thelist)
+        name = (length(f = $string_utils:nn(d[1])) <= 25) ? f | f[1..25];
+        name = (length(name) == 25) ? name | tostr(name, $string_utils:space(25 - 
+length(name)));
+        h = $list_utils:assoc(d[1], this.core_names);
+        core_name = "$" + h[2];
+        core_name = (length(core_name) >= 21) ? tostr(" ", core_name[1..21], " ") 
+| $string_utils:center(core_name, 23);
+        date = d[2] ? player:ctime(player, d[2]) | "Never";
+        player:tell(name, " ", core_name, " ", date);
+        $command_utils:suspend_if_needed(0);
+    endfor
+    player:tell("-- Finished");
+else
+    player:tell(E_PERM);
+endif
+.
+
+</pre>
+<BR>
+reminder:
+<pre>
+if (player == this.owner)
+    while (this.active_reminding && (!this.reminded))
+        if (this.owner:ctime()[12..16] == "12:00")
+            if (this.owner in connected_players())
+                this.owner:tell("Message from: ", $string_utils:nn(this));
+                this.owner:tell("Time to shutdown the server to release memory.");
+            else
+                $mail_agent:send_message(this, this.owner, "Shutdown Reminder", {"Shutdown 
+time has past by and you weren't connected:", "", tostr(this.owner:ctime())});
+            endif
+            this.reminded = 1;
+            this.next_time = time() + 172600;
+            fork (172600)
+                this.reminded = 0;
+                this:reminder();
+            endfork
+        endif
+        suspend(25);
+    endwhile
+else
+    player:tell(E_PERM);
+endif
+.
+
+</pre>
+<BR>
+add:
+<pre>
+if (player != this.owner)
+    player:tell(E_PERM);
+endif
+new = this:match_object(dobjstr);
+if (!$command_utils:object_match_failed(new, dobjstr))
+    this.core_objects = {@this.core_objects, {new, 0}};
+    this.core_names = {@this.core_names, {new, dobjstr[2..length(dobjstr)]}};
+    player:tell("Added: ", dobjstr, " (", new, ")");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp core_objects
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp core_names
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp reminded
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp active_reminding
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp next_time
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,785 @@
+<HTML>
+<HEAD>
+<TITLE>NNTP</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> NNTP (#76)</H3>
+(an instance of <A HREF="HTM_000124.htm">Generic Utilities Package</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA lot like Dennis the Menace, with a bag of newspapers slung over one shoulder.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe MOO NNTP agent fetches and posts USENET news articles.  It is designed to be 
+used primarily as a programmer's tool, especially in situations where it is necessary, 
+from a hypertext document, to refer to a news article.
+&nbsp&nbsp&nbsp&nbsp&nbspThe interface consists primarily of two verbs: #33339:fetch_{article,head,body}, 
+which fetch an article, the header of an article, or the body of an article respectively, 
+and #33339:post which posts an item to a newsgroup (if posting is enabled and the 
+user is either a wizard or trusted to post news.)
+&nbsp&nbsp&nbsp&nbsp&nbspFor help on individual verbs, type "help #33339:fetch_article", or "help #33339:post".
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+open:
+<pre>
+":open()";
+"open a network connection to the NNTP server specified by this.host and this.port.";
+if (caller != this)
+    return E_PERM;
+endif
+connexion = $network:open(this.host, this.port);
+if (typeof(connexion) == ERR)
+    this:log_error("open", connexion);
+    return connexion;
+endif
+"the server should always open with a `200 ...' message.";
+"this snarfs that message, so's it doesn't end up in an article";
+line = this:read_line(connexion);
+if ((!line) || (line[1] != "2"))
+    this:log_error("init", line);
+    return E_INVARG;
+endif
+return connexion;
+.
+
+</pre>
+<BR>
+article head body:
+<pre>
+":article(connection,article)";
+":head(connection,article)";
+":body(connection,article)";
+if (caller != this)
+    return E_PERM;
+endif
+"fetch an article, given a connection and an aritcle ID in one of two forms:";
+"either `usenet.group.name article-number', or `<message-id>'";
+conn = args[1];
+if (typeof(article = this:check_id(args[2])) == ERR)
+    return E_INVARG;
+endif
+if (cachecheck = this:check_cache(article, verb))
+    return cachecheck;
+endif
+if (typeof(article) == LIST)
+    this:send_line(conn, "GROUP " + article[1]);
+    line = this:read_line(conn);
+    if (line[1] != "2")
+        this:log_error("group", line);
+        return E_INVARG;
+    endif
+    this:send_line(conn, (verb + " ") + article[2]);
+    line = this:read_line(conn);
+    if (line[1] != "2")
+        this:log_error(verb, line);
+        return E_INVARG;
+    endif
+    text = this:nntp_read(conn);
+    if (typeof(text) == LIST)
+        this:insert_cache(article, verb, text);
+    endif
+    return text;
+else
+    this:send_line(conn, (verb + " ") + article);
+    line = this:read_line(conn);
+    if (line[1] != "2")
+        this:log_error(verb, line);
+        return E_INVARG;
+    endif
+    text = this:nntp_read(conn);
+    if (typeof(text) == LIST)
+        this:insert_cache(article, verb, text);
+    endif
+    return text;
+endif
+.
+
+</pre>
+<BR>
+check_id:
+<pre>
+"checks to see if the argument (a string) is a valid article indentifier";
+"Article identifiers are one of the following forms:";
+"   <message-id>             -- with brackets";
+"   groupname n              -- where groupname is like alt.pea.pickers and n is 
+an artcle number";
+"   groupname:n              -- similar";
+"for the first form, the message ID is returned as a string";
+"For the other forms, it returns a list {groupname, n}, where groupname is the string 
+and n is the number";
+if (match(args[1], "^<.*>$"))
+    "match a single message ID";
+    return args[1];
+elseif (matched = match(args[1], "%([a-zA-Z0-9_-+.]%)+[: ]%([0-9]+%)"))
+    "Match groupname:n";
+    return {args[1][1..matched[3][1][2]], args[1][matched[3][2][1]..matched[3][2][2]]};
+else
+    return E_INVARG;
+endif
+.
+
+</pre>
+<BR>
+nntp_read:
+<pre>
+"read an NNTP body, body being defined as something that ends with a period on a 
+blank line. expects a connection to read from.";
+if (caller != this)
+    return E_PERM;
+endif
+server = args[1];
+article = {};
+count = this.line_limit;
+now = time();
+while (((typeof(line = this:read_line(server)) != ERR) && ((count = count - 1) > 
+0)) && ((now + this.timeout) > (now = time())))
+    if (line && (line[1] == "."))
+        if (line == ".")
+            return article;
+        endif
+        article = {@article, line[2..length(line)]};
+    else
+        article = {@article, line};
+    endif
+endwhile
+if (count == 0)
+    while ((line = this:read_line(server)) != ".")
+    endwhile
+    return {@article, "<<Article exceeds maximum length.  Truncated.>>"};
+elseif (typeof(line) == ERR)
+    return line;
+else
+    "the connection is losing. throw it away.";
+    this:close(server);
+    return E_INVARG;
+endif
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    this.host = "";
+    this.port = 119;
+    this:flush_cache();
+    this.error_log = {};
+    this.debug = 0;
+    this.connections = {};
+    this.in_use = {};
+    this.connect_max = 0;
+    this.last_groups_update = 100000000;
+    this.newsgroups = {};
+    this.cache_limit = 10;
+    this.line_limit = 2000;
+    this.timeout = 30;
+    this.distributions = {};
+    this.expiry = 432000;
+    if (this.expire_task)
+        $code_utils:task_valid(this.expire_task) && kill_task(this.expire_task);
+        this.expire_task = 0;
+    endif
+    this.expire_delay = 172800;
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+close:
+<pre>
+"quit from the NNTP server and close the passed connection.";
+if (caller != this)
+    return E_PERM;
+endif
+"Use release_connection instead";
+this:send_line(args[1], "QUIT");
+$network:close(args[1]);
+this.in_use = setremove(this.in_use, args[1]);
+.
+
+</pre>
+<BR>
+fetch_article fetch_body fetch_head:
+<pre>
+":Fetch_article(article_id)";
+":fetch_body(article_id)";
+":fetch_head(article_id)";
+"This function fetches the article referred to by article-id from an NNTP server.";
+"The article-id may be any of the forms accepted by check_id";
+"When fetching headers or complete articles, it will often be useful to pass the 
+header of the article to :fixup_headers(), which will attempt to join multiline headers 
+into single lines";
+if (typeof(connection = this:get_connection()) != ERR)
+    text = this:(verb[index(verb, "_") + 1..length(verb)])(connection, args[1]);
+    this:release_connection(connection);
+    return text;
+else
+    return connection;
+endif
+.
+
+</pre>
+<BR>
+@update:
+<pre>
+"Update the groups list stored on the NNTP object.  This list is used in determining 
+which groups are valid for registration, and should be run regularly.";
+"This command may take some time to execute.";
+if (!$perm_utils:controls(player, this))
+    return E_PERM;
+endif
+connection = this:get_connection();
+if (typeof(connection) != ERR)
+    notify(connection, "NEWGROUPS " + $time_utils:time_sub(this.timeformat, this.last_groups_update));
+    line = read(connection);
+    if (line[1] != "2")
+        this:log_error("update", line);
+        return E_TYPE;
+    endif
+    groups = this:nntp_read(connection);
+    this:release_connection(connection);
+    if (typeof(groups) == LIST)
+        for froup in (groups)
+            $command_utils:suspend_if_needed(0);
+            this.newsgroups = {@this.newsgroups, $string_utils:explode(froup)[1]};
+        endfor
+        player:tell(("Newsgroup update procedure added " + tostr(length(groups))) 
++ " newsgroup(s)");
+        this.last_groups_update = time();
+    else
+        player:tell("An error occurred updating the list of newsgroups.");
+        this:log_error("update-read", groups);
+        return groups;
+    endif
+endif
+.
+
+</pre>
+<BR>
+fixup_headers:
+<pre>
+"#33339:fixup_headers({header-text})";
+"This function takes the header of an nntp article (as a list of strings) and joins 
+multiline headers into single lines.  It does no cleanup on the result, so there 
+may be extra spaces in the output, which is a list of strings.";
+"this may break if the first line isn't really a header.";
+result = {};
+for line in (args[1])
+    if (index(line, ":") && index($string_utils.alphabet, $string_utils:lowercase(line[1])))
+        "hokey, but technically it's the most accurate check we're allowed.";
+        result = {@result, line};
+    else
+        result[length(result)] = result[length(result)] + line;
+    endif
+endfor
+return result;
+.
+
+</pre>
+<BR>
+get_connection:
+<pre>
+"$NNTP maintains a list of open, available connections.";
+"This verb returns a connection from that list, and removes the connection from the 
+list of actives, adding it to a list of in-use connections.";
+"The maximum number of connections is maintained by this.connect_max.";
+"If this.connect_max is 0, there is no limit to the number of connections.";
+"If no connections are available, return E_RANGE.";
+if (caller != this)
+    return E_PERM;
+endif
+if (this.connections)
+    "A connection is available...";
+    connect = this.connections[1];
+    this.connections = setremove(this.connections, connect);
+    if (!$network:is_connected(connect))
+        "The connection is defunct.  scrap it and get a new one.";
+        connect = this:open();
+    endif
+else
+    "No connection is available.  If there's space for it (or we're";
+    "not enforcing limits,) create a new connection and add it to";
+    "this.in_use.";
+    if ((!this.connect_max) || (length(this.in_use) < this.connect_max))
+        connect = this:open();
+    else
+        "Whoops. can't get a connection.";
+        return E_RANGE;
+    endif
+endif
+if (typeof(connect) != ERR)
+    "just in case the connection failed.";
+    this.in_use = {@this.in_use, connect};
+endif
+return connect;
+.
+
+</pre>
+<BR>
+release_connection:
+<pre>
+"#33339:release_connection(connection)";
+"Release_connection frees a connection obtained with get_connection().";
+"It is assumed that any connection requested will eventually be released.";
+if (caller != this)
+    return E_PERM;
+endif
+if (args[1] in this.in_use)
+    this.in_use = setremove(this.in_use, args[1]);
+endif
+this.connections = {args[1], @this.connections};
+.
+
+</pre>
+<BR>
+post:
+<pre>
+":post(newsgroup(s), subject, lines, distributions)";
+"Post an article to news.";
+"Newsgroup(s) should either be a string or a list of strings.";
+"Subject should be a string.";
+"Lines should be a list of strings.";
+"Distributions should either be a string or a list of strings containing valid distributions.";
+"returns 0 if successful, otherwise error or error string";
+if (!this:posting_ok(caller_perms()))
+    return E_PERM;
+endif
+if (typeof(args[1]) == LIST)
+    newsgroups = $string_utils:from_list(args[1], ", ");
+else
+    newsgroups = args[1];
+endif
+subject = args[2];
+body = {};
+for line in (args[3])
+    body = {@body, (line[1] == ".") ? "." + line | line};
+endfor
+if (length(args) == 4)
+    if (typeof(args[4]) == LIST)
+        distribution = $string_utils:from_list(args[4], ", ");
+    else
+        distribution = args[4];
+    endif
+else
+    distribution = "";
+endif
+from = $network:return_address_for(player);
+reply_to = from;
+path = ($network.moo_name + "!") + player.name;
+organization = tostr($network.moo_name, ", ", $network.site, " ", $network.port);
+date = ctime();
+"-----";
+"Begin conversations with the server:";
+player:tell("Connecting to the NNTP server at ", this.host);
+if (typeof(connect = this:get_connection()) == ERR)
+    player:tell("Failed to connect: ", connect);
+    return connect;
+endif
+player:tell("Initiating POST");
+this:send_line(connect, "POST");
+line = this:read_line(connect);
+if (line[1..3] == "440")
+    this:release_connection(connect);
+    player:tell("Posting to this site refused: ", line);
+    return E_PERM;
+endif
+player:tell("Sending post...");
+"send headers";
+this:send_line(connect, "Path: " + path);
+this:send_line(connect, "From: " + from);
+this:send_line(connect, "Reply-to: " + reply_to);
+this:send_line(connect, "Newsgroups: " + newsgroups);
+player:tell("Newsgroups: " + newsgroups);
+if (distribution)
+    this:send_line(connect, "Distribution: " + distribution);
+endif
+this:send_line(connect, "Subject: " + subject);
+this:send_line(connect, "Date: " + date);
+this:send_line(connect, "Organization: " + organization);
+this:send_line(connect, "");
+for line in (body)
+    this:send_line(connect, line);
+endfor
+this:send_line(connect, ".");
+line = this:read_line(connect);
+this:release_connection(connect);
+if (line[1] == "4")
+    this:log_error(verb, line);
+    return E_INVARG;
+endif
+player:tell("NNTP Posting complete.");
+return 0;
+.
+
+</pre>
+<BR>
+posting_ok:
+<pre>
+return this.posting_allowed && (args[1].wizard || (args[1] in this.posting_ok));
+.
+
+</pre>
+<BR>
+check_cache:
+<pre>
+"cache maintenance for NNTP.";
+"return an item if it's in the cache, {} otherwise.";
+"args[1] should be an article reference, args[2] one of head, body,";
+"or article.";
+if (tmp = {args[1], args[2]} in this.cache_requests)
+    if (tmp != 1)
+        "got a hit. move it to the front of the cache.";
+        this:reorder_cache(tmp);
+    endif
+    return this.cache_values[1];
+elseif ((args[2] != "article") && (tmp = {args[1], "article"} in this.cache_requests))
+    if (tmp != 1)
+        this:reorder_cache(tmp);
+    endif
+    break_ = "" in this.cache_values[1];
+    if (args[2] == "head")
+        return this.cache_values[1][1..break_ - 1];
+    else
+        return this.cache_values[1][break_ + 1..length(this.cache_values[1])];
+    endif
+else
+    return {};
+endif
+.
+
+</pre>
+<BR>
+reorder_cache:
+<pre>
+"Cache maintenance for NNTP.";
+"on a hit, we move the item to the head of the cache, so future";
+"lookups go faster.  hi jay.";
+this.cache_values = {this.cache_values[args[1]], @setremove(this.cache_values, this.cache_values[args[1]])};
+this.cache_requests = {this.cache_requests[args[1]], @setremove(this.cache_requests, 
+this.cache_requests[args[1]])};
+this.cache_times = {time(), @setremove(this.cache_times, this.cache_times[args[1]])};
+.
+
+</pre>
+<BR>
+insert_cache:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+"Cache maintenance for NNTP";
+"Inserts an article into the cache, timestamping it.";
+"args[1] should be an article identifier, args[2] should be one of";
+"head, body, or article, args[3] should be the text.";
+if ((length(this.cache_requests) == this.cache_limit) && (!this:expire_cache()))
+    "if the cache is full and we can't expire anything, pull off the";
+    "last (presumably LRU) item.";
+    this.cache_requests = {{args[1], args[2]}, @this.cache_requests[1..length(this.cache_requests) 
+- 1]};
+    this.cache_values = {args[3], @this.cache_values[1..length(this.cache_values) 
+- 1]};
+    this.cache_times = {time(), @this.cache_times[1..length(this.cache_times) - 1]};
+else
+    this.cache_requests = {{args[1], args[2]}, @this.cache_requests[1..length(this.cache_requests)]};
+    this.cache_values = {args[3], @this.cache_values[1..length(this.cache_values)]};
+    this.cache_times = {time(), @this.cache_times[1..length(this.cache_times)]};
+endif
+.
+
+</pre>
+<BR>
+log_error:
+<pre>
+if (this.debug && (caller == this))
+    this.error_log = {@this.error_log, {ctime(), @args}};
+endif
+.
+
+</pre>
+<BR>
+flush_cache:
+<pre>
+if ((!caller) == this)
+    return E_PERM;
+endif
+this.cache_values = this.cache_times = this.cache_requests = {};
+.
+
+</pre>
+<BR>
+expire_cache:
+<pre>
+"called by the expiry task to remove dusty items from the cache.";
+"returns the number of items it removed.";
+if (caller != this)
+    return E_PERM;
+endif
+expiry = time() - this.expiry;
+removed = 0;
+for item in (this.cache_times)
+    if (expiry > item)
+        ind = item in this.cache_times;
+        this.cache_values = setremove(this.cache_values, this.cache_values[ind]);
+        this.cache_requests = setremove(this.cache_requests, this.cache_requests[ind]);
+        this.cache_times = setremove(this.cache_times, this.cache_times[ind]);
+        removed = removed + 1;
+    endif
+endfor
+return removed;
+.
+
+</pre>
+<BR>
+@expire @expire-task @expire-kill:
+<pre>
+"Either expire NNTP's caches now, or start or kill the expiration task.";
+if (!$perm_utils:controls(player, this))
+    return E_PERM;
+endif
+if (length(verb) == 7)
+    player:tell(("Expiry procedure removed " + tostr(this:expire_cache())) + " item(s) 
+from the NNTP cache.");
+elseif (index(verb, "task"))
+    if (this.expire_task)
+        player:tell("Expire task seems to be already running.");
+    else
+        fork task (0)
+            this:expire_task();
+        endfork
+        this.expire_task = task;
+    endif
+else
+    if (!this.expire_task)
+        player:tell("Expire task seems not to be running.");
+    else
+        kill_task(this.expire_task);
+        this.expire_task = 0;
+    endif
+endif
+.
+
+</pre>
+<BR>
+expire_task:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+if (this.cache_values)
+    this:expire_cache();
+endif
+fork task (this.expire_delay)
+    this:expire_task();
+endfork
+this.expire_task = task;
+.
+
+</pre>
+<BR>
+fetch_newnews:
+<pre>
+":Fetch_newnews(newsgroups, last-read)";
+"Return a list of message-IDs posted to newsgroups since last-read.";
+"newsgroups is either a string containing a single newsgroup, or a list of strings. 
+ last-read is a time.";
+if (typeof(connection = this:get_connection()) != ERR)
+    text = this:(verb[index(verb, "_") + 1..length(verb)])(connection, @args);
+    this:release_connection(connection);
+    return text;
+else
+    return connection;
+endif
+.
+
+</pre>
+<BR>
+newnews:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+"Fetch a list of new message IDs from a newsgroup, given a connection, a set of newsgroups, 
+and a last-this:read_line time.";
+conn = args[1];
+if (typeof(args[2]) == LIST)
+    groups = $string_utils:from_list(args[2], ",");
+else
+    groups = args[2];
+endif
+last_read = args[3];
+this:send_line(conn, (((verb + " ") + groups) + " ") + $time_utils:time_sub(this.timeformat, 
+last_read));
+line = this:read_line(conn);
+if (line[1] != "2")
+    this:log_error("newnews", line);
+    return E_INVARG;
+endif
+return this:nntp_read(conn);
+.
+
+</pre>
+<BR>
+read_line:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+value = read(@args);
+return value;
+.
+
+</pre>
+<BR>
+send_line:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+notify(@args);
+.
+
+</pre>
+<BR>
+fetch_xhdr:
+<pre>
+":fetch_xhdr(header, messages)";
+"return a list of headers associated with the article identifier(s) passed.  header 
+is a valid header line, such as 'subject'.  'message' should either be a message-id 
+or a list of article identifiers.";
+"Note that since may NNTP servers do not properly implement the XHDR command (especially 
+those running on a certain proprietary VAX operating system which Shall Remain Nameless,) 
+this command may be disabled.";
+if (!this.xhdr_enabled)
+    return E_PERM;
+endif
+if (typeof(connection = this:get_connection()) != ERR)
+    if (typeof(args[2]) != LIST)
+        args[1] = {args[1]};
+    endif
+    text = this:(verb[index(verb, "_") + 1..length(verb)])(connection, @args);
+    this:release_connection(connection);
+    return text;
+else
+    return connection;
+endif
+.
+
+</pre>
+<BR>
+xhdr:
+<pre>
+":xhdr(connection,header,articles)";
+if (caller != this)
+    return E_PERM;
+endif
+conn = args[1];
+header = args[2];
+text = {};
+for item in (args[3])
+    if (typeof(article = this:check_id(item)) == ERR)
+        return E_INVARG;
+    endif
+    if (typeof(article) == LIST)
+        this:send_line(conn, "GROUP " + article[1]);
+        line = this:read_line(conn);
+        if (line[1] != "2")
+            this:log_error("group", line);
+            return E_INVARG;
+        endif
+        this:send_line(conn, (((verb + " ") + header) + " ") + article[2]);
+        line = this:read_line(conn);
+        if (line[1] != "2")
+            this:log_error(verb, line);
+            return E_INVARG;
+        endif
+        result = this:nntp_read(conn);
+        "bit of weirdness here.  for no particular reason, the XHDR command prefixes 
+the header line with its message-id or article number.";
+        text = {@text, @result[length(article[2]) + 2..length(result[1])]};
+    else
+        this:send_line(conn, (((verb + " ") + header) + " ") + article);
+        line = this:read_line(conn);
+        if (line[1] != "2")
+            this:log_error(verb, line);
+            return E_INVARG;
+        endif
+        result = this:nntp_read(conn);
+        "bit of weirdness here.  for no particular reason, the XHDR command prefixes 
+the header line with its message-id or article number.";
+        text = {@text, result[1][length(article) + 2..length(result[1])]};
+    endif
+endfor
+return text;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp host
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp port
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cache_times
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cache_values
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cache_requests
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp error_log
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp debug
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp last_groups_update
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp newsgroups
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp timeformat
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp connect_max
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp connections
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp in_use
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp posting_allowed
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp posting_ok
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cache_limit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp line_limit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp timeout
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp distributions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp expiry
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp expire_task
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp expire_delay
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp xhdr_enabled
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

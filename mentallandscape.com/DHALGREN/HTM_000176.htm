@@ -1,0 +1,244 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Ambient Noise Room</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Ambient Noise Room (#176)</H3>
+(an instance of <A HREF="HTM_000003.htm">generic room</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis generic room has messages that you can set that will be displayed randomly after a certain delay. They will play as long as a player is in that room. See `help #176'.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000179.htm">Cluttered Closet</A>.
+<BR>
+<BR>
+This place has a certain ambiance...
+<BR>
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspSettable properties:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp.amb_delay - this is the delay between random announcements, in seconds.
+&nbsp&nbsp&nbsp&nbsp&nbsp             The default is 5 minutes, or 300 seconds.
+&nbsp&nbsp&nbsp&nbsp&nbsp.amb_noise - this is the list of random messages you wish to display.
+&nbsp&nbsp&nbsp&nbsp&nbsp.active    - set to 1 (default) when runs. Set to 0 to turn off ambient noise
+&nbsp&nbsp&nbsp&nbsp&nbsp             behavior entirely.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAll you need to do is @notedit the .amb_noise property and enter in all possible 
+messages you want announced. The order doesn't matter.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThen, whenever a player enters, the announcements will start and appear every .amb_delay 
+seconds. If the .amb_noise property is empty, nothing will happen and the room will 
+act like a normal blank room would.
+&nbsp&nbsp&nbsp&nbsp&nbspNote - the first noise message appears 30 seconds after the first player enters.
+&nbsp&nbsp&nbsp&nbsp&nbsp----
+&nbsp&nbsp&nbsp&nbsp&nbspCommands:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@restart
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe owner of the room can call this verb to restart the ambient noise tasks. Mostly 
+in the case when .active was set to 0 for a while, then set back to 1 while there 
+are people still in the room.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+occupied:
+<pre>
+occupied = 0;
+for thing in (this.contents)
+    if (is_player(thing) && $object_utils:connected(thing))
+        occupied = occupied + 1;
+    endif
+endfor
+return occupied;
+.
+
+</pre>
+<BR>
+ambience:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+while (((amb = this:get_amb()) && this.occupied) && this.active)
+    this:announce_all(amb);
+    suspend(this.amb_delay);
+endwhile
+.
+
+</pre>
+<BR>
+check_amb:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+if (this.amb_noise && this.active)
+    if ((occupied = this:occupied()) > 1)
+        this.occupied = 1;
+    elseif ((occupied == 1) && (!this.occupied))
+        this:start_amb();
+    elseif (!occupied)
+        this.occupied = 0;
+    endif
+endif
+.
+
+</pre>
+<BR>
+end_amb:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+if (occupied = this:occupied())
+    this.occupied = 1;
+else
+    this:stop_amb();
+endif
+.
+
+</pre>
+<BR>
+enterfunc confunc:
+<pre>
+pass(@args);
+this:check_amb();
+.
+
+</pre>
+<BR>
+exitfunc disfunc:
+<pre>
+pass(@args);
+this:end_amb();
+.
+
+</pre>
+<BR>
+@restart:
+<pre>
+"Usage: @restart";
+"";
+"The owner of the room can call this verb to restart the ambient noise tasks. Mostly 
+in the case when .active was set to 0 for a while, then set back to 1 while there 
+are people still in the room.";
+if (!$perm_utils:controls(player, this))
+    player:tell(E_PERM);
+    return;
+endif
+if ($code_utils:task_valid(this.amb_task))
+    player:tell(this.name, " is already running ambient noise.");
+    return;
+elseif (!this.active)
+    player:tell("Please set .active to 1 before @restarting ", this.name, ". (You 
+can use: @set here.active to 1)");
+    return;
+endif
+this:start_amb();
+player:tell(this.name, " has been restarted with ambient noise.");
+.
+
+</pre>
+<BR>
+start_amb:
+<pre>
+"Starts the ambient noise task. Children can program verbs on the rooms that start 
+and stop the noise as they wish. Be careful of multiple noise tasks though.";
+if (caller != this)
+    return E_PERM;
+endif
+fork ambience (this.initial_amb_delay)
+    if (this:occupied())
+        this.occupied = 1;
+        this:ambience();
+    else
+        this.amb_task = 0;
+    endif
+endfork
+this:set_amb_task(ambience);
+.
+
+</pre>
+<BR>
+stop_amb:
+<pre>
+"Ends the Ambient noise. Children can write verbs on their descendants which turn 
+it off at will.";
+if (caller != this)
+    return E_PERM;
+endif
+if ($code_utils:task_valid(this.amb_task))
+    kill_task(this.amb_task);
+endif
+this.amb_task = 0;
+this.occupied = 0;
+.
+
+</pre>
+<BR>
+get_amb:
+<pre>
+"Just returns a random noise. Children can override in case they want to send different 
+noise under different conditions.";
+if (caller != this)
+    return E_PERM;
+endif
+return this.amb_noise[random(length(this.amb_noise))];
+.
+
+</pre>
+<BR>
+set_amb_task:
+<pre>
+"Let's whoever controls this, or this, to set the .amb_task directly so that children 
+can deal with the tasks and the property.";
+if ((caller != this) && (!$perm_utils:controls(caller_perms(), this)))
+    return E_PERM;
+elseif ((typeof(t = args[1]) == NUM) && $code_utils:task_valid(t))
+    this.amb_task = t;
+else
+    return E_INVARG;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp amb_delay
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp amb_task
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp amb_noise
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp occupied
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp active
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp initial_amb_delay
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000110.htm">Generic Post-Apocalypse Room</A> <A HREF="HTM_000548.htm">boxmaker</A> <A HREF="HTM_000823.htm">Backstage</A> <A HREF="HTM_001030.htm">Generic Stone Building Room</A> <A HREF="HTM_001493.htm">The Ministry Of Information</A> <A HREF="HTM_001524.htm">Information Retrieval</A> <A HREF="HTM_002180.htm">A place</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

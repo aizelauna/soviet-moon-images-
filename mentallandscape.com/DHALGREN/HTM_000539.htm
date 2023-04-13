@@ -1,0 +1,93 @@
+<HTML>
+<HEAD>
+<TITLE>Sick</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Sick (#539)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_000539.htm">Sick</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSick is a wonderfully sick thing.
+<BR>
+<BR>
+Sick is carrying <A HREF="HTM_000843.htm">sick features</A>, <A HREF="HTM_000459.htm">generic integrating room</A>, <A HREF="HTM_002293.htm">sick utilities</A> and <A HREF="HTM_002597.htm">Millebornes database</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000998.htm">Tower Chamber</A>.
+<BR>
+<BR>
+<BR>
+Sick owns <A HREF="HTM_000539.htm">Sick</A> <A HREF="HTM_000843.htm">sick features</A> <A HREF="HTM_000459.htm">generic integrating room</A> <A HREF="HTM_002293.htm">sick utilities</A> <A HREF="HTM_002597.htm">Millebornes database</A> <A HREF="HTM_002598.htm">Millebornes Game</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@code:
+<pre>
+if (!(spec = $code_utils:parse_verbref(args[1])))
+    player:tell("Usage:  @code <object>:<verb>");
+    return;
+endif
+object = player:my_match_object(spec[1]);
+if ($command_utils:object_match_failed(object, spec[1]))
+    return;
+endif
+what = object;
+vname = spec[2];
+while ((what != $nothing) && ((code = verb_code(what, vname)) == E_VERBNF))
+    what = parent(what);
+endwhile
+if (code == E_VERBNF)
+    player:tell("That object does not define that verb.");
+elseif (typeof(code) == ERR)
+    player:tell(code);
+elseif (code == {})
+    player:tell("That verb has not been programmed.");
+else
+    su = $string_utils;
+    if (what != object)
+        player:tell("Object ", object, " does not define that verb, but its ancestor 
+", what, " does.");
+    endif
+    info = verb_info(what, vname);
+    vargs = verb_args(what, vname);
+    if (index(vargs[2], "/"))
+        vargs = listset(vargs, tostr("(", vargs[2], ")"), 2);
+    endif
+    player:tell("@verb ", what, ":", su:from_value(info[3], 1), " ", su:from_list(vargs, 
+" "), " ", info[2]);
+    player:tell("@program ", what, ":", vname);
+    player:tell_lines(code);
+    player:tell(".");
+endif
+.
+
+</pre>
+<BR>
+eval_value_to_string:
+<pre>
+set_task_perms(caller_perms());
+this.last_eval_result = args[1];
+return pass(@args);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp misc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp misc2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp last_eval_result
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

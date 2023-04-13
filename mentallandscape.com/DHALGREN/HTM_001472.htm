@@ -1,0 +1,346 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Music Machine</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Music Machine (#1472)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_001457.htm">Trismegistos</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA customizable, virtual music emulator with autoplay capacity. Type help #1472 for 
+details.
+</pre>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThis is the Generic Music Machine, intended to emulate a non-queued music player, 
+and programmed with an additional autoplay capacity.
+&nbsp&nbsp&nbsp&nbsp&nbspYou can program any number of "tunes" into the GMM -- an ordered series of text scraps 
+describing what is going on in a song -- as well as the tune's title, artist, and 
+the duration it will play. Text scraps are announced every 30 seconds, or less frequently 
+depending on how many there are, as the song plays. The GMM announces when it is 
+starting and finishing a song, and includes the title and artist in its own name 
+while playing, so that people entering the room will "hear" what is on.   
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspVerbs on the GMM:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspsel*ection on <GMM>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspGives a list of tunes currently programmed in the GMM. Tune number, title, artist 
+and duration are listed.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspreq*uest <name or number> on <GMM>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspMakes the GMM play a specific selection, either by title or by tune number. (Requesting 
+by number is generally preferable.)  
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspIf there is more than one tune with the entered title on the GMM, the first one will 
+be played; if the title of the tune is itself a number (e.g., '1999' by Prince), 
+and the tune is requested by this numerical title, it will be interpreted as a request 
+for the tune having that number.  (In the case of '1999', unless you have a 2000-tune 
+machine, you are likely to be informed that the selection is not available.)  
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe GMM in its present incarnation only takes requests while it is not currently 
+playing; there is no queuing of requests (unlike a jukebox or DJ).  
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspauto*play <GMM>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAutomatically cues a random selection of songs to be played, one after the other. 
+The number of songs played equals half the songs currently programmed into
+&nbsp&nbsp&nbsp&nbsp&nbspthe machine, up to a maximum of 8.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspaddtune to <GMM>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspPrograms a tune into the GMM. You will be prompted for its title, artist, and duration 
+(duration must be entered in the strict format mm:ss).
+&nbsp&nbsp&nbsp&nbsp&nbspThen, you will be asked to enter a number of lines describing, in sequence, events 
+taking place in the song -- scraps of lyrics, musical description, snide comments, 
+etc. The first line will be played immediately as the song starts, with lines being 
+played a minimum of 30 seconds apart after that. This means that the maximum number 
+of lines in the tune is one per 30 seconds of duration.  
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspWARNING -- make sure while you are entering lines that you do not go over the maximum 
+(which you will be informed of at the prompt) -- else you will have to enter them 
+all over again!
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsprmtune <name or number> from <GMM>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspDeletes a tune from the GMM, permanently. The tune must be specified as under req*uest, 
+and you will be prompted with a warning before it is deleted. Only the owner may 
+delete tunes.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspturnoff <GMM>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspKills all queued events on the GMM, and turns it off.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspdub <source GMM> to <recipient GMM>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspPrompts you to enter the title or number of a song on one GMM that you would like 
+to copy into another. If the tune exists on the source it will be added to the recipient's 
+selection.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspWell, that's it for now. Future improvements in sight include a tune copying function, 
+and queued requests. Enjoy, and please let me know of any bugs!
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp                                                   Trismegistos
+&nbsp&nbsp&nbsp&nbsp&nbsp                                 CEO, Triskelion Post-Industrial Industries
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+addtune:
+<pre>
+maxtime = 600;
+event_interval = 30;
+player:tell("What is the tune called?");
+title = $command_utils:read();
+player:tell("Who is the tune by?");
+artist = $command_utils:read();
+tunetime = 0;
+while (!tunetime)
+    player:tell("How long is the tune? (mm:ss)");
+    timeinput = $command_utils:read();
+    if (((length(timeinput) == 5) && (timeinput[3] == ":")) && match(timeinput, "[0-9][0-9]:[0-9][0-9]"))
+        time_secs = (tonum(timeinput[1..2]) * 60) + tonum(timeinput[4..5]);
+        if (time_secs > maxtime)
+            player:tell("What are you programming, a rock opera or something? That 
+track is too long!");
+        elseif (time_secs < event_interval)
+            player:tell("That track is shorter than the minimum possible time of 
+", event_interval, " seconds.");
+        else
+            tunetime = time_secs;
+        endif
+    else
+        player:tell(timeinput, " is not a valid time in the format mm:ss (ex: 02:59).");
+    endif
+endwhile
+max_events = tunetime / event_interval;
+player:tell("Type a maximum of ", max_events, " lines describing events happening 
+in the song.");
+player:tell("These lines will be announced in order, the first one immediately after 
+the tune begins, and at equal intervals through the duration of the tune after that.");
+tune_events = {};
+while (!tune_events)
+    events = $command_utils:read_lines();
+    if (length(events) <= max_events)
+        tune_events = events;
+    else
+        player:tell("That entry was longer than the maximum of ", max_events, " lines. 
+Try again.");
+    endif
+endwhile
+tune_entry = {title, artist, tunetime, tune_events};
+this.tunes = listappend(this.tunes, tune_entry);
+player:tell(title, " by ", artist, " added to ", this.name, ".");
+.
+
+</pre>
+<BR>
+rmtune:
+<pre>
+if (player != this.owner)
+    player:tell("Only the owner of ", this.name, " (", owner.name, ") may remove 
+a tune from the selection.");
+    return;
+endif
+request = #1472:to_request(args[1]);
+if (request)
+    player:tell("Do you really want to remove '", this.tunes[request][1], "' from 
+", this.name, "?");
+    if (!$command_utils:yes_or_no())
+        player:tell("Remove aborted.");
+        return;
+    endif
+    this.tunes = listdelete(this.tunes, request);
+    player:tell("Removed.");
+else
+    player:tell(this.name, " does not carry that selection.");
+endif
+.
+
+</pre>
+<BR>
+sel*ection:
+<pre>
+if (this.tunes)
+    for i in [1..length(this.tunes)]
+        tunemins = this.tunes[i][3] / 60;
+        tunesecs = this.tunes[i][3] - (tunemins * 60);
+        player:tell(i, ": ", this.tunes[i][1], " by ", this.tunes[i][2], " (", tunemins, 
+" min ", tunesecs, " sec", ")");
+    endfor
+else
+    player:tell(this.name, " has no tunes on it right now.");
+endif
+.
+
+</pre>
+<BR>
+play:
+<pre>
+if (this.tunes)
+    request = #1472:to_request(args[1], this.tunes);
+    if (request)
+        tune = this.tunes[request];
+        this.location:announce_all("'", tune[1], "' by ", tune[2], " starts playing 
+on ", this.name, ".");
+        this.name = ((((this.name + " [playing: ") + this.tunes[request][1]) + " 
+by ") + this.tunes[request][2]) + "]";
+        this.playing = request;
+        interval = max(this.interval, tune[3] / length(tune[4]));
+        for i in [1..length(tune[4])]
+            fork (interval * (i - 1))
+                if (this.playing)
+                    this.location:announce_all("[on ", this.aliases[1], ":] ", tune[4][i]);
+                endif
+            endfork
+        endfor
+        fork (tune[3])
+            if (this.playing)
+                this.name = strsub(this.name, (((" [playing: " + this.tunes[request][1]) 
++ " by ") + this.tunes[request][2]) + "]", "");
+                this.location:announce_all("'", tune[1], "' by ", tune[2], " stops 
+playing on ", this.name, ".");
+                this.playing = 0;
+            endif
+        endfork
+    else
+        player:tell(this.name, " does not carry that selection.");
+    endif
+else
+    player:tell(this.name, " has no tunes to play!");
+endif
+.
+
+</pre>
+<BR>
+auto*play:
+<pre>
+if (this.playing)
+    player:tell(this.name, " is already playing something.");
+    return;
+endif
+playlist = {};
+schedule = {};
+tunetime = 0;
+n = min(length(this.tunes) / 2, 8);
+for i in [1..n]
+    t = random(length(this.tunes));
+    playlist = listappend(playlist, t);
+    schedule = listappend(schedule, tunetime);
+    tunetime = (tunetime + this.tunes[t][3]) + 1;
+endfor
+for i in [1..n]
+    fork (schedule[i] + 1)
+        this:play(playlist[i]);
+    endfork
+endfor
+.
+
+</pre>
+<BR>
+turnoff:
+<pre>
+if (this.playing)
+    q = queued_tasks();
+    for i in [1..length(q)]
+        if (match(q[i][9], toobj(this)))
+            kill_task(q[i][1]);
+        endif
+    endfor
+    this.location:announce_all(player.name, " turns off ", this.name, ".");
+    this.playing = 0;
+    this.name = this.aliases[1];
+else
+    player:tell(this.name, " is already turned off!");
+endif
+.
+
+</pre>
+<BR>
+req*uest:
+<pre>
+if (this.playing)
+    player:tell(this.name, " is already playing something.");
+    return;
+else
+    this:play(args[1]);
+endif
+.
+
+</pre>
+<BR>
+dub:
+<pre>
+if ($object_utils:isa(dobj, #1472) && $object_utils:isa(iobj, #1472))
+    player:tell("Copy which tune [title or selection number] from ", dobj.name, " 
+to ", iobj.name, "?");
+    request = $command_utils:read();
+    request = #1472:to_request(request, this.tunes);
+    if (request)
+        iobj.tunes = setadd(iobj.tunes, dobj.tunes[request]);
+        player:tell(dobj.tunes[request][1], " by ", dobj.tunes[request][2], " copied 
+to ", iobj.name, ".");
+    else
+        player:tell(dobj.name, " does not carry that selection.");
+    endif
+else
+    player:tell("Both objects have to be children of the Generic Music Machine, #1472.");
+endif
+.
+
+</pre>
+<BR>
+to_request:
+<pre>
+request = 0;
+if (tonum(args[1]) <= length(args[2]))
+    request = tonum(args[1]);
+else
+    for i in [1..length(args[2])]
+        if (args[1] == args[2][i][1])
+            request = i;
+        endif
+    endfor
+endif
+return request;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp playing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp tunes
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp interval
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp queue
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_001592.htm">jukebox</A> <A HREF="HTM_001990.htm">keyboard</A> <A HREF="HTM_002013.htm">Tunes</A> <A HREF="HTM_002426.htm">poetry engine</A> <A HREF="HTM_002490.htm">torso</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

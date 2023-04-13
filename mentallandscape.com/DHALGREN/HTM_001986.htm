@@ -1,0 +1,111 @@
+<HTML>
+<HEAD>
+<TITLE>Generic PC with Integrated Contents</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic PC with Integrated Contents (#1986)</H3>
+(an instance of <A HREF="HTM_000099.htm">Useful Utilitarian PC</A> made by <A HREF="HTM_000538.htm">Eclipse</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe GPCIC is a simple integrating player class.  It basically integrates into a player's description anything in eir contents that has a .carried_msg.  This is a simple and useful form of integration, in that it allows the player to integrate any object into eir description, including clothing, weapons, jewelry, food, knapsacks, pets, or anything that has a .carried_msg or that the player puts a .carried_msg on.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe GPCIC is a child of the Useful Utilitarian PC (#99), and therefore does not have the features of the Scorpion or Lycanthropic PCs.  However, player classes with additional features can easily be @parented or @chparented to this one to inherit the integrating ability.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000576.htm">Big Box O' Numbers</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe GPCIC is a simple integrating player class.  It basically integrates into a player's 
+description anything in eir contents that has a .carried_msg.  This is a simple and 
+useful form of integration, in that it allows the player to integrate any object 
+into eir description, including clothing, weapons, jewelry, food, knapsacks, pets, 
+or anything that has a .carried_msg or that the player puts a .carried_msg on.
+&nbsp&nbsp&nbsp&nbsp&nbspThe GPCIC is a child of the Useful Utilitarian PC, #99, and therefore does not have 
+the features of the Scorpion or Lycanthropic PCs.  However, player classes with additional 
+features can easily be @parented or @chparented to this one to inherit the integrating 
+ability.
+&nbsp&nbsp&nbsp&nbsp&nbspIf you own an object which does not have a .carried_msg but that you would like to 
+have integrated into your description while you are carrying it, adding a .carried_msg 
+is an easy thing to do.
+&nbsp&nbsp&nbsp&nbsp&nbspEclipse wants her skull (#909) to be integrated into her description while she's 
+carrying it, but it doesn't have a .carried_msg property.  To do this, she simply 
+types:
+&nbsp&nbsp&nbsp&nbsp&nbsp@prop #909.carried_msg
+&nbsp&nbsp&nbsp&nbsp&nbsp@carried #909 is Visitor seems to be carrying a large, smiling skull in one hand.
+&nbsp&nbsp&nbsp&nbsp&nbspBy adding the property and setting it, the .carried_msg of the skull will now be 
+seen in her description whenever she carries the skull.  This can be done with just 
+about any object that you'd like mentioned in your description instead of your contents 
+list, and has many uses.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+look_self:
+<pre>
+player:tell(this:titlec());
+d = this:description();
+if (c = this:contents())
+    i = t = "";
+    for o in (c)
+        if (s = $code_utils:verb_or_property(o, "carried_msg"))
+            i = (i + t) + $string_utils:pronoun_sub(s, this, o);
+            t = t || this:look_sep_msg();
+            c = setremove(c, o);
+        endif
+    endfor
+    if (i)
+        d = (typeof(d) == LIST) ? listappend(d, i) | ((typeof(d) == STR) ? (d + t) 
++ i | i);
+    endif
+endif
+player:tell_lines(d || "You see nothing special.");
+if (!(this in connected_players()))
+    player:tell($gender_utils:pronoun_sub("%{:He} %{!is} sleeping.", this));
+elseif ((idle = idle_seconds(this)) < 60)
+    player:tell($gender_utils:pronoun_sub("%{:He} %{!is} awake and %{!looks} alert.", 
+this));
+else
+    time = $string_utils:from_seconds(idle);
+    player:tell($gender_utils:pronoun_sub("%{:He} %{!is} awake, but %{!has} been 
+staring off into space for ", this), time, ".");
+endif
+if (c)
+    this:tell_contents(c);
+endif
+.
+
+</pre>
+<BR>
+look_sep_msg:
+<pre>
+return this:get_message(verb[1..length(verb) - 4]);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp look_sep_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000538.htm">Eclipse</A> <A HREF="HTM_002208.htm">Ipsol</A> <A HREF="HTM_002082.htm">Dead_Can_MOO</A> <A HREF="HTM_002289.htm">Taniak</A> <A HREF="HTM_002508.htm">nataShA</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

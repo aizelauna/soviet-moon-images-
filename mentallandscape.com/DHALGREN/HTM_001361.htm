@@ -1,0 +1,117 @@
+<HTML>
+<HEAD>
+<TITLE>Johnathon's notebook</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Johnathon's notebook (#1361)</H3>
+(an instance of <A HREF="HTM_000009.htm">generic note</A> made by <A HREF="HTM_001358.htm">Johnathon</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001358.htm">Johnathon</A>.
+<BR>
+<pre>
+</pre>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+r*ead:
+<pre>
+this:look_self();
+player:tell("Notebook page : ", this.cur_page_no);
+player:tell();
+count = 1;
+while (((count <= this.page_len) && (count < length(this.after))) && (this.after[count] 
+!= "[page]"))
+    player:tell(this.after[count]);
+    count = count + 1;
+endwhile
+player:tell();
+player:tell("( now turn to another page.)");
+.
+
+</pre>
+<BR>
+turn_msg oturn_msg:
+<pre>
+return $string_utils:pronoun_sub(this.(verb));
+.
+
+</pre>
+<BR>
+next:
+<pre>
+count = 0;
+while (((count < this.page_len) && length(this.after)) && (this.after[1] != "[page]"))
+    this.before = {@this.before, this.after[1]};
+    this.after = listdelete(this.after, 1);
+    count = count + 1;
+endwhile
+if (this.after[1] == "[page]")
+    this.before = {@this.before, this.after[1]};
+    this.after = listdelete(this.after, 1);
+endif
+this.cur_page_no = this.cur_page_no + 1;
+player:tell(this:turn_msg());
+player.location:announce(this:oturn_msg());
+.
+
+</pre>
+<BR>
+back:
+<pre>
+count = 0;
+bfl = length(this.before);
+if (bfl && (this.before[bfl] == "[page]"))
+    this.after = {this.before[bfl], @this.after};
+    this.before = listdelete(this.before, bfl);
+    bfl = bfl - 1;
+endif
+while (((count < this.page_len) && length(this.before)) && (this.before[bfl] != "[page]"))
+    this.after = {this.before[bfl], @this.after};
+    this.before = listdelete(this.before, bfl);
+    count = count + 1;
+    bfl = bfl - 1;
+endwhile
+if (length(this.before))
+    this.cur_page_no = this.cur_page_no - 1;
+else
+    this.cur_page_no = 1;
+endif
+player:tell(this:turn_msg());
+player.location:announce(this:oturn_msg());
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cur_page
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp pages
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp page_len
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cur_page_no
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp turn_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oturn_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp before
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp after
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

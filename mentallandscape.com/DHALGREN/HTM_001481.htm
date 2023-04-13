@@ -1,0 +1,115 @@
+<HTML>
+<HEAD>
+<TITLE>Dinghy</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Dinghy (#1481)</H3>
+(an instance of <A HREF="HTM_001016.htm">Generic Container Room</A> made by <A HREF="HTM_001457.htm">Trismegistos</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA creaky and slightly leaky wooden boat, with seating for two on the gunwales,
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp powered by an outboard motor. Although its gray paint is peeling in places,
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp you can make out the somewhat cryptic name XAPON painted in black on the bow
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp and stern. The tiller seems to be stuck at a roughly 30 degree angle to starboard.  
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001485.htm">River's Edge</A>.
+<BR>
+<BR>
+This place has a certain ambiance...
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA pink headless plastic baby doll floats by.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA mutant fur-bearing trout leaps out of the river.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA slab of faded orange styrofoam floats by.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA plastic Baggie floats by.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspBubbles float to the surface of the river, releasing a long-trapped stench.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA section of telephone pole floats by.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA bunch of laser-printed pages -- the manual for some geeky computer fantasy game -- float by.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA forlorn rubber duckie floats by.
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+start:
+<pre>
+interval = 10;
+for n in (this.contents)
+    if (is_player(n) && (!(n in this.sitting[1])))
+        n:tell("What a landlubber! Don't you know better than to stand up in a ", 
+this.name, "? Sit down or get out!");
+        player:tell("You can't start the ", this.name, " until everyone is sitting 
+down.");
+        return;
+    endif
+endfor
+if (this.location == this.route[1])
+    final = this.route[3];
+    tech_note = ("The angle of the tiller roughly compensates for the pull of the 
+current, so that the " + this.name) + "'s course takes it straight across the channel.";
+    place_arriving = "the muddy far shore of the channel.";
+elseif (this.location == this.route[2])
+    player:tell("Relax! The ", this.name, " is moving along just fine.");
+    return;
+elseif (this.location == this.route[3])
+    final = this.route[1];
+    tech_note = ("The angle of the tiller and the pull of the current alter the " 
++ this.name) + "'s initial west-by-northwest course, creating a great arc which will 
+take it across the channel.";
+    place_arriving = "a concrete pier on the city's waterfront.";
+endif
+player.location:announce_all("With a couple of sharp yanks, ", player.name, " starts 
+the motor.");
+player.location:announce_all(tech_note);
+this.location:announce_all("The ", this.name, " moves out into the channel, with 
+", $string_utils:title_list(setremove(this.contents, this)), " on board.");
+fork (interval)
+    move(this, this.route[2]);
+    this:announce_all("The ", this.name, " arrives at ", this.route[2].name, ", with 
+", $string_utils:title_list(setremove(this.contents, this)) + " on board.");
+    fork (interval)
+        move(this, final);
+        this:announce_all(final.name);
+        this:announce_all(player.name, " kills the motor, and the ", this.name, " 
+glides until it bumps against ", place_arriving);
+        this.location:announce_all(((("The " + this.name) + " arrives, with ") + 
+$string_utils:title_list(this.contents)) + " on board.");
+    endfork
+endfork
+.
+
+</pre>
+<BR>
+close:
+<pre>
+player:tell("You can't close an open boat!");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp route
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,99 @@
+<HTML>
+<HEAD>
+<TITLE>Generic BigList Resident</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic BigList Resident (#73)</H3>
+(an instance of <A HREF="HTM_000001.htm">Root Class</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis is the object you want to use as a parent in order to @create a place for your biglists to live.  Suitably sick souls may wish to reimplement :_genprop and :_kill to reclaim unused properties (this :_kill just throws them away and this :_genprop just relentlessly advances....  who cares).  Anyway, you'll need to look at $biglist before this will make sense.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+_make:
+<pre>
+":_make(...) => new node with value {...}";
+if (!(caller in {this._mgr, this}))
+    return E_PERM;
+endif
+prop = this:_genprop();
+add_property(this, prop, args, {$generic_biglist_home.owner, ""});
+return prop;
+.
+
+</pre>
+<BR>
+_kill:
+<pre>
+":_kill(node) destroys the given node.";
+if (!(caller in {this, this._mgr}))
+    return E_PERM;
+endif
+delete_property(this, args[1]);
+.
+
+</pre>
+<BR>
+_get:
+<pre>
+return (caller == this._mgr) ? this.(args[1]) | E_PERM;
+.
+
+</pre>
+<BR>
+_put:
+<pre>
+return (caller == this._mgr) ? this.(args[1]) = listdelete(args, 1) | E_PERM;
+.
+
+</pre>
+<BR>
+_genprop:
+<pre>
+gp = this._genprop;
+ngp = "";
+for i in [1..length(gp)]
+    if (gp[i] != "z")
+        ngp = (ngp + "bcdefghijklmnopqrstuvwxyz"[strcmp(gp[i], "`")]) + gp[i + 1..length(gp)];
+        return " " + (this._genprop = ngp);
+    endif
+    ngp = ngp + "a";
+endfor
+return " " + (this._genprop = ngp + "a");
+.
+
+</pre>
+<BR>
+_ord:
+<pre>
+"this is a dummy. You have to decide what your leaves are going to look like and 
+then write this verb accordingly.  It should, given a leaf/list-element, return the 
+corresponding key value.  So for an ordinary alist, where all of the leaves are of 
+the form {key,datum}, you want:";
+return args[1][1];
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp _genprop
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mowner
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp _mgr
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

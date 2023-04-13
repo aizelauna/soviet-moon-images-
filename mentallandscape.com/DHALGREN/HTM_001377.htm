@@ -1,0 +1,91 @@
+<HTML>
+<HEAD>
+<TITLE>a bathtub</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a bathtub (#1377)</H3>
+(an instance of <A HREF="HTM_001016.htm">Generic Container Room</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA big bathtub, the old-fashioned kind, porcelain, with lion-claw feet on it.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIt's capacious, there's room enough for more than one.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA bathtub slides into the tub.
+<BR>
+<BR>
+You see <A HREF="HTM_002213.htm">a tubful of water</A>, <A HREF="HTM_000713.htm">a brush</A> and <A HREF="HTM_002223.htm">bubbles</A> here.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001043.htm">flutterby's whimsy</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+splash:
+<pre>
+this:announce(this:osplash_msg());
+this.location:announce(this:osplash_msg());
+player:tell(this:splash_msg());
+for time in [1..random(this.times)]
+    suds = "";
+    for sud in [1..random(68)]
+        suds = tostr(suds, " ");
+    endfor
+    this:announce_all(tostr(suds, "SUDS"));
+    this.location:announce_all(tostr(suds, "SUDS"));
+endfor
+.
+
+</pre>
+<BR>
+splash_msg osplash_msg slosh_msg:
+<pre>
+return $string_utils:pronoun_sub(this.(verb));
+.
+
+</pre>
+<BR>
+slosh:
+<pre>
+sloshmsg = this:slosh_msg();
+osloshmsg = "";
+for s in [1..72 - length(sloshmsg)]
+    osloshmsg = tostr(osloshmsg, " ");
+endfor
+osloshmsg = tostr(osloshmsg, sloshmsg);
+for time in [1..random(12)]
+    this:announce_all(sloshmsg);
+    this.location:announce_all(sloshmsg);
+    suspend(time + this.slosh_delay);
+    this:announce_all(osloshmsg);
+    this.location:announce_all(osloshmsg);
+endfor
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp times
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp splash_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp osplash_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp slosh_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp slosh_delay
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

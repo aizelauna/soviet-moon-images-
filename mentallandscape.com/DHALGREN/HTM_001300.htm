@@ -1,0 +1,107 @@
+<HTML>
+<HEAD>
+<TITLE>allgemeiner Raum</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> allgemeiner Raum (#1300)</H3>
+(an instance of <A HREF="HTM_000003.htm">generic room</A> made by <A HREF="HTM_001286.htm">Drummer</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspDu siehst nichts besonderes.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+tell_contents:
+<pre>
+"Copied from generic room (#3):tell_contents by The_Mayor (#2) Tue Jul 12 22:04:51 
+1994 EDT";
+contents = args[1];
+ctype = args[2];
+if ((!this.dark) && (contents != {}))
+    if (ctype == 0)
+        player:tell("Inhalt:");
+        for thing in (contents)
+            player:tell("  ", thing:title());
+        endfor
+    elseif (ctype == 1)
+        for thing in (contents)
+            if (is_player(thing))
+                player:tell(thing:title(), " ist da.");
+            else
+                player:tell("Du siehst da ", thing:title(), ".");
+            endif
+        endfor
+    elseif (ctype == 2)
+        player:tell("Du siehst ", strsub($string_utils:title_list(contents), " and 
+", " und "), " hier.");
+    elseif (ctype == 3)
+        players = things = {};
+        for x in (contents)
+            if (is_player(x))
+                players = {@players, x};
+            else
+                things = {@things, x};
+            endif
+        endfor
+        if (things)
+            player:tell("Du siehst ", strsub($string_utils:title_list(things), " 
+and ", " und "), " hier.");
+        endif
+        if (players)
+            player:tell(strsub($string_utils:title_listc(players), " and ", " und 
+"), (length(players) == 1) ? " ist" | " sind", " da.");
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+tell_exits:
+<pre>
+"Copied from generic room (#3):tell_exits by Dredful (#96) Tue Jul 12 22:05:11 1994 
+EDT";
+"Uebersetzung auf Deutsch/German Translation: Drummer Wed Jul 13 1994";
+"displays exits with obvious = 1 to player, ";
+obexits_list = {};
+for exit in (this:obvious_exits(1))
+    obexits_list = listappend(obexits_list, ((exit.name + " (nach ") + exit.dest.name) 
++ ")");
+endfor
+if (obexits_list && this.exit_display)
+    player:tell("Sichtbare Ausgaenge: " + strsub($string_utils:english_list(obexits_list), 
+" and ", " und "));
+endif
+.
+
+</pre>
+<BR>
+say:
+<pre>
+"Copied from generic room (#3):say by The_Mayor (#2) Thu Jul 14 06:26:20 1994 EDT";
+"German translation by Drummer Thu Jul 14 1994 EDT";
+player:tell("Du sagst: \"", argstr, "\"");
+this:announce(player.name, " sagt: \"", argstr, "\"");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_001274.htm">Riesenheim</A> <A HREF="HTM_001277.htm">Kerker</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

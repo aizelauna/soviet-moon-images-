@@ -1,0 +1,253 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Secured Post-Apocalypse Room</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Secured Post-Apocalypse Room (#262)</H3>
+(an instance of <A HREF="HTM_000110.htm">Generic Post-Apocalypse Room</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIt is raining and secure this day in Bellona.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Post-Apocalypse Room Class (PARC) allows room descriptions and details 
+to depend on the time of day and the weather.  It has eight settable messages:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   @secure here is O|D|A|M     Set the room security to open, deny
+&nbsp&nbsp&nbsp&nbsp&nbsp                               accept, maximum.  An open room will
+&nbsp&nbsp&nbsp&nbsp&nbsp                               allow anyone to enter.  Set to D, the
+&nbsp&nbsp&nbsp&nbsp&nbsp                               room will repel anyone placed on the
+&nbsp&nbsp&nbsp&nbsp&nbsp                               denied list.  Set to A, the room will
+&nbsp&nbsp&nbsp&nbsp&nbsp                               accept anyone on the accepted list.  At
+&nbsp&nbsp&nbsp&nbsp&nbsp                               M, the room is locked to all but the
+&nbsp&nbsp&nbsp&nbsp&nbsp                               owner or residents.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   @accept [player1, ...]      Add players to the accepted list.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   @unaccept [player1, ...]    Remove players from the accepted list.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   @deny [player1, ...]        Add players to the denied list.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   @undeny [player1, ...]      Remove players from the denied list.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspWhen a player is repelled by room security, they see the repel_msg.  Players in the 
+room then see the orepel_msg, informing them of the attempted entrance.  Objects 
+owned by a player have the same entrance permission as their owner.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspIf a player cannot enter a SPARC room (because of security or free_entry == 0), they 
+also may not look at it remotely.
+&nbsp&nbsp&nbsp&nbsp&nbsp(see also: help #110 for information on PARC)
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+accept:
+<pre>
+if (!(success = pass(@args)))
+    what = args[1];
+    if (this.repel_msg)
+        what:tell(this.repel_msg);
+    endif
+    if (this.orepel_msg)
+        msg = $string_utils:pronoun_sub(this.orepel_msg, what, this, what.location);
+        this:announce_all(msg);
+    endif
+endif
+return success;
+.
+
+</pre>
+<BR>
+acceptable:
+<pre>
+if (pass(@args))
+    if (this.security_level > 1)
+        what = args[1];
+        who = is_player(what) ? what | what.owner;
+        res = {this.owner, @this.residents};
+        if ((who in res) || (player in res))
+            return 1;
+        elseif (this.security_level == 2)
+            return !(who in this.deny_list);
+        elseif (this.security_level == 3)
+            return who in this.accept_list;
+        else
+            return 0;
+        endif
+    else
+        return 1;
+    endif
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+@accept:
+<pre>
+if (!(player in {this.owner, @this.residents}))
+    player:tell(E_PERM);
+    return;
+endif
+folks = $string_utils:explode(strsub(argstr, ",", " "));
+for f in (folks)
+    w = $string_utils:match_player(f);
+    if (valid(w))
+        this.accept_list = setadd(this.accept_list, w);
+    endif
+endfor
+player:tell("Accepted players:");
+this.accept_list = this:print_and_cleanup(this.accept_list);
+.
+
+</pre>
+<BR>
+@deny:
+<pre>
+if (!(player in {this.owner, @this.residents}))
+    player:tell(E_PERM);
+    return;
+endif
+folks = $string_utils:explode(strsub(argstr, ",", " "));
+for f in (folks)
+    w = $string_utils:match_player(f);
+    if (valid(w))
+        this.deny_list = setadd(this.deny_list, w);
+    endif
+endfor
+player:tell("Denied players:");
+this.deny_list = this:print_and_cleanup(this.deny_list);
+.
+
+</pre>
+<BR>
+@undeny:
+<pre>
+if (!(player in {this.owner, @this.residents}))
+    player:tell(E_PERM);
+    return;
+endif
+folks = $string_utils:explode(strsub(argstr, ",", " "));
+for f in (folks)
+    w = $string_utils:match_player(f);
+    if (valid(w))
+        this.deny_list = setremove(this.deny_list, w);
+    endif
+endfor
+player:tell("Denied players:");
+this.deny_list = this:print_and_cleanup(this.deny_list);
+.
+
+</pre>
+<BR>
+@unaccept:
+<pre>
+if (!(player in {this.owner, @this.residents}))
+    player:tell(E_PERM);
+    return;
+endif
+folks = $string_utils:explode(strsub(argstr, ",", " "));
+for f in (folks)
+    w = $string_utils:match_player(f);
+    if (valid(w))
+        this.accept_list = setremove(this.accept_list, w);
+    endif
+endfor
+player:tell("Accepted players:");
+this.accept_list = this:print_and_cleanup(this.accept_list);
+.
+
+</pre>
+<BR>
+@secure:
+<pre>
+if (!(player in {this.owner, @this.residents}))
+    player:tell(E_PERM);
+    return;
+endif
+if (iobjstr)
+    if (level = iobjstr[1] in {"O", "D", "A", "M"})
+        this.security_level = level;
+    else
+        player:tell("Security must be Open, Denied, Accepted, or Maximum.");
+    endif
+endif
+player:tell("Present security level is ", "ODAM"[this.security_level], ".");
+.
+
+</pre>
+<BR>
+print_and_cleanup:
+<pre>
+clean = {};
+names = {};
+for i in (args[1])
+    if (valid(i))
+        clean = {@clean, i};
+        names = {@names, i.name};
+    endif
+endfor
+player:tell($string_utils:print(names));
+return clean;
+.
+
+</pre>
+<BR>
+look_self:
+<pre>
+if ((player.location != this) && ((this.security_level > 1) || (!this.free_entry)))
+    player:tell("You are too far away to see that.");
+else
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+description:
+<pre>
+if ((player.location != this) && ((this.security_level > 1) || (!this.free_entry)))
+    return "You are too far away to see it.";
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp security_level
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp repel_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp orepel_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp accept_list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp deny_list
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000271.htm">Patro's Shack</A> <A HREF="HTM_000219.htm">Choir Loft</A> <A HREF="HTM_000177.htm">Ruined Church</A> <A HREF="HTM_000268.htm">Catacombs</A> <A HREF="HTM_000186.htm">Mayor's Office</A> <A HREF="HTM_000355.htm">Abandoned Luncheonette</A> <A HREF="HTM_000320.htm">Postmodern Laboratory</A> <A HREF="HTM_000255.htm">The Master's Chambers</A> <A HREF="HTM_000492.htm">The Marrakech</A> <A HREF="HTM_000507.htm">The Shack</A> <A HREF="HTM_000820.htm">Stage</A> <A HREF="HTM_000864.htm">.sig</A> <A HREF="HTM_000889.htm">Mouldering Tunnel</A> <A HREF="HTM_000977.htm">Tock_WatchDog's Bedroom</A> <A HREF="HTM_001048.htm">Shadowed Study</A> <A HREF="HTM_001156.htm">The Underground</A> <A HREF="HTM_001162.htm">Jeannie's Bottle</A> <A HREF="HTM_001173.htm">Gardenia Corner</A> <A HREF="HTM_001289.htm">The Club</A> <A HREF="HTM_001306.htm">Tangiers</A> <A HREF="HTM_001359.htm">The Vortex of Anguish</A> <A HREF="HTM_001593.htm">Generic Papa Room</A> <A HREF="HTM_001820.htm">The Casbah</A> <A HREF="HTM_002030.htm">Love&Rockets #23</A> <A HREF="HTM_002137.htm">Press Room</A> <A HREF="HTM_002090.htm">Baia</A> <A HREF="HTM_000590.htm">Gothic Tower</A> <A HREF="HTM_000591.htm">Slanted rooftop</A> <A HREF="HTM_000982.htm">Isolation Peak</A> <A HREF="HTM_000942.htm">Exotica</A> <A HREF="HTM_000955.htm">Generic Room with Seats</A> <A HREF="HTM_002663.htm">Graveyard</A> <A HREF="HTM_002669.htm">Memorial</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

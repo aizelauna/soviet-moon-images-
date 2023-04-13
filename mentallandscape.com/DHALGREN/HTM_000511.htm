@@ -1,0 +1,100 @@
+<HTML>
+<HEAD>
+<TITLE>Luce</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Luce (#511)</H3>
+(an instance of <A HREF="HTM_000192.htm">Generic Automaton</A> made by <A HREF="HTM_000095.htm">legba</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspShe moves quickly, with indifferent efficiency and seemingly everywhere at once, mixing drinks and pulling pints of beer from the shiny taps. She doesn't say much while she works, but regards you, if you manage to catch her attention at all, with a half amused stare. Her black brows arch sharply in the center and meet just above her slightly hooked nose, making a darkness like crow's wings across her face. Her lips are full and a rich shade of dark violet, with small creases beginning in the corners. Her blue-black hair she crops herself, close to the scalp with small scissors.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp She wears a black leather bra that fastens up the front with a brass zipper, tight black jeans and black boots that lace up to just under her knees.  On the tanned and sinewy bicep of her right arm she has a monochrome tattoo of a calla lily.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000154.htm">D.E.W.</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+order:
+<pre>
+suspend(5);
+for thing in ($object_utils:all_contents(player))
+    if ($object_utils:isa(thing, this.drinkable_root))
+        player:tell("Luce regards you cooly and tells you to finish the drink you 
+have first.  The drinks are free, but don't get greedy.");
+        this.location:announce($string_utils:pronoun_sub("%N tries to order another 
+drink before finishing up the one %s has, earning a glower from Luce."));
+        return;
+    endif
+endfor
+if (ind = index(dobjstr, " of "))
+    container = dobjstr[1..ind - 1];
+    drink = dobjstr[ind + 4..length(dobjstr)];
+else
+    container = "glass";
+    drink = dobjstr;
+endif
+article = $string_utils:a_or_an(dobjstr);
+if (this.location:find_sitter(player) == 2)
+    player:tell("You catch Luce's eye finally.  She pulls a few beers from the taps, 
+mixes a few drinks, polishes the bar again before making her way over to you.  You 
+order ", article, " ", dobjstr, " from her.  She acknowledges your order with a slight 
+nod.");
+    this.location:announce(player.name, " finally catches Luce's eye and orders a 
+drink from her.");
+else
+    player:tell("You make your way through the crowd to the bar and order ", article, 
+" ", dobjstr, " from Luce.  She takes your order with an abrupt nod and a slight 
+smile.");
+    this.location:announce(player.name, " moves through the crowd up to the bar and 
+orders a drink.");
+endif
+suspend(20);
+if (player.location == this.location)
+    this.drinkable_root:build_a_drink(container, drink, "A fairly normal looking 
+%container, mostly clean.");
+    player:tell("Luce hands you ", article, " ", dobjstr, ".");
+    this.location:announce("Luce hands ", player.name, " ", article, " ", dobjstr, 
+".");
+endif
+.
+
+</pre>
+<BR>
+cleanup_effects:
+<pre>
+player:tell("You finish up your ", args[1].name, ".");
+this.location:announce($string_utils:pronoun_sub("%N finishes %p drink."));
+suspend(10);
+player:tell("Luce works her way through the crowd, collecting up empty glasses.  
+She scoops up yours, goes back behind the bar and tosses the empty glasses into a 
+sink.");
+this.location:announce("Luce works her way through the crowd, collecting up empty 
+glasses.  She scoops up ", player.name, "'s ", args[1].name, ", goes back behind 
+the bar and tosses the empty glasses into a sink.");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp bartender
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp drinkable_root
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

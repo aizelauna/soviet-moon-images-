@@ -1,0 +1,176 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Feature Object</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Feature Object (#74)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThis is the Generic Feature Object.  It is not meant to be used as a feature object 
+itself, but is handy for making new feature objects.
+</pre>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Feature Object--not to be used as a feature object.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+help_msg:
+<pre>
+all_help = this.help_msg;
+if (typeof(all_help) == STR)
+    all_help = {all_help};
+endif
+helpless = {};
+for vrb in (this.feature_verbs)
+    if (loc = $object_utils:has_verb(this, vrb))
+        loc = loc[1];
+        help = $code_utils:verb_documentation(loc, vrb);
+        if (help)
+            all_help = {@all_help, "", tostr(loc, ":", verb_info(loc, vrb)[3]), @help};
+        else
+            helpless = {@helpless, vrb};
+        endif
+    endif
+endfor
+if (helpless)
+    all_help = {@all_help, "", ("No help found on " + $string_utils:english_list(helpless, 
+"nothing", " or ")) + "."};
+endif
+return {@all_help, "----"};
+.
+
+</pre>
+<BR>
+look_self:
+<pre>
+"Definition from #1";
+desc = this:description();
+if (desc)
+    player:tell_lines(desc);
+else
+    player:tell("You see nothing special.");
+endif
+player:tell("Please type \"help ", this, "\" for more information.");
+.
+
+</pre>
+<BR>
+using this:
+<pre>
+"Proper usage for the Generic Feature Object:";
+"";
+"First of all, the Generic Feature Object is constructed with the idea";
+"that its children will be @moved to #24300, which is kind of a warehouse";
+"for feature objects.  If there's enough interest, I'll try to make the";
+"stuff that works with that in mind optional.";
+"";
+"Make a short description.  This is so I can continue to have looking at";
+"#24300 give the descriptions of each of the objects in its .contents.";
+"The :look_msg automatically includes a pointer to `help <this object>',";
+"so you don't have to.";
+"";
+"Put a list of the commands you want people to use in";
+"<this object>.feature_verbs.  (You need to use the :set_feature_verbs";
+"verb to do this.)";
+"";
+"When someone types `help <this object>', they will be told the comment";
+"strings from each of the verbs named in .feature_verbs.";
+.
+
+</pre>
+<BR>
+examine_commands_ok:
+<pre>
+return this in args[1].features;
+.
+
+</pre>
+<BR>
+set_feature_ok:
+<pre>
+if ($perm_utils:controls(caller_perms(), this) || (caller == this))
+    return this.feature_ok = args[1];
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+hidden_verbs:
+<pre>
+"Can't see `get' unless it's in the room; can't see `drop' unless it's in the player. 
+ Should possibly go on $thing.";
+"Should use :contents, but I'm in a hurry.";
+hidden = pass(@args);
+if (this.location != args[1])
+    hidden = setadd(hidden, {$thing, verb_info($thing, "drop")[3], {"this", "none", 
+"none"}});
+    hidden = setadd(hidden, {$thing, verb_info($thing, "give")[3], {"this", "at/to", 
+"any"}});
+endif
+if (this.location != args[1].location)
+    hidden = setadd(hidden, {$thing, verb_info($thing, "get")[3], {"this", "none", 
+"none"}});
+endif
+return hidden;
+.
+
+</pre>
+<BR>
+set_feature_verbs:
+<pre>
+if ($perm_utils:controls(caller_perms(), this) || (caller == this))
+    return this.feature_verbs = args[1];
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+initialize:
+<pre>
+if ((caller == this) || $perm_utils:controls(caller_perms(), this))
+    pass(@args);
+    this.feature_verbs = {};
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp warehouse
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp feature_verbs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp feature_ok
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000109.htm">Login Watcher</A> <A HREF="HTM_000111.htm">Features Feature Object</A> <A HREF="HTM_000112.htm">Stage Talk FO</A> <A HREF="HTM_000125.htm">Player Information Feature</A> <A HREF="HTM_000126.htm">Carrot's Rosette Feature Object</A> <A HREF="HTM_000127.htm">Thinking Feature</A> <A HREF="HTM_000319.htm">Second Character Registry</A> <A HREF="HTM_000452.htm">Social Shortcuts Feature</A> <A HREF="HTM_000466.htm">Improved redirected say and whisper</A> <A HREF="HTM_000535.htm">Saffrona fo</A> <A HREF="HTM_000542.htm">Size-Prospectus FO</A> <A HREF="HTM_000536.htm">Lag Feature</A> <A HREF="HTM_001055.htm">Pasting Feature</A> <A HREF="HTM_001188.htm">Repetitive Stress Injuries feature</A> <A HREF="HTM_001216.htm">Random Features Maybe Useful</A> <A HREF="HTM_000843.htm">sick features</A> <A HREF="HTM_001257.htm">Liquor FO</A> <A HREF="HTM_002001.htm">Boot FO</A> <A HREF="HTM_000777.htm">Generics Registry FO</A> <A HREF="HTM_002352.htm">Suave Delanyesque Pickup FO</A> <A HREF="HTM_002391.htm">Info Feature</A> <A HREF="HTM_002659.htm">Esperantists' Feature</A> <A HREF="HTM_002684.htm">GrrlVerbs</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

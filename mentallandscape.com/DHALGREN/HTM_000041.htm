@@ -1,0 +1,870 @@
+<HTML>
+<HEAD>
+<TITLE>Player Database</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Player Database (#41)</H3>
+(an instance of <A HREF="HTM_000039.htm">Generic Database</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA database containing all player names and aliases.  
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSee `help $player_db' for more information.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+load:
+<pre>
+":load() -- reloads the player_db with the names of all existing players.";
+"This routine calls suspend() if it runs out of time.";
+".frozen is set to 1 while the load is in progress so that other routines are warned 
+and don't try to do any updates.  Sometimes, an update is unavoidable (e.g., player 
+gets recycled) in which case the offending routine should set .frozen to 2, causing 
+the load to start over at the beginning.";
+if ((caller != this) && (!$perm_utils:controls(caller_perms(), this)))
+    return E_PERM;
+endif
+this:clearall();
+this.frozen = 1;
+for p in (players())
+    this:suspend_restart(p);
+    "... note that if a player is recycled or toaded during the suspension,...";
+    "... it won't be removed from the for loop iteration; thus this test:     ";
+    if (valid(p) && is_player(p))
+        if (typeof(po = this:find_exact(p.name)) == ERR)
+            player:tell(p.name, ":  ", po);
+            return;
+        elseif (po != p)
+            if (valid(po) && is_player(po))
+                player:tell("name `", p.name, "' for ", p, " subsumes alias for ", 
+po.name, "(", po, ").");
+            endif
+            this:insert(p.name, p);
+        endif
+        for a in (p.aliases)
+            this:suspend_restart(p);
+            if (index(a, " ") || index(a, "	"))
+                "don't bother";
+            elseif (typeof(ao = this:find_exact(a)) == ERR)
+                player:tell(a, ":  ", ao);
+                return;
+            elseif (!(valid(ao) && is_player(ao)))
+                this:insert(a, p);
+            elseif (ao != p)
+                player:tell("alias `", a, "' for ", p.name, "(", p, ") used by ", 
+ao.name, "(", ao, ").");
+            endif
+        endfor
+    endif
+endfor
+this.frozen = 0;
+.
+
+</pre>
+<BR>
+check:
+<pre>
+":check() -- checks for recycled and toaded players that managed not to get expunged 
+from the db.";
+for p in (properties($player_db))
+    if ((ticks_left() < 500) || (seconds_left() < 2))
+        player:tell("...", p);
+        suspend(0);
+    endif
+    if (p[1] == " ")
+        nlist = this.(p)[3];
+        olist = this.(p)[4];
+        for i in [1..length(nlist)]
+            if (valid(olist[i]) && (is_player(olist[i]) && (nlist[i] in olist[i].aliases)))
+            else
+                player:tell(".", p[2..length(p)], " <- ", nlist[i], " ", olist[i]);
+            endif
+        endfor
+    endif
+endfor
+player:tell("done.");
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    pass();
+    this.reserved = {};
+    this:load();
+endif
+.
+
+</pre>
+<BR>
+available:
+<pre>
+":available(name) => 1 if a name is available for use, or the object id of whoever 
+is currently using it, or 0 if the name is otherwise forbidden.";
+"If $player_db is not .frozen and :available returns 1, then $player:set_name will 
+succeed.";
+name = args[1];
+if ((name in this.stupid_names) || (name in this.reserved))
+    return 0;
+elseif (((((!name) || index(name, " ")) || index(name, "\\")) || index(name, "\"")) 
+|| index(name, "	"))
+    return 0;
+elseif (index("*#()", name[1]))
+    return 0;
+elseif (valid(who = this:find_exact(name)) && is_player(who))
+    return who;
+else
+    return 1;
+endif
+.
+
+</pre>
+<BR>
+suspend_restart:
+<pre>
+"used during :load to do the usual out-of-time check.";
+"if someone makes a modification during the suspension (indicated by this.frozen 
+being set to 2), we have to restart the entire load.";
+if (caller != this)
+    return E_PERM;
+elseif ($command_utils:running_out_of_time())
+    player:tell("...", args[1]);
+    suspend(0);
+    if (this.frozen != 1)
+        player:tell("...argh... restarting $player_db:load...");
+        fork (0)
+            this:load();
+        endfork
+        kill_task(task_id());
+    endif
+endif
+.
+
+</pre>
+<BR>
+why_bad_name:
+<pre>
+":why_bad_name(player, namespec) => Returns a message explaining why a player name 
+change is invalid.  Stolen from APHiD's #15411:name_okay.";
+who = args[1];
+name = $building_utils:parse_names(args[2])[1];
+si = index(name, " ");
+qi = index(name, "\"");
+bi = index(name, "\\");
+ti = index(name, "	");
+if ((si || qi) || bi)
+    return tostr("You may not use a name containing ", $string_utils:english_list({@si 
+? {"spaces"} | {}, @qi ? {"quotation marks"} | {}, @bi ? {"backslashes"} | {}, @ti 
+? {"tabs"} | {}}, "ERROR", " or "), ".  Try \"", strsub(strsub(strsub(name, " ", 
+"_"), "\"", "'"), "\\", "/"), "\" instead.");
+elseif (name == "")
+    return tostr("You may not use a blank name.");
+elseif (i = index("*#()", name[1]))
+    return tostr("You may not begin a name with the \"", "*#()"[i], "\" character.");
+elseif (name in $player_db.stupid_names)
+    return tostr("The name \"", name, "\" would probably cause problems in command 
+parsing or similar usage.");
+elseif (name in $player_db.reserved)
+    return tostr("The name \"", name, "\" is reserved.");
+elseif (length(name) > $login.max_player_name)
+    return tostr("The name \"", name, "\" is too long.  Maximum name length is ", 
+$login.max_player_name, " characters.");
+elseif ((valid(match = $player_db:find_exact(name)) && is_player(match)) && (who 
+!= match))
+    return tostr("The name \"", name, "\" is already being used by ", match.name, 
+"(", match, ").");
+elseif ($player_db.frozen)
+    return tostr("$player_db is not accepting new changes at the moment.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp stupid_names
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp frozen
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp reserved
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  T
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  e
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  n
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  h
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  D
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Dr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  B
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  c
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  r
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Z
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ma
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rat
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  K
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ca
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  P
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  L
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Th
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ba
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Q
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Dre
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  drb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  A
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Am
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ki
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  V
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  S
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ci
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  No
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  G
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  J
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ch
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Y
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ho
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Je
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ev
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ne
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Bu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  De
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  An
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Man
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Dra
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Gr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  F
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ge
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Gri
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Qu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  va
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cal
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cin
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ta
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sal
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Br
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mal
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Hor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  He
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Anr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Pr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  The_
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  St
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ka
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  be
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ras
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Lo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lore
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Mar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  O
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Saf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Saff
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ob
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  BenD
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Cha
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ec
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ecl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ecli
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Eclip
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Eclips
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Se
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Si
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sic
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  So
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  W
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Jea
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ja
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Pa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ste
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Lu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  To
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Toc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ra
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Jan
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Co
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  marc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ph
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sy
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  al
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  i
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Pir
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Me
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sai
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  com
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ze
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  po
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pol
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mel
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  car
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Mo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kat
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cat
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Bur
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Bo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  But
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ro
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Mant
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ran
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Su
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Wi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  U
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Mae
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Def
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ton
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  eve
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  eva
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ben
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  go
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Wil
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Rod
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Fl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Joh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Jac
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  As
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Kar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Cy
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Gu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Gun
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Nes
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ant
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Tr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  trism
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ga
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Gi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  La
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Re
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Tri
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tre
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qui
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Kal
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Blac
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Fig
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Rob
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  El
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Gue
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Fr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ha
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  faa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Min
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  !
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bou
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  boud
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sho
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Vi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sw
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  marg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bec
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ip
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ips
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sna
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Lar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sil
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Pu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Tree
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Blacka
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Amb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Jay
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Wo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ari
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  aria
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  3
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  9
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  na
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bea
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  griff
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Cas
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Bud
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Vai
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  X
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  df
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Defa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Yo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  whi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  los
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  py
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ur
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Wol
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Bri
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Bria
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ber
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  god
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Mac
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mack
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Dea
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Vis
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Phl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Fir
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ke
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Son
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sonn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  beck
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Le
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Lum
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ald
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  I'
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sub
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Pat
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Fe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sta
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fel
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cyb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  We
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  li
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sha
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  leg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Kl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tris
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fla
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tw
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Rot
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  stet
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ken
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ic
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Per
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Que
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Deat
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  shal
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sco
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  te
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Bert
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Mag
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  di
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Er
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Bla
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ni
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  In
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nat
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ju
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sam
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Jen
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Gol
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Tal
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Pro
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  quix
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  do
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mis
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  8
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Pri
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yja
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jaz
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  The_M
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  stev
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Lin
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Lio
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Cir
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  may
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fas
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ART
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Bow
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sun
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Val
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Da
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  clip
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  aj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cae
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pus
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pussy
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kid
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sir
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  um
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  v.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Cor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hy
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  The
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Moo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ama
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ab
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  amaz
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ir
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sky
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Hi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  arc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Her
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Circ
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rai
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Rainb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Zo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Led
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Os
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gro
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  G-
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Quen
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Cli
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Whir
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ww
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wolf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  whit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ti
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Mos
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

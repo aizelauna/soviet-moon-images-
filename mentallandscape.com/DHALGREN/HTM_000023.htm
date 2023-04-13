@@ -1,0 +1,143 @@
+<HTML>
+<HEAD>
+<TITLE>Core Utility Help</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Core Utility Help (#23)</H3>
+(an instance of <A HREF="HTM_000032.htm">Generic Help Database</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspHelp database for LambdaCore utility objects and generics.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+find_topics:
+<pre>
+if (!args)
+    l = {};
+    for p in (properties(#0))
+        if ((p[max(1, length(p) - 5)..length(p)] == "_utils") && #0.(p).description)
+            l = {@l, "$" + p};
+        endif
+    endfor
+    return {@pass(@args), @l};
+elseif (ts = pass(@args))
+    return ts;
+elseif ((what = args[1])[1] != "$")
+    return {};
+elseif (ts = pass("$generic_" + what[2..length(what)]))
+    return ts;
+elseif ((r = rindex(w = strsub(what[2..length(what)], "-", "_"), "_utils")) && ((r 
+== (length(w) - 5)) && (valid(#0.(w)) && #0.(w).description)))
+    return {what};
+else
+    return {};
+endif
+.
+
+</pre>
+<BR>
+get_topic:
+<pre>
+topic = args[1];
+if ((topic == (("$" + topic[2..length(topic) - 5]) + "utils")) && (valid(#0.(w = 
+strsub(topic[2..length(topic)], "-", "_"))) && (uhelp = #0.(w):description())))
+    return {tostr("General information on $", w, ":"), "----", @uhelp};
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+dump_topic:
+<pre>
+if ((E_PROPNF != (text = pass(@args))) || ((args[1][1] != "$") || ((!((uprop = args[1][2..length(args[1])]) 
+in properties(#0))) || (typeof(uobj = #0.(uprop)) != OBJ))))
+    return text;
+else
+    udesc = uobj.description;
+    return {tostr(";;$", uprop, ".description = $command_utils:read_lines()"), @$command_utils:dump_lines((typeof(udesc) 
+== LIST) ? udesc | {udesc})};
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $login
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $container
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $mail_agent
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp MR-subscribing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp MR-naming
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp MR-access
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $mail_recipient
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp receiving-mail
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail-format
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail-resolve
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sending-mail
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail-system
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $player_db
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp core-index
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp object-matching
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $no_one
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $exit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $room
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $generic_db
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $generic_editor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $generic_help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $generic_options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp MR-sequences
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp MR-reading
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp MR-writing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp MR-searching
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $housekeeper
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $recycler
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $error
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp $biglist
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

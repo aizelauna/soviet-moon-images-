@@ -1,0 +1,84 @@
+<HTML>
+<HEAD>
+<TITLE>Empty Lot</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Empty Lot (#926)</H3>
+(an instance of <A HREF="HTM_001998.htm">Generic Performance Room</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspOut here is an empty lot. A building stood here once, not too long ago in ages past. Maybe burned, maybe pulled down, broken, scattered like dry, dead leaves. Now only the blank brick faces of adjacent blocks or buildings frame the space.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA FREE OJ T-shirt catches fire, blazes briefly, and is gone.
+<BR>
+<BR>
+You see <A HREF="HTM_002162.htm">Samhain Fire</A> and <A HREF="HTM_001991.htm">a metal crate</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp On the wall of the building to the west is a door.
+[ theater ] <A HREF="HTM_000823.htm">Backstage</A>.
+You pull the door open and enter darkness to smell sawdust and satin.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ street ] <A HREF="HTM_000956.htm">Little St.</A>.
+You round the fence and come out into
+<BR>
+<BR>
+This place has a certain ambiance...
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIn the distance you hear someone moan a few bars...the Hymn to the Moon.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAlmost sounds far away, as if you could hear tides lapping the river.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp(To be born is to pass and to change.)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspHigh in the sky speed clouds across. A far-off howl raises hairs on your skin.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSounds echo against the brick buildings surrounding.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspFar off some shrill shrieking pierces the air, subsiding to a moan...
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou think of the savagery of Artemis upon Actaeon. The huntress and the stag.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou wonder if you are perceiving what others do.
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+description:
+<pre>
+desc = pass(@args);
+if (#2162 in this.contents)
+    if (#2162.name[1..12] == "Samhain Fire")
+        if (length(#2162.name) > 12)
+            desc = {desc, this.firelit};
+        else
+            desc = {desc, this.fireout};
+        endif
+    endif
+endif
+return this:weather_daytime(desc);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp fireout
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp firelit
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

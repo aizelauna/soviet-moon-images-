@@ -1,0 +1,1213 @@
+<HTML>
+<HEAD>
+<TITLE>New-Prog-Log</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> New-Prog-Log (#31)</H3>
+(an instance of <A HREF="HTM_000046.htm">Generic Mail Recipient</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspRecord of who's been made a @programmer.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000047.htm">Mail Distribution Center</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    pass();
+    this:rm_message_seq({1, 1 + this:length_all_msgs()});
+    this:expunge_rmm();
+    this.mail_forward = {player, this};
+    this.mail_notify = {player};
+    for p in ({"moderator_forward", "writers", "readers", "expire_period", "last_used_time"})
+        this.(p) = $mail_recipient.(p);
+    endfor
+    this.moderated = 1;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+receive_message:
+<pre>
+if (!this:is_writable_by(caller_perms()))
+    return E_PERM;
+else
+    if (msgs = this.messages)
+        new = msgs[length(msgs)][1] + 1;
+    else
+        new = 1;
+    endif
+    if (rmsgs = this.messages_going)
+        lbrm = rmsgs[length(rmsgs)][2];
+        new = max(new, lbrm[length(lbrm)][1] + 1);
+    endif
+    m = args[1];
+    if (index(m[4], "@programmer ") == 1)
+        m = {m[1], toobj(args[2]), o = toobj(m[4][index(m[4], "(") + 1..index(m[4], 
+")") - 1]), o.name};
+    endif
+    this.messages = {@msgs, {new, m}};
+    this.last_msg_date = m[1];
+    this.last_used_time = time();
+    return new;
+endif
+.
+
+</pre>
+<BR>
+display_seq_headers display_seq_full:
+<pre>
+":display_seq_headers(msg_seq[,cur])";
+":display_seq_full(msg_seq[,cur]) => {cur}";
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+endif
+cur = {@args, 0}[2];
+read_date = {@args, $maxint, $maxint}[3];
+last = ldate = 0;
+player:tell("       WHEN           WHO                           BY");
+for x in (msgs = this:messages_in_seq(args[1]))
+    msgnum = $string_utils:right(last = x[1], 4, (cur == x[1]) ? ">" | " ");
+    ldate = x[2][1];
+    if (typeof(x[2][2]) != OBJ)
+        hdr = this:msg_summary_line(@x[2]);
+    else
+        hdr = tostr(ctime(ldate)[5..16], "   ", $string_utils:left(tostr(x[2][4], 
+" (", x[2][3], ")"), 30), valid(w = x[2][2]) ? w.name | "??", " (", x[2][2], ")");
+    endif
+    player:tell(msgnum, (ldate > read_date) ? ":+ " | ":  ", hdr);
+    $command_utils:suspend_if_needed(0);
+endfor
+if (verb == "display_seq_full")
+    return {last, ldate};
+else
+    player:tell("----+");
+endif
+.
+
+</pre>
+<BR>
+from_msg_seq:
+<pre>
+":from_msg_seq(object or list[,mask])";
+" => msg_seq of messages from any of these senders";
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+endif
+if (typeof(plist = args[1]) != LIST)
+    plist = {plist};
+endif
+i = 1;
+fseq = {};
+mask = {@args, {1}}[2];
+for msg in (this.messages)
+    if ((!mask) || (i < mask[1]))
+    elseif ((length(mask) < 2) || (i < mask[2]))
+        if (msg[2][2] in plist)
+            fseq = $seq_utils:add(fseq, i, i);
+        endif
+    else
+        mask = mask[3..length(mask)];
+    endif
+    i = i + 1;
+    $command_utils:suspend_if_needed(0);
+endfor
+return fseq || ("%f %<has> no messages from " + $string_utils:english_list($list_utils:map_arg(2, 
+$string_utils, "pronoun_sub", "%n (%#)", plist), "no one", " or "));
+.
+
+</pre>
+<BR>
+to_msg_seq:
+<pre>
+":to_msg_seq(object or list[,mask]) => msg_seq of messages to those people";
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+endif
+if (typeof(plist = args[1]) != LIST)
+    plist = {plist};
+endif
+i = 1;
+fseq = {};
+mask = {@args, {1}}[2];
+for msg in (this.messages)
+    if ((!mask) || (i < mask[1]))
+    elseif ((length(mask) < 2) || (i < mask[2]))
+        if (msg[2][3] in plist)
+            fseq = $seq_utils:add(fseq, i, i);
+        endif
+    else
+        mask = mask[3..length(mask)];
+    endif
+    i = i + 1;
+    $command_utils:suspend_if_needed(0);
+endfor
+return fseq || ("%f %<has> no messages about @programmer'ing " + $string_utils:english_list(plist, 
+"no one", " or "));
+.
+
+</pre>
+<BR>
+%to_msg_seq subject_msg_seq:
+<pre>
+":%to_msg_seq/subject_msg_seq(string or list of strings[,mask])";
+" => msg_seq of messages containing one of strings in the to line";
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+endif
+if (typeof(nlist = args[1]) != LIST)
+    nlist = {nlist};
+endif
+i = 1;
+fseq = {};
+mask = {@args, {1}}[2];
+for msg in (this.messages)
+    if ((!mask) || (i < mask[1]))
+    elseif ((length(mask) < 2) || (i < mask[2]))
+        if (msg[2][4] in nlist)
+            fseq = $seq_utils:add(fseq, i, i);
+        endif
+    else
+        mask = mask[3..length(mask)];
+    endif
+    i = i + 1;
+    $command_utils:suspend_if_needed(0);
+endfor
+return fseq || ("%f %<has> no messages about @programmer'ing " + $string_utils:english_list(nlist, 
+"no one", " or "));
+.
+
+</pre>
+<BR>
+%from_msg_seq:
+<pre>
+return this.name + " doesn't understand %%from:";
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+<BR>
+MAIL MESSAGES:
+<BR>
+<BR>
+<BR>
+Date: 1994 Jan 21, 07:29:49 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp N
+<BR>
+Subj: Patroclus
+<BR>
+<BR>
+Date: 1994 Jan 21, 07:29:59 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp O
+<BR>
+Subj: Marlowe
+<BR>
+<BR>
+Date: 1994 Jan 23, 05:23:48 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp Y
+<BR>
+Subj: Vampy
+<BR>
+<BR>
+Date: 1994 Jan 23, 05:24:02 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp _
+<BR>
+Subj: legba
+<BR>
+<BR>
+Date: 1994 Jan 23, 05:50:13 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp `
+<BR>
+Subj: Dred
+<BR>
+<BR>
+Date: 1994 Jan 24, 09:52:05 a.m. PST
+<BR>
+From: _
+<BR>
+To:&nbsp&nbsp j
+<BR>
+Subj: horse
+<BR>
+<BR>
+Date: 1994 Jan 24, 12:19:20 p.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp d
+<BR>
+Subj: Dred
+<BR>
+<BR>
+Date: 1994 Jan 24, 03:02:36 p.m. PST
+<BR>
+From: _
+<BR>
+To:&nbsp&nbsp t
+<BR>
+Subj: Bakunin
+<BR>
+<BR>
+Date: 1994 Jan 26, 02:00:27 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp ñ
+<BR>
+Subj: Calkins
+<BR>
+<BR>
+Date: 1994 Jan 27, 12:49:14 a.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp û
+<BR>
+Subj: Tak
+<BR>
+<BR>
+Date: 1994 Jan 27, 01:55:52 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp ≤
+<BR>
+Subj: Rat_Korga
+<BR>
+<BR>
+Date: 1994 Jan 31, 09:59:59 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp ◊
+<BR>
+Subj: Chay
+<BR>
+<BR>
+Date: 1994 Feb  7, 11:53:54 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp %
+<BR>
+Subj: Moose
+<BR>
+<BR>
+Date: 1994 Feb  8, 09:34:25 a.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp 
+<BR>
+Subj: Amber-Jessica
+<BR>
+<BR>
+Date: 1994 Feb 10, 02:56:59 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp (
+<BR>
+Subj: Klaatu
+<BR>
+<BR>
+Date: 1994 Feb 11, 02:20:13 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp `
+<BR>
+Subj: Fig
+<BR>
+<BR>
+Date: 1994 Feb 13, 05:50:52 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp }
+<BR>
+Subj: Gru
+<BR>
+<BR>
+Date: 1994 Feb 13, 06:33:05 p.m. PST
+<BR>
+From: t
+<BR>
+To:&nbsp&nbsp ’
+<BR>
+Subj: Deleuze
+<BR>
+<BR>
+Date: 1994 Feb 15, 03:00:31 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp g
+<BR>
+Subj: Zon
+<BR>
+<BR>
+Date: 1994 Feb 17, 01:07:48 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp -
+<BR>
+Subj: cinnamon
+<BR>
+<BR>
+Date: 1994 Feb 18, 06:24:17 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp Ω
+<BR>
+Subj: Tarquin
+<BR>
+<BR>
+Date: 1994 Feb 19, 06:46:29 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp ¿
+<BR>
+Subj: Carrot
+<BR>
+<BR>
+Date: 1994 Feb 20, 07:14:27 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp  
+<BR>
+Subj: Jafaar
+<BR>
+<BR>
+Date: 1994 Feb 21, 01:42:47 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ≠
+<BR>
+Subj: Catwoman
+<BR>
+<BR>
+Date: 1994 Feb 22, 12:23:02 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp œ
+<BR>
+Subj: Malquist
+<BR>
+<BR>
+Date: 1994 Feb 22, 06:16:44 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp v
+<BR>
+Subj: Vampy
+<BR>
+<BR>
+Date: 1994 Feb 22, 09:49:47 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp Ê
+<BR>
+Subj: Tristan_Tzara
+<BR>
+<BR>
+Date: 1994 Feb 23, 09:48:01 a.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp Ú
+<BR>
+Subj: Yib
+<BR>
+<BR>
+Date: 1994 Feb 23, 01:42:25 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp æ
+<BR>
+Subj: Salome
+<BR>
+<BR>
+Date: 1994 Feb 23, 06:09:50 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp ˝
+<BR>
+Subj: Ox
+<BR>
+<BR>
+Date: 1994 Feb 23, 08:45:02 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp 
+<BR>
+Subj: Obvious
+<BR>
+<BR>
+Date: 1994 Feb 24, 08:48:12 a.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp ﬁ
+<BR>
+Subj: coyote
+<BR>
+<BR>
+Date: 1994 Feb 24, 01:54:33 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ˛
+<BR>
+Subj: Saffron
+<BR>
+<BR>
+Date: 1994 Feb 25, 01:46:56 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp Á
+<BR>
+Subj: Loree
+<BR>
+<BR>
+Date: 1994 Feb 27, 06:57:40 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp %
+<BR>
+Subj: Felix
+<BR>
+<BR>
+Date: 1994 Mar  5, 10:30:29 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp 
+<BR>
+Subj: Sick
+<BR>
+<BR>
+Date: 1994 Mar  5, 10:39:20 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp 
+<BR>
+Subj: Eclipse
+<BR>
+<BR>
+Date: 1994 Mar  6, 03:27:26 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp I
+<BR>
+Subj: Karl
+<BR>
+<BR>
+Date: 1994 Mar  7, 08:31:40 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp ∆
+<BR>
+Subj: Hilshire
+<BR>
+<BR>
+Date: 1994 Mar 16, 02:12:39 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp 
+
+<BR>
+Subj: Doug
+<BR>
+<BR>
+Date: 1994 Mar 18, 04:07:47 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp 
+<BR>
+Subj: Faber
+<BR>
+<BR>
+Date: 1994 Mar 24, 05:29:53 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp &
+<BR>
+Subj: Jander
+<BR>
+<BR>
+Date: 1994 Mar 24, 05:50:44 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp t
+<BR>
+Subj: Lumper
+<BR>
+<BR>
+Date: 1994 Mar 28, 07:23:21 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp 
+<BR>
+Subj: Gannef
+<BR>
+<BR>
+Date: 1994 Mar 31, 08:26:13 p.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp +
+<BR>
+Subj: Spatula
+<BR>
+<BR>
+Date: 1994 Mar 31, 10:04:48 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ,
+<BR>
+Subj: Marcus
+<BR>
+<BR>
+Date: 1994 Apr 17, 07:51:50 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp k
+<BR>
+Subj: Rebis
+<BR>
+<BR>
+Date: 1994 Apr 22, 09:57:54 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp â
+<BR>
+Subj: polyhymnia
+<BR>
+<BR>
+Date: 1994 Apr 22, 09:58:03 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ã
+<BR>
+Subj: melusina
+<BR>
+<BR>
+Date: 1994 Apr 29, 07:49:01 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ˝
+<BR>
+Subj: Boudicea
+<BR>
+<BR>
+Date: 1994 May  2, 09:38:09 a.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp Û
+<BR>
+Subj: Ibn_Khaldun
+<BR>
+<BR>
+Date: 1994 May  2, 06:24:32 p.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp w
+<BR>
+Subj: erst
+<BR>
+<BR>
+Date: 1994 May 12, 01:45:58 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ƒ
+<BR>
+Subj: Sander
+<BR>
+<BR>
+Date: 1994 May 25, 02:42:06 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp °
+<BR>
+Subj: Michele
+<BR>
+<BR>
+Date: 1994 Jun  8, 09:07:48 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp 8
+<BR>
+Subj: Random
+<BR>
+<BR>
+Date: 1994 Jun 16, 08:29:07 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ’
+<BR>
+Subj: quixitachl
+<BR>
+<BR>
+Date: 1994 Jun 19, 06:04:06 p.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp s
+<BR>
+Subj: caitlin
+<BR>
+<BR>
+Date: 1994 Jul  3, 08:23:24 a.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp 
+<BR>
+Subj: Drummer
+<BR>
+<BR>
+Date: 1994 Jul  3, 08:23:40 a.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp 
+<BR>
+Subj: rocker
+<BR>
+<BR>
+Date: 1994 Jul 17, 07:25:27 a.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp N
+<BR>
+Subj: Johnathon
+<BR>
+<BR>
+Date: 1994 Jul 17, 04:41:00 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp 
+<BR>
+Subj: Nausea
+<BR>
+<BR>
+Date: 1994 Jul 26, 09:07:52 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp x
+<BR>
+Subj: Palace
+<BR>
+<BR>
+Date: 1994 Aug 16, 01:25:26 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ©
+<BR>
+Subj: NetBlazer
+<BR>
+<BR>
+Date: 1994 Aug 25, 07:49:30 a.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ¡
+<BR>
+Subj: Gilmore
+<BR>
+<BR>
+Date: 1994 Aug 25, 09:49:44 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ±
+<BR>
+Subj: Trismegistos
+<BR>
+<BR>
+Date: 1994 Aug 28, 12:50:55 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp ¥
+<BR>
+Subj: Gaijin
+<BR>
+<BR>
+Date: 1994 Sep  9, 09:47:37 p.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp s
+<BR>
+Subj: Soma
+<BR>
+<BR>
+Date: 1994 Sep 10, 06:34:14 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp 
+<BR>
+Subj: Kalessin
+<BR>
+<BR>
+Date: 1994 Sep 21, 06:39:08 p.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp ó
+<BR>
+Subj: Rob
+<BR>
+<BR>
+Date: 1994 Sep 24, 10:59:14 a.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp 
+<BR>
+Subj: Redlance
+<BR>
+<BR>
+Date: 1994 Oct  3, 02:01:33 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp 
+<BR>
+Subj: think
+<BR>
+<BR>
+Date: 1994 Oct  3, 02:59:48 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp R
+<BR>
+Subj: Vaidehi-Amitabha
+<BR>
+<BR>
+Date: 1994 Oct  4, 07:46:24 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp "
+<BR>
+Subj: !coil
+<BR>
+<BR>
+Date: 1994 Oct 24, 12:11:00 p.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp ‰
+<BR>
+Subj: Linnea
+<BR>
+<BR>
+Date: 1994 Oct 25, 09:29:44 a.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp 	
+<BR>
+Subj: Ben
+<BR>
+<BR>
+Date: 1994 Oct 25, 10:38:24 a.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp †
+<BR>
+Subj: Ipsol
+<BR>
+<BR>
+Date: 1994 Nov  9, 02:56:18 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp Å
+<BR>
+Subj: Avon
+<BR>
+<BR>
+Date: 1994 Nov 13, 06:27:45 p.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp ‡
+<BR>
+Subj: aghari
+<BR>
+<BR>
+Date: 1994 Nov 18, 09:27:28 p.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp Û
+<BR>
+Subj: Casanova
+<BR>
+<BR>
+Date: 1994 Nov 21, 06:46:59 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp d
+<BR>
+Subj: Karina
+<BR>
+<BR>
+Date: 1994 Nov 22, 10:17:46 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp ˘
+<BR>
+Subj: Losira
+<BR>
+<BR>
+Date: 1994 Nov 27, 07:03:36 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp 	
+<BR>
+Subj: lynn
+<BR>
+<BR>
+Date: 1994 Nov 28, 10:07:41 a.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp 	
+<BR>
+Subj: Defarge
+<BR>
+<BR>
+Date: 1994 Nov 30, 12:16:50 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp 
+	
+<BR>
+Subj: Indiana-Jones
+<BR>
+<BR>
+Date: 1994 Dec  2, 09:39:54 a.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ·
+<BR>
+Subj: Jo
+<BR>
+<BR>
+Date: 1994 Dec  2, 06:00:55 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp a
+<BR>
+Subj: Arc
+<BR>
+<BR>
+Date: 1994 Dec 21, 08:03:51 p.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp 
+<BR>
+Subj: Sick
+<BR>
+<BR>
+Date: 1994 Dec 30, 08:40:13 a.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp å
+<BR>
+Subj: Mosaica
+<BR>
+<BR>
+Date: 1995 Jan  9, 09:14:54 a.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp É
+<BR>
+Subj: Steelgrave
+<BR>
+<BR>
+Date: 1995 Jan 10, 10:54:38 a.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp H	
+<BR>
+Subj: Booga
+<BR>
+<BR>
+Date: 1995 Jan 10, 08:37:18 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp D	
+<BR>
+Subj: dried
+<BR>
+<BR>
+Date: 1995 Jan 16, 06:08:22 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp J	
+<BR>
+Subj: RandomNobody
+<BR>
+<BR>
+Date: 1995 Jan 29, 01:29:27 a.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp 8	
+<BR>
+Subj: Mack-the-Knife
+<BR>
+<BR>
+Date: 1995 Jan 29, 12:03:46 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ¯
+<BR>
+Subj: Cass
+<BR>
+<BR>
+Date: 1995 Feb 10, 04:41:43 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ]	
+<BR>
+Subj: tuc
+<BR>
+<BR>
+Date: 1995 Feb 27, 12:44:19 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp â	
+<BR>
+Subj: Stetson
+<BR>
+<BR>
+Date: 1995 Mar  9, 03:20:33 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp l	
+<BR>
+Subj: Babeuf
+<BR>
+<BR>
+Date: 1995 Mar 22, 10:25:31 a.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ≤	
+<BR>
+Subj: tend
+<BR>
+<BR>
+Date: 1995 Apr 14, 02:52:44 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp À
+<BR>
+Subj: Rhys
+<BR>
+<BR>
+Date: 1995 May  8, 01:59:41 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp 
+
+<BR>
+Subj: Prism
+<BR>
+<BR>
+Date: 1995 May 16, 08:33:15 a.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp 
+
+<BR>
+Subj: Brit
+<BR>
+<BR>
+Date: 1995 May 17, 07:37:17 p.m. PST
+<BR>
+From: `
+<BR>
+To:&nbsp&nbsp !
+
+<BR>
+Subj: SunRay
+<BR>
+<BR>
+Date: 1995 May 26, 12:11:20 a.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp  
+
+<BR>
+Subj: Cleo
+<BR>
+<BR>
+Date: 1995 May 27, 01:01:58 a.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp Õ	
+<BR>
+Subj: Caesar
+<BR>
+<BR>
+Date: 1995 May 27, 02:35:01 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp Œ	
+<BR>
+Subj: Sakana
+<BR>
+<BR>
+Date: 1995 Jun 18, 03:48:01 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp J
+
+<BR>
+Subj: Amazon_Bitch
+<BR>
+<BR>
+Date: 1995 Jun 18, 06:34:44 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp Q
+
+<BR>
+Subj: Bedai
+<BR>
+<BR>
+Date: 1995 Jun 19, 08:14:14 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp b
+
+<BR>
+Subj: Ledtrad
+<BR>
+<BR>
+Date: 1995 Jun 21, 03:48:18 p.m. PST
+<BR>
+From: 
+<BR>
+To:&nbsp&nbsp R
+
+<BR>
+Subj: Andovar
+<BR>
+<BR>
+Date: 1995 Jun 28, 03:57:18 p.m. PST
+<BR>
+From: j
+<BR>
+To:&nbsp&nbsp ¯	
+<BR>
+Subj: Cyrus
+<BR>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

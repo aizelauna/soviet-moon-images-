@@ -1,0 +1,98 @@
+<HTML>
+<HEAD>
+<TITLE>Dead_Can_MOO</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Dead_Can_MOO (#2082)</H3>
+(an instance of <A HREF="HTM_001986.htm">Generic PC with Integrated Contents</A> made by <A HREF="HTM_002082.htm">Dead_Can_MOO</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA tall, gaunt person with long black hair who is wearing a long, black coat.  You can't really discern what gender it is.
+<BR>
+<BR>
+Dead_Can_MOO is carrying <A HREF="HTM_002386.htm">chamber</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002189.htm">Trans-Yuggothian Expressway</A>.
+<BR>
+<BR>
+<BR>
+Dead_Can_MOO owns <A HREF="HTM_002082.htm">Dead_Can_MOO</A> <A HREF="HTM_002189.htm">Trans-Yuggothian Expressway</A> <A HREF="HTM_002386.htm">chamber</A> <A HREF="HTM_002385.htm">Caged</A> <A HREF="HTM_002392.htm">Hugo</A> <A HREF="HTM_002469.htm">test</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+do_tree:
+<pre>
+root = args[1];
+indent = args[2];
+search_text = args[3];
+kids = children(root);
+if ((length(search_text) > 0) ? index(kid.title, search_text) | 1)
+    num_str = ($string_utils:space(indent) + tostr(root)) + ": ";
+    name_str = ((root.name + " (") + tostr(length(kids))) + ")";
+    name_lines = player:linesplit(name_str, 75 - length(num_str));
+    player:tell(num_str, name_lines[1]);
+    for line in (name_lines[2..length(name_lines)])
+        player:tell($string_utils:space(num_str), line);
+    endfor
+endif
+indent = indent + "  ";
+for kid in (kids)
+    $command_utils:suspend_if_needed(1);
+    if (kid.f || children(kid))
+        this:do_tree(kid, indent, search_text);
+    endif
+endfor
+.
+
+</pre>
+<BR>
+@tree:
+<pre>
+"Usage:  @tree <object> [search_string]";
+"";
+"Shows an object hierarchy beginning with the given object.  All fertile ";
+"children and children with children are included in the tree.  The output";
+root = player:my_match_object(dobjstr);
+search_text = $string_utils:from_list(args[2..length(args)]);
+if (valid(root))
+    player:tell("Fertile kids of ", root.name, ":  (this may take a while)");
+    this:do_tree(root, "", search_text);
+    player:tell("----end of @tree listing for ", root.name, ".");
+endif
+.
+
+</pre>
+<BR>
+sa em emm:
+<pre>
+"sa is say";
+"em is emote";
+"emm is emote with no space";
+if (verb == "emm")
+    if (args)
+        args[1] = ":" + args[1];
+    else
+        args = {":"};
+    endif
+    argstr = ":" + argstr;
+    verb = "em";
+endif
+player.location:({"say", "emote"}[verb in {"sa", "em"}])(@args);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

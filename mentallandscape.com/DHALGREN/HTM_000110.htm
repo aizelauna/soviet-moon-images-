@@ -1,0 +1,239 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Post-Apocalypse Room</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Post-Apocalypse Room (#110)</H3>
+(an instance of <A HREF="HTM_000176.htm">Generic Ambient Noise Room</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIt is raining this day in Bellona.
+<BR>
+<BR>
+[Citation: ]
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Post-Apocalypse Room Class (PARC) allows room descriptions and details 
+to depend on the time of day and the weather.  It has eight settable messages:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp day_msg       - substituted for day in the room description
+&nbsp&nbsp&nbsp&nbsp&nbsp                 during the hours of 9am to 6pm.
+&nbsp&nbsp&nbsp&nbsp&nbsp evening_msg   - substituted for day from 6pm to 9pm.
+&nbsp&nbsp&nbsp&nbsp&nbsp night_msg     - substituted for day from 9pm to 6am.
+&nbsp&nbsp&nbsp&nbsp&nbsp morning_msg   - substituted for day from 6am to 9am.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp cool_msg      - substituted for raining in the room description
+&nbsp&nbsp&nbsp&nbsp&nbsp                 when the weather is cool.
+&nbsp&nbsp&nbsp&nbsp&nbsp warm_msg      - substituted for raining when it is warm.
+&nbsp&nbsp&nbsp&nbsp&nbsp raining_msg   - substituted for raining when it is warm and raining.
+&nbsp&nbsp&nbsp&nbsp&nbsp snowing_msg   - substituted for raining when it is cold and snowing.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspraining is substituted first, then day.  So the weather messages can contain day.
+&nbsp&nbsp&nbsp&nbsp&nbspTime of day messages are useful indoors and out.  Weather messages are most often 
+used in outdoor rooms, but an indoor room's description could contain a sentence 
+like:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   Through an open window, day raining.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspWhich, given the right message definitions, could result in:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   Through an open window, the night-time sky is silhouetted by a snow-covered fire 
+escape.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspPARC also supports basic details that can be looked at:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp @det*ail <name> is <string>   - add or replace a detail description
+&nbsp&nbsp&nbsp&nbsp&nbsp @rmd*etail <name>             - remove a detail
+&nbsp&nbsp&nbsp&nbsp&nbsp @details                      - show all the detail names
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNote that detail strings can contain raining and day.  It is often wise to keep the 
+associated time and weather messages simple (like their default values) so they can 
+be useful in a variety of detail strings as well as in the room description.
+&nbsp&nbsp&nbsp&nbsp&nbspPARC is a child of the Generic Ambient Noise Room, so see also: help #176
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@details:
+<pre>
+if (player != this.owner)
+    player:tell(E_PERM);
+    return;
+endif
+player:tell("Details here are: ", $string_utils:print(this.detail_names));
+.
+
+</pre>
+<BR>
+@det*ail:
+<pre>
+if (player != this.owner)
+    player:tell(E_PERM);
+    return;
+endif
+name = dobjstr;
+desc = iobjstr;
+if (i = name in this.detail_names)
+    this.detail_descriptions = listset(this.detail_descriptions, desc, i);
+    player:tell("Detail ", name, " replaced.");
+else
+    this.detail_names = {@this.detail_names, name};
+    this.detail_descriptions = {@this.detail_descriptions, desc};
+    player:tell("Detail ", name, " added.");
+endif
+.
+
+</pre>
+<BR>
+@rmd*etail:
+<pre>
+if (player != this.owner)
+    player:tell(E_PERM);
+    return;
+endif
+if (i = dobjstr in this.detail_names)
+    this.detail_names = listdelete(this.detail_names, i);
+    this.detail_descriptions = listdelete(this.detail_descriptions, i);
+    player:tell("Detail ", dobjstr, " deleted.");
+else
+    player:tell("Detail ", dobjstr, " not found.");
+endif
+.
+
+</pre>
+<BR>
+l*ook:
+<pre>
+if ((length(args) != 1) || valid($string_utils:match_object(dobjstr, this)))
+    pass(@args);
+elseif (i = $string_utils:match_stringlist(dobjstr, this.detail_names))
+    player:tell(this:weather_daytime(this.detail_descriptions[i]));
+else
+    player:tell("I see no \"", dobjstr, "\" here.");
+endif
+.
+
+</pre>
+<BR>
+weather_daytime:
+<pre>
+hour = tonum(ctime(clock = time())[12..13]);
+if ((hour < 6) || (hour > 20))
+    daytime = this.night_msg;
+elseif (hour < 9)
+    daytime = this.morning_msg;
+elseif (hour < 18)
+    daytime = this.day_msg;
+else
+    daytime = this.evening_msg;
+endif
+noise = abs((((clock / 3600) / 8) * 1103515245) + 12345) % 3;
+climate = abs(((clock / 3600) / 24) + noise) % 11;
+if (climate == 2)
+    weather = this.raining_msg;
+elseif (climate < 6)
+    weather = this.warm_msg;
+elseif (climate == 8)
+    weather = this.snowing_msg;
+else
+    weather = this.cool_msg;
+endif
+if (typeof(args[1]) == STR)
+    s = strsub(args[1], "%weather", weather);
+    return strsub(s, "%daytime", daytime);
+elseif (typeof(args[1]) == LIST)
+    l = {};
+    for s in (args[1])
+        s = strsub(s, "%weather", weather);
+        s = strsub(s, "%daytime", daytime);
+        l = {@l, s};
+    endfor
+    return l;
+else
+    return args[1];
+endif
+.
+
+</pre>
+<BR>
+description:
+<pre>
+return this:weather_daytime(pass(@args));
+.
+
+</pre>
+<BR>
+break smash:
+<pre>
+dobj = $string_utils:match_object(dobjstr, player.location);
+if (valid(dobj) && $object_utils:has_callable_verb(dobj, "break_self"))
+    dobj:break_self();
+else
+    player:tell("Either ", dobjstr, " is not here, or it is unbreakable.");
+endif
+.
+
+</pre>
+<BR>
+set_detail_descriptions set_detail_names:
+<pre>
+"Allows note editors to set these props. Doesn't check for proper value";
+if ((!$perm_utils:controls(caller_perms(), this)) && (caller != this))
+    return E_PERM;
+elseif (args)
+    which = verb[5..length(verb)];
+    return this.(which) = args[1];
+else
+    return E_INVARG;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp day_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp night_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp morning_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp evening_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp warm_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp raining_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cool_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp snowing_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp detail_names
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp detail_descriptions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp citation_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000080.htm">Bridge</A> <A HREF="HTM_000090.htm">Nutmeg Orchard</A> <A HREF="HTM_000132.htm">The River</A> <A HREF="HTM_000134.htm">Bridge Pier</A> <A HREF="HTM_000164.htm">Jackson & Broadway</A> <A HREF="HTM_000167.htm">Brisbain & Broadway</A> <A HREF="HTM_000170.htm">Drive Way</A> <A HREF="HTM_000173.htm">Entrance Hall</A> <A HREF="HTM_000180.htm">Clearing In The Park</A> <A HREF="HTM_000183.htm">Lobby Of Office Building</A> <A HREF="HTM_000196.htm">Generic Urban Streen Scene</A> <A HREF="HTM_000089.htm">Roof Top</A> <A HREF="HTM_000222.htm">Room 222</A> <A HREF="HTM_000223.htm">Garden</A> <A HREF="HTM_000229.htm">Stone Building</A> <A HREF="HTM_000232.htm">Park Public Restrooms</A> <A HREF="HTM_000235.htm">Dining Room</A> <A HREF="HTM_000262.htm">Generic Secured Post-Apocalypse Room</A> <A HREF="HTM_000246.htm">The Foyer of The Chantry</A> <A HREF="HTM_000249.htm">The Library</A> <A HREF="HTM_000252.htm">The Parlour</A> <A HREF="HTM_000265.htm">Tunnel</A> <A HREF="HTM_000305.htm">Concrete Lot</A> <A HREF="HTM_000333.htm">Room 333</A> <A HREF="HTM_000308.htm">The Entrance Hall</A> <A HREF="HTM_000335.htm">The Living Room</A> <A HREF="HTM_000343.htm">Cave Entrance</A> <A HREF="HTM_000344.htm">Crypt</A> <A HREF="HTM_000338.htm">Damp Tunnel</A> <A HREF="HTM_000349.htm">Crystal Cave</A> <A HREF="HTM_000358.htm">Underground Pool</A> <A HREF="HTM_000362.htm">Underground Maelstrom</A> <A HREF="HTM_000366.htm">Stalactite Chamber</A> <A HREF="HTM_000382.htm">Chamber of Petroglyphs</A> <A HREF="HTM_000390.htm">Tourist Center</A> <A HREF="HTM_000328.htm">Landing</A> <A HREF="HTM_000139.htm">Grocery Store</A> <A HREF="HTM_000128.htm">Outside the Grocery Store</A> <A HREF="HTM_000121.htm">The Loft</A> <A HREF="HTM_000321.htm">Always Already</A> <A HREF="HTM_000444.htm">Room 444</A> <A HREF="HTM_000443.htm">Bellona Zoo</A> <A HREF="HTM_000427.htm">Parking Lot</A> <A HREF="HTM_000457.htm">truck</A> <A HREF="HTM_000489.htm">Broken Bottle Cafe</A> <A HREF="HTM_000468.htm">Z</A> <A HREF="HTM_000517.htm">Museum</A> <A HREF="HTM_000147.htm">Outside the D.E.W Drop Inn</A> <A HREF="HTM_000113.htm">The Crossroads</A> <A HREF="HTM_000563.htm">Generic Room with Stacking</A> <A HREF="HTM_000603.htm">Interzone University</A> <A HREF="HTM_000606.htm">Interzone: Port Of Saints</A> <A HREF="HTM_000609.htm">Bellona: Bus Depot</A> <A HREF="HTM_000421.htm">Ape Island</A> <A HREF="HTM_000619.htm">War on Drugs</A> <A HREF="HTM_000621.htm">Television Evangelist</A> <A HREF="HTM_000630.htm">I. The Magus</A> <A HREF="HTM_000632.htm">II. The Door Of The Occult Sanctuary</A> <A HREF="HTM_000634.htm">III. Isis-Urania</A> <A HREF="HTM_000636.htm">IV. The Cubic Stone</A> <A HREF="HTM_000638.htm">V. The Master Of The Aracana</A> <A HREF="HTM_000640.htm">VI. The Two Roads</A> <A HREF="HTM_000642.htm">VII. The Chariot of Osiris</A> <A HREF="HTM_000644.htm">VIII. Themis</A> <A HREF="HTM_000646.htm">IX. The Veiled Lamp</A> <A HREF="HTM_000648.htm">X. The Sphinx</A> <A HREF="HTM_000650.htm">XI. The Tamed Lion</A> <A HREF="HTM_000652.htm">XII. The Sacrifice</A> <A HREF="HTM_000654.htm">XIII. The Scythe</A> <A HREF="HTM_000656.htm">XIV. The Solar Spirit</A> <A HREF="HTM_000658.htm">XV. Typhon</A> <A HREF="HTM_000660.htm">XVI. The Lightning-Struck Tower</A> <A HREF="HTM_000662.htm">XVII. The Star Of The Magi</A> <A HREF="HTM_000665.htm">XVIII. Twilight</A> <A HREF="HTM_000667.htm">XIX. The Blazing Light</A> <A HREF="HTM_000669.htm">XX. The Awakening Of The Dead</A> <A HREF="HTM_000671.htm">O. The Crocodile</A> <A HREF="HTM_000673.htm">XXI. The Crown Of The Magi</A> <A HREF="HTM_000422.htm">Interzone Plaza</A> <A HREF="HTM_000495.htm">Gaming Tables</A> <A HREF="HTM_000431.htm">The Rave</A> <A HREF="HTM_000682.htm">Back Alley</A> <A HREF="HTM_000687.htm">Taxi</A> <A HREF="HTM_000247.htm">Hallway</A> <A HREF="HTM_000288.htm">Hallway</A> <A HREF="HTM_000727.htm">Hallway</A> <A HREF="HTM_000730.htm">Hallway</A> <A HREF="HTM_000739.htm">Kitchen</A> <A HREF="HTM_000742.htm">Dining Hall</A> <A HREF="HTM_000753.htm">Veranda</A> <A HREF="HTM_000562.htm">Generic Auditorium</A> <A HREF="HTM_000919.htm">Dying Moon Carnival</A> <A HREF="HTM_001045.htm">crannog</A> <A HREF="HTM_000962.htm">My First Home!</A> <A HREF="HTM_001070.htm">Archean Island</A> <A HREF="HTM_001072.htm">Cambrian Shore</A> <A HREF="HTM_001074.htm">The Late-Permian Event</A> <A HREF="HTM_001076.htm">Late Cretaceous</A> <A HREF="HTM_001211.htm">Brown Cardboard Box</A> <A HREF="HTM_001234.htm">The Roof Garden</A> <A HREF="HTM_001261.htm">Entry</A> <A HREF="HTM_001295.htm">Trash Bin</A> <A HREF="HTM_001364.htm">Johnathon's basement</A> <A HREF="HTM_001365.htm">Johnathon's room</A> <A HREF="HTM_001043.htm">flutterby's whimsy</A> <A HREF="HTM_000853.htm">Quent's Garret</A> <A HREF="HTM_001033.htm">orb</A> <A HREF="HTM_001484.htm">Middle of South Channel</A> <A HREF="HTM_001491.htm">Beside a Large Building</A> <A HREF="HTM_001498.htm">a small barrel</A> <A HREF="HTM_001539.htm">A simple room</A> <A HREF="HTM_001543.htm">Generic Elevator</A> <A HREF="HTM_001574.htm">Dog Solitude</A> <A HREF="HTM_001561.htm">Triskelion Post-Industrial Park</A> <A HREF="HTM_001956.htm">Desolate Shore</A> <A HREF="HTM_001959.htm">here</A> <A HREF="HTM_001961.htm">Sunken Islandia</A> <A HREF="HTM_001517.htm">Information Storage</A> <A HREF="HTM_002119.htm">Battle Zone</A> <A HREF="HTM_002123.htm">Rickety Stairs</A> <A HREF="HTM_002143.htm">Exeunt</A> <A HREF="HTM_002227.htm">Dragonfly's Escuela</A> <A HREF="HTM_000847.htm">Ground Floor Hallway</A> <A HREF="HTM_001996.htm">TrepaNation</A> <A HREF="HTM_002256.htm">Elevator Shaft</A> <A HREF="HTM_002304.htm">Amethyst's Basement</A> <A HREF="HTM_000986.htm">Desolation Row</A> <A HREF="HTM_001376.htm">Backroom</A> <A HREF="HTM_002340.htm">a cardboard box</A> <A HREF="HTM_002467.htm">A Narrow Patch of Green</A> <A HREF="HTM_002460.htm">Chora</A> <A HREF="HTM_001476.htm">Drag-Strip Speedway</A> <A HREF="HTM_002459.htm">Rebellion's Wellspring</A> <A HREF="HTM_002604.htm">Mausoleum</A> <A HREF="HTM_002620.htm">Idle Hands</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

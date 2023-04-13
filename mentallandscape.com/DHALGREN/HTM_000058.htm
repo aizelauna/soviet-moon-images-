@@ -1,0 +1,1441 @@
+<HTML>
+<HEAD>
+<TITLE>generic wizard</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> generic wizard (#58)</H3>
+(an instance of <A HREF="HTM_000099.htm">Useful Utilitarian PC</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a wizard who chooses not to reveal its true appearance.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@chown:
+<pre>
+if ((!player.wizard) || (player != this))
+    player:notify("Sorry.");
+    return;
+endif
+set_task_perms(player);
+args = setremove(args, "to");
+if ((length(args) != 2) || (!args[2]))
+    player:notify(tostr("Usage:  ", verb, " <object-or-property-or-verb> <owner>"));
+    return;
+endif
+what = args[1];
+owner = $string_utils:match_player(args[2]);
+if ($command_utils:player_match_result(owner, args[2])[1])
+elseif (index(what, ".") && (spec = $code_utils:parse_propref(what)))
+    object = this:my_match_object(spec[1]);
+    if (!$command_utils:object_match_failed(object, spec[1]))
+        pname = spec[2];
+        e = $wiz_utils:set_property_owner(object, pname, owner);
+        if (e == E_NONE)
+            player:notify("+c Property owner set.  Did you really want to do that?");
+        else
+            player:notify(tostr(e && "Property owner set."));
+        endif
+    endif
+elseif (spec = $code_utils:parse_verbref(what))
+    object = this:my_match_object(spec[1]);
+    if (!$command_utils:object_match_failed(object, spec[1]))
+        vname = spec[2];
+        info = verb_info(object, vname);
+        if (info == E_VERBNF)
+            player:notify("That object does not define that verb.");
+        elseif (typeof(info) == ERR)
+            player:notify(tostr(info));
+        else
+            result = set_verb_info(object, vname, listset(info, owner, 1));
+            if (typeof(result) == ERR)
+                player:notify(tostr(result));
+            else
+                player:notify("Verb owner set.");
+            endif
+        endif
+    endif
+else
+    object = this:my_match_object(what);
+    if (!$command_utils:object_match_failed(object, what))
+        player:notify(tostr($wiz_utils:set_owner(object, owner) && "Object ownership 
+changed."));
+    endif
+endif
+.
+
+</pre>
+<BR>
+@shout:
+<pre>
+if ((length(args) == 1) && (argstr[1] == "\""))
+    argstr = args[1];
+endif
+for person in (connected_players())
+    if (person != player)
+        person:notify(tostr(player.name, " shouts, \"", argstr, "\""));
+    endif
+endfor
+player:notify(tostr("You shout, \"", argstr, "\""));
+.
+
+</pre>
+<BR>
+@grant @grants* @transfer:
+<pre>
+"@grant <object> to <player>";
+"@grants <object> to <player>   --- same as @grant but may suspend.";
+"@transfer <expression> to <player> -- like 'grant', but evalutes a possible list 
+of objects to transfer, and modifies quota.";
+"Ownership of the object changes as in @chown and :set_owner (i.e., .owner and all 
+c properties change).  In addition all verbs and !c properties owned by the original 
+owner change ownership as well.  Finally, for !c properties, instances on descendant 
+objects change ownership (as in :set_property_owner).";
+if ((!player.wizard) || (player != this))
+    player:notify("Sorry.");
+    return;
+endif
+set_task_perms(player);
+if ((!iobjstr) || (!dobjstr))
+    return player:notify(tostr("Usage:  ", verb, " <object> to <player>"));
+endif
+if ($command_utils:player_match_failed(newowner = $string_utils:match_player(iobjstr), 
+iobjstr))
+    "...newowner is bogus...";
+    return;
+endif
+if (verb == "@transfer")
+    objlist = player:eval_cmd_string(dobjstr, 0);
+    if (!objlist[1])
+        player:notify(tostr("Had trouble reading `", dobjstr, "': "));
+        player:notify_lines(@objlist[2]);
+        return;
+    elseif (typeof(objlist[2]) == OBJ)
+        objlist = objlist[2..2];
+    elseif (typeof(objlist[2]) != LIST)
+        player:notify(tostr("Value of `", dobjstr, "' is not an object or list:  
+", $string_utils:print(objlist[2])));
+        return;
+    else
+        objlist = objlist[2];
+    endif
+elseif ($command_utils:object_match_failed(object = this:my_match_object(dobjstr), 
+dobjstr))
+    "...object is bogus...";
+    return;
+else
+    objlist = {object};
+endif
+if ((verb == "@transfer") && (newowner.ownership_quota < length(objlist)))
+    player:tell("Sorry, ", $string_utils:nn(newowner), " doesn't have enough quota.");
+    return;
+endif
+suspendok = verb != "@grant";
+player:tell("Transfering ", $string_utils:print(objlist), " to ", $string_utils:nn(newowner));
+for object in (objlist)
+    $command_utils:suspend_if_needed(0);
+    same = object.owner == newowner;
+    for vnum in [0..length(verbs(object)) - 1]
+        verb = tostr(vnum);
+        info = verb_info(object, verb);
+        if (!((info[1] != object.owner) && (valid(info[1]) && is_player(info[1]))))
+            same = same && (info[1] == newowner);
+            set_verb_info(object, verb, listset(info, newowner, 1));
+        endif
+    endfor
+    for prop in (properties(object))
+        if (suspendok && ((ticks_left() < 5000) || (seconds_left() < 2)))
+            suspend(0);
+        endif
+        info = property_info(object, prop);
+        if (!(index(info[2], "c") || (((info[1] != object.owner) && valid(info[1])) 
+&& is_player(info[1]))))
+            same = same && (info[1] == newowner);
+            $wiz_utils:set_property_owner(object, prop, newowner, suspendok);
+        endif
+    endfor
+    if (suspendok)
+        suspend(0);
+    endif
+    $wiz_utils:set_owner(object, newowner, suspendok);
+    if (same)
+        player:notify(tostr(newowner.name, " already owns everything ", newowner.ps, 
+" is entitled to on ", object.name, "."));
+    else
+        player:notify(tostr("Ownership changed on ", $string_utils:nn(object), ", 
+verb, properties and descendants' properties."));
+    endif
+endfor
+.
+
+</pre>
+<BR>
+@programmer:
+<pre>
+set_task_perms(player);
+dobj = $string_utils:match_player(dobjstr);
+if (dobj == $nothing)
+    player:notify(tostr("Usage:  ", verb, " <playername>"));
+elseif ($command_utils:player_match_result(dobj, dobjstr)[1])
+elseif (dobj in $wiz_utils.programmer_restricted)
+    return player:notify(tostr("Sorry,", dobj.name, " is not allowed to be a programmer."));
+elseif ((dobj.description == $player.description) && (!$command_utils:yes_or_no($string_utils:pronoun_sub("@Programmer 
+%d despite %[dpp] lack of description?"))))
+    player:notify(tostr("Okay, leaving ", dobj.name, " !programmer."));
+    return;
+elseif (result = $wiz_utils:set_programmer(dobj))
+    player:notify(tostr(dobj.name, " (", dobj, ") is now a programmer.  ", dobj.ppc, 
+" quota is currently ", $quota_utils:get_quota(dobj), "."));
+    player:notify(tostr(dobj.name, " and the other wizards have been notified."));
+    if (msg = this:programmer_victim_msg())
+        dobj:notify(msg);
+    endif
+    if ($object_utils:isa(dobj.location, $room) && (msg = this:programmer_msg()))
+        dobj.location:announce_all_but({dobj}, msg);
+    endif
+elseif (result == E_NONE)
+    player:notify(tostr(dobj.name, " (", dobj, ") is already a programmer..."));
+else
+    player:notify(tostr(result));
+endif
+.
+
+</pre>
+<BR>
+make-core-database:
+<pre>
+if (!player.wizard)
+    player:notify("Nice try, but permission denied.");
+    return;
+elseif (args == {})
+    player:notify(tostr("Continuing with this command will destroy all but the central 
+core of the database.  If you're really sure that you want to do this, type '", verb, 
+" ", tonum(o = create(#1)), "' now."));
+    recycle(o);
+    return;
+elseif (toobj(tonum(args[1])) != max_object())
+    player:notify(tostr("Nice try, but you mistyped the self-destruct password.  
+Type '", verb, "' again to get a new password."));
+    return;
+elseif (verb_info($wiz, verb)[1] != player)
+    player:notify("Sorry, but you must own this verb in order to use it.");
+    return;
+endif
+"----------------------------------------";
+player:notify("Blowing away $local...");
+$local = #-1;
+"----------------------------------------";
+player:notify("Identifying objects to be saved...");
+saved = {#0, player};
+saved_props = {};
+for p in (properties(#0))
+    v = #0.(p);
+    if ((typeof(v) == OBJ) && valid(v))
+        saved = setadd(saved, v);
+        saved_props = {@saved_props, p};
+    endif
+endfor
+for o in (saved)
+    "Also save non-$ objects that are ancestors of $ objects";
+    "but leave out non-$ player classes";
+    if (!$object_utils:isa(o, $player))
+        p = parent(o);
+        while (valid(p))
+            saved = setadd(saved, p);
+            p = parent(p);
+        endwhile
+    endif
+endfor
+$player_class = $player;
+"----------------------------------------";
+player:notify("Killing all queued tasks ...");
+for t in (queued_tasks())
+    kill_task(t[1]);
+endfor
+"----------------------------------------";
+player:notify("Stripping you of any personal verbs and/or properties ...");
+suspend(0);
+for i in [1..length(verbs(player))]
+    delete_verb(player, "0");
+endfor
+for p in (properties(player))
+    delete_property(player, p);
+endfor
+chparent(player, $wiz);
+for p in ($object_utils:all_properties(player))
+    player.(p) = $wiz.(p);
+endfor
+player.name = "Wizard";
+player.aliases = {"Wizard"};
+player.description = "";
+player.key = 0;
+player.ownership_quota = 100;
+player.password = 0;
+$gender_utils:set(player, "neuter");
+"----------------------------------------";
+suspend(0);
+player:notify("Making you or $hacker the owner of every saved object, verb and property 
+...");
+for i in [1..length(saved)]
+    if ($command_utils:running_out_of_time())
+        suspend(0);
+        player:notify(tostr("... finished ", i - 1, " out of ", length(saved), " 
+saved objects ..."));
+    endif
+    o = saved[i];
+    if (valid(o.owner) && o.owner.wizard)
+        o.owner = player;
+    else
+        o.owner = $hacker;
+    endif
+    old_verbs = {};
+    for j in [0..length(verbs(o)) - 1]
+        if ((seconds_left() < 2) || (ticks_left() < 2000))
+            suspend(0);
+            player:notify(tostr("... finished ", i - 1, " out of ", length(saved), 
+" saved objects ..."));
+        endif
+        vname = tostr(j);
+        info = verb_info(o, vname);
+        if (valid(info[1]) && info[1].wizard)
+            info = listset(info, player, 1);
+        else
+            info = listset(info, $hacker, 1);
+        endif
+        set_verb_info(o, vname, info);
+        if (index(info[3], "(old)"))
+            old_verbs = {vname, @old_verbs};
+        endif
+    endfor
+    for vname in (old_verbs)
+        delete_verb(o, vname);
+    endfor
+    for p in ($object_utils:all_properties(o))
+        if ((seconds_left() < 2) || (ticks_left() < 2000))
+            suspend(0);
+            player:notify(tostr("... finished ", i - 1, " out of ", length(saved), 
+" saved objects ..."));
+        endif
+        info = property_info(o, p);
+        if (valid(info[1]) && info[1].wizard)
+            info = listset(info, player, 1);
+        else
+            info = listset(info, $hacker, 1);
+        endif
+        set_property_info(o, p, info);
+    endfor
+endfor
+"----------------------------------------";
+player:notify("Removing all unsaved :recycle and :exitfunc verbs ...");
+for i in [0..tonum(max_object())]
+    o = toobj(i);
+    if (i && ((i % 1000) == 0))
+        player:notify(tostr("... ", o));
+    endif
+    $command_utils:suspend_if_needed(0);
+    if (valid(o) && (!(o in saved)))
+        for v in ({"recycle", "exitfunc"})
+            while ((hv = $object_utils:has_verb(o, v)) && (hv[1] == o))
+                delete_verb(o, v);
+            endwhile
+        endfor
+    endif
+endfor
+"----------------------------------------";
+player:notify("Recycling unsaved objects ...");
+add_property(this, "mcd_pos", 0, {player, "r"});
+suspend(0);
+this:mcd_2(saved, saved_props);
+.
+
+</pre>
+<BR>
+@shutdown:
+<pre>
+if (!player.wizard)
+    player:notify("Sorry.");
+    return;
+elseif ($code_utils:task_valid($shutdown_task))
+    player:notify("Shutdown already in progress.");
+    return;
+endif
+if (s = match(argstr, "^in +%([0-9]+%) +"))
+    bounds = s[3][1];
+    delay = tonum(argstr[bounds[1]..bounds[2]]);
+    argstr = argstr[s[2] + 1..length(argstr)];
+else
+    delay = 2;
+endif
+if (!$command_utils:yes_or_no(tostr("Do you really want to shut down the server in 
+", delay, " minutes?")))
+    player:notify("Aborted.");
+    return;
+endif
+announce_times = {};
+if (delay > 0)
+    while (delay > 0)
+        announce_times = {@announce_times, delay * 60};
+        delay = delay / 2;
+    endwhile
+    announce_times = {@announce_times, 30, 10};
+    $shutdown_time = time() + announce_times[1];
+endif
+$shutdown_message = tostr(player.name, " (", player, "): ", argstr);
+$shutdown_task = task_id();
+for i in [1..length(announce_times)]
+    msg = tostr("*** The server will be shut down by ", player.name, " (", player, 
+") in ", $time_utils:english_time(announce_times[i]), ": ", argstr, " ***");
+    "...use raw notify() since :notify() verb could be broken...";
+    for p in (connected_players())
+        notify(p, msg);
+    endfor
+    suspend(announce_times[i] - {@announce_times, 0}[i + 1]);
+endfor
+for p in (connected_players())
+    notify(p, tostr("*** Server shutdown by ", player.name, " (", player, "): ", 
+argstr, " ***"));
+    boot_player(p);
+endfor
+suspend(0);
+$shutdown_task = E_NONE;
+set_task_perms(player);
+shutdown(argstr);
+.
+
+</pre>
+<BR>
+@dump-d*atabase:
+<pre>
+set_task_perms(player);
+dump_database();
+player:notify("Dumping...");
+.
+
+</pre>
+<BR>
+@who-calls:
+<pre>
+set_task_perms(player);
+if (argstr[1] != ":")
+    argstr = ":" + argstr;
+endif
+player:notify(tostr("Searching for verbs that appear to call ", argstr, " ..."));
+player:notify("");
+$code_utils:find_verbs_containing(argstr + "(");
+.
+
+</pre>
+<BR>
+mcd_2:
+<pre>
+if (!caller_perms().wizard)
+    return;
+elseif (!("mcd_pos" in properties(this)))
+    return;
+endif
+start = this.mcd_pos;
+saved = args[1];
+saved_props = args[2];
+player:notify(tostr("*** Recycling from #", start, " ..."));
+suspend(0);
+fork (0)
+    this:mcd_2(saved, saved_props);
+endfork
+for i in [start..tonum(max_object())]
+    this.mcd_pos = i;
+    o = toobj(i);
+    if ($command_utils:running_out_of_time())
+        return;
+    endif
+    if (valid(o) && (!(o in saved)))
+        for x in (o.contents)
+            move(x, #-1);
+        endfor
+        recycle(o);
+    endif
+endfor
+delete_property(this, "mcd_pos");
+"----------------------------------------";
+suspend(0);
+player:notify("Killing queued tasks ...");
+for t in (queued_tasks())
+    kill_task(t[1]);
+endfor
+"----------------------------------------";
+player:notify("Compacting object numbers ...");
+alist = {};
+for p in (saved_props)
+    $command_utils:suspend_if_needed(0);
+    if (pair = $list_utils:assoc(#0.(p), alist))
+        #0.(p) = pair[2];
+    elseif (#0.(p) != player)
+        old = #0.(p);
+        #0.(p) = renumber(#0.(p));
+        alist = {@alist, {old, #0.(p)}};
+    endif
+endfor
+for o in (saved)
+    if (valid(o) && (o != player))
+        renumber(o);
+    endif
+endfor
+reset_max_object();
+"----------------------------------------";
+player:notify("Performing miscellaneous cleanups ...");
+for i in [0..tonum(max_object())]
+    $command_utils:suspend_if_needed(0);
+    o = toobj(i);
+    move(o, ((o == player) || (o == $news)) ? $player_start | #-1);
+    if ($object_utils:has_callable_verb(o, "init_for_core"))
+        o:init_for_core();
+    endif
+endfor
+player:notify("Core database extraction is complete.  Type @shutdown to save it.");
+.
+
+</pre>
+<BR>
+@toad @toad! @toad!!:
+<pre>
+"@toad[!][!] <player> [blacklist|redlist|graylist] [commentary]";
+whostr = args[1];
+comment = $string_utils:first_word(argstr)[2];
+if (verb == "@toad!!")
+    listname = "redlist";
+elseif (verb == "@toad!")
+    listname = "blacklist";
+elseif ((ln = {@args, ""}[2]) && (index(listname = $login:listname(ln), ln) == 1))
+    "...first word of coment is one of the magic words...";
+    comment = $string_utils:first_word(comment)[2];
+else
+    listname = "";
+endif
+if ((!player.wizard) || (player != this))
+    player:notify("Yeah, right... you wish.");
+    return;
+elseif ($command_utils:player_match_failed(who = $string_utils:match_player(whostr), 
+whostr))
+    return;
+elseif (((whostr != who.name) && (!(whostr in who.aliases))) && (whostr != tostr(who)))
+    player:notify(tostr("Must be a full name or an object number:  ", who.name, "(", 
+who, ")"));
+    return;
+elseif (who == player)
+    player:notify("If you want to toad yourself, you have to do it by hand.");
+    return;
+endif
+dobj = who;
+if (msg = player:toad_victim_msg())
+    notify(who, msg);
+endif
+if ($wiz_utils:rename_all_instances(who, "disfunc", "toad_disfunc"))
+    player:notify(tostr(who, ":disfunc renamed."));
+endif
+if ($wiz_utils:rename_all_instances(who, "recycle", "toad_recycle"))
+    player:notify(tostr(who, ":recycle renamed."));
+endif
+e = $wiz_utils:unset_player(who, $hacker);
+player:notify(e ? tostr(who.name, "(", who, ") is now a toad.") | tostr(e));
+if (e && ($object_utils:isa(who.location, $room) && (msg = player:toad_msg())))
+    who.location:announce_all_but({who}, msg);
+endif
+if (listname && (!$login:(listname + "ed")(cname = $string_utils:connection_hostname(who.last_connect_place))))
+    $login:(listname + "_add")(cname);
+    player:notify(tostr("Site ", cname, " ", listname, "ed."));
+else
+    cname = "";
+endif
+if (!comment)
+    player:notify("So why is this person being toaded?");
+    comment = $command_utils:read();
+endif
+$mail_agent:send_message(player, $toad_log, tostr("@toad ", who.name, " (", who, 
+")"), {$string_utils:from_list(who.all_connect_places, " "), @cname ? {$string_utils:capitalize(listname 
++ "ed:  ") + cname} | {}, @comment ? {comment} | {}});
+player:notify(tostr("Mail sent to ", $mail_agent:name($toad_log), "."));
+.
+
+</pre>
+<BR>
+@untoad @detoad:
+<pre>
+"@untoad <object> [as namespec]";
+"Turns object into a player.  Anything that isn't a guest is chowned to itself.";
+if (!player.wizard)
+    player:notify("Yeah, right... you wish.");
+elseif (prepstr && (prepstr != "as"))
+    player:notify(tostr("Usage:  ", verb, " <object> [as name,alias,alias...]"));
+elseif ($command_utils:object_match_failed(dobj, dobjstr))
+elseif (prepstr && (!(e = $building_utils:set_names(dobj, iobjstr))))
+    player:notify(tostr("Initial rename failed:  ", e));
+elseif (e = $wiz_utils:set_player(dobj, g = $object_utils:isa(dobj, $guest)))
+    player:notify(tostr(dobj.name, "(", dobj, ") is now a ", g ? "usable guest." 
+| "player."));
+elseif (e == E_INVARG)
+    player:notify(tostr(dobj.name, "(", dobj, ") is not of an appropriate player 
+class."));
+    player:notify("@chparent it to $player or some descendant.");
+elseif (e == E_NONE)
+    player:notify(tostr(dobj.name, "(", dobj, ") is already a player."));
+elseif (e == E_NACC)
+    player:notify("Wait until $player_db is finished updating...");
+elseif (e == E_RECMOVE)
+    player:notify(tostr("The name `", dobj.name, "' is currently unavailable."));
+    player:notify(tostr("Try again with   ", verb, " ", dobj, " as <newname>"));
+else
+    player:notify(tostr(e));
+endif
+.
+
+</pre>
+<BR>
+@quota:
+<pre>
+"@quota <player> is [public] <number> [<reason>]";
+"  changes a player's quota.  sends mail to the wizards.";
+set_task_perms(player);
+dobj = $string_utils:match_player(dobjstr);
+if ($command_utils:player_match_result(dobj, dobjstr)[1])
+    return;
+elseif (!valid(dobj))
+    player:notify("Set whose quota?");
+    return;
+endif
+if (iobjstr[1..7] == "public ")
+    iobjstr[1..7] = "";
+    if ($object_utils:has_property($local, "public_quota_log"))
+        recipients = {$quota_log, $local.public_quota_log};
+    else
+        player:tell("No public quota log.");
+        return E_INVARG;
+    endif
+else
+    recipients = {$quota_log};
+endif
+old = $quota_utils:get_quota(dobj);
+qstr = iobjstr[1..(n = index(iobjstr + " ", " ")) - 1];
+new = $code_utils:tonum((qstr[1] == "+") ? qstr[2..length(qstr)] | qstr);
+reason = iobjstr[n + 1..length(iobjstr)] || "(none)";
+if (typeof(new) != NUM)
+    player:notify(tostr("Set ", dobj.name, "'s quota to what?"));
+    return;
+elseif (qstr[1] == "+")
+    new = old + new;
+endif
+result = $quota_utils:set_quota(dobj, new);
+if (typeof(result) == ERR)
+    player:notify(tostr(result));
+else
+    player:notify(tostr(dobj.name, "'s quota set to ", new, "."));
+endif
+$mail_agent:send_message(player, recipients, tostr("@quota ", dobj.name, " (", dobj, 
+") ", new, " (from ", old, ")"), tostr("Reason for quota ", ((new - old) < 0) ? "decrease: 
+" | "increase: ", reason, index("?.!", reason[length(reason)]) ? "" | "."));
+.
+
+</pre>
+<BR>
+@players:
+<pre>
+set_task_perms(player);
+"The time below is Oct. 1, 1990, roughly the birthdate of the LambdaMOO server.";
+start = 654768000;
+now = time();
+day = (24 * 60) * 60;
+week = 7 * day;
+month = 30 * day;
+days_objects = days_players = {0, 0, 0, 0, 0, 0, 0};
+weeks_objects = weeks_players = {0, 0, 0, 0};
+months_objects = months_players = {};
+nonplayer_objects = invalid_objects = 0;
+always_objects = always_players = 0;
+never_objects = never_players = 0;
+numo = 0;
+if (argstr)
+    if (((!dobjstr) && (prepstr == "with")) && (index("objects", iobjstr) == 1))
+        with_objects = 1;
+    else
+        player:notify(tostr("Usage:  ", verb, " [with objects]"));
+        return;
+    endif
+else
+    with_objects = 0;
+    players = players();
+endif
+for i in [1..with_objects ? tonum(max_object()) + 1 | length(players)]
+    if (with_objects)
+        o = toobj(i - 1);
+    else
+        o = players[i];
+    endif
+    if ($command_utils:running_out_of_time())
+        player:notify(tostr("... ", o));
+        suspend(0);
+    endif
+    if (valid(o))
+        numo = numo + 1;
+        p = is_player(o) ? o | o.owner;
+        if (!valid(p))
+            invalid_objects = invalid_objects + 1;
+        elseif (!$object_utils:isa(p, $player))
+            nonplayer_objects = nonplayer_objects + 1;
+        else
+            seconds = now - p.last_connect_time;
+            days = seconds / day;
+            weeks = seconds / week;
+            months = seconds / month;
+            if (seconds < 0)
+                if (is_player(o))
+                    always_players = always_players + 1;
+                else
+                    always_objects = always_objects + 1;
+                endif
+            elseif (seconds > (now - start))
+                if (is_player(o))
+                    never_players = never_players + 1;
+                else
+                    never_objects = never_objects + 1;
+                endif
+            elseif (months > 0)
+                while (months > length(months_players))
+                    months_players = {@months_players, 0};
+                    months_objects = {@months_objects, 0};
+                endwhile
+                if (is_player(o))
+                    months_players[months] = months_players[months] + 1;
+                endif
+                months_objects[months] = months_objects[months] + 1;
+            elseif (weeks > 0)
+                if (is_player(o))
+                    weeks_players[weeks] = weeks_players[weeks] + 1;
+                endif
+                weeks_objects[weeks] = weeks_objects[weeks] + 1;
+            else
+                if (is_player(o))
+                    days_players[days + 1] = days_players[days + 1] + 1;
+                endif
+                days_objects[days + 1] = days_objects[days + 1] + 1;
+            endif
+        endif
+    endif
+endfor
+player:notify("");
+player:notify(tostr("Last connected"));
+player:notify(tostr("at least this     Num.     Cumul.   Cumul. %", with_objects 
+? "     Num.     Cumul.   Cumul. %" | ""));
+player:notify(tostr("long ago        players   players   players ", with_objects 
+? "   objects   objects   objects" | ""));
+player:notify(tostr("---------------------------------------------", with_objects 
+? "--------------------------------" | ""));
+su = $string_utils;
+col1 = 14;
+col2 = 7;
+col3 = 10;
+col4 = 9;
+col5 = 11;
+col6 = 11;
+col7 = 10;
+nump = length(players());
+totalp = totalo = 0;
+for x in ({{days_players, days_objects, "day", 1}, {weeks_players, weeks_objects, 
+"week", 0}, {months_players, months_objects, "month", 0}})
+    pcounts = x[1];
+    ocounts = x[2];
+    unit = x[3];
+    offset = x[4];
+    for i in [1..length(pcounts)]
+        $command_utils:suspend_if_needed(0);
+        j = i - offset;
+        player:notify(tostr(su:left(tostr(j, " ", unit, (j == 1) ? ":" | "s:"), col1), 
+su:right(pcounts[i], col2), su:right(totalp = totalp + pcounts[i], col3), su:right((totalp 
+* 100) / nump, col4), "%", with_objects ? tostr(su:right(ocounts[i], col5), su:right(totalo 
+= totalo + ocounts[i], col6), su:right((totalo * 100) / numo, col7), "%") | ""));
+    endfor
+    player:notify("");
+endfor
+player:notify(tostr(su:left("Never:", col1), su:right(never_players, col2), su:right(totalp 
+= totalp + never_players, col3), su:right((totalp * 100) / nump, col4), "%", with_objects 
+? tostr(su:right(never_objects, col5), su:right(totalo = totalo + never_objects, 
+col6), su:right((totalo * 100) / numo, col7), "%") | ""));
+player:notify(tostr(su:left("Always:", col1), su:right(always_players, col2), su:right(totalp 
+= totalp + always_players, col3), su:right((totalp * 100) / nump, col4), "%", with_objects 
+? tostr(su:right(always_objects, col5), su:right(totalo = totalo + always_objects, 
+col6), su:right((totalo * 100) / numo, col7), "%") | ""));
+with_objects && player:notify(tostr(su:left("Non-player owner:", (((col1 + col2) 
++ col3) + col4) + 1), su:right(nonplayer_objects, col5), su:right(totalo = totalo 
++ nonplayer_objects, col6), su:right((totalo * 100) / numo, col7), "%"));
+with_objects && player:notify(tostr(su:left("Invalid owner:", (((col1 + col2) + col3) 
++ col4) + 1), su:right(invalid_objects, col5), su:right(totalo = totalo + invalid_objects, 
+col6), su:right((totalo * 100) / numo, col7), "%"));
+player:notify("");
+.
+
+</pre>
+<BR>
+kill_aux_wizard_parse:
+<pre>
+"Auxiliary verb for parsing @kill soon [#-of-seconds] [player | everyone]";
+"Args[1] is either # of seconds or player/everyone.";
+"Args[2], if it exists, is player/everyone, and forces args[1] to have been # of 
+seconds.";
+"Return value: {# of seconds [default 60] , 1 for all, object for player.}";
+set_task_perms(caller_perms());
+nargs = length(args);
+soon = tonum(args[1]);
+if (nargs > 1)
+    everyone = args[2];
+elseif (soon <= 0)
+    everyone = args[1];
+else
+    everyone = 0;
+endif
+if (everyone == "everyone")
+    everyone = 1;
+elseif (typeof(everyone) == STR)
+    result = $string_utils:match_player(everyone);
+    if ($command_utils:player_match_failed(result, everyone))
+        player:notify(tostr("Usage:  ", callers()[1][2], " soon [number of seconds] 
+[\"everyone\" | player name]"));
+        return {-1, -1};
+    else
+        return {soon ? soon | 60, result};
+    endif
+endif
+return {soon ? soon | 60, everyone ? everyone | player};
+.
+
+</pre>
+<BR>
+@grepcore @egrepcore:
+<pre>
+set_task_perms(player);
+if (!args)
+    player:notify(tostr("Usage:  ", verb, " <pattern>"));
+    return;
+endif
+pattern = argstr;
+regexp = verb == "@egrepcore";
+player:notify(tostr("Searching for core verbs ", regexp ? "matching the regular expression 
+" | "containing the string ", $string_utils:print(pattern), " ..."));
+player:notify("");
+$code_utils:(regexp ? "find_verbs_matching" | "find_verbs_containing")(pattern, $core_objects());
+.
+
+</pre>
+<BR>
+@net-who @@who @whois:
+<pre>
+"@net-who prints all connected users and hosts.";
+"@net-who player player player prints specified users and current or most recent 
+connected host.";
+"@net-who from hoststring prints all players who have connected from that host or 
+host substring.  Substring can include *'s, e.g. @net-who from *.foo.edu.";
+set_task_perms(player);
+su = $string_utils;
+if ((prepstr == "from") && dobjstr)
+    player:notify(tostr("Usage:  ", verb, " from <host string>"));
+elseif (((prepstr != "from") || dobjstr) || (!iobjstr))
+    "Not parsing 'from' here...  Instead printing connected/recent users.";
+    if (!(pstrs = args))
+        unsorted = connected_players();
+    else
+        unsorted = listdelete($command_utils:player_match_result(su:match_player(pstrs), 
+pstrs), 1);
+    endif
+    if (!unsorted)
+        return;
+    endif
+    $wiz_utils:show_netwho_listing(player, unsorted);
+else
+    $wiz_utils:show_netwho_from_listing(player, iobjstr);
+endif
+.
+
+</pre>
+<BR>
+@make-player:
+<pre>
+"Creates a player.";
+"Syntax:  @make-player name email-address comments....";
+"Generates a random password for the player.";
+if ((!player.wizard) || callers())
+    return E_PERM;
+endif
+return $wiz_utils:do_make_player(@args);
+.
+
+</pre>
+<BR>
+@abort-sh*utdown:
+<pre>
+if (!player.wizard)
+    player:notify("Sorry.");
+elseif (!$code_utils:task_valid($shutdown_task))
+    player:notify("No server shutdown in progress.");
+    $shutdown_task = E_NONE;
+else
+    "... Reset time so that $login:check_for_shutdown shuts up...";
+    kill_task($shutdown_task);
+    $shutdown_task = E_NONE;
+    $shutdown_time = time() - 1;
+    for p in (connected_players())
+        notify(p, tostr("*** Server shutdown ABORTED by ", player.name, " (", player, 
+")", argstr && (":  " + argstr), " ***"));
+    endfor
+endif
+.
+
+</pre>
+<BR>
+toad_msg toad_victim_msg programmer_msg programmer_victim_msg newt_msg newt_victim_msg:
+<pre>
+"This is the canonical doing-something-to-somebody message.";
+"The corresponding property can either be";
+"   string             msg for all occasions";
+"   list of 2 strings  {we-are-there-msg,we-are-elsewhere-msg}";
+m = this.(verb);
+if (typeof(m) != LIST)
+    return $string_utils:pronoun_sub(m);
+elseif ((this.location == dobj.location) || (length(m) < 2))
+    return $string_utils:pronoun_sub(m[1]);
+else
+    return $string_utils:pronoun_sub(m[2]);
+endif
+.
+
+</pre>
+<BR>
+moveto:
+<pre>
+set_task_perms((caller in {this, $generic_editor, $verb_editor, $mail_editor, $note_editor}) 
+? this.owner | caller_perms());
+return move(this, args[1]);
+.
+
+</pre>
+<BR>
+@newt:
+<pre>
+"@newt <player> [commentary]";
+"turns a player into a newt.  It can get better...";
+"Installs $wiz_utils:newt_confunc on a user as :confunc.  It saves any existing :confunc 
+the user may have as :denewt_confunc.  @denewt checks that their :confunc is the 
+same as $wiz_utils:newt_confunc (if not it renames it to :newt_confunc and complains). 
+ If so, it deletes it, and renames any :denewt_confunc to :confunc.";
+"Sends mail to $newt_log giving .all_connect_places and commentary.";
+whostr = args[1];
+comment = $string_utils:first_word(argstr)[2];
+if (!player.wizard)
+    player:notify("Yeah, right.");
+elseif ($command_utils:player_match_failed(who = $string_utils:match_player(whostr), 
+whostr))
+    return;
+elseif (((whostr != who.name) && (!(whostr in who.aliases))) && (whostr != tostr(who)))
+    player:notify(tostr("Must be a full name or an object number:  ", who.name, "(", 
+who, ")"));
+    return;
+elseif (who == player)
+    player:notify("If you want to newt yourself, you have to do it by hand.");
+    return;
+elseif ($wiz_utils:isnewt(who))
+    player:notify(tostr(who.name, " appears to already be a newt."));
+    return;
+else
+    if ($wiz_utils:rename_all_instances(who, "confunc", "denewt_confunc"))
+        player:notify(tostr(who, ":confunc renamed to :denewt_confunc."));
+    endif
+    add_verb(who, {player, "x", "confunc"}, {"this", "none", "this"});
+    set_verb_code(who, "confunc", verb_code($wiz_utils, "newt_confunc"));
+    if (msg = player:newt_victim_msg())
+        notify(who, msg);
+    endif
+    notify(who, $login:newt_registration_string());
+    boot_player(who);
+    player:notify(tostr(who.name, " (", who, ") has been turned into a newt."));
+    if (r = !comment)
+        player:notify("So why has this player been newted?");
+        comment = $command_utils:read();
+    endif
+    $mail_agent:send_message(player, $newt_log, tostr("@newt ", who.name, " (", who, 
+")"), {$string_utils:from_list(who.all_connect_places, " "), @comment ? {comment} 
+| {}});
+    if ($object_utils:isa(who.location, $room) && (msg = player:newt_msg()))
+        who.location:announce_all_but({who}, msg);
+    endif
+    player:notify(tostr("Mail sent to ", $mail_agent:name($newt_log), "."));
+endif
+.
+
+</pre>
+<BR>
+@unnewt @denewt @get-better:
+<pre>
+"@denewt <player> [commentary]";
+"Renames the player's :confunc to :newt_confunc, then checks that it is is the same 
+as $wiz_utils:newt_confunc, if not complains.  If so, it deletes it, and renames 
+any :denewt_confunc to :confunc.";
+"Sends mail to $newt_log with commentary.";
+whostr = args[1];
+comment = $string_utils:first_word(argstr)[2];
+if (!player.wizard)
+    player:notify("Yeah, right.");
+elseif ($command_utils:player_match_failed(who = $string_utils:match_player(whostr), 
+whostr))
+    return;
+else
+    "Should parse email address and register user in some clever way.  Ick.";
+    if (!(inf = verb_info(who, "confunc")))
+        player:notify(tostr(who.name, " does not appear to be a newt."));
+    else
+        set_verb_info(who, "confunc", {inf[1], inf[2], "newt_confunc"});
+        wiz = verb_code($wiz_utils, "newt_confunc");
+        user = verb_code(who, "newt_confunc");
+        if (wiz == user)
+            delete_verb(who, "newt_confunc");
+        else
+            player:notify(tostr(who.name, "'s :confunc was not identical to $wiz_utils:newt_confunc. 
+ Not automatically rmverbed.  Verify and manually @rmverb it."));
+        endif
+        if (inf = verb_info(who, "denewt_confunc"))
+            set_verb_info(who, "denewt_confunc", {inf[1], inf[2], "confunc"});
+        endif
+        player:notify(tostr(who.name, " (", who, ") got better."));
+        $mail_agent:send_message(player, $newt_log, tostr("@denewt ", who.name, " 
+(", who, ")"), comment ? {comment} | {});
+    endif
+endif
+.
+
+</pre>
+<BR>
+@register:
+<pre>
+"Registers a player.";
+"Syntax:  @register name email-address [additional commentary]";
+"Email-address is stored in $registration_db and on the player object.";
+if (!player.wizard)
+    return player:tell(E_PERM);
+endif
+$wiz_utils:do_register(@args);
+.
+
+</pre>
+<BR>
+@new-password @newpassword:
+<pre>
+"@newpassword player is [string]";
+"Set's a player's password; omit string to have one randomly generated.";
+"Offer to email the password.";
+if (!player.wizard)
+    return E_PERM;
+endif
+$wiz_utils:do_new_password(dobjstr, iobjstr);
+.
+
+</pre>
+<BR>
+@log:
+<pre>
+"@log [<string>]    enters a comment in the server log.";
+"If no string is given, you are prompted to enter one or more lines for an extended 
+comment.";
+set_task_perms(player);
+whostr = tostr("from ", player.name, " (", player, ")");
+if ((!player.wizard) || (player != caller))
+    player:notify("Yeah, right.");
+elseif (argstr)
+    server_log(tostr("COMMENT: [", whostr, "]  ", argstr));
+    player:notify("One-line comment logged.");
+elseif (lines = $command_utils:read_lines())
+    server_log(tostr("COMMENT: [", whostr, "]"));
+    for l in (lines)
+        server_log(l);
+    endfor
+    server_log(tostr("END_COMMENT."));
+    player:notify(tostr(length(lines), " lines logged as extended comment."));
+endif
+.
+
+</pre>
+<BR>
+@guests:
+<pre>
+set_task_perms(player);
+n = (dobjstr == "all") ? 0 | $code_utils:tonum(dobjstr || "20");
+if (caller != this)
+    player:notify("You lose.");
+elseif ((n == E_TYPE) && (index("now", dobjstr) != 1))
+    player:notify(tostr("Usage:  ", verb, " <number>  (where <number> indicates how 
+many entries to look at in the guest log)"));
+    player:notify(tostr("Usage:  ", verb, " now (to see information about currently 
+connected guests only)"));
+elseif ((!dobjstr) || (index("now", dobjstr) != 1))
+    $guest_log:last(n);
+else
+    "*way* too much copied code in here from @who...  Sorry.  --yduJ";
+    su = $string_utils;
+    conn = connected_players();
+    unsorted = {};
+    for g in (children($guest))
+        if (g in conn)
+            unsorted = {@unsorted, g};
+        endif
+    endfor
+    if (!unsorted)
+        player:tell("No guests found.");
+        return;
+    endif
+    footnotes = {};
+    alist = {};
+    nwidth = length("Player name");
+    for u in (unsorted)
+        pref = u.programmer ? "% " | "  ";
+        u.programmer && (footnotes = setadd(footnotes, "prog"));
+        u3 = {tostr(pref, u.name, " (", u, ")"), su:from_seconds(connected_seconds(u)), 
+su:from_seconds(idle_seconds(u)), where = $string_utils:connection_hostname(connection_name(u))};
+        nwidth = max(length(u3[1]), nwidth);
+        if ($login:blacklisted(where))
+            where = "(*) " + where;
+            footnotes = setadd(footnotes, "black");
+        elseif ($login:graylisted(where))
+            where = "(+) " + where;
+            footnotes = setadd(footnotes, "gray");
+        endif
+        alist = {@alist, u3};
+    endfor
+    alist = $list_utils:sort_alist_suspended(0, alist, 3);
+    $command_utils:suspend_if_needed(0);
+    headers = {"Player name", "Connected", "Idle Time", "From Where"};
+    time_width = length("59 minutes") + 2;
+    before = {0, w1 = nwidth + 3, w2 = w1 + time_width, w3 = w2 + time_width};
+    tell1 = "  " + headers[1];
+    tell2 = "  " + su:space(headers[1], "-");
+    for j in [2..4]
+        tell1 = su:left(tell1, before[j]) + headers[j];
+        tell2 = su:left(tell2, before[j]) + su:space(headers[j], "-");
+    endfor
+    player:notify(tell1);
+    player:notify(tell2);
+    active = 0;
+    for a in (alist)
+        $command_utils:suspend_if_needed(0);
+        tell1 = a[1];
+        for j in [2..4]
+            tell1 = su:left(tell1, before[j]) + tostr(a[j]);
+        endfor
+        player:notify(tell1[1..min(length(tell1), 79)]);
+    endfor
+    if (footnotes)
+        player:notify("");
+        if ("prog" in footnotes)
+            player:notify(" %  == programmer.");
+        endif
+        if ("black" in footnotes)
+            player:notify("(*) == blacklisted site.");
+        endif
+        if ("gray" in footnotes)
+            player:notify("(+) == graylisted site.");
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+@rn mail_catch_up check_mail_lists current_message set_current_message get_current_message 
+make_current_message kill_current_message:
+<pre>
+if (caller != this)
+    set_task_perms(valid(caller_perms()) ? caller_perms() | player);
+endif
+use = this.mail_identity;
+if (valid(use) && (use != this))
+    return use:(verb)(@args);
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+@blacklist @graylist @redlist @unblacklist @ungraylist @unredlist @spooflist @unspooflist:
+<pre>
+"@[un]blacklist [<site or subnet>  [commentary]]";
+"@[un]graylist  [<site or subnet>  [commentary]]";
+"@[un]redlist   [<site or subnet>  [commentary]]";
+"@[un]spooflist [<site of subnet>  [commentary]]";
+set_task_perms(player);
+if ((player != this) || (!player.wizard))
+    player:notify("Ummm.  no.");
+    return;
+endif
+undo = verb[2..3] == "un";
+which = $login:listname(verb[undo ? 4 | 2]);
+downgrade = {"", "graylist", "blacklist"}[1 + index("br", which[1])];
+if (!(fw = $string_utils:first_word(argstr)))
+    "... Just print the list...";
+    slist = {};
+    if (s = $login.(which)[1])
+        slist = {@slist, "--- Subnets ---", @s};
+    endif
+    if (s = $login.(which)[2])
+        slist = {@slist, "--- Domains ---", @s};
+    endif
+    player:notify_lines($string_utils:columnize(slist, 3));
+    return;
+endif
+target = fw[1];
+comment = fw[2] ? {fw[2]} | {};
+if (is_literal = $site_db:domain_literal(target))
+    if (target[l = length(target)] == ".")
+        target = target[1..l - 1];
+    endif
+    fullname = "subnet " + target;
+else
+    if (target[1] == ".")
+        target[1..1] = "";
+    endif
+    fullname = ("domain `" + target) + "'";
+endif
+rm = {};
+entrylist = $login.(which)[1 + (!is_literal)];
+if ((!undo) && (target in entrylist))
+    player:notify(tostr(fullname, " is already ", which, "ed."));
+    return;
+endif
+entrylist = setremove(entrylist, target);
+confirm = 0;
+if (is_literal)
+    for s in (entrylist)
+        if ((i = index(s, target + ".")) == 1)
+            "... target is a prefix of s, s should probably go...";
+            rm = {@rm, s};
+        elseif (index(target + ".", s + ".") != 1)
+            "... s is not a prefix of target...";
+        elseif (undo)
+            player:notify(tostr("You will need to un", which, " subnet ", s, " as 
+well."));
+        elseif (confirm)
+            player:notify(tostr("...Subnet ", s, " already ", which, "ed..."));
+        else
+            player:notify(tostr("Subnet ", s, " already ", which, "ed."));
+            if (!(confirm = $command_utils:yes_or_no(tostr(which, " ", target, " 
+anyway?"))))
+                return;
+            endif
+        endif
+    endfor
+else
+    for s in (entrylist)
+        if ((i = rindex(s, "." + target)) && (i == (length(s) - length(target))))
+            "... target is a suffix of s, s should probably go...";
+            rm = {@rm, s};
+        elseif ((!(i = rindex("." + target, "." + s))) || (i < ((length(target) - 
+length(s)) + 1)))
+            "... s is not a suffix of target...";
+        elseif (undo)
+            player:notify(tostr("You will need to un", which, " domain `", s, "' 
+as well."));
+        elseif (confirm)
+            player:notify(tostr("...Domain `", s, "' already ", which, "ed..."));
+        else
+            player:notify(tostr("Domain `", s, "' already ", which, "ed."));
+            if (!(confirm = $command_utils:yes_or_no(tostr(which, " ", target, " 
+anyway?"))))
+                return;
+            endif
+        endif
+    endfor
+endif
+namelist = $string_utils:english_list(rm);
+downgraded = {};
+if (rm)
+    ntries = (length(rm) == 1) ? "ntry" | "ntries";
+    if ($command_utils:yes_or_no(tostr("Remove e", ntries, " for ", namelist, "?")))
+        dg = undo && (downgrade && $command_utils:yes_or_no(downgrade + " them?"));
+        for s in (rm)
+            $login:(which + "_remove")(s);
+            dg && ($login:(downgrade + "_add")(s) && (downgraded = {@downgraded, 
+s}));
+        endfor
+        player:notify(tostr("E", ntries, " removed", @dg ? {" and ", downgrade, "ed."} 
+| {"."}));
+    else
+        player:notify(tostr(namelist, " will continue to be ", which, "ed."));
+        rm = {};
+    endif
+endif
+if (downgraded)
+    comment[1..0] = {tostr(downgrade, "ed ", $string_utils:english_list(downgraded), 
+".")};
+endif
+if (!undo)
+    $login:(which + "_add")(target);
+    player:notify(tostr(fullname, " ", which, "ed."));
+    if (rm)
+        comment[1..0] = {tostr("Subsumes ", which, "ing for ", namelist, ".")};
+    endif
+elseif ($login:(which + "_remove")(target))
+    player:notify(tostr(fullname, " un", which, "ed."));
+    if (downgrade && $command_utils:yes_or_no(downgrade + " it?"))
+        $login:(downgrade + "_add")(target) && (downgraded = {target, @downgraded});
+        player:notify(tostr(fullname, " ", downgrade, "ed."));
+    endif
+    if (downgraded)
+        comment[1..0] = {tostr(downgrade, "ed ", $string_utils:english_list(downgraded), 
+".")};
+    endif
+    if (rm)
+        comment[1..0] = {tostr("Also removed ", namelist, ".")};
+    endif
+elseif (rm)
+    player:notify(tostr(fullname, " itself was never actually ", which, "ed."));
+    comment[1..0] = {tostr("Removed ", namelist, ".")};
+else
+    player:notify(tostr(fullname, " was not ", which, "ed before."));
+    return;
+endif
+subject = tostr(undo ? "@un" | "@", which, " ", fullname);
+$mail_agent:send_message(player, $site_log, subject, comment);
+"...";
+"... make sure we haven't screwed ourselves...";
+uhoh = {};
+for site in (player.all_connect_places)
+    if (index(site, target) && $login:(which + "ed")(site))
+        uhoh = {@uhoh, site};
+    endif
+endfor
+if (uhoh)
+    player:notify(tostr("WARNING:  ", $string_utils:english_list(uhoh), " are now 
+", which, "ed!"));
+endif
+.
+
+</pre>
+<BR>
+@corify:
+<pre>
+"Usage:  @corify <object> as <propname>";
+"Adds <object> to the core, as $<propname>";
+"Reminds the wizard to write an :init_for_core verb, if there isn't one already.";
+if (!player.wizard)
+    player:tell("Sorry, the core is wizardly territory.");
+endif
+if (dobj == $failed_match)
+    dobj = player:my_match_object(dobjstr);
+endif
+if ($command_utils:object_match_failed(dobj, dobjstr))
+    return;
+endif
+if (!iobjstr)
+    player:tell("Usage:  @corify <object> as <propname>");
+    return;
+elseif (iobjstr[1] == "$")
+    iobjstr = iobjstr[2..length(iobjstr)];
+endif
+if (typeof(e = add_property(#0, iobjstr, dobj, {player, "r"})) == ERR)
+    player:tell(e);
+    return;
+endif
+if (!("init_for_core" in verbs(dobj)))
+    player:tell(dobj:titlec(), " has no :init_for_core verb.  Strongly consider adding 
+one before doing anything else.");
+endif
+.
+
+</pre>
+<BR>
+@make-guest:
+<pre>
+"Usage:  @make-guest <guestname>";
+"Creates a player called <guestname>_Guest owned by $hacker and a child of $guest.";
+if (!player.wizard)
+    player:tell("If you think this MOO needs more guests, you should contact a wizard.");
+    return E_PERM;
+endif
+if (length(args) != 1)
+    player:tell("Usage: ", verb, " <guest name>");
+    return;
+endif
+guestname = args[1] + "_Guest";
+guestaliases = {guestname, adj = args[1]};
+if (!player.wizard)
+    return;
+elseif ($player_db.frozen)
+    player:tell("Sorry, the player db is frozen, so no players can be made right 
+now.  Please try again in a few minutes.");
+    return;
+elseif (!$player_db:available(guestname))
+    player:tell("\"", guestname, "\" is not an available name.");
+    return;
+elseif (!$player_db:available(adj))
+    player:Tell("\"", adj, "\" is not an available name.");
+    return;
+else
+    new = $quota_utils:bi_create($guest, $hacker);
+    new:set_name(guestname);
+    new:set_aliases(guestaliases);
+    if (!(e = $wiz_utils:set_player(new, 1)))
+        player:Tell("Unable to make ", new.name, " (", new, ") a player.");
+        player:Tell(tostr(e));
+    else
+        player:Tell("Guest: ", new.name, " (", new, ") made.");
+        new.default_description = {"By definition, guests appear nondescript."};
+        new.description = new.default_description;
+        new.last_connect_time = $maxint;
+        new.last_disconnect_time = time();
+        new:set_gender(new.default_gender);
+        move(new, $player_start);
+        player:tell("Now don't forget to @describe ", new, " as something.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+notify_list:
+<pre>
+"Lets all players in a wizzes' .mail_forward, .mail_notify, and .public_identity 
+know when the wiz is being paged. Good for a double-buffering wiz.";
+people = pass(@args);
+people = valid(this.public_identity) ? {this.public_identity, @people} | people;
+return setremove(people, player);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp newt_victim_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp newt_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp public_identity
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp programmer_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp programmer_victim_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp toad_victim_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp toad_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail_identity
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000002.htm">The_Mayor</A> <A HREF="HTM_000096.htm">Dredful</A> <A HREF="HTM_000116.htm">Bakunin</A> <A HREF="HTM_000106.htm">horse</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

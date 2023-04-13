@@ -1,0 +1,383 @@
+<HTML>
+<HEAD>
+<TITLE>Social Shortcuts Feature</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Social Shortcuts Feature (#452)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000352.htm">genna</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000111.htm">Features Feature Object</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspCommands that emote for you, much like those on Diku-Muds.";
+&nbsp&nbsp&nbsp&nbsp&nbsp";
+&nbsp&nbsp&nbsp&nbsp&nbspExamples:  laugh            (alone)";
+&nbsp&nbsp&nbsp&nbsp&nbsplaugh bob        (victim)";
+&nbsp&nbsp&nbsp&nbsp&nbsp           laugh me         (self)";
+&nbsp&nbsp&nbsp&nbsp&nbsp      laugh everything (everything in room)";
+&nbsp&nbsp&nbsp&nbsp&nbsplaugh everyone (all players in room)";
+&nbsp&nbsp&nbsp&nbsp&nbsp";
+&nbsp&nbsp&nbsp&nbsp&nbspIf you don't like the messages for a verb, create a property on yourself";
+&nbsp&nbsp&nbsp&nbsp&nbsp  with the verb's name and load it in this format...";
+&nbsp&nbsp&nbsp&nbsp&nbsp";
+&nbsp&nbsp&nbsp&nbsp&nbspline 1: Told to player when used alone.";
+&nbsp&nbsp&nbsp&nbsp&nbspline 2: Announced to room when used alone.";
+&nbsp&nbsp&nbsp&nbsp&nbspline 3: Told to player when used with victim.";
+&nbsp&nbsp&nbsp&nbsp&nbspline 4: Told to victim.";
+&nbsp&nbsp&nbsp&nbsp&nbspline 5: Annouced to room when used with victim.";
+&nbsp&nbsp&nbsp&nbsp&nbspline 6: Told to player when used on self.";
+&nbsp&nbsp&nbsp&nbsp&nbspline 7: Announced to room when used on self.";
+&nbsp&nbsp&nbsp&nbsp&nbsp";
+&nbsp&nbsp&nbsp&nbsp&nbsp Messages are run through pronoun_sub, with you as visitor and victim as $nothing.";
+&nbsp&nbsp&nbsp&nbsp&nbsp Look at #452.social (or any of its other properties) for an example.";
+&nbsp&nbsp&nbsp&nbsp&nbsp This verb may NOT be called without using it as a Feature.  If you want to use it 
+without going through Features, call the techie verb #452:_social() in the format 
+#452:(\"_\"+socialverbname)(victim || list of victims || $no_one)";
+&nbsp&nbsp&nbsp&nbsp&nbspIf you're calling without a victim, send $no_one.";
+&nbsp&nbsp&nbsp&nbsp&nbsp";
+&nbsp&nbsp&nbsp&nbsp&nbspNote:  When yo use `<verb> <everyone/everything>' it displays messages 3 and 5 only.";
+&nbsp&nbsp&nbsp&nbsp&nbsp";
+&nbsp&nbsp&nbsp&nbsp&nbspHere's a summary of commands:";
+&nbsp&nbsp&nbsp&nbsp&nbspcomfort - Comfort someone, possibly in pity";
+&nbsp&nbsp&nbsp&nbsp&nbspwink - wink at someone";
+&nbsp&nbsp&nbsp&nbsp&nbspyawn - yawn tiredly at someone";
+&nbsp&nbsp&nbsp&nbsp&nbspwave - wave to someone in greeting, farewell, or just for the joy of waving";
+&nbsp&nbsp&nbsp&nbsp&nbspcackle - laugh like a madman";
+&nbsp&nbsp&nbsp&nbsp&nbspgiggle - giggle like a schoolkid";
+&nbsp&nbsp&nbsp&nbsp&nbspcry - cry like an 80's sensitive guy";
+&nbsp&nbsp&nbsp&nbsp&nbsppoke - poke someone";
+&nbsp&nbsp&nbsp&nbsp&nbspshrug - shrug in a non-commital way";
+&nbsp&nbsp&nbsp&nbsp&nbspblush - blush embarassed-like";
+&nbsp&nbsp&nbsp&nbsp&nbspcringe - cringe in fear";
+&nbsp&nbsp&nbsp&nbsp&nbspsmirk - a sort of haughty or sarcastic grin";
+&nbsp&nbsp&nbsp&nbsp&nbspnod - bob your head affirmatively";
+&nbsp&nbsp&nbsp&nbsp&nbspgrin - an amplified smile";
+&nbsp&nbsp&nbsp&nbsp&nbspsmile - take a frown, turn it upside-down";
+&nbsp&nbsp&nbsp&nbsp&nbsplaugh - roll on the floor in laughter";
+&nbsp&nbsp&nbsp&nbsp&nbspsigh - heavy sigh";
+&nbsp&nbsp&nbsp&nbsp&nbspchuckle - a private little laugh";
+&nbsp&nbsp&nbsp&nbsp&nbsphug - wrap your arms around someone and squeeze warmly";
+&nbsp&nbsp&nbsp&nbsp&nbspkiss - smoochy-smoochy";
+&nbsp&nbsp&nbsp&nbsp&nbspfrench - like kiss but with tongue";
+&nbsp&nbsp&nbsp&nbsp&nbspbow - bend at the waist in homage";
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+_social _smirk _hug _comfort _wink _yawn _wave _cackle _giggle _cry _poke _shrug 
+_blush _cringe _nod _grin _smile _laugh _sigh _chuckle _kiss _french _bow:
+<pre>
+":_social(victim | list of victims | $no_one if no victim[, social-verb])";
+"The first arg should be a single objnum or a list of objnums or $no_one if there 
+is no victim.";
+"The second arg should be wave or wink or yawn or one of the other current social 
+verbs.  The second arg is optional. you can just call the verb with the verbname 
+\"_\"+action instead.";
+if (!valid(caller))
+    return;
+endif
+where = player.location;
+victim = args[1];
+verb = (length(args) == 2) ? args[2] | verb;
+whose = $object_utils:has_property(player, verb) ? player | this;
+this.custom = setadd(this.custom, player);
+if (length(emote = whose.(verb)) < 7)
+    overb = (verb[l = length(verb)] == "y") ? tostr(verb[1..l - 1], "ies") | tostr(verb, 
+"s");
+    emote = {tostr("You ", verb, "."), tostr("%n ", overb, "."), tostr("You ", verb, 
+" at %d."), tostr("%n ", overb, " at you."), tostr("%n ", overb, " at %d."), tostr("You 
+", verb, " at yourself."), tostr("%n", overb, " at %r.")};
+endif
+if (victim == $no_one)
+    player:tell($string_utils:pronoun_sub(emote[1], player, victim));
+    where:announce($string_utils:pronoun_sub(emote[2], player, victim));
+elseif ((typeof(victim) == OBJ) && (victim.location != player.location))
+    player:tell(victim.name, " isn't here.");
+elseif (victim == player)
+    player:tell($string_utils:pronoun_sub(emote[6], player, victim));
+    where:announce($string_utils:pronoun_sub(emote[7], player, victim));
+elseif (typeof(victim) == OBJ)
+    player:tell($string_utils:pronoun_sub(emote[3], player, player, where, victim));
+    victim:tell($string_utils:pronoun_sub(emote[4], player, player, where, victim));
+    where:announce_all_but({player, victim}, $string_utils:pronoun_sub(emote[5], 
+player, player, where, victim));
+else
+    player:tell(#452:super_sub(emote[3], player, player, player, where, victim));
+    where:announce_all_but({player, @victim}, #452:super_sub(emote[5], $no_one, player, 
+player, where, victim));
+    for v in (victim)
+        $command_utils:suspend_if_needed(0);
+        v:tell(#452:super_sub(emote[5], v, player, player, where, victim));
+    endfor
+endif
+if ($object_utils:has_verb(where, "notify_social"))
+    where:notify_social(verb, victim);
+endif
+.
+
+</pre>
+<BR>
+super_sub:
+<pre>
+"Pronoun (and other things) substitution. See 'help pronouns' for details.";
+"The main advantage of :super_sub() is that any of the objects can be a list and 
+by defining the listener (second arg), all references to the listener are used with 
+$You.";
+"set_task_perms($no_one);";
+if (typeof(args[1]) == LIST)
+    nargs = listdelete(args, 1);
+    plines = {};
+    "syntax: #452:super_sub(text[,listener[,who[,thing[,location[,dobj[,iobj]]]]])";
+    "%s,%o,%p,%q,%r    => <who>'s pronouns.  <who> defaults to player.";
+    "%n,%d,%i,%t,%l,%% => <who>, dobj, iobj, <thing>, location and %";
+    "<thing> defaults to caller; <location> defaults to who.location";
+    "%S,%O,%P,%Q,%R, %N,%D,%I,%T,%L have corresponding capitalized substitutions.";
+    " %[#n], %[#d], ...  =>  <who>, dobj, etc.'s object number";
+    "%(foo) => <who>.foo and %(Foo) => <who>.foo capitalized. %[dfoo] => dobj.foo, 
+etc..";
+    "%<foo> -> whatever <who> does when normal people foo. This is determined by 
+calling :verb_sub() on the <who>.";
+    "%<d:foo> -> whatever <dobj> does when normal people foo.";
+    for line in (args[1])
+        plines = {@plines, this:(verb)(line, @nargs)};
+    endfor
+    return plines;
+endif
+listener = (length(args) >= 2) ? args[2] | player;
+who = (length(args) >= 3) ? args[3] | player;
+thing = (length(args) >= 4) ? args[4] | caller;
+where = (length(args) >= 5) ? args[5] | (((typeof(who) == OBJ) && valid(who)) ? who.location 
+| $nothing);
+old = tostr(args[1]);
+new = "";
+objspec = "nditl";
+objects = {};
+for o in ({who, (length(args) >= 6) ? args[6] | dobj, (length(args) >= 7) ? args[7] 
+| iobj, thing, where})
+    if (typeof(o) == LIST)
+        while (i = listener in o)
+            o[i] = $you;
+        endwhile
+        if (length(o) == 1)
+            o = o[1];
+        endif
+    else
+        o = (o == listener) ? $you | o;
+    endif
+    objects = {@objects, o};
+endfor
+prnspec = "sopqrSOPQR";
+prprops = {"ps", "po", "pp", "pq", "pr", "Ps", "Po", "Pp", "Pq", "Pr"};
+oldlen = length(old);
+while ((prcnt = index(old, "%")) && (prcnt < oldlen))
+    s = old[k = prcnt + 1];
+    if ((s == "<") && (gt = index(old[k + 2..length(old)], ">")))
+        "handling %<verb> ";
+        gt = (gt + k) + 1;
+        vb = old[k + 1..gt - 1];
+        vbs = objects[1];
+        if ((length(vb) > 2) && (vb[2] == ":"))
+            " %<d:verb>";
+            vbs = objects[index(objspec, vb[1]) || 1];
+            vb = vb[3..length(vb)];
+        endif
+        vbs = (typeof(vbs) == LIST) ? this.they | vbs;
+        vb = $object_utils:has_verb(vbs, "verb_sub") ? vbs:verb_sub(vb) | this:(verb)(vb, 
+vbs);
+        new = (new + old[1..prcnt - 1]) + vb;
+        k = gt;
+    else
+        cp_args = {};
+        if (brace = index("([", s))
+            if (!(w = index(old[k + 1..oldlen], ")]"[brace])))
+                return new + old;
+            else
+                p = old[prcnt + 2..(k = k + w) - 1];
+                if (brace == 1)
+                    "%(property)";
+                    cp_args = {objects[1], p};
+                elseif (p[1] == "#")
+                    "%[#n] => object number";
+                    s = (o = index(objspec, p[2])) ? (typeof(object[o]) == LIST) 
+? $string_utils:english_list($list_utils:map_builtin(objects[o], "tostr")) | tostr(objects[o]) 
+| (("[" + p) + "]");
+                elseif (!(o = index(objspec, p[1])))
+                    s = ("[" + p) + "]";
+                else
+                    " %[dproperty] ";
+                    cp_args = {(typeof(objects[o]) == LIST) ? ($you in objects[o]) 
+? $you | this.they | objects[o], p[2..w - 1], strcmp(p[1], "a") < 0};
+                endif
+            endif
+        elseif (o = index(objspec, s))
+            cp_args = {objects[o], "", strcmp(s, "a") < 0};
+        elseif (w = index(prnspec, s, 1))
+            cp_args = {objects[1], prprops[w]};
+        elseif (s == "#")
+            s = (typeof(objects[1]) == LIST) ? $list_utils:map_builtin(objects[1], 
+"tostr") | tostr(objects[1]);
+        elseif (s != "%")
+            s = "%" + s;
+        endif
+        new = (new + old[1..prcnt - 1]) + ((!cp_args) ? s | ((typeof(sub = $string_utils:_cap_property(@cp_args)) 
+!= ERR) ? sub | (("%(" + tostr(sub)) + ")")));
+    endif
+    old = old[k + 1..oldlen];
+    oldlen = oldlen - k;
+endwhile
+return new + old;
+.
+
+</pre>
+<BR>
+social comfort wink yawn wave cackle giggle cry poke shrug blush cringe smirk nod 
+grin smile laugh sigh chuckle hug kiss french bow:
+<pre>
+"Commands that emote for you, much like those on Diku-Muds.";
+"";
+"Examples:  laugh            (alone)";
+"           laugh bob        (victim)";
+"           laugh me         (self)";
+"           laugh everything (everything in room)";
+"           laugh everyone   (all players in room)";
+"";
+"If you don't like the messages for a verb, create a property on yourself";
+"  with the verb's name and load it in this format...";
+"";
+"line 1: Told to player when used alone.";
+"line 2: Announced to room when used alone.";
+"line 3: Told to player when used with victim.";
+"line 4: Told to victim.";
+"line 5: Annouced to room when used with victim.";
+"line 6: Told to player when used on self.";
+"line 7: Announced to room when used on self.";
+"";
+" Messages are run through pronoun_sub, with you as %n and victim as %d.";
+" Look at #452.social (or any of its other properties) for an example.";
+" This verb may NOT be called without using it as a Feature.  If you want to use 
+it without going through Features, call the techie verb #452:_social() in the format 
+#452:(\"_\"+socialverbname)(victim || list of victims || $no_one)";
+" If you're calling without a victim, send $no_one.";
+"";
+"Note:  When you use `<verb> <everyone/everything>' it displays messages 3 and 5 
+only.";
+"";
+"Here's a summary of commands:";
+"comfort - Comfort someone, possibly in pity";
+"wink - wink at someone";
+"yawn - yawn tiredly at someone";
+"wave - wave to some, in greeting, farewell, or just for the joy of waving";
+"cackle - laugh like a madman";
+"giggle - giggle like a schoolgirl";
+"cry - cry like an 80's sensitive guy";
+"poke - poke someone";
+"shrug - shrug in a non-commital way";
+"blush - blush embarassed-like";
+"cringe - cringe in fear";
+"smirk - a sort of haughty or sarcastic grin";
+"nod - bob your head affirmatively";
+"grin - an amplified smile";
+"smile - take a frown, turn it upside-down";
+"laugh - roll on the floor in laughter";
+"sigh - heavy sigh";
+"chuckle - a private little laugh";
+"hug - wrap your arms around someone and squeeze warmly";
+"kiss - smoochy-smoochy";
+"french - like kiss but with tongue";
+"bow - bend at the waist in homage";
+if (verb != "social")
+    dobj = player.location:match_object(dobjstr);
+    if (((dobjstr in {"all", "everyone", "everything", "everybody"}) || (!dobjstr)) 
+|| (!$command_utils:object_match_failed(dobj, dobjstr)))
+        victim = dobjstr ? (dobjstr in {"all", "everyone", "everybody"}) ? $you | 
+((dobjstr in {"everything"}) ? setremove(player.location.contents, player) | (valid(dobj) 
+? dobj | $no_one)) | $no_one;
+        if (victim == $you)
+            for v in (victim = setremove(player.location.contents, player))
+                if (!is_player(v))
+                    victim = setremove(victim, v);
+                endif
+            endfor
+        endif
+        this:("_" + verb)((typeof(victim) == LIST) ? (length(victim) > 1) ? victim 
+| (length(victim) ? victim[1] | $no_one) | victim, verb);
+    endif
+else
+    player:tell("Current Social Verbs:");
+    player:tell_lines($string_utils:columnize(setremove($string_utils:explode(verb_info(this, 
+"social")[3]), "social"), 4));
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp custom
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp comfort
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp wink
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp wave
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cackle
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sigh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp chuckle
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp hug
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp kiss
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp french
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp smirk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp trusted
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp grin
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp smile
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp laugh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp yawn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cringe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp giggle
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp poke
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cry
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp bow
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp social
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp nod
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp blush
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp shrug
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,106 @@
+<HTML>
+<HEAD>
+<TITLE>a sewing machine</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a sewing machine (#2036)</H3>
+(an instance of <A HREF="HTM_001488.htm">Generic Dispenser</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAn old-fashioned sewing machine, not the fancy programmed kind but still looking like you could operate it.......
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp1. Type 'cut pattern' to fashion a sewing pattern.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp2. Cutting the pattern you can make up a role and its description.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp3. 'Run machine with pattern' and you'll sew your very own costume.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp4. ('@chparent me to #1223' if you can't wear costumes.)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp5. Watch out! if you run the machine without cutting a pattern, you'll get a costume just like the last person's who used it...
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002106.htm">Pattern Room</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+run use op*erate:
+<pre>
+set_task_perms(player);
+this:dispense_item(argstr);
+.
+
+</pre>
+<BR>
+set_new_name:
+<pre>
+pattern = this.dispenses;
+name = tostr(pattern.role_msg, " costume");
+return pass(name);
+.
+
+</pre>
+<BR>
+set_new_aliases:
+<pre>
+pattern = this.dispenses;
+name = tostr(pattern.role_msg, " costume");
+alias = tostr(player.name, "'s ", pattern.role_msg, " costume");
+aliases = {name, pattern.role_msg, alias, "costume"};
+return pass(aliases);
+.
+
+</pre>
+<BR>
+set_new_desc:
+<pre>
+pattern = this.dispenses;
+description = tostr("You see a costume, for the part of ", pattern.role_msg, ". Seemingly 
+sewn by ", player.name, ".");
+return pass(description);
+.
+
+</pre>
+<BR>
+pre_dispense:
+<pre>
+this.location:announce_all("There's a whirring, shuttling, snipping...");
+suspend(3);
+this:set_new_name();
+this:set_new_aliases();
+this:set_new_desc();
+.
+
+</pre>
+<BR>
+post_dispense:
+<pre>
+pass(@args);
+object = args[2];
+object.role_msg = object.role_msg;
+object.role_desc_msg = object.role_desc_msg;
+player:tell("Looking over your handiwork...");
+player:tell_lines(object.role_desc_msg);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sitting_msg
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

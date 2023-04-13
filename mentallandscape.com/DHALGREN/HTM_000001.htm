@@ -1,0 +1,613 @@
+<HTML>
+<HEAD>
+<TITLE>Root Class</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Root Class (#1)</H3>
+(an instance of <A HREF="http://mentallandscape.com/DHALGREN/HTM_-00001.htm">$nothing</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+initialize:
+<pre>
+if (typeof(this.owner.owned_objects) == LIST)
+    this.owner.owned_objects = setadd(this.owner.owned_objects, this);
+endif
+if ((caller == this) || $perm_utils:controls(caller_perms(), this))
+    this.object_size = {0, 0};
+    this.key = 0;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+recycle:
+<pre>
+if ((caller == this) || $perm_utils:controls(caller_perms(), this))
+    if (typeof(this.owner.owned_objects) == LIST)
+        this.owner.owned_objects = setremove(this.owner.owned_objects, this);
+    endif
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+set_name:
+<pre>
+"set_name(newname) attempts to change this.name to newname";
+"  => E_PERM   if you don't own this or aren't its parent, or are a player trying 
+to do an end-run around $player_db...";
+if ((!caller_perms().wizard) && (is_player(this) || ((caller_perms() != this.owner) 
+&& (this != caller))))
+    return E_PERM;
+else
+    return (typeof(e = this.name = args[1]) != ERR) || e;
+endif
+.
+
+</pre>
+<BR>
+title:
+<pre>
+return this.name;
+.
+
+</pre>
+<BR>
+titlec:
+<pre>
+return $object_utils:has_property(this, "namec") ? this.namec | $string_utils:capitalize(this:title());
+.
+
+</pre>
+<BR>
+set_aliases:
+<pre>
+"set_aliases(alias_list) attempts to change this.aliases to alias_list";
+"  => E_PERM   if you don't own this or aren't its parent";
+"  => E_TYPE   if alias_list is not a list";
+"  => E_INVARG if any element of alias_list is not a string";
+if (!($perm_utils:controls(caller_perms(), this) || (this == caller)))
+    return E_PERM;
+elseif (typeof(aliases = args[1]) != LIST)
+    return E_TYPE;
+else
+    for s in (aliases)
+        if (typeof(s) != STR)
+            return E_INVARG;
+        endif
+    endfor
+    this.aliases = aliases;
+    return 1;
+endif
+.
+
+</pre>
+<BR>
+match:
+<pre>
+c = this:contents();
+return $string_utils:match(args[1], c, "name", c, "aliases");
+.
+
+</pre>
+<BR>
+match_object:
+<pre>
+":match_object(string [,who])";
+args[2..1] = {this};
+return $string_utils:match_object(@args);
+.
+
+</pre>
+<BR>
+set_description:
+<pre>
+"set_description(newdesc) attempts to change this.description to newdesc";
+"  => E_PERM   if you don't own this or aren't its parent";
+if (!($perm_utils:controls(caller_perms(), this) || (this == caller)))
+    return E_PERM;
+elseif (typeof(desc = args[1]) in {LIST, STR})
+    this.description = desc;
+    return 1;
+else
+    return E_TYPE;
+endif
+.
+
+</pre>
+<BR>
+description:
+<pre>
+return this.description;
+.
+
+</pre>
+<BR>
+look_self:
+<pre>
+desc = this:description();
+if (desc)
+    player:tell_lines(desc);
+else
+    player:tell("You see nothing special.");
+endif
+.
+
+</pre>
+<BR>
+exam*ine:
+<pre>
+player:tell("The examine command has been renamed to @examine.  Please use @examine.");
+.
+
+</pre>
+<BR>
+notify:
+<pre>
+if (is_player(this))
+    notify(this, args[1]);
+endif
+.
+
+</pre>
+<BR>
+tell:
+<pre>
+this:notify(tostr(@args));
+.
+
+</pre>
+<BR>
+tell_lines:
+<pre>
+lines = args[1];
+if (typeof(lines) == LIST)
+    for line in (lines)
+        this:tell(line);
+    endfor
+else
+    this:tell(lines);
+endif
+.
+
+</pre>
+<BR>
+accept:
+<pre>
+set_task_perms(caller_perms());
+return this:acceptable(@args);
+.
+
+</pre>
+<BR>
+moveto:
+<pre>
+set_task_perms(this.owner);
+return move(this, args[1]);
+.
+
+</pre>
+<BR>
+eject eject_nice eject_basic:
+<pre>
+"eject(victim) --- usable by the owner of this to remove victim from this.contents. 
+ victim goes to its home if different from here, or $nothing or $player_start according 
+as victim is a player.";
+"eject_basic(victim) --- victim goes to $nothing or $player_start according as victim 
+is a player; victim:moveto is not called.";
+what = args[1];
+nice = verb != "eject_basic";
+perms = caller_perms();
+if ((!perms.wizard) && (perms != this.owner))
+    return E_PERM;
+elseif ((!(what in this.contents)) || what.wizard)
+    return 0;
+endif
+if (nice && ($object_utils:has_property(what, "home") && ((typeof(what.home) == OBJ) 
+&& ((what.home != this) && (is_player(what) ? what.home:accept_for_abode(what) | 
+what.home:acceptable(what))))))
+    where = what.home;
+else
+    where = is_player(what) ? $player_start | $nothing;
+endif
+if (nice)
+    fork (0)
+        "...Some objects like to know they've been moved...";
+        "... this is the best we can do.  Remember :moveto() may be broken.";
+        what:moveto(where);
+    endfork
+endif
+return move(what, where);
+.
+
+</pre>
+<BR>
+is_unlocked_for:
+<pre>
+return (this.key == 0) || $lock_utils:eval_key(this.key, args[1]);
+.
+
+</pre>
+<BR>
+huh:
+<pre>
+set_task_perms(valid(caller_perms()) ? caller_perms() | player);
+$command_utils:do_huh(verb, args);
+.
+
+</pre>
+<BR>
+set_message:
+<pre>
+":set_message(msg_name,new_value)";
+"Does the actual dirty work of @<msg_name> object is <new_value>";
+"changing the raw value of the message msg_name to be new_value.";
+"Both msg_name and new_value should be strings, though their interpretation is up 
+to the object itself.";
+" => error value (use E_PROPNF if msg_name isn't recognized)";
+" => string error message if something else goes wrong.";
+" => 1 (true non-string) if the message is successfully set";
+" => 0 (false non-error) if the message is successfully `cleared'";
+if (!((caller == this) || $perm_utils:controls(caller_perms(), this)))
+    return E_PERM;
+else
+    return (this.(args[1] + "_msg") = args[2]) && 1;
+endif
+.
+
+</pre>
+<BR>
+do_examine:
+<pre>
+"do_examine(examiner)";
+"the guts of examine";
+"call a series of verbs and report their return values to the player";
+who = args[1];
+"if (caller == this || caller == who)";
+if (caller == who)
+    "set_task_perms();";
+    who:notify_lines(this:examine_names(who) || {});
+    "this:examine_names(who);";
+    who:notify_lines(this:examine_owner(who) || {});
+    "this:examine_owner(who);";
+    who:notify_lines(this:examine_desc(who) || {});
+    "this:examine_desc(who);";
+    who:notify_lines(this:examine_key(who) || {});
+    "this:examine_key(who);";
+    who:notify_lines(this:examine_contents(who) || {});
+    who:notify_lines(this:examine_verbs(who) || {});
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+examine_key:
+<pre>
+"examine_key(examiner)";
+"return a list of strings to be told to the player, indicating what the key on this 
+type of object means, and what this object's key is set to.";
+"the default will only tell the key to a wizard or this object's owner.";
+who = args[1];
+if (((caller == this) && $perm_utils:controls(who, this)) && (this.key != 0))
+    return {tostr("Key:  ", $lock_utils:unparse_key(this.key))};
+    "who:notify(tostr(\"Key:  \", $lock_utils:unparse_key(this.key)));";
+endif
+.
+
+</pre>
+<BR>
+examine_names:
+<pre>
+"examine_names(examiner)";
+"Return a list of strings to be told to the player, indicating the name and aliases 
+(and, by default, the object number) of this.";
+return {tostr(this.name, " (aka ", $string_utils:english_list({tostr(this), @this.aliases}), 
+")")};
+.
+
+</pre>
+<BR>
+examine_desc:
+<pre>
+"examine_desc(who) - return the description, probably";
+"who is the player examining";
+"this should probably go away";
+desc = this:description();
+if (desc)
+    if (typeof(desc) != LIST)
+        desc = {desc};
+    endif
+    return desc;
+else
+    return {"(No description set.)"};
+endif
+.
+
+</pre>
+<BR>
+examine_contents:
+<pre>
+"examine_contents(examiner)";
+"by default, calls :tell_contents.";
+"Should probably go away.";
+who = args[1];
+"if (caller == this && $object_utils:has_verb(this, \"tell_contents\"))";
+if (caller == this)
+    this:tell_contents(this.contents, this.ctype);
+endif
+.
+
+</pre>
+<BR>
+examine_verbs:
+<pre>
+"Return a list of strings to be told to the player.  Standard format says \"Obvious 
+verbs:\" followed by a series of lines explaining syntax for each usable verb.";
+if (caller != this)
+    return E_PERM;
+endif
+who = args[1];
+name = dobjstr;
+vrbs = {};
+commands_ok = this:examine_commands_ok(who);
+dull_classes = {$root_class, $room, $player, $prog, $builder};
+what = this;
+hidden_verbs = this:hidden_verbs(who);
+while (what != $nothing)
+    $command_utils:suspend_if_needed(0);
+    if (!(what in dull_classes))
+        for i in [0..length(verbs(what)) - 1]
+            $command_utils:suspend_if_needed(0);
+            info = verb_info(what, tostr(i));
+            syntax = verb_args(what, tostr(i));
+            if (this:examine_verb_ok(what, i, info, syntax, commands_ok, hidden_verbs))
+                dobj = syntax[1];
+                prep = syntax[2];
+                iobj = syntax[3];
+                if (syntax == {"any", "any", "any"})
+                    prep = "none";
+                endif
+                if (prep != "none")
+                    for x in ($string_utils:explode(prep, "/"))
+                        if (length(x) <= length(prep))
+                            prep = x;
+                        endif
+                    endfor
+                endif
+                "This is the correct way to handle verbs ending in *";
+                vname = info[3];
+                while (i = index(vname, "* "))
+                    vname = tostr(vname[1..i - 1], "<anything>", vname[i + 1..length(vname)]);
+                endwhile
+                if (vname[i = length(vname)] == "*")
+                    vname = vname[1..i - 1] + "<anything>";
+                endif
+                vname = strsub(vname, " ", "/");
+                rest = "";
+                if (prep != "none")
+                    rest = " " + ((prep == "any") ? "<anything>" | prep);
+                    if (iobj != "none")
+                        rest = tostr(rest, " ", (iobj == "this") ? name | "<anything>");
+                    endif
+                endif
+                if (dobj != "none")
+                    rest = tostr(" ", (dobj == "this") ? name | "<anything>", rest);
+                endif
+                vrbs = setadd(vrbs, ("  " + vname) + rest);
+            endif
+        endfor
+    endif
+    what = parent(what);
+endwhile
+if ($code_utils:verb_or_property(this, "help_msg"))
+    vrbs = {@vrbs, tostr("  help ", dobjstr)};
+endif
+return vrbs && {"Obvious verbs:", @vrbs};
+.
+
+</pre>
+<BR>
+get_message:
+<pre>
+":get_message(msg_name)";
+"Use this to obtain a given user-customizable message's raw value, i.e., the value 
+prior to any pronoun-substitution or incorporation of any variant elements --- the 
+value one needs to supply to :set_message().";
+"=> error (use E_PROPNF if msg_name isn't recognized)";
+"=> string or list-of-strings raw value";
+"=> {2, @(list of {msg_name_n,rawvalue_n} pairs to give to :set_message)}";
+"=> {1, other kind of raw value}";
+"=> {E_NONE, error message} ";
+if (!((caller == this) || $perm_utils:controls(caller_perms(), this)))
+    return E_PERM;
+elseif (((t = typeof(msg = this.(msgname = args[1] + "_msg"))) in {ERR, STR}) || 
+((t == LIST) && (typeof(msg[1]) == STR)))
+    return msg;
+else
+    return {1, msg};
+endif
+.
+
+</pre>
+<BR>
+room_announce*_all_but:
+<pre>
+this.location:(verb)(@args);
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    vnum = 0;
+    while (vnum <= (length(verbs(this)) - 1))
+        $command_utils:suspend_if_needed(0);
+        info = verb_info(this, tostr(vnum))[3];
+        if (index(info, "(old)"))
+            delete_verb(this, tostr(vnum));
+        else
+            vnum = vnum + 1;
+        endif
+    endwhile
+endif
+.
+
+</pre>
+<BR>
+contents:
+<pre>
+"Returns a list of the objects that are apparently inside this one.  Don't confuse 
+this with .contents, which is a property kept consistent with .location by the server. 
+ This verb should be used in `VR' situations, for instance when looking in a room, 
+and does not necessarily have anything to do with the value of .contents (although 
+the default implementation does).  `Non-VR' commands (like @contents) should look 
+directly at .contents.";
+return this.contents;
+.
+
+</pre>
+<BR>
+examine_verb_ok:
+<pre>
+"examine_verb_ok(loc, index, info, syntax, commands_ok, hidden_verbs)";
+"loc is the object that defines the verb; index is which verb on the object; info 
+is verb_info; syntax is verb_args; commands_ok is determined by this:commands_ok, 
+probably, but passed in so we don't have to calculate it for each verb.";
+"hidden_verbs is passed in for the same reasons.  It should be a list, each of whose 
+entries is either a string with the full verb name to be hidden (e.g., \"d*rop th*row\") 
+or a list of the form {verb location, full verb name, args}.";
+if ((caller == this) || $perm_utils:controls(caller_perms(), this))
+    loc = args[1];
+    info = args[3];
+    vname = info[3];
+    syntax = args[4];
+    hidden_verbs = args[6];
+    return (((((syntax[2..3] != {"none", "this"}) && (!index(vname, "("))) && (args[5] 
+|| ("this" in syntax))) && verb_code(loc, tostr(args[2]))) && (!(vname in hidden_verbs))) 
+&& (!({loc, vname, syntax} in hidden_verbs));
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+is_listening:
+<pre>
+"return 1 if the object can hear a :tell, or cares. Useful for active objects that 
+want to stop when nothing is listening.";
+return 0;
+.
+
+</pre>
+<BR>
+hidden_verbs:
+<pre>
+"hidden_verbs(who)";
+"returns a list of verbs on this that should be hidden from examine";
+"the player who's examining is passed in, so objects can hide verbs from specific 
+players";
+"verbs are returned as {location, full_verb_name, args} or just full_verb_name.  
+full_verb name is what shows up in verb_info(object, verb)[2], for example \"d*op 
+th*row\".";
+if ((caller == this) || $perm_utils:controls(caller_perms(), this))
+    hidden = {};
+    what = this;
+    while (what != $nothing)
+        for i in [0..length(verbs(what)) - 1]
+            info = verb_info(what, tostr(i));
+            if (!index(info[2], "r"))
+                hidden = setadd(hidden, {what, info[3], verb_args(what, tostr(i))});
+            endif
+        endfor
+        what = parent(what);
+    endwhile
+    return hidden;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+examine_owner:
+<pre>
+"examine_owner(examiner)";
+"Return a list of strings to be told to the player, indicating who owns this.";
+return {tostr("Owned by ", this.owner.name, ".")};
+.
+
+</pre>
+<BR>
+announce*_all_but:
+<pre>
+return;
+.
+
+</pre>
+<BR>
+tell_lines_suspended:
+<pre>
+lines = args[1];
+if (typeof(lines) == LIST)
+    for line in (lines)
+        this:tell(line);
+        $command_utils:suspend_if_needed(0);
+    endfor
+else
+    this:tell(lines);
+endif
+.
+
+</pre>
+<BR>
+acceptable:
+<pre>
+"intended as a 'quiet' way to determine if :accept will succeed. Currently, some 
+objects have a noisy :accept verb since it is the only thing that a builtin move() 
+call is guaranteed to call.";
+"if you want to tell, before trying, whether :accept will fail, use :acceptable instead. 
+Normally, they'll do the same thing.";
+return 0;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp key
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp aliases
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp description
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp object_size
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000003.htm">generic room</A> <A HREF="HTM_000000.htm">The System Object</A> <A HREF="HTM_000005.htm">generic thing</A> <A HREF="HTM_000006.htm">generic player</A> <A HREF="HTM_000007.htm">generic exit</A> <A HREF="HTM_000047.htm">Mail Distribution Center</A> <A HREF="HTM_000046.htm">Generic Mail Recipient</A> <A HREF="HTM_000077.htm">Generic Gendered Object</A> <A HREF="HTM_000039.htm">Generic Database</A> <A HREF="HTM_000032.htm">Generic Help Database</A> <A HREF="HTM_000017.htm">The Body Bag</A> <A HREF="HTM_000073.htm">Generic BigList Resident</A> <A HREF="HTM_000022.htm">Verb Help DB</A> <A HREF="HTM_000014.htm">Guest Log</A> <A HREF="HTM_000013.htm">Player Last_huh Verbs</A> <A HREF="HTM_000012.htm">Login Commands</A> <A HREF="HTM_000067.htm">Generic Option Package</A> <A HREF="HTM_000069.htm">Error Generator</A> <A HREF="HTM_000072.htm">Network Utilities</A> <A HREF="HTM_000105.htm">Local Clearinghouse</A> <A HREF="HTM_000124.htm">Generic Utilities Package</A> <A HREF="HTM_000472.htm">bowl of milk</A> <A HREF="HTM_000068.htm">@paranoid database</A> <A HREF="HTM_001477.htm">generic tattoo</A> <A HREF="HTM_001994.htm">Object #1994</A> <A HREF="HTM_002010.htm">Object #2010</A> <A HREF="HTM_002293.htm">sick utilities</A> <A HREF="HTM_002184.htm">body part</A> <A HREF="HTM_002319.htm">plain vanilla ass key</A> <A HREF="HTM_002341.htm">lame</A> <A HREF="HTM_002469.htm">test</A> <A HREF="HTM_002351.htm">cigar</A> <A HREF="HTM_001127.htm">Geek Code</A> <A HREF="HTM_002597.htm">Millebornes database</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,52 @@
+<HTML>
+<HEAD>
+<TITLE>Ox</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Ox (#509)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_000509.htm">Ox</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA male, 5'8, black hair, blue eyes. Athletic. Likes to drive. Alot.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000507.htm">The Shack</A>.
+<BR>
+<BR>
+<BR>
+Ox owns <A HREF="HTM_000509.htm">Ox</A> <A HREF="HTM_000507.htm">The Shack</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+moveto:
+<pre>
+"Copied from Carrot's Rosette Feature Object (#126):moveto by Snap (#448) Wed Feb 
+23 21:24:14 1994 EST";
+pass(@args);
+if ($object_utils:has_property(this, "features") && (#126 in this.features))
+    used = $list_utils:assoc(player, #126.read);
+    if ((used != {}) && ("a" in used[3]))
+        rose = #126:genrose(player.location, used[3]);
+        if (typeof(rose) == LIST)
+            player:tell_lines(rose);
+        endif
+    endif
+endif
+return;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

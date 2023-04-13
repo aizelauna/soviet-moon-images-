@@ -1,0 +1,72 @@
+<HTML>
+<HEAD>
+<TITLE>holder</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> holder (#2470)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_002482.htm">tend</A>)
+<BR>
+<BR>
+<pre>
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_002482.htm">tend</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@wwho:
+<pre>
+if (valid(caller) && (caller != player))
+    return E_PERM;
+endif
+user = player in this.users;
+if ((!user) || (this.interesting[user] == {}))
+    player:tell(verb, " is used to list players who are in your login ", "watcher 
+interesting list. You haven't set anyone as interesting. Use ", "@interesting <player> 
+to start your list.");
+    return;
+endif
+this:gc_intlist(user);
+if (argstr == "all")
+    if (this.options[user][1])
+        this.options[user][1] = 0;
+        player:tell("@wwho all toggled off. Only awake people will appear ", "in 
+your @wwho list.");
+    else
+        this.options[user][1] = 1;
+        player:tell("@wwho all toggled on. Both awake and sleeping players ", "will 
+appear in your @wwho list.");
+    endif
+    return;
+endif
+if (this.options[user][1])
+    interesting = this.interesting[user];
+else
+    interesting = $set_utils:intersection(this.interesting[user], connected_players());
+endif
+if (interesting)
+    this:add_relaying_task(task_id(), player);
+    $code_utils:show_who_listing(interesting);
+    this:delete_relaying_task(task_id(), player);
+else
+    player:tell("No interesting players are online now.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

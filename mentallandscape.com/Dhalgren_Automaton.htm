@@ -1,0 +1,136 @@
+<HTML>
+<HEAD><TITLE>Narrow Alley</TITLE></HEAD>
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99>
+<FONT face="ariel,helvetica">
+<P>
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH="640">
+<BR>
+<B>Narrow Alley</B>
+<P>
+<PRE>
+Generic Automaton (#192):
+----
+The Generic Automaton is an easy-to-program robot which responds to simple
+ commands.  It can have multiple MOODS, each one of which has a different
+ description and set of RESPONSES.  Commands trigger an announced response and
+ can also trigger a TRANSITION to another mood. For example, a trivial robot
+ might be made as follows:
+
+   @create #192 named robot
+   @describe robot as "A crash-test dummy."
+   @setresponse robot with hug,kiss: %vs the %t.  It smiles.
+   @setresponse robot with hit,kick: %vs the %t.  It frowns.
+
+The pattern %v will be substituted with the verb name, and %vs will be
+ substituted with the third-person form of the verb.  So, if Calkins types
+ "kiss robot" or "hit robot", we will see:
+
+   Calkins kisses the robot.  It smiles.
+   Calkins hits the robot.  It smiles.
+
+This trivial automaton has only one mood (called "initial"), but things don't
+ really get interesting until multiple moods are created.  Moods and
+ transitions between moods form a sort of MENTAL LANDSCAPE or personality
+ which other players can explore, somewhat like rooms and exits.  To make a
+ new mood (or switch to an existing mood), use @setmood.  For example, we can
+ make our trivial robot slightly more interesting:
+
+   @setmood robot to initial
+   @transition robot with hit,kick:angry
+   @setmood robot to angry
+   @describe robot as "A very angry test dummy."
+   @setresponse robot with hug,kiss: %vs the %t.  It relaxes.
+   @transition robot with hug,kiss:initial
+   @setresponse robot with hit,kick: %vs the %t.  It %vs %n!
+
+Now kicking the robot will make it mad, and when it's mad it will react more
+ violently to being kicked again.  Kissing or hugging it will calm it down
+ (transition to initial mood).  If an automaton is left alone in a room, it
+ automatically returns to the "initial" mood, if it has one.
+
+To design an automaton think of what moods or states it should have. Pick a
+ set of basic commands to trigger responses and mood transitions. Draw a
+ TRANSITION DIAGRAM!  Complex automatons have over a dozen moods and are
+ impossible to design without making a diagram. Here is the diagram of a
+ three-mood stray dog:
+
+               +-------<---------------<---------------+
+               |                                       |
+  feed +---+   V        +-->--+        +---+           |
+   pet |   |   |        | pet |        |   | kick      |
+       \   V   |        \     V   pet  \   V           |
+       HAPPY---+        INITIAL<---<---ANGRY------>----+
+       |   ^            |     |        ^   ^     feed
+       |   |   feed     |     |  kick  |   |
+       |   +---<-----<--+     +--->----+   |
+       +------->------->------->------->---+
+                       kick
+
+Besides setting responses and transitions, you can use @rminputs to erase a
+ response and @actions <robot> to review the programming of a given mood.
+ @rmmoods will erase whole moods, and @cpmood will copy the responses and
+ transisions of another mood to the current mood (sometimes a convenient
+ starting point for a mood that is similar).  Once the basic logic of an
+ automaton is finished, @alias can be used to beef up the number of verbs the
+ robot will respond to:
+
+   @alias robot with slug,punch,slap=hit
+
+Aliases apply to all moods, but are overridden by any set responses in any
+ particular mood. Useful tip: if you are using @notedit, beware that the
+ automaton will return to its "initial" mood when you depart to the note
+ editor.  So it is a good idea to be carrying the robot while you are
+ programming it.
+</PRE>
+<P>
+You see an old wooden box with a broken lid.<BR>
+Contents:<BR>
+  Generic <A HREF="Dhalgren_GSPC.htm">Scorpion Player Class</A> (#153)<BR>
+  Generic <A HREF="Dhalgren_PARC.htm">Post-Apocalypse Room</A> (#110)<BR>
+  Generic <A HREF="Dhalgren_Automaton.htm">Automaton</A> (#192)<BR>
+  Generic <A HREF="Dhalgren_GEO.htm:>Edible Object</A> (#101)<BR>
+  Generic <A HREF="Dhalgren_Boomerang.htm">Boomerang Thing</A> (#261)<BR>
+  Generic Secured Post-Apocalypse Room (#262)<BR>
+  Generic Room with Stacking (#563)<BR>
+  Generic Wandering Automaton (#502)<BR>
+  Generic Auditorium (#562)<BR>
+  Generic Room with Seats (#955)<BR>
+  Generic Scripted Object (#826)<BR>
+  Generic Transparent Exit (#1053)<BR>
+  Generic Moon-phased Wearable (#859)<BR>
+  Generic Performance Room (#1998)<BR>
+  Generic Lycanthropic Thespian PC (#1223)<BR>
+  Generic Room with Surfaces (#2061)<BR>
+  Generic Costume (#1226)<BR>
+  Generic Litter (#834)<BR>
+  Generic Listening Automaton (#790)<BR>
+  Generic Black Lotus Room (#2918)<BR>
+<P>
+You are in a narrow dark alley way between two brick buildings. The ground is
+ littered with trash, old newspapers, empty cans, bricks set up as a fireplace
+ with an arrangement of pipes over it. Beside it is an army messpan, inside
+ filled with dirty snow and ice. At the east end of the alley is a fence,
+<A HREF="Dhalgren_Waterfront.htm">behind</A> you is the street.
+
+</TD></TR></TABLE></CENTER>
+<P>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<CENTER><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH="640">
+<A HREF="Index.htm">Home</A>,
+<A HREF="Dhalgren.htm">Back to Dhalgren</A>
+</TD></TR></TABLE></CENTER>
+
+<P><BR><CENTER>Copyright © 1994, 2003 Don P. Mitchell.  All rights reserved.</CENTER>
+
+</FONT>
+</BODY>
+</HTML>

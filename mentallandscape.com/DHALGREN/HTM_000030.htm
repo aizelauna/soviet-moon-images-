@@ -1,0 +1,260 @@
+<HTML>
+<HEAD>
+<TITLE>Builtin Function Help</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Builtin Function Help (#30)</H3>
+(an instance of <A HREF="HTM_000032.htm">Generic Help Database</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA help database (in the sense of anything that is usable by $player:help()) is any object having the following two verbs:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :find_topics(string)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     returns a list of strings or some boolean false value.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :get_topic(string)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     given one of the strings returned by :find_topics this either
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     returns a list of strings (text to be spewed to the player) or
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     returns 1 to indicate that it has already taken care of printing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     information to the player.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp$player:help() consults any .help properties that exist on the player, its ancestors, player.location and its ancestors (in that order).  These properties are assumed to have values that are objects or lists of objects, each object itself assumed to be a help database in the above sense.  The main help database ($help) is placed at the end of the list of databases to be consulted.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Help Database (this object) is the standard model help database of which the actual help database itself ($help) is an instance.  On help databases of this type, every help topic has a corresponding property, interpreted as follows:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspthis.(topic) = string           - one-line help text.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspthis.(topic) = {"*verb*",@args} - call this:verb(@args) to get text
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspthis.(topic) = any other list   - multi-line help text
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspFor the {"*verb*",...} form, the current verbs available are
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  {"*forward*", topic2, @rest}   
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     - get topic2 help text and then append rest.  
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp       rest may, in turn, begin with a "*verb*"...
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  {"*subst*", @lines} 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     - all occurences of [exp] in lines are replaced with value of exp.  
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp       exp is assumed to evaluate to a string.  Evaluation is done using 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp       $no_one's permissions so exp can only refer to public information.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  {"*index*"}
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     - returns a list of all topics in this database, arranged in columns.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+init_for_core:
+<pre>
+pass();
+$prog.help = this;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp match()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp rmatch()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp substitute()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sqrt()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp server_log()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp pass()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp builtin-index
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp open_network_connection()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp connection_name()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp shutdown()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dump_database()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp memory_usage()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp reset_max_object()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp renumber()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp server_version()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp output_delimiters()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp callers()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp kill_task()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp queued_tasks()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp read()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp suspend()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp task_id()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp seconds_left()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ticks_left()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp caller_perms()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp set_task_perms()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp eval()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp boot_player()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp notify()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp idle_seconds()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp connected_seconds()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp connected_players()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp set_player_flag()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp is_player()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp players()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp set_verb_code()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp verb_code()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp delete_verb()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp add_verb()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp set_verb_args()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp verb_args()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp set_verb_info()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp verb_info()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp verbs()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp delete_property()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp add_property()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp set_property_info()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp property_info()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp properties()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp move()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp max_object()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp recycle()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp children()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp parent()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp valid()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp chparent()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp create()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp setremove()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp setadd()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp listset()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp listdelete()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp listinsert()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp listappend()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp strcmp()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp rindex()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp index()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp crypt()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp strsub()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp length()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ctime()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp time()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp random()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp abs()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp max()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp min()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp toobj()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp tonum()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp tostr()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp typeof()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp clear_property()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp is_clear_property()
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

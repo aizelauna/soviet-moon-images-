@@ -1,0 +1,226 @@
+<HTML>
+<HEAD>
+<TITLE>generic candle</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> generic candle (#208)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000095.htm">legba</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_001061.htm">Cody</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+light burn:
+<pre>
+if (this.lit == 1)
+    player:tell("It's already lit.");
+    return;
+elseif (this.lit == 2)
+    player:tell("It's already burned down.");
+    return;
+elseif (this.lit != 3)
+    player:tell("You shouldn't light the ", this.name, " now, because you haven't 
+bought it yet.  Also, you don't have any money to buy it with.  What's a law-abiding 
+citizen to do in a post-apocalyptic society?");
+    return;
+endif
+this.lit = 1;
+player:tell("You can't light the ", this.name, " without a match.  You rummage through 
+your pockets and fortunately find one.  Though it's coated with pocket lint, it flares 
+up into a flame when you strike it on your shoe.  You light the ", this.name, ".");
+this.location:announce(player.name, " rummages around for a match, finds one and 
+lights the ", this.name, ".");
+this.location:announce_all("The ", this.name, " sputters and flares as the flame 
+reaches the wax.  You smell the sharp sulfur of the match and the scent of ", this.scent, 
+" as the ", this.name, " burns.");
+suspend(this.interval * 3);
+this.location:announce_all("The flame of the ", this.name, " leaps up higher now 
+as it burns itself halfway down.");
+suspend(this.interval * 3);
+this.location:announce_all("The ", this.name, " is reduced now to a small shard of 
+", this.color, " wax and a bright flame.");
+suspend(this.interval);
+this.location:announce_all("The flame finally consumes the ", this.name, " entirely 
+and extinguishes itself.  Where the ", this.name, " once was, you see a small slip 
+of paper.");
+this.old_name = this.name;
+this.old_desc = this.description;
+"set this.name to slip of paper here, if possible";
+this.description = ("A small slip of " + this.color) + " paper, a little charred 
+at the edges.  It has some writing on it.";
+this.aliases = setadd(this.aliases, "paper");
+this.aliases = setadd(this.aliases, this.color + " paper");
+this.lit = 2;
+fork (60)
+    if (this.lit == 2)
+        this.location:announce_all("The ", this.name, " suddenly bursts into flame 
+and disappears.");
+        this:revert();
+    endif
+endfork
+.
+
+</pre>
+<BR>
+read:
+<pre>
+if (this.lit != 2)
+    player:tell("What are you trying to read a candle for?");
+    return;
+endif
+player:tell("You read your fortune: ", this.fortune[random(length(this.fortune))]);
+player.location:announce(player.name, " squints at the slip of paper with what appears 
+to be rapt superstition.");
+suspend(5);
+player.location:announce_all("The slip of paper turns to dust and blows away in a 
+sudden, chilly breeze.");
+this:revert();
+.
+
+</pre>
+<BR>
+buy:
+<pre>
+player:tell("With what money?");
+player.location:announce("In a charming display of pre-apocalyptic optimism, ", player.name, 
+" attempts to purchase the ", this.name, " without success.");
+.
+
+</pre>
+<BR>
+steal lift shoplift:
+<pre>
+"Copied from generic thing (#5):take by bakunin (#2) Sat Jan 29 16:43:41 1994 PST";
+if (this.lit == 3)
+    player:tell("The ", this.name, " has already been stolen.");
+    return;
+else
+    this:moveto(player);
+    if (this.location == player)
+        this.lit = 3;
+        fork (120)
+            if (this.lit == 3)
+                this.location:announce_all("The ", this.name, " suddenly melts into 
+a small glob of ", this.color, " wax and disappears.");
+                this:revert();
+            endif
+        endfork
+        player:tell(this:take_succeeded_msg() || "Taken.");
+        if (msg = this:otake_succeeded_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    else
+        player:tell(this:take_failed_msg() || "You can't pick that up.");
+        if (msg = this:otake_failed_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+revert:
+<pre>
+this:moveto(this.home);
+"set this.name back to this.old_name here if necessary";
+this.description = this.old_desc;
+this.lit = 0;
+this.aliases = setremove(this.aliases, "slip of paper");
+this.aliases = setremove(this.aliases, this.color + " paper");
+.
+
+</pre>
+<BR>
+@interval @color @scent @fortune:
+<pre>
+prop = $string_utils:trim(verb, "@");
+if (player != this.owner)
+    player:tell("You must be the owner of the ", this.name, " to set the ", prop, 
+".");
+    return;
+endif
+if (prop == "interval")
+    i = tonum(args[3]);
+else
+    i = iobjstr;
+endif
+if ((i == 0) || (i == ""))
+    player:tell("You can't set ", prop, " to that.");
+    return;
+endif
+if (prop != "fortune")
+    this.(prop) = i;
+    player:tell("You set the ", prop, " of the ", this.name, " to ", i, ".");
+else
+    this.(prop) = setadd(this.(prop), i);
+    player:tell("You add ", i, " to ", prop, ".");
+endif
+.
+
+</pre>
+<BR>
+@listf*ortune @purgef*ortune:
+<pre>
+if (this.owner != player)
+    player:tell("You can't do that.");
+    return;
+endif
+if (verb[1..5] == "@list")
+    l = length(this.fortune);
+    if (l == 0)
+        player:tell(this.name, " doesn't have any fortunes defined.");
+        return;
+    endif
+    for n in [1..l]
+        player:tell(tostr(n), ") ", this.fortune[n]);
+    endfor
+endif
+if (verb[1..5] == "@purg")
+    this.fortune = {};
+    player:tell("You've purged your list of fortunes.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp lit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp scent
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp color
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp fortune
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp old_name
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp home
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp old_desc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp interval
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000210.htm">Venus Fortune Candle</A> <A HREF="HTM_000402.htm">Moon Candle</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

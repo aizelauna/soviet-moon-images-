@@ -1,0 +1,327 @@
+<HTML>
+<HEAD>
+<TITLE>sick features</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> sick features (#843)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000539.htm">Sick</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSick's mostly useful programmerly features.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000539.htm">Sick</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspNifty stuff for builders and programmers.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@family @family-mail:
+<pre>
+"Usage:  @family[-mail] <object> [with [branches] [!<object> ... ]]";
+"Displays indented list of ancestors and descendants/branches for the given object.";
+"An optional list of objects can be given, in which case neither those objects, descendants 
+of those objects, nor other objects owned by those objects will be shown.";
+"";
+"If you use @family-mail rather than @family, the list will be MOOmailed to you rather 
+than spamming your screen.";
+"";
+"Please be careful when you use this verb. Do _not_ type `@family #1' or `@family 
+$thing' or anything else that is naturally going to spam you with a list of tens 
+of thousands of objects.";
+if (!argstr)
+    return player:tell_lines($code_utils:verb_documentation(this, verb));
+endif
+if ((!valid(dobj)) && $command_utils:object_match_failed(dobj = player:my_match_object(dobjstr), 
+dobjstr))
+    return;
+endif
+dverbs = (dverb = "descendant") + "s";
+excludes = {};
+if (prepstr && iobjstr)
+    for s in ($string_utils:words(iobjstr))
+        if (index("branches", s) == 1)
+            dverbs = (dverb = "branch") + "es";
+        elseif (s[1] in {"!", "-"})
+            if ($command_utils:object_match_failed(o = player:my_match_object(s), 
+s))
+                return;
+            endif
+            excludes = setadd(excludes, o);
+        else
+            return player:tell("I don't understand `", s, "'.");
+        endif
+    endfor
+endif
+mail = index(verb, "mail") && 1;
+player:tell("Compiling a list of ancestors and ", dverbs, " of ", $string_utils:nn(dobj), 
+excludes ? tostr(", excluding descendants of and objects owned by ", $string_utils:name_and_number_list(excludes)) 
+| "", " ...");
+if (mail)
+    player:tell("The list will be mailed to you when finished.");
+endif
+header = {tostr("Ancestors/", dverbs, " information on ", $string_utils:nn(dobj), 
+":")};
+if (excludes)
+    header = {@header, tostr("Excluding descendants of and objects owned by ", $string_utils:nn_list(excludes), 
+".")};
+endif
+anum = length(atext = this:_ancestors(dobj));
+dnum = length(dtext = this:("_" + dverbs)(dobj, $string_utils:space(anum * 2), excludes)) 
+- 1;
+footer = tostr("* ", anum, " ancestor", (anum == 1) ? "" | "s", ", ", dnum, " ", 
+(dnum == 1) ? dverb | dverbs, " found.");
+text = {@header, @atext, @dtext, footer};
+if (mail)
+    $mail_agent:send_message(this, player, tostr(verb, " ", argstr), text);
+else
+    player:tell_lines_suspended(text);
+endif
+.
+
+</pre>
+<BR>
+_ancestors:
+<pre>
+"Syntax:  _ancestors(obj <object> [, str <prefix>])  => list";
+"";
+"Returns a formatted string list of ancestors for the given object.";
+object = args[1];
+prefix = (length(args) > 1) ? args[2] | "";
+if (parents = $list_utils:reverse($object_utils:ancestors(object)))
+    lines = {this:object_line(parents[1], prefix)};
+    for p in (listdelete(parents, 1))
+        $command_utils:suspend_if_needed(0);
+        lines = {@lines, this:object_line(p, prefix = prefix + "  ")};
+    endfor
+    return lines;
+else
+    return {};
+endif
+.
+
+</pre>
+<BR>
+_descendants _branches:
+<pre>
+"Syntax:  _descendants(obj <object> [, str <prefix> [, list <excludes>]])  => list";
+"            _branches(obj <object> [, str <prefix> [, list <excludes>]])  => list";
+"";
+"Returns a formatted string list of descendants/branches for the given object.";
+lines = {this:object_line(object = args[1], prefix = (length(args) > 1) ? args[2] 
+| "")};
+excludes = (length(args) > 2) ? args[3] | {};
+for kid in (children(object))
+    $command_utils:suspend_if_needed(0);
+    if ((verb == "_descendants") || children(kid))
+        if (!(excludes && ((kid in excludes) || (kid.owner in excludes))))
+            lines = {@lines, @this:(verb)(kid, prefix + "  ", excludes)};
+        endif
+    endif
+endfor
+return lines;
+.
+
+</pre>
+<BR>
+object_line:
+<pre>
+"Syntax:  object_line(obj <object> [, str <prefix>)  => str";
+"";
+"Takes an object and returns a string in the form:";
+"";
+" [<prefix>][{<kids>} ]<object.name> (<object#>) ...: <owner.name> (<owner#>)";
+"Ex: {25} featureful programmer (#96) .......................: Sickness (#80)";
+object = args[1];
+prefix = {@args, ""}[2];
+ownername = tostr("...: ", valid(object) ? tostr(valid(owner = object.owner) ? $list_utils:shortest(owner.aliases) 
+| "<invalid>", " (", owner, ")") | "<invalid>");
+objectnum = tostr(" (", object, ") ");
+maxnamelen = (pad = player:linelen() - length(ownername)) - length(objectnum);
+objectname = (length(oname = tostr(prefix, (valid(object) && (c = length(children(object)))) 
+? tostr("{", c, "} ") | "", valid(object) ? object.name | "<invalid>")) > maxnamelen) 
+? tostr(oname[1..maxnamelen - 2], "++") | oname;
+objectname = tostr(objectname, objectnum);
+return tostr($string_utils:left(objectname, -pad, "."), ownername);
+.
+
+</pre>
+<BR>
+owned_matches:
+<pre>
+"Syntax: owned_matches(str <substr>, obj <object>)  => true/false";
+"Returns true if <substr> is an index of <object>'s name or an alias.";
+substr = args[1];
+for name in ({args[2].name, @args[2].aliases})
+    if (index(name, substr))
+        return 1;
+    endif
+endfor
+.
+
+</pre>
+<BR>
+owned_includes:
+<pre>
+"Syntax:  owned_includes(obj <object>, list <includes>, list <excludes>)  => true/false";
+"Returns true if included or not excluded.";
+object = args[1];
+includes = args[2];
+excludes = args[3];
+while (valid(object))
+    if (object in includes)
+        return 1;
+    elseif (object in excludes)
+        return 0;
+    endif
+    object = parent(object);
+endwhile
+return !includes;
+.
+
+</pre>
+<BR>
+owned_location:
+<pre>
+"Syntax:  owned_location(obj <object>)  => str";
+"Returns \"#source Source->#dest Dest\" for exits, \"Room\" for rooms, and \"#loc 
+Location\" (or \"[Nowhere]\" for others.";
+if (!valid(loc = (o = args[1]).location))
+    nowhere = "[Nowhere]";
+    p = o;
+    while (valid(p = parent(p)))
+        if (p == $room)
+            return "Room";
+        elseif (p == $exit)
+            source = valid(s = o.source) ? tostr(s, (s.owner == o.owner) ? " " | 
+"*", s.name) | nowhere;
+            dest = valid(d = o.dest) ? tostr(d, (d.owner == o.owner) ? " " | "*", 
+d.name) | nowhere;
+            return tostr(source[1..min(length(source), 25 - length(dest))], "->", 
+dest);
+        endif
+    endwhile
+    return nowhere;
+endif
+return tostr(loc, (loc.owner == o.owner) ? " " | "*", loc.name);
+.
+
+</pre>
+<BR>
+@owned @pros-owned @po*wned:
+<pre>
+"Syntax:  @owned [<player>] [named <substr>] [with <class> ...]";
+"Display objects owned by <player>, or yourself.";
+"";
+"If \"named <substr>\" is given, only objects with <substr> somewhere in their names 
+will be shown.";
+"";
+"By default, exits are omitted from the list.  Use \"with <class> ...\" to further 
+limit the ancestory of displayed objects.  Each <class> string can be one of:";
+"  \"exits\"  -- do not exclude exits by default";
+"  <parent>   -- include only those objects descended from <parent>";
+"  !<parent>  -- exclude any objects descended from <parent>";
+"";
+"Ex:  @owned sick named util     -- display Sick's objects matching \"util\"";
+"     @owned with $note !$letter -- display only notes that are not letters";
+named = "";
+inc = {};
+exc = {$exit};
+su = $string_utils;
+cu = $command_utils;
+ou = $object_utils;
+lu = $list_utils;
+myu = this.utils;
+pros = verb[1..2] == "@p";
+while (argstr && (m = rmatch(argstr, "%(^%| +%)%(named%|with%) +%(.+%)$")))
+    argstr[m[1]..m[2]] = "";
+    if ((pstr = substitute("%2", m)) == "named")
+        named = substitute("%3", m);
+        player:tell("named=", su:print(named));
+    elseif (pstr == "with")
+        for s in (su:words(substitute("%3", m)))
+            if ((length(s) > 3) && (index("prospectus", s) == 1))
+                pros = 1;
+            elseif (s == "exits")
+                exc = setremove(exc, $exit);
+            elseif (cu:object_match_failed(o = player:my_match_object((ex = s && 
+("!" == s[1])) ? s = s[2..length(s)] | s), s))
+                return;
+            elseif (ex)
+                exc = setadd(exc, o);
+                inc = setremove(inc, o);
+            else
+                inc = setadd(inc, o);
+                exc = setremove(exc, o);
+            endif
+        endfor
+    else
+        return player:tell(pstr, ": huh?");
+    endif
+endwhile
+if (argstr ? cu:player_match_failed(who = su:match_player(argstr), argstr) | (who 
+= player))
+    return;
+elseif (typeof(stuff = who.owned_objects) != LIST)
+    return player:tell(su:nn(who), " owns too much stuff to keep in a list.");
+endif
+data = keys = {};
+nsize = tsize = 0;
+slen = blen = olen = nlen = llen = 0;
+for o in (stuff)
+    tsize = tsize + (size = o.object_size[1]);
+    if (((!named) || this:owned_matches(named, o)) && ((!(inc || exc)) || this:owned_includes(o, 
+inc, exc)))
+        nsize = nsize + size;
+        keys = listinsert(keys, size, i = lu:find_insert(keys, size));
+        slen = max(slen, length(size = size ? myu:byte_string(size) | "-?-"));
+        bits = tostr(" r"[o.r + 1], " f"[o.f + 1], " W"[o.w + 1]);
+        blen = max(blen, ((o.w * 3) || (o.f * 2)) || o.r);
+        olen = max(olen, length(onum = tostr(o)));
+        nlen = max(nlen, length(name = " !"[is_clear_property(o, "description") + 
+1] + o.name));
+        pros && (llen = max(llen, length(loc = this:owned_location(o))));
+        data = listinsert(data, pros ? {myu:verb_count(o) || "", length(children(o)) 
+|| "", size, bits, onum, name, loc} | {size, bits, onum, name});
+    endif
+endfor
+tobj = length(stuff);
+nobj = length(data);
+format = tostr(pros ? "`vrbs:4R' `kids:4R' " | "", "`size:", slen, "R' ` :", blen 
++ 1, "'` :", olen, "R' ` :", nlen, "'", @pros ? {" : ` :", llen, "'"} | {});
+    player:tell("format=", format);
+    text = data && listdelete(myu:generate_table(format, data), 2);
+    header = tostr("Showing ", inc ? "descendants of " + su:nanl(inc) | "all objects", 
+named ? (" matching \"" + named) + "\"" | "", " owned by ", su:nn(who), exc ? ", 
+excluding descendants of " + su:nanl(exc) | "", ":");
+    footer = tostr("--- ", @(nobj == tobj) ? {} | {nobj, " of "}, tobj, (tobj == 
+1) ? " object " | " objects ", (nobj == 1) ? "uses " | "use ", myu:byte_string(nsize), 
+@(nsize == tsize) ? {} | {" of ", myu:byte_string(tsize), " total usage "}, " of 
+", myu:byte_string($quota_utils:get_quota(who)), " quota.");
+    player:tell_lines_suspended({header, "", @text, footer});
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp utils
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

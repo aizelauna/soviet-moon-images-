@@ -1,0 +1,76 @@
+<HTML>
+<HEAD>
+<TITLE>Consumable Storage Room</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Consumable Storage Room (#801)</H3>
+(an instance of <A HREF="HTM_000003.htm">generic room</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIt looks somewhat like a crazy bar with kitchen elements in it as well. There are lots and lots of shelves, nooks, crannies, and tables for storing all sorts of consumable objects.
+<BR>
+<BR>
+You see <A HREF="HTM_000500.htm">Generic Consumable I</A>, <A HREF="HTM_000522.htm">Generic Drink Object</A>, <A HREF="HTM_000828.htm">Generic Drug Object</A> and <A HREF="HTM_002384.htm">big glass of Self</A> here.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+is_unlocked_for:
+<pre>
+return $object_utils:isa(args[1], this.consumable_root);
+.
+
+</pre>
+<BR>
+available:
+<pre>
+if (((caller != this.consumable_root) && (caller != this.drinkable_root)) && (caller 
+!= this.drug_root))
+    return E_PERM;
+endif
+contents = $set_utils:diff(this.contents, {this.consumable_root, this.drinkable_root, 
+this.drug_root});
+if (contents)
+    for cons in (contents)
+        if (caller == this.drinkable_root)
+            if ($object_utils:isa(cons, this.drinkable_root))
+                return cons;
+            endif
+        elseif (caller == this.drug_root)
+            if ($object_utils:isa(cons, this.drug_root))
+                return cons;
+            endif
+        else
+            if (!$object_utils:isa(cons, this.drinkable_root))
+                return cons;
+            endif
+        endif
+    endfor
+    return #-1;
+else
+    return #-1;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp consumable_root
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp drinkable_root
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp drug_root
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

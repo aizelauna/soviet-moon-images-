@@ -1,0 +1,67 @@
+<HTML>
+<HEAD>
+<TITLE>Avon</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Avon (#2177)</H3>
+(an instance of <A HREF="HTM_001223.htm">Generic Lycanthropic Thespian PC</A> made by <A HREF="HTM_002177.htm">Avon</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspHair and eyes obsidian. Expression ironic. Upper lip sensuous with a chiselled edge, lower lip austere. No movements wasted, but his stillness is not peace. You feel his withheld energy, like a fine shiver of electicity. day A civilized man, he has survived the savage chaos of other worlds in another time. He has come here because he sees Bellona as his for the taking.
+<BR>
+<BR>
+Avon is carrying <A HREF="HTM_000901.htm">a coil of darkness</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000569.htm">Orientalism</A>.
+<BR>
+<BR>
+<BR>
+Avon owns <A HREF="HTM_000569.htm">Orientalism</A> <A HREF="HTM_000570.htm">a virtual Sybarite expiring of a surfeit of textual chocolate</A> <A HREF="HTM_000583.htm">chocolate truffles</A> <A HREF="HTM_000627.htm">a reflective black cabinet</A> <A HREF="HTM_000989.htm">a Hallucination of Cioccolato</A> <A HREF="HTM_000993.htm">leathers</A> <A HREF="HTM_000997.htm">Mama Hunch</A> <A HREF="HTM_002177.htm">Avon</A> <A HREF="HTM_002202.htm">The Pickpocket</A> <A HREF="HTM_002222.htm">Bolthole</A> <A HREF="HTM_002255.htm">Proto-Generic Aspect Seated Secured Post-Apocalypse Room</A> <A HREF="HTM_002451.htm">a fancy case with fractured glass</A> <A HREF="HTM_002492.htm">east</A> <A HREF="HTM_002493.htm">west</A> <A HREF="HTM_002463.htm">a thick soft robe</A> <A HREF="HTM_002497.htm">a luxurious kaftan</A> <A HREF="HTM_002448.htm">a plate of fruit</A> <A HREF="HTM_002306.htm">a laser probe</A> <A HREF="HTM_000441.htm">b</A> <A HREF="HTM_000436.htm">c</A> <A HREF="HTM_002424.htm">f</A><BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+look_self:
+<pre>
+"Copied from Generic Scorpion Player Class (#153):look_Self by Calkins (#150) Sun 
+Feb  5 23:17:36 1995 PST";
+if ((player.location != this.location) && (this.remote_see_msg != "YES"))
+    player:tell("You are too far away to see that player.");
+    return;
+endif
+pass(@args);
+if (this.ooh_msg == "on")
+    player:tell($string_utils:pronoun_sub(this.body_msg));
+elseif (this.ooh_msg == "silver")
+    player:tell($string_utils:pronoun_sub(this.silver_msg));
+endif
+"ooh by Avon (#2177)";
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp body_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ooh_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp silver_msg
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

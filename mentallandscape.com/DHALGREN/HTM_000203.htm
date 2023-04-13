@@ -1,0 +1,76 @@
+<HTML>
+<HEAD>
+<TITLE>Twisted Oak Tree</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Twisted Oak Tree (#203)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000095.htm">legba</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspSet in a circle of cobbles, ringed in a decorative fence is an oak.  Its trunk is 
+big enough to hide behind and its branches are gnarled and twisted.  Despite the 
+toxicity of the air and the acid rain, a few leaves remain on the tree, but these 
+are far outnumbered by the strange objects that have been hung or nailed all over 
+it, possibly as offerings to local tree gods.
+&nbsp&nbsp&nbsp&nbsp&nbsp  There's a hammer and plenty of nails lying around.  Feel free to leave your own 
+offering.  You never know when you might need the favor of a tree spirit.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000159.htm">Crumbling Foundation</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+description:
+<pre>
+nailed_text = "";
+if (length(this.nailed) != 0)
+    nailed_text = ("You see " + $string_utils:english_list(this.nailed)) + " nailed 
+to the tree.";
+endif
+return {@this.description, nailed_text};
+.
+
+</pre>
+<BR>
+nail:
+<pre>
+this.nailed = setadd(this.nailed, dobjstr);
+this.location:announce_all(player.name, " nails ", dobjstr, " to the tree.");
+.
+
+</pre>
+<BR>
+@purge:
+<pre>
+if (player == this.owner)
+    this.nailed = {};
+    player:tell("You've cleaned the clutter of offerings from the tree.");
+    this.location:announce(player.name, " has cleaned all the offerings from the 
+tree.");
+else
+    this.location:announce_all(player.name, " has attempted to take the offerings 
+from the tree.  What a maroon.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp nailed
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

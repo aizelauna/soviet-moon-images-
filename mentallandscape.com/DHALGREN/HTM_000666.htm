@@ -1,0 +1,285 @@
+<HTML>
+<HEAD>
+<TITLE>Grim Reaper</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Grim Reaper (#666)</H3>
+(an instance of <A HREF="HTM_000192.htm">Generic Automaton</A> made by <A HREF="HTM_000096.htm">Dredful</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA dark presence. Regarding you with hollow eyes, the figure in black shifts with a dry rustle of clacking bones. A menacing step towards you, gleaming scythe held at ready to strike those whose time has come.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001178.htm">Attic</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@goners:
+<pre>
+"Syntax: @goners from Grim Reaper";
+"";
+"Displays all currently reapable players who haven't logged in for greater than one 
+month, broken down by months unconnected.";
+pn = abs(player.linelen);
+player:tell("Showing reapable players, generated ", player:ctime(this.last_run), 
+":");
+player:tell($string_utils:space(pn, "-"));
+player:tell_lines({"Information is in DD:HH:MM:SS format.", "D = has a description, 
+O = owns objects, N = never connected"});
+for ind in [1..length(this.reapable)]
+    suspend(0);
+    if (set = this.reapable[ind])
+        if (ind != 6)
+            player:tell($string_utils:center(tostr(" Not logged in > ", ind, " month", 
+(ind == 1) ? "" | "s", " and < ", ind + 1, " months "), pn, "="));
+        else
+            player:tell($string_utils:center(tostr(" Not logged in > 6 months "), 
+pn, "="));
+        endif
+        newset = {};
+        for dude in (this:sorted(set))
+            nl = (pn - 38) / 2;
+            cleard = (!is_clear_property(dude[1], "description")) ? "D" | " ";
+            owned = setremove(dude[1].owned_objects, dude[1]) ? "O" | " ";
+            never = is_clear_property(dude[1], "first_connect_time") ? "N" | " ";
+            newset = {@newset, tostr($string_utils:left($string_utils:nn(dude[1]), 
+nl)[1..nl], cleard, owned, never, $string_utils:right(tostr(" => ", $time_utils:dhms(dude[2])), 
+15))};
+        endfor
+        player:tell_lines({@$string_utils:columnize(newset, 2), ""});
+    else
+        player:tell("None not logged in greater than ", ind, " month", (ind == 1) 
+? "" | "s", (ind == 6) ? "." | tostr(" and less than ", ind + 1, " months."));
+    endif
+endfor
+player:tell($string_utils:space(pn, "-"));
+.
+
+</pre>
+<BR>
+sweep:
+<pre>
+if (!$perm_utils:controls(caller_perms(), this))
+    return E_PERM;
+endif
+if ($code_utils:task_valid(this.sweep_task))
+    kill_task(this.sweep_task);
+endif
+fork sweeper (0)
+    while (this.running)
+        this.reapable = {{}, {}, {}, {}, {}, {}};
+        for victim in (players())
+            if (!(victim in this.exempt))
+                time = time() - victim.last_disconnect_time;
+                if (ind = $math_utils:div(time, (24 * 3600) * 30))
+                    ind = (ind > 6) ? 6 | ind;
+                    this.reapable[ind] = setadd(this.reapable[ind], victim);
+                endif
+            endif
+            $command_utils:suspend_if_needed(0);
+        endfor
+        this.last_run = time();
+        suspend(this.sweep_delay);
+    endwhile
+endfork
+this.sweep_task = sweeper;
+.
+
+</pre>
+<BR>
+sorted:
+<pre>
+set = args[1];
+newset = {};
+for d in (set)
+    newset = {@newset, {d, time() - d.last_disconnect_time}};
+endfor
+return $list_utils:sort_alist(newset, 2);
+.
+
+</pre>
+<BR>
+@check-email:
+<pre>
+"Checks through players() for email addresses that match what $registration_db thinks 
+they have.";
+if (!$perm_utils:controls(player, this))
+    player:tell(E_PERM);
+    return;
+endif
+player:tell("Generating report...");
+blank_email = not_match = not_in_db = dual_db = {};
+for who in (players())
+    if ((!$object_utils:isa(who, $guest)) && (!(who in {$no_one, $hacker, $housekeeper, 
+$quota})))
+        if (info = $registration_db:get_player(who))
+            if (length(info) > 1)
+                dual_db = {@dual_db, who};
+            elseif (info[1][1] != who.email_address)
+                not_match = {@not_match, who};
+            endif
+        else
+            not_in_db = {@not_in_db, who};
+        endif
+        if (!who.email_address)
+            blank_email = {@blank_email, who};
+        endif
+        $command_utils:suspend_if_needed(0);
+    endif
+endfor
+if (dual_db)
+    player:tell("Players found with more than one email in $registration_db: ", $string_utils:nanl(dual_db));
+    player:tell("----------");
+endif
+if (not_match)
+    player:tell("Players found with email addresses not matching $registration_db: 
+", $string_utils:nanl(not_match));
+    player:tell("----------");
+endif
+if (not_in_db)
+    player:tell("Players found who aren't in $registration_db: ", $string_utils:nanl(not_in_db));
+    player:tell("----------");
+endif
+if (blank_email)
+    player:tell("Players found with blank .email_address: ", $string_utils:nanl(blank_email));
+    player:tell("----------");
+endif
+full = $set_utils:union(dual_db, not_match, not_in_db, blank_email);
+fixed = $set_utils:diff(this.no_email, full);
+new = $set_utils:diff(full, this.no_email);
+if (new)
+    player:tell("New problems since the last run of this verb: ", $string_utils:nanl(new));
+    player:tell("----------");
+endif
+if (fixed)
+    player:tell("Fixed since the last run of this verb: ", $string_utils:nanl(fixed));
+    player:tell("----------");
+endif
+this.no_email = full;
+player:tell("-- Finished");
+.
+
+</pre>
+<BR>
+@reap:
+<pre>
+"Gets rid of players completely and cleanly. Does lots of checks first. Lots of places 
+to opt out of the process before any damage is done.";
+if (!player.wizard)
+    player:tell(E_PERM);
+    return;
+endif
+victim = $string_utils:match_player(dobjstr);
+if ($command_utils:player_match_failed(victim, dobjstr))
+    return;
+endif
+nvictim = $string_utils:nn(victim);
+ind = 0;
+for set in [1..length(this.reapable)]
+    ind = (victim in this.reapable[set]) ? set | ind;
+endfor
+if (!ind)
+    msg = tostr(nvictim, " has not been marked as reapable by the Grim Reaper as 
+of ", player:ctime(this.last_run), ". Continue anyway?");
+else
+    if (ind != 6)
+        msg = tostr(nvictim, " has not logged in > ", ind, " month", (ind == 1) ? 
+"" | "s", " and < ", ind + 1, " months.");
+    else
+        msg = tostr(nvictim, " has not logged in > 6 months.");
+    endif
+    msg = msg + " Continue?";
+endif
+if (!$command_utils:yes_or_no(msg))
+    return;
+endif
+if (length(email = $registration_db:get_player(victim)) > 1)
+    player:tell("");
+    player:tell(nvictim, " has multiple email addresses. Will remove all occurences 
+of ", victim.name, " in $registration_db.");
+endif
+if (all_seconds = $local.second_char_registry:all_second_chars(victim))
+    if (!$command_utils:yes_or_no(tostr(nvictim, " is a registered second character 
+of: ", $string_utils:nanl(setremove(all_seconds, victim)), ". If you continue, the 
+association will be removed, but it might be wise to abort and check to see how idle 
+the other characters are first. Continue?")))
+        return;
+    endif
+endif
+suspend(0);
+if (owned = setremove(victim.owned_objects, victim))
+    player:tell("");
+    if (!$command_utils:yes_or_no(tostr(nvictim, " owns objects. If you continue, 
+they will be @chowned to $hacker. The .orphan property of the Grim Reaper will keep 
+a list of these objects. It is probably better to abort now and take care of the 
+objects by hand first, then reap. Continue?")))
+        return;
+    endif
+    for thing in (owned)
+        $wiz_utils:set_owner(thing, $hacker);
+    endfor
+    this.orphans = {@this.orphans, {nvictim, owned}};
+endif
+suspend(0);
+if (email)
+    for set in (email)
+        addr = set[1];
+        who = set[2];
+        nind = $list_utils:iassoc(victim, who);
+        if (length(who[nind]) > 1)
+            who[nind][2] = tostr("Reaped ", $time_utils:ddmmyy(time()));
+        else
+            who[nind] = {@who[nind], tostr("Reaped ", $time_utils:ddmmyy(time()))};
+        endif
+        $registration_db:insert(addr, who);
+    endfor
+endif
+if (all_seconds)
+    $local.second_char_registry:unsecond_char(victim, setremove(all_seconds, victim)[1]);
+endif
+if (ind)
+    this.reapable[ind] = setremove(this.reapable[ind], victim);
+endif
+suspend(0);
+$recycler:_recycle(victim);
+player:tell("With a flash of steel, and an almost soundless slice through the air, 
+", this.name, " takes its latest victim, ", nvictim, ".");
+this.location:announce(this.name, " quickly whirls its scythe through insubstantiality 
+and takes another victim.");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp reapable
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp exempt
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sweep_task
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp sweep_delay
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp last_run
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp no_email
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp orphans
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp running
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp problem_email
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

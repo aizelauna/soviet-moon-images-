@@ -1,0 +1,109 @@
+<HTML>
+<HEAD>
+<TITLE>Postmodern Laboratory</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Postmodern Laboratory (#320)</H3>
+(an instance of <A HREF="HTM_000262.htm">Generic Secured Post-Apocalypse Room</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspExotic scientific apparatus fills the room.  Purple arcs of electricity play across porcelain insulators, generating ozone.  A walnut tripod supports a glass retort in which a single orange mushroom of immense size grows.  Its pale green exhalations condense in the neck and drip into a receiving vessel.  You see a well-locked door to the south.
+<BR>
+<BR>
+You see <A HREF="HTM_000556.htm">Steamer Trunk</A>, <A HREF="HTM_001595.htm">Robin</A>, <A HREF="HTM_000790.htm">Trevor</A> and <A HREF="HTM_000150.htm">Calkins</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ south ] <A HREF="HTM_000328.htm">Landing</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@brain_transplant:
+<pre>
+old = dobj;
+new = iobj;
+if ((old.location != this) || (new.location != this))
+    player:tell("The two subjects are not in the laboratory.");
+    return;
+endif
+player:tell("You are about to transfer the mind of ", old.name, " into ", new.name, 
+", wiping out ", new.name, "'s current personality.");
+if (!$command_utils:yes_or_no("Are you sure?"))
+    player:tell("No transplate performed.");
+    return;
+endif
+this:announce_all("The lights dim as ", player.name, " throws a switch.  ", old.name, 
+" and ", new.name, " are enveloped in an ionized corona.  \"This has to work this 
+time!\", ", player.name, " cries.  \"I just can't stand another $5000 electric bill!\"");
+new.states = old.states;
+new.responses = old.responses;
+new.transitions = old.transitions;
+new.inputs = old.inputs;
+new.descriptions = old.descriptions;
+new.state = old.state;
+new.input = old.input;
+new.response = old.response;
+new.transition = old.transition;
+new:set_description(old.description);
+new.alias_names = old.alias_names;
+new.alias_values = old.alias_values;
+this:announce_all(new.name, " twitches.");
+.
+
+</pre>
+<BR>
+@topology:
+<pre>
+this:print_all_rooms(#3);
+.
+
+</pre>
+<BR>
+print_all_rooms:
+<pre>
+room = args[1];
+player:tell(room, " ", room.name);
+player:tell_lines(room:description());
+if (room.f && $command_utils:yes_or_no("continue?"))
+    c = children(room);
+    for r in (c)
+        this:print_all_rooms(r);
+        suspend(0);
+    endfor
+endif
+.
+
+</pre>
+<BR>
+print_all_exits:
+<pre>
+exit = args[1];
+player:tell(exit, " ", exit.name);
+player:tell(" From ", exit.source, " to ", exit.dest);
+if (exit.f && $command_utils:yes_or_no("continue?"))
+    c = children(exit);
+    for r in (c)
+        this:print_all_exits(r);
+        suspend(0);
+    endfor
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

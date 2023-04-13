@@ -1,0 +1,128 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Edible Object</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Edible Object (#101)</H3>
+(an instance of <A HREF="HTM_000261.htm">Generic Boomerang Thing</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe it becomes this raining sensual object.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Edible Object (GEO) is the simplest of a class of edible, feelable, smellable 
+objects.  After making a child of this object, you set the following messages:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp   smell_msg          - what player reads when he does "smell <object>"
+&nbsp&nbsp&nbsp&nbsp&nbsp   taste_msg          - what player reads when he does "taste <object>"
+&nbsp&nbsp&nbsp&nbsp&nbsp   feel_msg           - what player reads when he does "feel <object>"
+&nbsp&nbsp&nbsp&nbsp&nbsp   eat_msg            - what player reads when he does "eat <object>"
+&nbsp&nbsp&nbsp&nbsp&nbsp   drink_msg          - what player reads when he does "drink <object>"
+&nbsp&nbsp&nbsp&nbsp&nbsp   smoke_msg
+&nbsp&nbsp&nbsp&nbsp&nbsp   
+&nbsp&nbsp&nbsp&nbsp&nbsp   osmell_msg         - what others see when player smells the object.
+&nbsp&nbsp&nbsp&nbsp&nbsp   otaste_msg                  etc, etc...
+&nbsp&nbsp&nbsp&nbsp&nbsp   ofeel_msg
+&nbsp&nbsp&nbsp&nbsp&nbsp   oeat_msg
+&nbsp&nbsp&nbsp&nbsp&nbsp   odrink_msg
+&nbsp&nbsp&nbsp&nbsp&nbsp   osmoke_msg
+&nbsp&nbsp&nbsp&nbsp&nbsp   
+&nbsp&nbsp&nbsp&nbsp&nbsp   delayed_eat_msg    - delayed action after eating, drinking or smoking.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspIf delayed_eat_msg is a string, it will be displayed to the player after 12 seconds. 
+ If it is a list of strings, randomly selected strings will be displayed to the user 
+starting in 12 seconds and spaced 15 seconds apart.  In that case, the number of 
+messages shown will be the square root of the length of the list of strings.  The 
+chances of seeing a duplicate are then fairly rare.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspGEO is a child of Dred's Generic Boomerang Object.  See help for that generic to 
+set automatic return-to-home behavior for edible objects.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+smell taste feel eat drink smoke:
+<pre>
+if ((this.location == player) || (this.location == player.location))
+    msg = verb + "_msg";
+    omsg = "o" + msg;
+    if (this.(msg))
+        player:tell($string_utils:pronoun_sub(this.(msg)));
+        if (this.(omsg))
+            this.location:announce(player.name, " ", $string_utils:pronoun_sub(this.(omsg)));
+        else
+            this.location:announce(player.name, " ", verb, "s ", this.name, ".");
+        endif
+        if ((((verb == "eat") || (verb == "drink")) || (verb == "smoke")) && this.delayed_eat_msg)
+            fork (12)
+                if (typeof(this.delayed_eat_msg) == STR)
+                    player:tell($string_utils:pronoun_sub(this.delayed_eat_msg));
+                elseif (typeof(this.delayed_eat_msg) == LIST)
+                    n = sqrt(length(this.delayed_eat_msg));
+                    for i in [1..n]
+                        dmsg = this.delayed_eat_msg[random(length(this.delayed_eat_msg))];
+                        player:tell($string_utils:pronoun_sub(dmsg));
+                        suspend(15);
+                    endfor
+                endif
+            endfork
+        endif
+    else
+        player:tell(this.name, " has nothing to ", verb);
+        this.location:announce(player.name, " tries unsuccessfully to ", verb, " 
+", this.name, ".");
+    endif
+else
+    player:tell("You are not close enough to ", this.name, " to ", verb, " it.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp smell_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp taste_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp feel_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp eat_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp osmell_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp otaste_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ofeel_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oeat_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp delayed_eat_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp smoke_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp osmoke_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000093.htm">nutmeg fruit</A> <A HREF="HTM_000278.htm">caviar</A> <A HREF="HTM_000934.htm">generic lunch</A> <A HREF="HTM_000966.htm">a big black spider</A> <A HREF="HTM_000967.htm">Red Pill</A> <A HREF="HTM_000968.htm">Blue Pill</A> <A HREF="HTM_000818.htm">Silver Hookah</A> <A HREF="HTM_000870.htm">tiramisu</A> <A HREF="HTM_000583.htm">chocolate truffles</A> <A HREF="HTM_000985.htm">cassatta alla Siciliana</A> <A HREF="HTM_000984.htm">tartes</A> <A HREF="HTM_002448.htm">a plate of fruit</A> <A HREF="HTM_002544.htm">partly rotted potato</A> <A HREF="HTM_002545.htm">mostly rotted potato</A> <A HREF="HTM_002546.htm">sickly brown mush</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

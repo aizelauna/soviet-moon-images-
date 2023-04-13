@@ -1,0 +1,132 @@
+<HTML>
+<HEAD><TITLE>Narrow Alley</TITLE></HEAD>
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99>
+<FONT face="ariel,helvetica">
+<P>
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH="640">
+<BR>
+<B>Narrow Alley</B>
+<P>
+<PRE>
+Generic Post-Apocalypse Room (#110):
+----
+The Generic Post-Apocalypse Room Class (PARC) allows room descriptions and
+ details to depend on the time of day and the weather.  It has eight settable
+ messages:
+
+ day_msg       - substituted for %daytime in the room description
+                 during the hours of 9am to 6pm.
+ evening_msg   - substituted for %daytime from 6pm to 9pm.
+ night_msg     - substituted for %daytime from 9pm to 6am.
+ morning_msg   - substituted for %daytime from 6am to 9am.
+
+ cool_msg      - substituted for %weather in the room description
+                 when the weather is cool.
+ warm_msg      - substituted for %weather when it is warm.
+ raining_msg   - substituted for %weather when it is warm and raining.
+ snowing_msg   - substituted for %weather when it is cold and snowing.
+
+%weather is substituted first, then %daytime.  So the weather messages can
+ contain %daytime.
+Time of day messages are useful indoors and out.  Weather messages are most
+ often used in outdoor rooms, but an indoor room's description could contain a
+ sentence like:
+
+   Through an open window, %daytime %weather.
+
+Which, given the right message definitions, could result in:
+
+   Through an open window, the night-time sky is silhouetted by a snow-covered
+ fire escape.
+
+PARC also supports basic details that can be looked at:
+
+ @det*ail <name> is <string>   - add or replace a detail description
+ @rmd*etail <name>             - remove a detail
+ @details                      - show all the detail names
+
+Note that detail strings can contain %weather and %daytime.  It is often wise
+ to keep the associated time and weather messages simple (like their default
+ values) so they can be useful in a variety of detail strings as well as in
+ the room description.
+PARC is a child of the Generic Ambient Noise Room, so see also: help #176
+
+Generic Ambient Noise Room (#176):
+----
+Settable properties:
+
+.amb_delay - this is the delay between random announcements, in seconds.
+             The default is 5 minutes, or 300 seconds.
+.amb_noise - this is the list of random messages you wish to display.
+.active    - set to 1 (default) when runs. Set to 0 to turn off ambient noise
+             behavior entirely.
+
+All you need to do is @notedit the .amb_noise property and enter in all
+ possible messages you want announced. The order doesn't matter.
+
+Then, whenever a player enters, the announcements will start and appear every
+ .amb_delay seconds. If the .amb_noise property is empty, nothing will happen
+ and the room will act like a normal blank room would.
+Note - the first noise message appears 30 seconds after the first player
+ enters.
+----
+Commands:
+
+@restart
+
+The owner of the room can call this verb to restart the ambient noise tasks.
+ Mostly in the case when .active was set to 0 for a while, then set back to 1
+ while there are people still in the room.
+</PRE>
+<P>
+You see an old wooden box with a broken lid.<BR>
+Contents:<BR>
+  Generic <A HREF="Dhalgren_GSPC.htm">Scorpion Player Class</A> (#153)<BR>
+  Generic <A HREF="Dhalgren_PARC.htm">Post-Apocalypse Room</A> (#110)<BR>
+  Generic <A HREF="Dhalgren_Automaton.htm">Automaton</A> (#192)<BR>
+  Generic <A HREF="Dhalgren_GEO.htm:>Edible Object</A> (#101)<BR>
+  Generic <A HREF="Dhalgren_Boomerang.htm">Boomerang Thing</A> (#261)<BR>
+  Generic Secured Post-Apocalypse Room (#262)<BR>
+  Generic Room with Stacking (#563)<BR>
+  Generic Wandering Automaton (#502)<BR>
+  Generic Auditorium (#562)<BR>
+  Generic Room with Seats (#955)<BR>
+  Generic Scripted Object (#826)<BR>
+  Generic Transparent Exit (#1053)<BR>
+  Generic Moon-phased Wearable (#859)<BR>
+  Generic Performance Room (#1998)<BR>
+  Generic Lycanthropic Thespian PC (#1223)<BR>
+  Generic Room with Surfaces (#2061)<BR>
+  Generic Costume (#1226)<BR>
+  Generic Litter (#834)<BR>
+  Generic Listening Automaton (#790)<BR>
+  Generic Black Lotus Room (#2918)<BR>
+<P>
+You are in a narrow dark alley way between two brick buildings. The ground is
+ littered with trash, old newspapers, empty cans, bricks set up as a fireplace
+ with an arrangement of pipes over it. Beside it is an army messpan, inside
+ filled with dirty snow and ice. At the east end of the alley is a fence,
+<A HREF="Dhalgren_Waterfront.htm">behind</A> you is the street.
+
+</TD></TR></TABLE></CENTER>
+<P>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+<CENTER><TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH="640">
+<A HREF="Index.htm">Home</A>,
+<A HREF="Dhalgren.htm">Back to Dhalgren</A>
+</TD></TR></TABLE></CENTER>
+
+<P><BR><CENTER>Copyright © 1994, 2003 Don P. Mitchell.  All rights reserved.</CENTER>
+
+</FONT>
+</BODY>
+</HTML>

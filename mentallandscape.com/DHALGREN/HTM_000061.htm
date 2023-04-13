@@ -1,0 +1,522 @@
+<HTML>
+<HEAD>
+<TITLE>Help Database</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Help Database (#61)</H3>
+(an instance of <A HREF="HTM_000032.htm">Generic Help Database</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe object $help is the main help database.  For every help topic there is a corresponding property on $help, interpreted as follows:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp$help.(topic) = string           - one-line help text.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp$help.(topic) = {"*verb*",@args} - call this:verb(args,{}) to get text
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp$help.(topic) = any other list   - multi-line help text
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThere is also a "" property which applies in the case of `help' typed without any arguments.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSee the description of $generic_help for more detail.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+player_quota:
+<pre>
+return $player.ownership_quota;
+.
+
+</pre>
+<BR>
+prog_quota:
+<pre>
+return $prog.ownership_quota;
+.
+
+</pre>
+<BR>
+get_topic:
+<pre>
+text = pass(@args);
+if ((text != E_PROPNF) || (!valid(object = $string_utils:match_object(what = args[1], 
+player.location))))
+    return text;
+elseif (ohelp = (object = $string_utils:match_object(what, player.location)):help_msg() 
+|| object.help_msg)
+    "...geez. life is simple if we set -d...";
+    return {tostr(object.name, " (", object, "):"), "----", @(typeof(ohelp) == LIST) 
+? ohelp | {ohelp}};
+else
+    about = $object_utils:has_verb(object, "about");
+    return {tostr("Sorry, but no help is available on ", object.name, " (", object, 
+")."), tostr("Try `@examine ", what, "'", @about ? {" or `about ", what, "'"} | {}, 
+".")};
+endif
+.
+
+</pre>
+<BR>
+find_topics:
+<pre>
+topiclist = pass(@args);
+if (topiclist || (!args))
+    return topiclist;
+elseif (valid(o = $string_utils:match_object(what = args[1], player.location)))
+    return {what};
+else
+    return {};
+endif
+.
+
+</pre>
+<BR>
+full_index:
+<pre>
+text = {};
+for db in ($code_utils:help_db_list())
+    if ($object_utils:has_callable_verb(db, "index"))
+        text = {@text, @db:index({tostr(db.name, " (", db, ")")})};
+    endif
+endfor
+return text;
+.
+
+</pre>
+<BR>
+index_list:
+<pre>
+hdr = "Available Help Indices";
+text = {"", hdr, $string_utils:space(hdr, "-")};
+for db in ($code_utils:help_db_list())
+    if ($object_utils:isa(db, $generic_help))
+        for p in (properties(db))
+            if ((h = db.(p)) && ("*index*" in h))
+                text = {@text, tostr($string_utils:left(p, 14), " -- ", h[2] || db.name, 
+" (", db, ")")};
+            endif
+        endfor
+    endif
+endfor
+for p in (properties(this))
+    if (this.(p) && (this.(p)[1] == "*full_index*"))
+        return {@text, "", tostr($string_utils:left(p, 14), " -- ", "EVERYTHING")};
+    endif
+endfor
+return text;
+.
+
+</pre>
+<BR>
+wizard_list:
+<pre>
+wizzes = {#2, @$list_utils:randomly_permute(setremove($object_utils:leaves($wiz), 
+#2))};
+numwiz = length(wizzes);
+hlist = {"ArchWizard:", "Wizard" + ((numwiz == 2) ? ":" | "s:"), @$list_utils:make(max(0, 
+numwiz - 2), "")};
+slist = {};
+su = $string_utils;
+for i in [1..numwiz]
+    wiz = wizzes[i];
+    slist = {@slist, tostr(su:left(hlist[i], 13), su:left(wiz.name, 16), (wpi = wiz.public_identity.name) 
+? (" (a.k.a. " + wpi) + ")" | "")};
+endfor
+return slist;
+.
+
+</pre>
+<BR>
+dump_topic:
+<pre>
+if (((text = pass(@args)) != E_PROPNF) || ((!valid(object = $string_utils:match_object(what 
+= args[1], player.location))) || (!$object_utils:has_property(object, "help_msg"))))
+    return text;
+else
+    return {tostr(";;", $code_utils:corify_object(object), ".help_msg = $command_utils:read_lines()"), 
+@$command_utils:dump_lines((typeof(text = object.help_msg) == LIST) ? text | {text})};
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @locations
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @uptime
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @mailoptions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @sort-owned
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @verify-owned
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @add-owned
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @mail-options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp wizard-list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @wrap
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp full-index
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  index
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gen-index
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail-forwarding
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @pagelength
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @more
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp programming
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @forward
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @subscribe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @rn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @unsubscribe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @skip
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp negative_quota
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp zombie-messages
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp message-sequences
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp common_quota
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @recreate
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @linelength
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp room-messages
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @unrmmail
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @gaglist
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ::
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @comment
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @remove-entrance
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @remove-exit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @parents
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @contents
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp spoofing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp privacy
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @realm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @resident
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @examine
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp security
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @sweep
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @paranoid
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @check
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @reply
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @eject
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @quit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp whereis
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @suggest
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @idea
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @bug
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @typo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @renumber
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @notedit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp editors
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @prev
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @unlock_for_open
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @lock_for_open
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @opacity
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp container-messages
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @memory
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp "
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp :
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @lastlog
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @version
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp miscellaneous
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp insert
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp information
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ?
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp put
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp remove
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp burn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp letters
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp decrypt
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp encrypt
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp delete
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp erase
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp write
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp read
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp examine
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp hand
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp key-representation
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp keys
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @unlock
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @lock
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp locking
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp thing-messages
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp throw
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp take
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @messages
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp pronouns
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp exit-messages
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp messages
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp descriptions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @describe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @add-entrance
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @add-exit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp topology
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @classes
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @audit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @count
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @quota
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @create
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp tinymud
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @next
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @answer
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @rmmail
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @read
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @send
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mail
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @gripe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp creation
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @mail
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @listgag
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @ungag
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @gag
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp go
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @password
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @sethome
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @who
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp introduction
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp give
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp news
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gagging
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @dig
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @move
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp inventory
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @entrances
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @exits
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @gender
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @recycle
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @rename
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp containers
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp notes
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp look
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp drop
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp get
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp manipulation
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp rooms
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp movement
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp home
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp communication
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp say
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp whisper
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp page
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp emote
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp building
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp players
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp summary
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @edit-options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @editoptions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @add-feature
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @remove-feature
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @features
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp features
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @dump
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp me
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @rmalias
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @addalias
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp commands
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  name
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  alias
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @setprop
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @set
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @peek
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @subscribed
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @request-character
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp player-names
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @registerme
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @netforward
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @eject!
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gopher
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @builder-options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @builderoptions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @buildoptions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp @build-options
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp osummary
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

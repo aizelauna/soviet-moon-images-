@@ -1,0 +1,155 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Scripted Object</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Scripted Object (#826)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspYou don't see much. It's a block. It might be fun to play with?
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+After a moment, something begins to happen...
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA block. A script.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSpam your friends!
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe possibilities are endless.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Scripted Object is a simple toy.
+&nbsp&nbsp&nbsp&nbsp&nbspDescendents of it have a property, .script, a list of lines to be played to the room.
+&nbsp&nbsp&nbsp&nbsp&nbsp@notedit <object>.script to write your script.
+&nbsp&nbsp&nbsp&nbsp&nbspThe lag between lines may be changed with @setdelay <object> to <delay>. (The default 
+setting is 4).
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+play perf*orm:
+<pre>
+if (this.location != player)
+    player:tell($string_utils:pronoun_sub(this.not_wearing_msg));
+elseif ($code_utils:task_valid(this.runtask))
+    player:tell(this.name, " is already playing...");
+else
+    player:tell($string_utils:pronoun_sub(this.perform_msg));
+    player.location:announce($string_utils:pronoun_sub(this.operform_msg));
+    suspend(this.delay);
+    this:play_script(@args);
+    while (this.playing)
+        suspend(this.delay);
+    endwhile
+    player:tell($string_utils:pronoun_sub(this.finished_msg));
+    player.location:announce($string_utils:pronoun_sub(this.ofinished_msg));
+endif
+.
+
+</pre>
+<BR>
+stop halt:
+<pre>
+" interrupts the script in mid-performance... ";
+if (this.playing)
+    kill_task(this.runtask);
+    this.runtask = 0;
+    this.playing = 0;
+else
+    player:tell(this.name, " is quiet at the moment.");
+endif
+.
+
+</pre>
+<BR>
+play_script:
+<pre>
+this.playing = 1;
+fork runtask (0)
+    this.runtask = runtask;
+    script = this.script;
+    for line in (script)
+        if (this.location == player)
+            player.location:announce_all(line);
+        else
+            this.location:announce_all(line);
+        endif
+        suspend(this.delay);
+    endfor
+    this.playing = 0;
+endfork
+.
+
+</pre>
+<BR>
+@setdelay:
+<pre>
+" sets the interval between lines when the script is performed ";
+if (player != this.owner)
+    player:tell("You're not allowed to set the delay on this ", this.name);
+else
+    this.delay = tonum(iobjstr);
+    player:tell("You set the delay on ", this.name, " to ", this.delay, " seconds.");
+endif
+.
+
+</pre>
+<BR>
+credits:
+<pre>
+for line in (this.credits)
+    player:tell(this.name, " ::  ", line);
+endfor
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp script
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp not_wearing_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp delay
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp perform_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp operform_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp finished_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ofinished_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp runtask
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp playing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp credits
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000871.htm">Noh Mask</A> <A HREF="HTM_000876.htm">feather boa</A> <A HREF="HTM_001024.htm">a caress</A> <A HREF="HTM_001025.htm">a leather mask</A> <A HREF="HTM_001138.htm">Princess Mask</A> <A HREF="HTM_001150.htm">T'ai Chi Classics</A> <A HREF="HTM_001171.htm">a clod of earth</A> <A HREF="HTM_000937.htm">thought transformation</A> <A HREF="HTM_001222.htm">Inner Smile</A> <A HREF="HTM_001226.htm">Generic Costume</A> <A HREF="HTM_001233.htm">framework</A> <A HREF="HTM_001375.htm">testmovie</A> <A HREF="HTM_001081.htm">a star</A> <A HREF="HTM_002055.htm">ScriptedObject</A> <A HREF="HTM_002164.htm">battery-powered radio</A> <A HREF="HTM_002226.htm">pomegranate</A> <A HREF="HTM_000901.htm">a coil of darkness</A> <A HREF="HTM_002541.htm">whip</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,240 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Phone</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Phone (#2152)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_001460.htm">Gaijin</A>)
+<BR>
+<BR>
+<pre>
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000533.htm">Moss</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+reset:
+<pre>
+player:tell("You slam the phone, resetting its faltering circuitry.");
+this:reset_phone();
+.
+
+</pre>
+<BR>
+conn*ect reg*ister:
+<pre>
+switch = player:my_match_object(iobjstr);
+if ($object_utils:has_callable_verb(switch, "register_phone"))
+    phone = switch:lookup_phone(this);
+    if (phone == 0)
+        switch:register_phone();
+        player:tell("Your phone service has been established!");
+        this.switch = switch;
+    else
+        player:tell("Unable to establish phone service.  Already connected?");
+    endif
+else
+    player:tell("The object ", switch, " doesn't appear to be a phone switch.");
+endif
+.
+
+</pre>
+<BR>
+hear:
+<pre>
+"Listen to the phone.";
+who = this.location;
+from = args[1];
+who:tell("[from ", from, "] ", @args[2..length(args)]);
+.
+
+</pre>
+<BR>
+hangup:
+<pre>
+if (this.switch == 0)
+    player:tell("Hangup all you want, this phone isn't connected to any phone switch!");
+else
+    this.switch:hangup(this.circuit_id);
+    player:tell("You hang up ", this.name);
+    this:announce(player.name, " hangs the phone up.");
+    this.circuit_id = 0;
+endif
+.
+
+</pre>
+<BR>
+pickup answer:
+<pre>
+if (this.switch == 0)
+    player:tell("This phone must be connected to a phone switch via the .switch property.");
+else
+    cid = this.switch:circuit_lookup();
+    if (cid == 0)
+        player:tell("There's no one on the other end calling you...");
+        this:announce(player.name, " oddly answers a phone that isn't ringing.");
+    else
+        this.circuit_id = cid;
+        this.switch:circuit_connect_party(this.circuit_id);
+    endif
+endif
+.
+
+</pre>
+<BR>
+unconn*ect unreg*ister disconn*ect:
+<pre>
+if (this.switch == 0)
+    player:tell("This phone doesn't appear to be connected to a switch.");
+else
+    this.switch:unregister_phone();
+    this.switch = 0;
+    player:tell("Your phone service has been disconnected!");
+endif
+.
+
+</pre>
+<BR>
+call:
+<pre>
+if (this.circuit_id != 0)
+    player:tell("The phone is already in use.  Hangup first, duh!");
+elseif (this.switch == 0)
+    player:tell("This phone is not connected to a phone switch.");
+else
+    callee_phone = this.switch:lookup_phone(args[1]);
+    if (callee_phone == 0)
+        player:tell("You have attempted to reach a phone that is not connected to 
+this switch.");
+    else
+        player:tell("You pick up the phone and call ", callee_phone.name);
+        this:announce(player.name, " picks up a phone and places a call.");
+        cid = this.switch:circuit_id_alloc();
+        if (cid <= 0)
+            player:tell("All circuits are busy at this time. Please try your call 
+later.");
+            this.circuit_id = 0;
+        else
+            this.circuit_id = cid;
+            this.switch:place_call(cid, callee_phone);
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+ring:
+<pre>
+player:tell(this.name, " rings.");
+this:announce("You hear a phone ring.");
+.
+
+</pre>
+<BR>
+reset_phone:
+<pre>
+this.circuit_id = 0;
+.
+
+</pre>
+<BR>
+blab:
+<pre>
+"Speak into the phone.";
+if (this.circuit_id == 0)
+    player:tell("You speak into the phone, totally forgetting that for this to be 
+a meaningful conversation, you should call someone first.");
+else
+    if (this.switch == 0)
+        player:tell("Hmm.  The line has gone dead.  Perhaps the phone switch has 
+been bombed?");
+        this.circuit_id = 0;
+    else
+        player:tell("You speak into the phone.");
+        this.switch:pass_msg(this.circuit_id, dobjstr);
+    endif
+endif
+.
+
+</pre>
+<BR>
+add:
+<pre>
+if (this.switch == 0)
+    player:tell("This phone is not connected to a phone switch.");
+elseif (this.circuit_id == 0)
+    player:tell("You must already be online in order to add another party");
+else
+    player:tell("dobjstr is ", dobjstr);
+    callee_phone = this.switch:lookup_phone(dobjstr);
+    if (callee_phone == 0)
+        player:tell("You have attempted to reach a phone that is not connected to 
+this switch.");
+    else
+        player:tell("Pretending to know how phones work, you try to add ", callee_phone.name, 
+" to the line.");
+        cid = this.circuit_id;
+        this.switch:place_call(cid, callee_phone);
+    endif
+endif
+.
+
+</pre>
+<BR>
+>*:
+<pre>
+"Speak into the phone.";
+if (this.circuit_id == 0)
+    player:tell("You speak into the phone, totally forgetting that for this to be 
+a meaningful conversation, you should call someone first.");
+else
+    if (this.switch == 0)
+        player:tell("Hmm.  The line has gone dead.  Perhaps the phone switch has 
+been bombed?");
+        this.circuit_id = 0;
+    else
+        player:tell("You speak into the phone.");
+        msg = (verb[2..length(verb)] + "  ") + argstr;
+        this.switch:pass_msg(this.circuit_id, msg);
+    endif
+endif
+.
+
+</pre>
+<BR>
+line_noise:
+<pre>
+"Hear some sounds on a phone";
+who = this.location;
+who:tell("[Random sounds on ", this.name, "] ", @args);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp switch
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp circuit_id
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp caller_id
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_002425.htm">Cell Phone</A> <A HREF="HTM_002423.htm">Basic Phone</A> <A HREF="HTM_002560.htm">Secret Phone</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

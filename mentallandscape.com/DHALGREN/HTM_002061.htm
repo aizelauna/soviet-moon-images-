@@ -1,0 +1,229 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Room with Surfaces</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Room with Surfaces (#2061)</H3>
+(an instance of <A HREF="HTM_000955.htm">Generic Room with Seats</A> made by <A HREF="HTM_001457.htm">Trismegistos</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis child of the Generic Seated Room allows you to drop objects on seats, and program special messages for when this happens. Type 'help #2061' for more details.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspBy means of a simple (if slightly clunky) graft, this child of the Generic Room with 
+Seats (#955) enables you to simulate any number of surfaces in a room, on which objects 
+may be placed and people sit. Essentially, you can now drop objects on, and take 
+them from, seats -- except that these seats are not just for sitting any more.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspFor information on adding seats and the messages associated with players occupying 
+and vacating these seats, type 'help #955'. In fact, if you are not already familiar 
+with #955, you should read its help before proceeding with this message.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThis room adds two main features: 
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp      1) The verb d*rop/th*row can now be typed: "drop <object> on <seat>", in order 
+to add a carried object to the list of sitters for that object. Both objects and 
+players count toward saeted-limits on seats -- thus, a player may find a chair occupied 
+by an object, and be unable to sit there. The directed "drop" on this room also takes 
+the aliases "put" and "place".
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp      2) When you perform this directed drop, putting an object on a seat, a place 
+and oplace message will be displayed. These messages may be set for specific seats 
+with the verbs @place and @oplace <seat-name> is <"message">. Like the @sit, etc. 
+messages on #955, place and oplace messages take all standard substitutions plus 
+bed for the seat-name.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe main innovation in this room, though, will have to come from you the designer, 
+in adding seats and writing messages that reflect the new concept of seats-as-surface-locations. 
+For example:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@detail barbecue is "A large barbecue pit, with a blazing mesquite-wood fire going."
+&nbsp&nbsp&nbsp&nbsp&nbsp@add-seat barbecue for 2
+&nbsp&nbsp&nbsp&nbsp&nbsp@sitting barbecue is "Lashed to a spit, sheitter slowly <roasts> over the flaming 
+barbecue pit."
+&nbsp&nbsp&nbsp&nbsp&nbsp@place barbecue is "You lash a gasoline can to a spit and put it on the bed."
+&nbsp&nbsp&nbsp&nbsp&nbsp@sit barbecue is "You hop on a spit and let the flames of the bed lick your flesh."
+&nbsp&nbsp&nbsp&nbsp&nbsp@stand barbecue is "You untie yourself and get off the bed spit, slightly charred."
+&nbsp&nbsp&nbsp&nbsp&nbspetc.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspA future upgrade will add the option of specifying classes of object that each seat 
+may hold -- so you can create seats for players, tables for objects, bulletin boards 
+for notes, etc. Till then, enjoy and be sure to tell me of any bugs you find! -- 
+Trism
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+d*rop th*row put place:
+<pre>
+if (dobj in player.contents)
+    seat = this:match_seat(iobjstr);
+    if (seat)
+        if (length(this.seat_types) >= seat)
+            if ($object_utils:isa(dobj, toobj(this.seat_types[seat])))
+                typeOK = 1;
+            else
+                typeOK = 0;
+            endif
+        else
+            typeOK = 1;
+        endif
+        if (typeOK)
+            if (length(this.sitting[seat]) < this.seats[seat][2])
+                message = (length(this.place_msg) >= length(this.seats)) ? this.place_msg[seat] 
+| "You set %d down on the %seat.";
+                omessage = (length(this.oplace_msg) >= length(this.seats)) ? this.oplace_msg[seat] 
+| "You set %d down on the %seat.";
+                player:tell($string_utils:pronoun_sub(strsub(message, "%seat", this.seats[seat][1][1])));
+                this:announce($string_utils:pronoun_sub(strsub(omessage, "%seat", 
+this.seats[seat][1][1])));
+                dobj:moveto(this);
+                sitlist = this.sitting;
+                sitlist[seat] = setadd(sitlist[seat], dobj);
+                this:set_sitting(sitlist);
+            else
+                player:tell("There isn't enough room to put ", dobj.name, " there.");
+            endif
+        else
+            player:tell("That location will only take descendants of ", toobj(this.seat_types[seat]).name);
+        endif
+    else
+        player:tell("You can't put things there.");
+    endif
+else
+    player:tell("You don't have that!");
+endif
+.
+
+</pre>
+<BR>
+g*et,t*ake:
+<pre>
+if (oldseat = this:find_sitter(dobj))
+    sitlist = this.sitting;
+    sitlist[oldseat] = setremove(sitlist[oldseat], dobj);
+    this:set_sitting(sitlist);
+endif
+pass(@args);
+.
+
+</pre>
+<BR>
+@place @oplace:
+<pre>
+"Copied from Generic Room with Seats (#955):@sit by Dred (#100) Sat Oct  8 15:41:37 
+1994 EDT";
+"Usage: @sit/@osit/@stand/@ostand/@ositting <seat> is [message|default]";
+"";
+"Use this command to see and set the messages for your seats. With no indirect object 
+string (i.e. `@sit <seat> is'), you will be told the current message. If you use 
+the word `default' as the message, the message will be cleared back to default values. 
+Otherwise, the new [message] is set for that seat. Note that in addition to standard 
+pronoun substitutions, the word %seat will be replaced with the name of the seat 
+in your message.";
+if ((!$perm_utils:controls(valid(cp = caller_perms()) ? cp | player, this)) && (caller 
+!= this))
+    return E_PERM;
+endif
+if (seat = this:match_seat(dobjstr))
+    mesnam = tostr(verb[2..length(verb)], "_msg");
+    if (iobjstr)
+        if (iobjstr == "default")
+            player:tell("You clear the \"", mesnam[1..length(mesnam) - 4], "\" message 
+of seat \"", this.seats[seat][1][1], "\" back to default values.");
+            this.(mesnam)[seat] = "";
+        else
+            player:tell("You set the \"", mesnam[1..length(mesnam) - 4], "\" message 
+of seat \"", this.seats[seat][1][1], "\".");
+            this.(mesnam)[seat] = iobjstr;
+        endif
+    else
+        player:tell("The \"", mesnam[1..length(mesnam) - 4], "\" message of seat 
+\"", this.seats[seat][1][1], "\":");
+        if (!(msg = this.(mesnam)[seat]))
+            vlist = $string_utils:words(verb_info(#955, mesnam)[3]);
+            vind = mesnam in vlist;
+            msg = this.defaults[vind];
+        endif
+        player:tell(msg);
+    endif
+else
+    player:tell("Seat \"", dobjstr, "\" not found.");
+endif
+.
+
+</pre>
+<BR>
+@add-seat:
+<pre>
+nseats = length(this.seats);
+player:tell("Seat to hold what kind of object: (type #<parent number> or $<generic 
+class name>; blank to default to any kind)");
+type = $command_utils:read();
+type = toobj(type);
+if (!valid(toobj(type)))
+    type = #1;
+endif
+pass(@args);
+if (length(this.seats) > nseats)
+    this.place_msg = {@this.place_msg, "You place %d down on the %seat."};
+    while (length(this.seat_types) < length(this.seats))
+        this.seat_types = {@this.seat_types, ""};
+    endwhile
+    this.seat_types[length(this.seat_types)] = type;
+    this.oplace_msg = {@this.oplace_msg, "%N places %d down on the %seat."};
+endif
+.
+
+</pre>
+<BR>
+@rm-seat:
+<pre>
+nseats = length(this.seats);
+seat = this:match_seat(dobjstr);
+pass(@args);
+if ((length(this.seats) < nseats) && (length(this.place_msg) == nseats))
+    this.place_msg = listdelete(this.place_msg, seat);
+    this.oplace_msg = listdelete(this.oplace_msg, seat);
+endif
+if ((length(this.seats) < nseats) && (length(this.seat_types) == nseats))
+    this.seat_types = listdelete(this.seat_types, seat);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp place_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oplace_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp seat_types
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp seat_types;
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_001485.htm">River's Edge</A> <A HREF="HTM_001676.htm">AnArchie Bunker</A> <A HREF="HTM_001603.htm">Filling Station</A> <A HREF="HTM_001041.htm">ramshackle hut</A> <A HREF="HTM_002150.htm">Temple of Corwin</A> <A HREF="HTM_001256.htm">aghari's hollow</A> <A HREF="HTM_002215.htm">Ipsol's Alley</A> <A HREF="HTM_000874.htm">Machine Shop</A> <A HREF="HTM_002494.htm">crate</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

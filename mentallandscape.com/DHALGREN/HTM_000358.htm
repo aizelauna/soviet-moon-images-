@@ -1,0 +1,64 @@
+<HTML>
+<HEAD>
+<TITLE>Underground Pool</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Underground Pool (#358)</H3>
+(an instance of <A HREF="HTM_000110.htm">Generic Post-Apocalypse Room</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou are at the southern end of a long vaulted cavern; the northern end is lost in the darkness.  A pool of cool bluish water two or three feet deep is filled with baroque limestone formations and  white, eyeless fish.  A hemp rope is tied around a stalagmite and drops into a hole in the floor.  The rock ledge you stand on runs north along side the shallow pool.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe signs here will explain how players can communicate.
+<BR>
+<BR>
+You see <A HREF="HTM_000361.htm">sign</A> and <A HREF="HTM_000415.htm">sign2</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ down ] <A HREF="HTM_000349.htm">Crystal Cave</A>.
+You scramble over the lip of the whole and down the rope, knot by knot.  You notice the end of the rope seems oddly frayed.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp The rock ledge continues north.
+[ north ] <A HREF="HTM_000362.htm">Underground Maelstrom</A>.
+You walk north along the ledge.  A sound of rushing water becomes louder and louder as you proceed.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+emote:
+<pre>
+pass(@args);
+fork (3)
+    this:announce_all("Reflected in the pool, you see ", player.name, " ", argstr);
+endfork
+.
+
+</pre>
+<BR>
+say:
+<pre>
+pass(@args);
+fork (4)
+    this:announce_all("From the darkness, an echo of ", player.name, "'s voice says, 
+\"", argstr, "\"");
+endfork
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

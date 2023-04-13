@@ -1,0 +1,1660 @@
+<HTML>
+<HEAD>
+<TITLE>Site DB</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Site DB (#27)</H3>
+(an instance of <A HREF="HTM_000039.htm">Generic Database</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis object holds a db of places from which players have connected (see `help $site_db').
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe site blacklist and the graylist live as well (see `help blacklist').
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+find* _only _every*:
+<pre>
+return ((caller == this) || caller_perms().wizard) ? pass(@args) | E_PERM;
+.
+
+</pre>
+<BR>
+add:
+<pre>
+":add(player,site)";
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+who = args[1];
+domain = args[2];
+if (this:domain_literal(domain))
+    "... just enter it...";
+    l = this:find_exact(domain);
+    if (l == $failed_match)
+        this:insert(domain, {who});
+    elseif (!(who in l))
+        this:insert(domain, setadd(l, who));
+    endif
+else
+    "...an actual domain name; add player to list for that domain...";
+    "...then add domain itself to list for the next larger domain; repeat...";
+    "...  Example:  domain == foo.bar.edu:  ";
+    "...            enter #who  on foo.bar.edu list";
+    "...            enter `foo' on bar.edu list";
+    "...            enter `bar' on edu list";
+    if (!(dot = index(domain, ".")))
+        dot = length(domain) + 1;
+        domain = tostr(domain, ".", this.domain);
+    endif
+    prev = who;
+    while ($failed_match == (l = this:find_exact(domain)))
+        this:insert(domain, {prev});
+        if (dot)
+            prev = domain[1..dot - 1];
+            domain = domain[dot + 1..length(domain)];
+        else
+            return;
+        endif
+        dot = index(domain, ".");
+    endwhile
+    if (!(prev in l))
+        this:insert(domain, {@l, prev});
+    endif
+    return;
+endif
+.
+
+</pre>
+<BR>
+load:
+<pre>
+":load([start]) -- reloads site_db with the connection places of all players.";
+"This routine calls suspend() if it runs out of time.";
+"WIZARDLY";
+"...needs to be able to read .all_connect_places";
+if (!$perm_utils:controls(caller_perms(), this))
+    return E_PERM;
+endif
+plist = players();
+if (!args)
+    this:clearall();
+elseif (i = args[1] in plist)
+    plist[1..i - 1] = {};
+else
+    return E_INVARG;
+endif
+for p in (plist)
+    if (valid(p) && (is_player(p) && (!$object_utils:isa(p, $guest))))
+        "... player may be recycled or toaded during the suspend(),...";
+        "... guests login from everywhere...";
+        for c in (p.all_connect_places)
+            this:add(p, c);
+            if ($command_utils:running_out_of_time())
+                player:tell("...", p);
+                suspend(0);
+            endif
+        endfor
+    endif
+endfor
+.
+
+</pre>
+<BR>
+domain_literal:
+<pre>
+":domain_literal(string)";
+" => true iff string is a domain literal (i.e., numeric IP address).";
+if (10 <= (len = length(hnum = strsub(args[1], ".", ""))))
+    return tonum(hnum[1..9]) && tonum(hnum[6..len]);
+else
+    return tonum(hnum);
+endif
+"SLEAZY CODE ALERT";
+"... what I wanted to do was return tonum(strsub(args[1],\".\",\"\"))";
+"... but on a 32-bit machine, this has a 1 in 4294967296 chance of failing";
+"... (e.g., on \"42.94.967.296\", though I'll grant this particular example";
+"...  entails some very strange subnetting on net 42, to say the least).";
+"... So we do something that is guaranteed to work so long as internet";
+"... addresses stay under 32 bits --- a while yet...";
+"";
+"... As soon as we're sure match() is working, this will become a one-liner:";
+return match(args[1], "[0-9]+%.[0-9]+%.[0-9]+%.[0-9]+");
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    pass();
+    this:clearall();
+    this.domain = "localdomain";
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp domain
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  w
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  u
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  r
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  a
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  c
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ra
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  d
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  co
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  N
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  g
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  m
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  o
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  14
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  12
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  140
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.8
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  19
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  e
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ac
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  l
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ca
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  um
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  B
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  an
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  p
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ap
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  la
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.11
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  h
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  13
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  go
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  x
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  el
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.14
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  131
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.148.33
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ne
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Ha
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  131.218.2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  s
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  t
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  car
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  br
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nex
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  net
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  be
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ma
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Netc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ACF
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bel
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ge
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  AX
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cas
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mat
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ps
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bellevue-ip1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ell
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ums
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bellevue-ip2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  K
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Pr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bellevue-ip4
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  re
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ga
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bellevue-ip3
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  math
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cs.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  na
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  143
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rac
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ch
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.148.38
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  147
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ny
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  du
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  di
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  acc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  da
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ph
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  de
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  no
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ri
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  WI
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  po
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  col
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dec
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  chi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xer
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  un
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.148.38.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.25
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tra
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  f
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.17
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ucs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pro
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  198
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nam
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ka
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.255.3
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cc.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ro
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  geo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  v
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  to
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  141
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  toe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ad
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  por
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Acce
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  do
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ci
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pla
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  li
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pan
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  snca
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  par
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uhu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  chin
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  i
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Colo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  port4
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  or
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ba
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.12
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  143.44.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sas
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  OI
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  TA
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.5
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  har
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  netcom.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  en
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.22
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.8.7
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.6
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.148
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.11
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  va
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ic
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lis
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bellevue-ip6
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ucs.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  al
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  netcom1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cla
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fli
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  chu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cas.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  er
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  130
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  TS
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  st
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pho
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  csd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uw
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  si
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.171.4
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  me
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bos
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lam
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  15
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  se
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cun
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cam
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  j
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  y
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ya
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  198.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  is
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  it
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  16
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Sta
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  3
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  141.215.4
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  140.142.5
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ste
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.5
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.112.9
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.8
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.2.98.15
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  140.142.56
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  130.6
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  130.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  137
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.8.70.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.2.98.10
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  198.13
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.171
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  131.2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.59
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  166
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  port1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.2.98.16
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mil
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.23
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dis
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cha
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.6.7
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wv
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sim
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ui
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  and
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dat
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  datl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  141.215.6
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  as
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mac
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ei
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ru
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  stat
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  us
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  138
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.20
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  carl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  seq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pic
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M252-10
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ux
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ct
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ein
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.114
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M252-1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M252-9
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  umd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mod
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  stei
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.2.98.13
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cunyv
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gc.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uni
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M252-11
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  PSY
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  baS
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  scs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.1.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  trans
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uio
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.171.44
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  on
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sau
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  141.215.48.10
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cis
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.100.81.12
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  eng
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ucd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  199
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  at
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  can
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cant
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ac.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mack
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  log
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  basI
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.1.2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  UHC
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  clar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bio
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  unc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  141.215.48.19
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gw
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.223
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  scsun2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gen
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  arl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lamp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  132
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  com
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ua
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ROd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  PC.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  CC.C
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  in
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M252-12
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.100.81.11
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  165
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.206
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ho
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  s2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.100.81.10
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  s20
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  math.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  th
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mic
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  142
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  act
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Dia
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  132.20
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sli
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gui
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.12
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.12
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  aca
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dialu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mich
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.124.5
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.114.6
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pm03
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pm01
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sil
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ucs.u
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ef
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.2.9
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  193
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  netcom2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pm035
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.124.4
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.7
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M252
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pm035-0
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ki
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pm012-1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  access.m
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bro
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cisc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ade
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  le
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.124.50
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  131.218
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  131.211
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ser
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.171.41
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uncc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.9
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nau
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cisco-ts2-
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cw
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  geni
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M250
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mot
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M250-14
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hom
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rsl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  homer1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bra
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gol
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  homer0
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Mt
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  db
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  te
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cw-
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cisco-ts2-line1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tro
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  PORT-
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  umslt
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  disu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  PORT-00
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cisco-ts2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  PORT-01
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cisco-ts5
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.124.43.8
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  umslts1_1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.53.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  137.2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mac7
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  138.2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  13.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ke
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.124.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  homer2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.124.43.9
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gru
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  unix
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cl.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ms
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  snc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cisco-ts2-line7
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  for
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mer
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  198.7
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  carlo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  MSU
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.16
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  198.6
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  umslts1_2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  137.22
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.100.81.13
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  MR
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  msp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  msp81-1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ee
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ep
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  166.82.1.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gan
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  166.82.14
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  em
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ve
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  man
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  164
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pri
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M250-15
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  net2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.72
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  access.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nort
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mon
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.223.3
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  UHCL
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mont
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ed
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  andr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.10
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  its
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  smc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cau
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  net1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pm00
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  z
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ACN
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Carle
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  166.82.145.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xen
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  199.2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  199.2.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  PORT-03
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  loc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.20
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  134.53.14.11
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  net0
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.15
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pm003
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  luc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lucky12
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  UT
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  UTK
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  che
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  chem.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lat
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.255
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  UTKV
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.21
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  LIB
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  blv
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.10
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  LIBMAC1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ara
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  aragorn17
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.164.12
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  LIBMAC2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ld
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mac6
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  199.2.4
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hol
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  36
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  141.215.68
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dialup.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gw.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ty
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dialup-
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  blv-pm4
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  skynet-21
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  HS
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  141.215.66
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  HSS
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.164
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  199.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  skynet-22
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  stem
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  131.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  micr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  at0
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  x2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.223.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  atd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  stemmons1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  LIBMAC0
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  W2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wal
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  W20-575-1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  W20-575-12
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.169
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.95
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nas
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  skynet-20
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  129.82
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  port2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.232
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nord
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dialup-3
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nas1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  flie
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.169.3
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  als
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  edu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.112.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  140.142.7
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  msp81
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  W20-575-11
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dialup-3-1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vax
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ind
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  blv-pm5
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  p2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  oit.u
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nas1-1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nas1-3
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  spa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dialup-3-2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dy
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  p0
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Free
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tel
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  p5
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.112.16
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  walib9-22
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.112.15
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  epa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  p4
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dialup-5
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xenon.C
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  CS.N
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.169.36.7
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dialup-4
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  HSSMAC1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  oa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  140.14
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  atdialup1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  phoe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  holl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  p1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  net5
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hcc1330b
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  x215
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  net4
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  stemmons0
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  es
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  p3
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M25
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  max
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ti
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  spo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  efn.o
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  org
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dial0
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lucky15
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ucc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  blv-pm4-ip2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M3
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  M6
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  130.13
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  204.1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dial01
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cs.u
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  disc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dial00
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ix
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  phoen
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ko
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  at0-6
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lucky11
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hcc1330c
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gold.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  int
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bin
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cc.b
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bran
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  prim
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  204.11
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hcc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bos1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.112.169
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dluv
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sw
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bet
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.7
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  acs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gat
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nas1-2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  serv
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  198.3
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  199.10
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Merc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.204
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  atdialup2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dyna
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dyni
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  198.14
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dialup-3-23
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rem
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  comp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  C-
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  stemmons2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  remote1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ip
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  199.3
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  remote2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  140.142.70
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dialup-2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dialup-5-14
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  umd.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  umd1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  prime.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fre
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  RD
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.112
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  128.204
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  aragorn1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  su
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dynip1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cra
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  up
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  aragorn2
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  147.9
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mul
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lucky14
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cis.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  192.8
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rav
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp3
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ab
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp4
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp7
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp-
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp-m04
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  chr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp5
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tom
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ang
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp-m03
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  af
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  aps
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  au
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  am
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp-m03-1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gene
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ix-
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wri
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  big
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  blu
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  eri
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  Fi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp-m02
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lin
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  worl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  glad
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  flic
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp-m02-1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp-m04-0
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  red
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pm002
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hcc1330a
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp-m04-1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp-m02-0
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  PORT-02
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ix-l
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp31
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  unixs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pm035-
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  198.68
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  140.15
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  REN
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  umi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lar
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  slip1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp-m03-0
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  PORT-04
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  woo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cs1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ppp33
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cs128
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ix-lv1
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cs12
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cs127
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tun
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cs128-1
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

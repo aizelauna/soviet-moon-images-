@@ -1,0 +1,83 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Wind-Up Toy</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Wind-Up Toy (#1039)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_001431.htm">Rob</A>)
+<BR>
+<BR>
+<pre>
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_001431.htm">Rob</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+wind:
+<pre>
+if (this.location == player)
+    if (this.wound < this.maximum)
+        this.wound = this.wound + 2;
+        player:tell("You wind up the ", this.name, ".");
+        player.location:announce(player.name, " winds up the ", this.name, ".");
+        if (this.wound >= this.maximum)
+            player:tell("The knob comes to a stop while winding.");
+        endif
+    else
+        player:tell("The ", this.name, " is already fully wound.");
+    endif
+else
+    player:tell("You have to be holding the ", this.name, ".");
+endif
+.
+
+</pre>
+<BR>
+d*rop th*row:
+<pre>
+pass(@args);
+if (this.wound)
+    this.location:announce_all(this.name, " ", this:startup_msg());
+    fork (15)
+        this:do_the_work();
+    endfork
+endif
+.
+
+</pre>
+<BR>
+continue_msg:
+<pre>
+return this.(verb);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp wound
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp startup_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp continue_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp maximum
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_002028.htm">Wind-Up Duck</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

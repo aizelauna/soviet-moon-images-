@@ -1,0 +1,183 @@
+<HTML>
+<HEAD>
+<TITLE>Trevor</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Trevor (#790)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspTrevor Machine is a generic automaton who listens.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000320.htm">Postmodern Laboratory</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+tell:
+<pre>
+if (this:audience())
+    c = this.location:contents();
+    words = $string_utils:from_list(args);
+    words = $string_utils:strip_chars(words, "'\",?.!][;:-");
+    words = $string_utils:words(words);
+    if ((words && (words[1] != this.name)) && (this.name in words))
+        forwhom = $string_utils:match(words[1], c, "name");
+            if ((forwhom != this) && valid(forwhom))
+                acts = $set_utils:intersection(this.actions, words);
+                if (acts)
+                    this:perform(forwhom.name, acts[1]);
+                endif
+            endif
+        endif
+    else
+        this:changeMood("initial");
+    endif
+.
+
+</pre>
+<BR>
+perform:
+<pre>
+"perform - submit an input token to the finite state machine";
+if (caller != this)
+    return E_PERM;
+endif
+forwhom = args[1];
+    what = args[2];
+    if (i = (what + ":") in this.mood)
+        j = length(this.mood);
+        fork (0)
+            for line in (this.mood[i + 1..j])
+                len = length(line);
+                suspend(2);
+                if ((len >= 5) && (line[1..4] == "say "))
+                    this:say(line[5..length(line)]);
+                elseif ((len >= 7) && (line[1..6] == "emote "))
+                    this:emote(line[7..length(line)]);
+                elseif ((len >= 6) && (line[1..5] == "mood "))
+                    this:changeMood(line[6..length(line)]);
+                    return;
+                elseif ((len == 3) && (line[1..3] == "end"))
+                    return;
+                endif
+            endfor
+        endfork
+    endif
+.
+
+</pre>
+<BR>
+look_self:
+<pre>
+player:tell(this:titlec());
+pass(@args);
+player:tell("He is awake and looks alert.");
+if ("looks" in this.actions)
+    this:perform(player.name, "looks");
+endif
+.
+
+</pre>
+<BR>
+emote:
+<pre>
+"emote - simulate an emote action in the room";
+if (caller != this)
+    return E_PERM;
+endif
+this.location:announce_all(this.name, " ", args[1]);
+.
+
+</pre>
+<BR>
+say:
+<pre>
+"say - simulate a say action in the room";
+if (caller != this)
+    return E_PERM;
+endif
+this.location:announce_all(this.name, " says, \"", args[1], "\"");
+.
+
+</pre>
+<BR>
+changeMood:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+mood = "*" + args[1];
+if (i = mood in this.database)
+end = j = length(this.database);
+for k in [i + 1..end]
+    if (this.database[k][1] == "*")
+        j = k - 1;
+        this.mood = this.database[i..j];
+        this:set_description(this.mood[2]);
+        return;
+    endif
+endfor
+this.mood = this.database[i..j];
+this:set_description(this.mood[2]);
+endif
+.
+
+</pre>
+<BR>
+@compile:
+<pre>
+if (player == this.owner)
+    this.actions = {};
+    for lines in (this.database)
+        if (lines[length(lines)] == ":")
+            this.actions = setadd(this.actions, lines[1..length(lines) - 1]);
+        endif
+    endfor
+    this:changeMood("initial");
+    player:tell("Action list build and state set to initial.");
+else
+    player:tell(E_PERM);
+endif
+.
+
+</pre>
+<BR>
+audience:
+<pre>
+if ($object_utils:connected(this.location))
+    return 1;
+else
+    for c in (this.location.contents)
+        if ($object_utils:connected(c))
+            return 1;
+        endif
+    endfor
+endif
+return 0;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp actions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp database
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mood
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

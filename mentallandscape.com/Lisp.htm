@@ -1,0 +1,53 @@
+<HTML>
+<HEAD><TITLE>Lisp Interpreters</TITLE></HEAD>
+<BODY bgcolor=#000000 text=#FFFF66 link=#FFFF00 vlink=#FFFFCC alink=#FFFFCC>
+<FONT face="ariel,helvetica">
+<CENTER><H1>LISP 1.5 Interpreters</H1></CENTER>
+<P>
+<BR>
+<CENTER> <TABLE BORDER="0" CELLSPACING="0" CELLPADDING="0"> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH="640">
+
+<H2>Control Data Corporation 6600</H2>
+My interest in LISP began in 1976, when I read Friedman's <I>The Little Lisper</I>.  I was mostly programming in FORTRAN and CDC 6600 assembler at that time, so recursion was a cool new idea to me.  After reading McCarthy's <I>LISP 1.5 Programmer's Manual</I>, I wrote an interpreter in CDC 6600 assembler.  As far as I know, a line-printer listing is the only remaining copy of that program.
+I'm scanning that in little by litte with ABBYY FineReader, so here are jpg images of the pages done so far:
+<P>
+define functions -
+<A HREF="CDC_DEFINE1.jpg">DEFINE1</A>,
+<A HREF="CDC_DEFINE2.jpg">DEFINE2</A>
+<br>
+initialization -
+<A HREF="CDC_INITT1.jpg">INITT1</A>,
+<A HREF="CDC_INITT2.jpg">INITT2</A>,
+<A HREF="CDC_INITT3.jpg">INITT3</A>,
+<A HREF="CDC_INITT4.jpg">INITT4</A>,
+<A HREF="CDC_INITT5.jpg">INITT5</A>,
+<A HREF="CDC_INITT6.jpg">INITT6</A>
+<br>
+<P>
+
+<H2>Digital Equipment Corporation VAX 11/780</H2>
+At Caltech, I became friends with 
+<A HREF="http://www.stephenwolfram.com/">Stephen Wolfram</A>, a brilliant physicist.  Stephen and others were engaged in field-theory calculations that required heavy-duty symbolic computation.  The physics community had developed specialized programs like Veltman's powerful <I>Schoonschip</I>, capable of manipulating expressions that filled disk drives!  But the most flexible program was <I>MACSYMA</I>, which was only available on a dedicated PDP-10 at MIT.  Stephen thought we needed a local solution to this problem, useable on the High-Energy Physics Deptartment's VAX.
+<P>
+To aid in this venture, I decided to write a LISP interpreter and compiler for the VAX.  This machine was not nearly as fast as MIT's PDP-10 (a KL10 model), but my interpreter was faster on our VAX than MACLISP.  We never finished the compiler, partly because Stephen decided to write the symbolic math program in C.  Rob Pike was also a grad student in the Physics Dept., and his encouragement and knowledge of UNIX was very helpful.  Rob suggested using memory fault to trigger garbage collection, instead testing on every call to cons.  He and John Reiser at Bell Labs urged me to completely solve the tail-recursion problem in the interpreter.
+<P>
+I designed the data structures for fast execution, the atom flag was the quadword sign bit, some recursion was unwound in the registers, etc.  Eval would return the value of an atom in four machine instructions!  The calling convention used separate return stacks and frame stacks, which allowed aggressive tail recursion optimization.  As far as I know, this was the first interpreter to do serious tail recursion optimization, so that an infinite recursion would loop forever without growing the stack.
+<P>
+<A HREF="Lisp_data.s.txt">data.s</A> - initialized data segment<BR>
+<A HREF="Lisp_eval.s.txt">eval.s</A> - the heart of the interpreter<BR>
+<A HREF="Lisp_functions.s.txt">functions.s</A> - miscellaneous functions<BR>
+<A HREF="Lisp_init.s.txt">init.s</A> - run-time initialization<BR>
+<A HREF="Lisp_math.s.txt">math.s</A> - numerical functions<BR>
+<A HREF="Lisp_print.s.txt">print.s</A> - output S expressions<BR>
+<A HREF="Lisp_pure.s.txt">pure.s</A> - basic lisp functions<BR>
+<A HREF="Lisp_read.s.txt">read.s</A> - parse S expressions<BR>
+<A HREF="Lisp_reclaim.s.txt">reclaim.s</A> - the garbage collector<BR>
+
+</TD></TR></TABLE></CENTER>
+
+<P><BR><CENTER>Copyright © 2003 Don P. Mitchell.  All rights reserved.</CENTER>
+
+</FONT>
+</BODY>
+</HTML>

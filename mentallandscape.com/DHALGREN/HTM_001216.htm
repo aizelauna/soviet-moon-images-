@@ -1,0 +1,151 @@
+<HTML>
+<HEAD>
+<TITLE>Random Features Maybe Useful</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Random Features Maybe Useful (#1216)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_001080.htm">Random</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspFeature Object for Maybe Useful Stuff.  All ported.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAt this point, @find #xxx works.  The others have some weird stuff going on.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001080.htm">Random</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@find:
+<pre>
+"'@find #<object>', '@find <player>', '@find :<verb>' '@find .<property>' - Attempt 
+to locate things. Verbs and properties are found on any object in the player's vicinity, 
+and some other places.";
+if (!dobjstr)
+    player:tell("Usage: '@find #<object>' or '@find <player>' or '@find :<verb>' 
+or '@find .<property>'.");
+    return;
+endif
+if (dobjstr[1] == ":")
+    name = dobjstr[2..length(dobjstr)];
+    this:find_verb(name);
+    return;
+elseif (dobjstr[1] == ".")
+    name = dobjstr[2..length(dobjstr)];
+    this:find_property(name);
+    return;
+elseif (dobjstr[1] == "#")
+    target = toobj(dobjstr);
+    if (!valid(target))
+        player:tell(target, " does not exist.");
+    endif
+else
+    target = $string_utils:match_player(dobjstr);
+    $command_utils:player_match_result(target, dobjstr);
+endif
+if (valid(target))
+    player:tell(target.name, " (", target, ") is at ", valid(target.location) ? target.location.name 
+| "Nowhere", " (", target.location, ").");
+endif
+.
+
+</pre>
+<BR>
+find_verb:
+<pre>
+"'find_verb (<name>)' - Search for a verb with the given name. The objects searched 
+are those returned by this:find_verbs_on(). The printing order relies on $list_utils:remove_duplicates 
+to leave the *first* copy of each duplicated element in a list; for example, {1, 
+2, 1} -> {1, 2}, not to {2, 1}.";
+name = args[1];
+results = "";
+objects = $list_utils:remove_duplicates(this:find_verbs_on());
+for thing in (objects)
+    if (valid(thing) && (mom = $object_utils:has_verb(thing, name)))
+        results = ((((results + "   ") + thing.name) + "(") + tostr(thing)) + ")";
+        mom = mom[1];
+        if (thing != mom)
+            results = ((((results + "--") + mom.name) + "(") + tostr(mom)) + ")";
+        endif
+    endif
+endfor
+if (results)
+    this:tell("The verb :", name, " is on", results);
+else
+    this:tell("The verb :", name, " is nowhere to be found.");
+endif
+.
+
+</pre>
+<BR>
+find_property:
+<pre>
+"'find_property (<name>)' - Search for a property with the given name. The objects 
+searched are those returned by this:find_properties_on(). The printing order relies 
+on $list_utils:remove_duplicates to leave the *first* copy of each duplicated element 
+in a list; for example, {1, 2, 1} -> {1, 2}, not to {2, 1}.";
+name = args[1];
+results = "";
+objects = $list_utils:remove_duplicates(this:find_properties_on());
+for thing in (objects)
+    if (valid(thing) && (mom = $object_utils:has_property(thing, name)))
+        results = ((((results + "   ") + thing.name) + "(") + tostr(thing)) + ")";
+        mom = this:property_inherited_from(thing, name);
+        if (thing != mom)
+            if (valid(mom))
+                results = ((((results + "--") + mom.name) + "(") + tostr(mom)) + 
+")";
+            else
+                results = results + "--built-in";
+            endif
+        endif
+    endif
+endfor
+if (results)
+    this:tell("The property .", name, " is on", results);
+else
+    this:tell("The property .", name, " is nowhere to be found.");
+endif
+.
+
+</pre>
+<BR>
+find_verbs_on:
+<pre>
+"'find_verbs_on ()' -> list of objects - Return the objects that @find searches when 
+looking for a verb. The objects are searched (and the results printed) in the order 
+returned. Feature objects are included in the search. Duplicate entries are removed 
+by the caller.";
+return {this, this.location, @valid(this.location) ? this.location:contents() | {}, 
+@this:contents(), @this.features};
+.
+
+</pre>
+<BR>
+find_properties_on:
+<pre>
+"'find_properties_on ()' -> list of objects - Return the objects that @find searches 
+when looking for a property. The objects are searched (and the results printed) in 
+the order returned. Feature objects are *not* included in the search. Duplicate entries 
+are removed by the caller.";
+return {this, this.location, @valid(this.location) ? this.location:contents() | {}, 
+@this:contents()};
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

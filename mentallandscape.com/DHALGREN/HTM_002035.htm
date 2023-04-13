@@ -1,0 +1,103 @@
+<HTML>
+<HEAD>
+<TITLE>a sewing pattern</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a sewing pattern (#2035)</H3>
+(an instance of <A HREF="HTM_001226.htm">Generic Costume</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                     *  COSTUMIERS  *
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                   --  Best Quality  --
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                      SEWING PATTERN
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                   Instructions for Use
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp* To make a costume, use a pattern.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp* Having cut the pattern, run the machine with the pattern.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp* The costume you sew will be identical to the pattern you cut.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        -- 'The Best Costumes Are Our Standard' --
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002106.htm">Pattern Room</A>.
+<BR>
+<BR>
+After a moment, something begins to happen...
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe pattern is all pieces, but has a tag with directions on it.
+&nbsp&nbsp&nbsp&nbsp&nbsp                                                LOOK Pattern!
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+cut:
+<pre>
+" This verb sets the properties of the costume in accordance with the player's instructions... 
+";
+if (!$object_utils:has_verb(player, "costume"))
+    player:tell("You can cut a costume but only thespians (children of #1223) will 
+be able to wear it...");
+endif
+this.location:announce(player.name, " gets busy cutting up fabric and putting scraps 
+together for a costume...");
+player:tell("What's the name of the role you'd think of playing in this costume?");
+role = $command_utils:read(player);
+this.role_msg = role;
+" Name, aliases and description will be set on the machine based on role_msg... ";
+this.location:announce(player.name, " looks into working on the cutting...");
+player:tell("Type in a description of how you'd like a player to appear in your costume, 
+Oh dramaturge!");
+this.role_desc_msg = $command_utils:read_lines(player);
+player:tell("You're done making the ", this.name, ". Something you could sew for 
+yourself....");
+this.location:announce(player.name, " seems about done cutting up an idea for a costume...");
+.
+
+</pre>
+<BR>
+rend scat*ter dest*roy:
+<pre>
+" Clears the role_msg and role_desc_msg on the costume ";
+this.role_msg = "Nothing much";
+this.role_desc_msg = "%N %<is> wearing ... it's hard to tell what it is.";
+player:tell("You pull apart ", this.name, ", making it pretty well indistinct.");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_002087.htm">Vannevar Bush costume</A> <A HREF="HTM_002134.htm">Hag costume</A> <A HREF="HTM_002161.htm">Lovely costume</A> <A HREF="HTM_000588.htm">a 1960's hippie costume</A> <A HREF="HTM_002158.htm">Baphomet costume</A> <A HREF="HTM_002516.htm">Darth Vader costume</A> <A HREF="HTM_002584.htm">The Real Inspector Hound costume</A> <A HREF="HTM_002585.htm">The Real Inspector Hound costume</A> <A HREF="HTM_002464.htm">Ant costume</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

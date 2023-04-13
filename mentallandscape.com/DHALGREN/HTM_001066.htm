@@ -1,0 +1,357 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Journeying SPARC</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Journeying SPARC (#1066)</H3>
+(an instance of <A HREF="HTM_001016.htm">Generic Container Room</A> made by <A HREF="HTM_000352.htm">genna</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspEver wanted a car with doorlocks? Or a houseboat? A dirigible? 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis generic might be just what you need. It is a secure, seated, portable container room.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspTo move around type journey <compass direction>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspTo listen or not listen to the outside world.. type @listen on/off
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspTo speak to the outside world ... type yell <whatever>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe @secure verb is the same as on #962.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis child of the PARC allows you to make custom seats of any amount, holding a custom amount of people each. The owner can create seats fitting for their room environment and theme. See `help #955'.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+announce_move:
+<pre>
+"announce_move(from,to): does general announcements when the generic";
+"portable room moves.";
+from = args[1];
+to = args[2];
+this:announce_all(this:teleport_msg() || (this:title() + " moves."));
+if (room = $object_utils:isa(to, $room))
+    where = this.location;
+    this:announce_all(where:title());
+endif
+if (!(callers()[2][2] in this.silent_actions))
+    speak = $object_utils:isa(from, $room) ? "announce_all" | "tell";
+    if (msg = this:teleport_outside_msg(from))
+        from:(speak)(msg);
+    endif
+    speak = room ? "announce_all" | "tell";
+    if (msg = this:oteleport_outside_msg(to))
+        msg = index(msg, this.name) ? msg | ((this:title() + " ") + msg);
+        to:(speak)(msg);
+    endif
+endif
+.
+
+</pre>
+<BR>
+journey:
+<pre>
+if (!args)
+    player:tell("Usage: move/go <direction>");
+elseif (!$object_utils:isa(this.location, $room))
+    player:tell(this:title(), " isn't in a room!");
+else
+    exit = this.location:match_exit(args[1]);
+    if (exit == $failed_match)
+        player:tell("I don't understand that.");
+    elseif (exit == $ambiguous_match)
+        player:tell("I don't know which direction you mean.");
+    elseif ($object_utils:has_verb(exit, "move"))
+        exit:move(this);
+    else
+        player:tell("That's an unusual direction.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+location:
+<pre>
+if (!valid(this.location))
+    return $nothing;
+elseif (is_player(this.location))
+    return this.location.location;
+else
+    return this.location;
+endif
+.
+
+</pre>
+<BR>
+moveto:
+<pre>
+to = args[1];
+from = this.location;
+if ((((!valid(to)) || this:is_unlocked_for(to)) && this:move_ok()) && (typeof(pass(to)) 
+!= ERR))
+    this:announce_move(from, to);
+endif
+.
+
+</pre>
+<BR>
+move_ok:
+<pre>
+"okay to move if .motile != 0 or player is in a verified list";
+if (this.motile)
+    return 1;
+endif
+movable = {this.owner, @this.move_ok};
+if (valid(this.location))
+    movable = {this.location.owner, @movable};
+endif
+if (player in movable)
+    return 1;
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+take_succeeded_msg otake_succeeded_msg take_failed_msg otake_failed_msg drop_succeeded_msg 
+odrop_succeeded_msg drop_failed_msg odrop_failed_msg arrive_outside_msg leave_outside_msg 
+arrive_succeeded_msg oarrive_succeeded_msg arrive_failed_msg oarrive_failed_msg leave_succeeded_msg 
+oleave_succeeded_msg leave_failed_msg oleave_failed_msg teleport_outside_msg oteleport_outside_msg 
+teleport_msg:
+<pre>
+"_msg(conversion strings): converts messages into amenable formats";
+"conversion strings should be of the form '{str1,val1},{str2,val2}'";
+string = this.(verb);
+location = args ? args[1] | this.location;
+return $string_utils:pronoun_sub(string, player, this, location);
+.
+
+</pre>
+<BR>
+insecure:
+<pre>
+from = args[1];
+return (!valid(from)) ? callers()[2][3] != this.owner | (!(((from == this) || (from.owner 
+== this.owner)) || from.wizard));
+.
+
+</pre>
+<BR>
+acceptable:
+<pre>
+"Copied from Generic Secured Post-Apocalypse Room (#262):acceptable by Calkins (#150) 
+Fri May  6 00:35:55 1994 EDT";
+if (pass(@args))
+    if (this.security_level > 1)
+        what = args[1];
+        who = is_player(what) ? what | what.owner;
+        res = {this.owner, @this.residents};
+        if ((who in res) || (player in res))
+            return 1;
+        elseif (this.security_level == 2)
+            return !(who in this.deny_list);
+        elseif (this.security_level == 3)
+            return who in this.accept_list;
+        else
+            return 0;
+        endif
+    else
+        return 1;
+    endif
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+accept:
+<pre>
+"Copied from Generic Secured Post-Apocalypse Room (#262):accept by Calkins (#150) 
+Fri May  6 00:38:22 1994 EDT";
+if (!(success = pass(@args)))
+    what = args[1];
+    if (this.repel_msg)
+        what:tell(this.repel_msg);
+    endif
+    if (this.orepel_msg)
+        msg = $string_utils:pronoun_sub(this.orepel_msg, what, this, what.location);
+        this:announce_all(msg);
+    endif
+endif
+return success;
+.
+
+</pre>
+<BR>
+@accept:
+<pre>
+"Copied from Generic Secured Post-Apocalypse Room (#262):@accept by Calkins (#150) 
+Fri May  6 00:39:07 1994 EDT";
+if (!(player in {this.owner, @this.residents}))
+    player:tell(E_PERM);
+    return;
+endif
+folks = $string_utils:explode(strsub(argstr, ",", " "));
+for f in (folks)
+    w = $string_utils:match_player(f);
+    if (valid(w))
+        this.accept_list = setadd(this.accept_list, w);
+    endif
+endfor
+player:tell("Accepted players:");
+this.accept_list = this:print_and_cleanup(this.accept_list);
+.
+
+</pre>
+<BR>
+@secure:
+<pre>
+"Copied from Generic Secured Post-Apocalypse Room (#262):@secure by Calkins (#150) 
+Fri May  6 00:40:05 1994 EDT";
+if (!(player in {this.owner, @this.residents}))
+    player:tell(E_PERM);
+    return;
+endif
+if (iobjstr)
+    if (level = iobjstr[1] in {"O", "D", "A", "M"})
+        this.security_level = level;
+    else
+        player:tell("Security must be Open, Denied, Accepted, or Maximum.");
+    endif
+endif
+player:tell("Present security level is ", "ODAM"[this.security_level], ".");
+.
+
+</pre>
+<BR>
+@deny:
+<pre>
+"Copied from Generic Secured Post-Apocalypse Room (#262):@deny by Calkins (#150) 
+Fri May  6 00:40:16 1994 EDT";
+if (!(player in {this.owner, @this.residents}))
+    player:tell(E_PERM);
+    return;
+endif
+folks = $string_utils:explode(strsub(argstr, ",", " "));
+for f in (folks)
+    w = $string_utils:match_player(f);
+    if (valid(w))
+        this.deny_list = setadd(this.deny_list, w);
+    endif
+endfor
+player:tell("Denied players:");
+this.deny_list = this:print_and_cleanup(this.deny_list);
+.
+
+</pre>
+<BR>
+@unaccept:
+<pre>
+"Copied from Generic Secured Post-Apocalypse Room (#262):@unaccept by Calkins (#150) 
+Fri May  6 00:40:25 1994 EDT";
+if (!(player in {this.owner, @this.residents}))
+    player:tell(E_PERM);
+    return;
+endif
+folks = $string_utils:explode(strsub(argstr, ",", " "));
+for f in (folks)
+    w = $string_utils:match_player(f);
+    if (valid(w))
+        this.accept_list = setremove(this.accept_list, w);
+    endif
+endfor
+player:tell("Accepted players:");
+this.accept_list = this:print_and_cleanup(this.accept_list);
+.
+
+</pre>
+<BR>
+@undeny:
+<pre>
+"Copied from Generic Secured Post-Apocalypse Room (#262):@undeny by Calkins (#150) 
+Fri May  6 00:40:33 1994 EDT";
+if (!(player in {this.owner, @this.residents}))
+    player:tell(E_PERM);
+    return;
+endif
+folks = $string_utils:explode(strsub(argstr, ",", " "));
+for f in (folks)
+    w = $string_utils:match_player(f);
+    if (valid(w))
+        this.deny_list = setremove(this.deny_list, w);
+    endif
+endfor
+player:tell("Denied players:");
+this.deny_list = this:print_and_cleanup(this.deny_list);
+.
+
+</pre>
+<BR>
+print_and_cleanup:
+<pre>
+"Copied from Generic Secured Post-Apocalypse Room (#262):print_and_cleanup by Calkins 
+(#150) Fri May  6 00:40:53 1994 EDT";
+clean = {};
+names = {};
+for i in (args[1])
+    if (valid(i))
+        clean = {@clean, i};
+        names = {@names, i.name};
+    endif
+endfor
+player:tell($string_utils:print(names));
+return clean;
+.
+
+</pre>
+<BR>
+look_self:
+<pre>
+"Copied from generic room (#3):look_self by The_Mayor (#2) Fri May  6 03:08:16 1994 
+EDT";
+player:tell(this:title());
+if (!(args && args[1]))
+    pass();
+endif
+this:tell_contents(setremove(this:contents(), player), this.ctype);
+this:tell_exits();
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp motile
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp (silent_actions)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp teleport_outside_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oteleport_outside_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp teleport_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp silent_actions
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp noperms_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000209.htm">Dhalmart Shopping Cart</A> <A HREF="HTM_001184.htm">Buick</A> <A HREF="HTM_001241.htm">speedster</A> <A HREF="HTM_001410.htm">Truck</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

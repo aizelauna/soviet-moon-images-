@@ -1,0 +1,81 @@
+<HTML>
+<HEAD>
+<TITLE>The Critic</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> The Critic (#1482)</H3>
+(an instance of <A HREF="HTM_001044.htm">Generic Speaking Wandering Automaton</A> made by <A HREF="HTM_000907.htm">melusina</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspHe wears a black turtleneck and faded jeans. His hair is longish, darkly slicked back from his face. The long nervous fingers of one hand toy with an unlit Galuoise, in the other he clutches a tome of obscure and inaccessible literary criticism. He isn't really sure why he's here, but is happy, in his gloomy intellectual way, as long as he has an audience.
+<BR>
+<BR>
+The Critic has some things to say:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp If we consider all three serial kinds -- the connective synthesis on a single series, the conjunctive synthesis of convergence, and the disjunctive synthesis of resonance, we see that the third proves to be the truth and the destination of the others, to the degree that the disjunction attains its positive and affirmative use.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp It is because the Real itself offers no support for a direct symbolization of it -- because every symbolization is in the last resort contingent -- that the only way the experience of a given historical reality can acheive its unity is through the agency of a signifier, through reference to a 'pure' signifier.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp The poem itself was as opaque to rational enquiry as the Almighty himself:  it existed as a self-enclosed object, mysteriously intact in its own unique being.  The poem was that which could not be paraphrased, expressed in any language other than itself:  each of its parts was folded in on the others in a complex organic unity which it would be a kind of blasphemy to violate.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp The ambivalent logic inscribed into cultural representations of dead feminine bodies presents the desire for immutability only to undo it again, because, in the end, the corpse is reanimated or allowed to decompose and be replaced by its tropic reversion, by a commemorative sign.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Power consists not only of using the means of power, but also of concealing power's reliance on means; and oppositionality therefore demonstrates its knowledge of power's secret in its symmetrical recourse to those means -- the duplicities of discourse as a mediated phenomenon -- for its own purposes.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000923.htm">The House of Freaks</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+shutup gag:
+<pre>
+if (!this.talkative)
+    player:tell("Someone has rather rudely stuffed a candied apple in ", this.name, 
+"'s mouth.  He has been quite effectively shut up.  In fact, he seems to be turning 
+rather blue.");
+    this.location:announce(player.name, " glares at ", this.name, " but sees that 
+he's already been silenced.");
+else
+    this:set_talkative(0);
+    player:tell("You find most of a candied apple on the ground, and, driven into 
+a blind fury by his babble, stuff it into ", this.name, "'s mouth.");
+    this.location:announce(player.name, "crams a candied apple into ", this.name, 
+"'s mouth, nearly gagging him.");
+endif
+.
+
+</pre>
+<BR>
+unshutup ungag:
+<pre>
+if (this.talkative)
+    player:tell(this.name, " is talking as fast as he can.  Are you sure you want 
+him to be more verbose?");
+    this.location:announce(player.name, " begs ", this.name, " to talk even MORE.");
+else
+    this:set_talkative(1);
+    player:tell("You thump ", this.name, " on the back, and the bit of candied apple 
+that was gagging him flies out of his mouth.");
+    this.location:announce(player.name, " gives ", this.name, " a solid whack on 
+the back and he stops choking on the apple.  He's free to share his wisdom with you 
+now.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

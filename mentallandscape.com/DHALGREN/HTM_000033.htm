@@ -1,0 +1,463 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Guest</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Guest (#33)</H3>
+(an instance of <A HREF="HTM_000098.htm">Basic Local PC</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspBy definition, guests appear nondescript.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@password:
+<pre>
+player:tell("Sorry, but guest characters are not allowed to change their passwords.");
+.
+
+</pre>
+<BR>
+boot:
+<pre>
+if (!caller_perms().wizard)
+    return;
+endif
+player = this;
+this:notify(tostr("Sorry, but you've been here for ", $string_utils:from_seconds(connected_seconds(this)), 
+" and someone else wants to be a guest now.  Feel free to come back", @$login:player_creation_enabled(player) 
+? {" or even create your own character if you want..."} | ($login.registration_address 
+? {" or send mail to ", $login.registration_address, " to obtain a character of your 
+own."} | {"."})));
+fork (0)
+    oldloc = this.location;
+    move(this, #-1);
+    move(this, this.home);
+    "..force enterfunc to be called so that the newbie gets a room description.";
+    if ($object_utils:isa(oldloc, $room))
+        oldloc:announce("In the distance you hear someone's alarm clock going off.");
+        if (oldloc != this.location)
+            oldloc:announce(this.name, " wavers and vanishes into insubstantial mist.");
+        else
+            oldloc:announce(this.name, " undergoes a wrenching personality shift.");
+        endif
+    endif
+endfork
+.
+
+</pre>
+<BR>
+disfunc:
+<pre>
+if (((valid(cp = caller_perms()) && (caller != this)) && (!$perm_utils:controls(cp, 
+this))) && (cp != this))
+    return E_PERM;
+endif
+this:log_disconnect();
+fork (0)
+    if (this.location != this.home)
+        this:room_announce("A gang of youths charge in, grab ", this.name, ", and 
+quickly drag ", this.po, " out of sight.");
+        move(this, this.home);
+    endif
+    for x in ({"paranoid", "lines", "responsible", "linelen", "linebuffer", "brief", 
+"gaglist", "rooms", "pagelen", "current_message", "current_folder", "messages", "request"})
+        if ($object_utils:has_property($guest, x))
+            clear_property(this, x);
+        endif
+    endfor
+    this:set_description(this.default_description);
+    this:set_gender(this.default_gender);
+    for x in (this.contents)
+        this:eject(x);
+    endfor
+    for x in (this.features)
+        if (!(x in $guest.features))
+            this:remove_feature(x);
+        endif
+    endfor
+    for x in ($guest.features)
+        if (!(x in this.features))
+            this:add_feature(x);
+        endif
+    endfor
+    if ($object_utils:has_callable_verb(this, "clear_refusals"))
+        this:clear_refusals();
+    endif
+    for x in ($object_utils:descendants($generic_editor))
+        if (loc = this in x.active)
+            x:kill_session(loc);
+        endif
+    endfor
+endfork
+pass(@args);
+.
+
+</pre>
+<BR>
+defer:
+<pre>
+"Called by #0:connect_player when this object is about to be used as the next guest 
+character.  Usually returns `this', but if for some reason some other guest character 
+should be used, that player object is returned instead";
+if (!caller_perms().wizard)
+    "...caller is not :do_login_command; doesn't matter what we return...";
+    return this;
+elseif ($login:blacklisted($string_utils:connection_hostname(connection_name(player))))
+    return #-2;
+elseif (!(this in connected_players()))
+    "...not logged in, no problemo...";
+    return this;
+endif
+longest = 900;
+"...guests get 15 minutes before they can be dislodged...";
+candidate = #-1;
+free = {};
+for g in (children($guest))
+    if (!is_player(g))
+        "...a toaded guest?...";
+    elseif (!(g in connected_players()))
+        "...yay; found an unused guest...";
+        free = {@free, g};
+    elseif ((t = connected_seconds(g)) > longest)
+        longest = t;
+        candidate = g;
+    endif
+endfor
+if (free)
+    candidate = free[random(length(free))];
+elseif (valid(candidate))
+    "...someone's getting bumped...";
+    candidate:boot();
+endif
+return candidate;
+.
+
+</pre>
+<BR>
+mail_catch_up:
+<pre>
+return;
+.
+
+</pre>
+<BR>
+create:
+<pre>
+if ($login:player_creation_enabled(player))
+    player:tell("First @quit, then connect to the MOO again and, rather than doing 
+`connect guest' do `create <name> <password>'");
+else
+    player:tell($login:registration_string());
+endif
+.
+
+</pre>
+<BR>
+eject:
+<pre>
+return pass(@args);
+.
+
+</pre>
+<BR>
+log:
+<pre>
+":log(islogin,time,where) adds an entry to the connection log for this guest.";
+if (caller != this)
+    return E_PERM;
+elseif (length(this.connect_log) < this.max_connect_log)
+    this.connect_log = {args, @this.connect_log};
+else
+    this.connect_log = {args, @this.connect_log[1..this.max_connect_log - 1]};
+endif
+.
+
+</pre>
+<BR>
+confunc:
+<pre>
+if (((valid(cp = caller_perms()) && (caller != this)) && (!$perm_utils:controls(cp, 
+this))) && (cp != this))
+    return E_PERM;
+else
+    $guest_log:enter(1, time(), $string_utils:connection_hostname(connection_name(this)));
+    ret = pass(@args);
+    this:tell_lines($string_utils:pronoun_sub(this.extra_confunc_msg));
+    return ret;
+endif
+.
+
+</pre>
+<BR>
+log_disconnect:
+<pre>
+if (caller != this)
+    return E_PERM;
+else
+    cname = connection_name(this) || this.last_connect_place;
+    $guest_log:enter(0, time(), $string_utils:connection_hostname(cname));
+endif
+.
+
+</pre>
+<BR>
+@last-c*onnection:
+<pre>
+if (!valid(caller_perms()))
+    player:tell("Sorry, that information is not available.");
+endif
+.
+
+</pre>
+<BR>
+connection_name_hash:
+<pre>
+"Compute an encrypted hash of the guest's (last) connection, using 'crypt'. Basically, 
+you can't tell where the guest came from, but it is unlikely that two guests will 
+have the same hash";
+"You can use guest:connection_name_hash(seed) as a string to identify whether two 
+guests are from the same place.";
+hash = tonum(caller_perms());
+host = $string_utils:connection_hostname(this.last_connect_place);
+for i in [1..length(host)]
+    hash = (hash * 14) + index($string_utils.ascii, host[i]);
+endfor
+return crypt(tostr(hash), @args);
+.
+
+</pre>
+<BR>
+my_huh:
+<pre>
+if (caller_perms() != this)
+    return E_PERM;
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+@read:
+<pre>
+return pass(@args);
+.
+
+</pre>
+<BR>
+set_current_folder:
+<pre>
+return pass(@args);
+"only for setting permission";
+.
+
+</pre>
+<BR>
+@request*-character @register:
+<pre>
+"Usage:  @request <player-name> for <email-address>";
+if (player != this)
+    return player:tell(E_PERM);
+endif
+if (this.request)
+    return player:tell("Sorry, you appear to have already requested a character.");
+endif
+name = dobjstr;
+if ((prepstr != "for") || ((!dobjstr) || index(address = iobjstr, " ")))
+    return player:notify_lines($code_utils:verb_usage());
+endif
+if ($login:request_character(player, name, address))
+    this.request = 1;
+endif
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    this.extra_confunc_msg = "";
+    this.features = {};
+endif
+.
+
+</pre>
+<BR>
+set_name set_aliases:
+<pre>
+"disallow guests from setting aliases on themselves";
+if ($perm_utils:controls(caller_perms(), this))
+    return pass(@args);
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+request(older):
+<pre>
+return;
+"Old version, Dredful 2/16/94";
+"Usage:  @request <name> for <email-address>";
+if (player != this)
+    return player:tell(E_PERM);
+endif
+name = dobjstr;
+address = iobjstr;
+connection = $string_utils:connection_hostname(connection_name(player));
+if (this.request)
+    return player:tell("Sorry, you appear to have already requested a character.");
+endif
+if (index(address = iobjstr, " "))
+    return player:notify_lines($code_utils:verb_usage());
+elseif (reason = $wiz_utils:check_player_request(name, address, connection))
+    if (reason[1] == "-")
+        reason = reason[2..length(reason)] + " Please ";
+    else
+        reason = reason + " Please try again, or, to register another way, ";
+    endif
+    player:tell(reason, " mail to ", $login.registration_address, " with the character 
+name you want.");
+    return;
+endif
+while (typeof(answer = $command_utils:yes_or_no(("Generally, only one character per 
+real person is allowed. For more details, read `help multiple-characters'. Do you 
+already have (or have you already requested) a " + $network.moo_name) + " character?")) 
+== ERR)
+endwhile
+if (answer)
+    return player:tell("Character request processing ended.");
+endif
+if (!$network.active)
+    $mail_agent:send_message(this, $registration_db.registrar, "Player request", 
+{"Player request from " + connection, ":", "", (("@make-player " + name) + " ") + 
+address});
+    player:tell("Request for new character ", name, " email address '", address, 
+"' accepted. Please be patient until the registrar gets around to it. If you don't 
+get email within a week, please send regular email to ", $login.registration_address, 
+".");
+elseif ($player_db.frozen)
+    player:tell("Sorry, can't create any new players right now.  Try again in a few 
+minutes.");
+else
+    new = $wiz_utils:make_player(name, address);
+    password = new[2];
+    new = new[1];
+    player:tell("Character ", name, " (", new, ") created, mailing password to ", 
+address, "; you should get the mail very soon.");
+    player:tell("If you do not get it, please do NOT request another character. Send 
+regular email to ", $login.registration_address, ", with the name of the character 
+you requested.");
+    $mail_agent:send_message($new_player_log.autoregistration_player, $new_player_log, 
+tostr(name, " (", new, ")"), {address, (" Automatically created at request of player 
+from " + connection) + "."});
+    $wiz_utils:send_new_player_mail(tostr("A guest connected from ", connection, 
+" at ", ctime(), " requested a character on ", $network.moo_name, " for email address 
+", address, "."), name, address, new, password);
+    this.request = 1;
+    return;
+endif
+.
+
+</pre>
+<BR>
+@request(old):
+<pre>
+return;
+"Usage:  @request <name> for <email-address>";
+if (player != this)
+    return player:tell(E_PERM);
+endif
+name = dobjstr;
+address = iobjstr;
+connection = $string_utils:connection_hostname(connection_name(player));
+if (this.request)
+    return player:tell("Sorry, you appear to have already requested a character.");
+endif
+if (index(address = iobjstr, " "))
+    return player:notify_lines($code_utils:verb_usage());
+elseif (reason = $wiz_utils:check_player_request(name, address, connection))
+    if (reason[1] == "-")
+        reason = reason[2..length(reason)] + " Please ";
+    else
+        reason = reason + " Please try again, or, to register another way, ";
+    endif
+    player:tell(reason, " mail to ", $login.registration_address, " with the character 
+name you want.");
+    return;
+endif
+while (typeof(answer = $command_utils:yes_or_no(("Generally, only one character per 
+real person is allowed. For more details, read `help multiple-characters'. Do you 
+already have (or have you already requested) a " + $network.moo_name) + " character?")) 
+== ERR)
+endwhile
+if (answer)
+    return player:tell("Character request processing ended.");
+endif
+"I rearranged this so mail goes to .registrar regardless. No automatic player creation. 
+Dredful 2/16/94";
+if ($player_db.frozen)
+    player:tell("Sorry, can't create any new players right now.  Try again in a few 
+minutes.");
+else
+    $mail_agent:send_message(this, $registration_db.registrar, "Player request", 
+{"Player request from " + connection, ":", "", (("@make-player " + name) + " ") + 
+address});
+    player:tell("Request for new character ", name, " email address '", address, 
+"' accepted. Please be patient until the registrar gets around to it. If you don't 
+get email within a week, please send regular email to ", $login.registration_address, 
+".");
+endif
+"Old automatic stuff DF";
+if (!$network.active)
+else
+    new = $wiz_utils:make_player(name, address);
+    password = new[2];
+    new = new[1];
+    player:tell("Character ", name, " (", new, ") created, mailing password to ", 
+address, "; you should get the mail very soon.");
+    player:tell("If you do not get it, please do NOT request another character. Send 
+regular email to ", $login.registration_address, ", with the name of the character 
+you requested.");
+    $mail_agent:send_message($new_player_log.autoregistration_player, $new_player_log, 
+tostr(name, " (", new, ")"), {address, (" Automatically created at request of player 
+from " + connection) + "."});
+    $wiz_utils:send_new_player_mail(tostr("A guest connected from ", connection, 
+" at ", ctime(), " requested a character on ", $network.moo_name, " for email address 
+", address, "."), name, address, new, password);
+    this.request = 1;
+    return;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp default_gender
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp default_description
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp request
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp extra_confunc_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000297.htm">Guest</A> <A HREF="HTM_000309.htm">Mantis_Guest</A> <A HREF="HTM_000310.htm">Scorpion_Guest</A> <A HREF="HTM_000311.htm">Dragon_Guest</A> <A HREF="HTM_000312.htm">Griffin_Guest</A> <A HREF="HTM_000314.htm">Soylent_Guest</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

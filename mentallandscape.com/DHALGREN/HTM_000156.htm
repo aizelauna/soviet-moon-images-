@@ -1,0 +1,69 @@
+<HTML>
+<HEAD>
+<TITLE>door</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> door (#156)</H3>
+(an instance of <A HREF="HTM_000959.htm">Generic Post-Apocalypse Exit</A> made by <A HREF="HTM_000095.htm">legba</A>)
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+weather_daytime:
+<pre>
+"Copied from Generic Post-Apocalypse Room (#110):weather_daytime by Calkins (#150) 
+Sun Apr 24 22:22:57 1994 EDT";
+hour = tonum(ctime(clock = time())[12..13]);
+if ((hour < 6) || (hour > 20))
+    daytime = this.night_msg;
+elseif (hour < 9)
+    daytime = this.morning_msg;
+elseif (hour < 18)
+    daytime = this.day_msg;
+else
+    daytime = this.evening_msg;
+endif
+noise = abs((((clock / 3600) / 8) * 1103515245) + 12345) % 3;
+climate = abs(((clock / 3600) / 24) + noise) % 11;
+if (climate == 2)
+    weather = this.raining_msg;
+elseif (climate < 6)
+    weather = this.warm_msg;
+elseif (climate == 8)
+    weather = this.snowing_msg;
+else
+    weather = this.cool_msg;
+endif
+if (typeof(args[1]) == STR)
+    s = strsub(args[1], "%weather", weather);
+    return strsub(s, "%daytime", daytime);
+elseif (typeof(args[1]) == LIST)
+    l = {};
+    for s in (args[1])
+        s = strsub(s, "%weather", weather);
+        s = strsub(s, "%daytime", daytime);
+        l = {@l, s};
+    endfor
+    return l;
+else
+    return args[1];
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

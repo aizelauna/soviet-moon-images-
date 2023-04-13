@@ -1,0 +1,1033 @@
+<HTML>
+<HEAD>
+<TITLE>Player-Creation-Log</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Player-Creation-Log (#19)</H3>
+(an instance of <A HREF="HTM_000016.htm">Generic Large-Capacity Mail Recipient</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspLog of player creations.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000047.htm">Mail Distribution Center</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+display_seq_headers:
+<pre>
+":display_seq_headers(msg_seq[,cur])";
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+endif
+player:tell("       WHEN    BY        WHO                 EMAIL-ADDRESS");
+pass(@args);
+.
+
+</pre>
+<BR>
+msg_summary_line:
+<pre>
+when = ctime(args[1])[5..10];
+from = args[2];
+by = $string_utils:left(from[1..index(from, " (") - 1], -9);
+subject = args[4];
+who = subject[1..(open = index(subject, " (")) - 1];
+if ((close = rindex(subject, ")")) > open)
+    who = who[1..min(9, length(who))] + subject[open..close];
+endif
+who = $string_utils:left(who, 18);
+line = args[("" in args) + 1];
+email = line[1..index(line + " ", " ") - 1];
+if (!index(email, "@"))
+    email = "??";
+endif
+return tostr(when, "  ", by, " ", who, "  ", email);
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    pass();
+    "this:rm_message_seq({1, 1 + this:length_all_msgs()})";
+    "this:expunge_rmm()";
+    for p in (properties(this))
+        $command_utils:suspend_if_needed(0);
+        if (p && (p[1] == " "))
+            delete_property(this, p);
+        endif
+    endfor
+    this.messages = this.messages_going = {};
+    this._genprop = "";
+    this.mail_forward = {player, this};
+    this.mail_notify = {player};
+    for p in ({"moderator_forward", "writers", "readers", "expire_period", "last_used_time"})
+        this.(p) = $mail_recipient.(p);
+    endfor
+    this.moderated = 1;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+is_usable_by:
+<pre>
+"Copied from Generic Mail Recipient (#6419):is_usable_by by Rog (#4292) Tue Mar  
+2 10:02:32 1993 PST";
+return (!this.moderated) || ((this:is_writable_by(who = args[1]) || (who in this.moderated)) 
+|| who.wizard);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  a
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  b
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  c
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  d
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  e
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  f
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  g
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  h
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  i
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  j
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  k
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  l
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  m
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  n
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  o
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  s
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  t
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  u
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  v
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  w
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  x
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  y
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  z
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  aa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ba
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ca
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  da
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ea
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ga
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ha
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ia
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ja
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ka
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  la
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ma
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  na
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  oa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ra
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ta
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ua
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  va
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xa
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ya
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  za
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ab
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  db
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  eb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ib
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ob
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ub
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zb
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ac
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ec
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ic
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  oc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ad
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ed
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  id
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ld
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  md
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  od
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  td
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ud
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zd
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ae
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  be
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ce
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  de
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ee
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ge
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  he
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ie
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  je
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ke
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  le
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  me
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ne
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  oe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  re
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  se
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  te
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ue
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ve
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  we
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xe
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ye
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ze
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  af
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  df
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ef
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ff
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  if
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  of
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zf
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ag
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  eg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ig
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ng
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  og
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ug
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ah
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ch
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  eh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ih
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  oh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ph
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  th
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zh
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ai
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ci
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  di
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ei
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ii
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ji
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ki
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  li
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ni
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  oi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ri
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  si
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ti
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ui
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zi
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  aj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ej
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ij
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  oj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zj
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ak
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ck
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ek
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ik
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ok
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zk
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  al
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  el
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  il
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ll
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ml
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ol
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ql
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ul
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zl
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  am
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  em
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  im
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  km
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  om
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  um
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ym
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zm
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  an
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  en
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  in
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ln
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  on
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  un
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zn
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ao
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  co
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  do
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  eo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  go
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ho
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  io
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ko
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  no
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  oo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  po
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ro
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  so
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  to
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zo
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ap
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ep
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  ip
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  np
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  op
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  up
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  zp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  aq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  bq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  cq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  dq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  eq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  hq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  iq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  jq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  kq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  nq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  oq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  qq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  rq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  tq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  uq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  vq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  wq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  xq
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  yq
+<BR>
+<RB>
+<BR>
+MAIL MESSAGES:
+<BR>
+<BR>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

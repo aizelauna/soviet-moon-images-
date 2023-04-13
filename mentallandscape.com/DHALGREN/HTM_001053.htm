@@ -1,0 +1,105 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Transparent Exit</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Transparent Exit (#1053)</H3>
+(an instance of <A HREF="HTM_000959.htm">Generic Post-Apocalypse Exit</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis is an exit hacked off #7 (the generic exit) to tell the contents of the room it exits to (if it's not dark in there).
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Transparent Exit is a child of #959, the Generic Post-Apocalyptic Exit 
+(q.v.); as such, it supports daytime and weather on its @messages.
+&nbsp&nbsp&nbsp&nbsp&nbspFor ease of programming, the transparency of children of #1053 is quite simple. When 
+you look at it, a @players message and a @things message will append to the exit's 
+description if there are any players or things (non-player objects) in the room behind 
+to be seen. Write these messages with the strings herlayers and Generic Transparent 
+Exithings to be substituted with appropriate lists of names. Verb conjugations, as 
+per the @sitting message on the Generic Room with Seats (#955), are also supported.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+look_self:
+<pre>
+" To the description of the exit are appended messages @players ";
+" and @things, with substitutions listing players or things in ";
+" the room behind (including verb conjugations for verbs marked ";
+" up as %<verb>) [cf. #955, the seated room] ";
+players = {};
+things = {};
+if ((typeof(room = this.dest) == OBJ) && valid(room))
+    for item in (room.contents)
+        is_player(item) ? players = {@players, item} | (things = {@things, item});
+    endfor
+endif
+pass(args);
+if (players)
+    player:tell(this:players_msg(players));
+endif
+if (things)
+    player:tell(this:things_msg(things));
+endif
+.
+
+</pre>
+<BR>
+players_msg things_msg:
+<pre>
+" Called by :look_self, runs a string substitution on the message ";
+" naming players or things in the destination, making any verb ";
+" conjugation on it. (Largely hacked from Dredful's #955.) ";
+msg = this.(verb);
+inlist = args[1];
+fverb = "";
+for word in ($string_utils:words(msg))
+    if ((length(word) > 1) && (word[1..2] == "%<"))
+        fverb = word[3..length(word) - 1];
+    endif
+endfor
+if (fverb)
+    wverb = $gender_utils:get_conj(fverb, @(length(inlist) > 1) ? {this} | inlist);
+    msg = strsub(msg, tostr("%<", fverb, ">"), wverb);
+endif
+return strsub(msg, tostr("%", verb[1..length(verb) - 4]), $string_utils:title_list(inlist));
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp players_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp things_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gender
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dark
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_001057.htm">wood</A> <A HREF="HTM_001390.htm">a path</A> <A HREF="HTM_001373.htm">picnic</A> <A HREF="HTM_001252.htm">a path</A> <A HREF="HTM_000851.htm">out</A> <A HREF="HTM_001031.htm">muck</A> <A HREF="HTM_001046.htm">sprout</A> <A HREF="HTM_000849.htm">a path</A> <A HREF="HTM_001029.htm">bog</A> <A HREF="HTM_001028.htm">crawl</A> <A HREF="HTM_001034.htm">awaken</A> <A HREF="HTM_000817.htm">sky</A> <A HREF="HTM_000961.htm">in</A> <A HREF="HTM_001419.htm">up</A> <A HREF="HTM_001050.htm">step</A> <A HREF="HTM_001450.htm">up</A> <A HREF="HTM_001451.htm">up</A> <A HREF="HTM_001452.htm">up</A> <A HREF="HTM_001408.htm">pleasance</A> <A HREF="HTM_002026.htm">measure</A> <A HREF="HTM_001677.htm">south</A> <A HREF="HTM_002618.htm">out</A> <A HREF="HTM_002619.htm"> in</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

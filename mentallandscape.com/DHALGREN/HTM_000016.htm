@@ -1,0 +1,881 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Large-Capacity Mail Recipient</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Large-Capacity Mail Recipient (#16)</H3>
+(an instance of <A HREF="HTM_000046.htm">Generic Mail Recipient</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspGeneric Large Capacity Mail Recipient
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp-------------------------------------
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSince any modifications to large lists entail copying the entire list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspover, operations on ordinary mail recipients having large numbers of
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspmessages, that actually change the content of .messages will take
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspinordinately long.  Thus we have this version which makes use of the
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp$biglist package, scattering the messages onto numerous properties so
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspthat write operations involving only a few messages will not require
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsprecopying of the entire list.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIn nearly all respects it behaves as the ordinary Mail Recipient,
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspexcept that it is faster for certain kinds of operations.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspCertain unimplemented verbs, like :date_sort(), and :messages()
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspcurrently return E_VERBNF.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspTo convert an existing $mail_recipient-child (call it #MR) into a
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp$big_mail_recipient-child the basic procedure is
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp    ;;something.foo= #MR:messages();
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp    @rmm 1-$ from #MR
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp    @unrmm expunge
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp    @chparent #MR to $big_mail_recipient
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp    ;#MR:receive_batch(@something.foo);
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+_genprop:
+<pre>
+gp = this._genprop;
+ngp = "";
+for i in [1..length(gp)]
+    if (gp[i] != "z")
+        ngp = (ngp + "bcdefghijklmnopqrstuvwxyz"[index("abcdefghijklmnopqrstuvwxy", 
+gp[i])]) + gp[i + 1..length(gp)];
+        return " " + (this._genprop = ngp);
+    endif
+    ngp = ngp + "a";
+endfor
+return " " + (this._genprop = ngp + "a");
+.
+
+</pre>
+<BR>
+_make:
+<pre>
+":_make(...) => new node with value {...}";
+if (!(caller in {this._mgr, this}))
+    return E_PERM;
+endif
+prop = this:_genprop();
+add_property(this, prop, args, {this.mowner, ""});
+return prop;
+.
+
+</pre>
+<BR>
+_kill:
+<pre>
+":_kill(node) destroys the given node.";
+if (!(caller in {this, this._mgr}))
+    return E_PERM;
+endif
+delete_property(this, args[1]);
+.
+
+</pre>
+<BR>
+_get:
+<pre>
+return (caller == this._mgr) ? this.(args[1]) | E_PERM;
+.
+
+</pre>
+<BR>
+_put:
+<pre>
+return (caller == this._mgr) ? this.(args[1]) = listdelete(args, 1) | E_PERM;
+.
+
+</pre>
+<BR>
+_ord:
+<pre>
+return args[1][2..3];
+.
+
+</pre>
+<BR>
+_makemsg:
+<pre>
+":_makemsg(ord,msg) => leafnode for msg";
+"msg = $mail_agent:__convert_new(@args[2])";
+msg = args[2];
+if (caller != this)
+    return E_PERM;
+elseif (h = "" in msg)
+    return {this:_make(@msg[h + 1..length(msg)]), args[1], @msg[1..h - 1]};
+else
+    return {0, args[1], @msg};
+endif
+.
+
+</pre>
+<BR>
+_killmsg:
+<pre>
+if (caller != this._mgr)
+    return E_PERM;
+elseif (node = args[1][1])
+    this:_kill(node);
+endif
+.
+
+</pre>
+<BR>
+_message_num:
+<pre>
+return args[2];
+.
+
+</pre>
+<BR>
+_message_date:
+<pre>
+return args[3];
+.
+
+</pre>
+<BR>
+_message_hdr:
+<pre>
+return args[3..length(args)];
+.
+
+</pre>
+<BR>
+_message_text:
+<pre>
+return {@args[3..length(args)], @args[1] ? {"", @this.(args[1])} | {}};
+.
+
+</pre>
+<BR>
+_lt_msgnum:
+<pre>
+return args[1] < args[2][1];
+.
+
+</pre>
+<BR>
+_lt_msgdate:
+<pre>
+return args[1] < args[2][2];
+.
+
+</pre>
+<BR>
+receive_batch:
+<pre>
+if (!this:is_writable_by(caller_perms()))
+    return E_PERM;
+else
+    new = this:new_message_num();
+    msgtree = this.messages;
+    for m in (args)
+        msgtree = this._mgr:insert_last(msgtree, this:_makemsg(new, m[2]));
+        new = new + 1;
+        if ($command_utils:running_out_of_time())
+            this.messages = msgtree;
+            player:tell("... ", new);
+            suspend(0);
+            msgtree = this.messages;
+            new = this:new_message_num();
+        endif
+    endfor
+    this.messages = msgtree;
+    this.last_used_time = time();
+    return 1;
+endif
+.
+
+</pre>
+<BR>
+receive_message:
+<pre>
+if (!this:is_writable_by(caller_perms()))
+    return E_PERM;
+else
+    this.messages = this._mgr:insert_last(this.messages, msg = this:_makemsg(new 
+= this:new_message_num(), args[1]));
+    this.last_msg_date = this:_message_date(@msg);
+    this.last_used_time = time();
+    return new;
+endif
+.
+
+</pre>
+<BR>
+messages_in_seq:
+<pre>
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+elseif (typeof(seq = args[1]) != LIST)
+    x = this._mgr:find_nth(this.messages, seq);
+    return {this:_message_num(@x), this:_message_text(@x)};
+else
+    msgs = {};
+    while (seq)
+        handle = this._mgr:start(this.messages, seq[1], seq[2] - 1);
+        while (handle)
+            for x in (handle[1])
+                msgs = {@msgs, {this:_message_num(@x), this:_message_text(@x)}};
+            endfor
+            handle = this._mgr:next(@listdelete(handle, 1));
+            $command_utils:suspend_if_needed(0);
+        endwhile
+        seq = seq[3..length(seq)];
+    endwhile
+    return msgs;
+endif
+.
+
+</pre>
+<BR>
+display_seq_headers:
+<pre>
+":display_seq_headers(msg_seq[,cur[,last_read_date]])";
+"This is the default header display routine.";
+"Prints a list of headers of messages on this to player.  msg_seq is the handle returned 
+by this:parse_message_seq(...).  cur is the player's current message.  last_read_date 
+is the date of the last of the already-read messages.";
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+endif
+getmsg = this.summary_uses_body ? "_message_text" | "_message_hdr";
+seq = args[1];
+cur = {@args, 0}[2];
+last_old = {@args, $maxint, $maxint}[3];
+keep_seq = {@$seq_utils:contract(this:kept_msg_seq(), $seq_utils:complement(seq, 
+1, this:length_all_msgs())), $maxint};
+k = 1;
+mcount = 0;
+width = player:linelen();
+while (seq)
+    handle = this._mgr:start(this.messages, seq[1], seq[2] - 1);
+    while (handle)
+        for x in (handle[1])
+            $command_utils:suspend_if_needed(0);
+            if (keep_seq[k] <= (mcount = mcount + 1))
+                k = k + 1;
+            endif
+            annot = (x[3] > last_old) ? "+" | ((k % 2) ? " " | "=");
+            line = tostr($string_utils:right(x[2], 5, (cur == x[2]) ? ">" | " "), 
+":", annot, " ", this:msg_summary_line(@this:(getmsg)(@x)));
+            player:tell(line[1..min(width, length(line))]);
+        endfor
+        handle = this._mgr:next(@listdelete(handle, 1));
+    endwhile
+    seq = seq[3..length(seq)];
+endwhile
+player:tell("-----+");
+.
+
+</pre>
+<BR>
+display_seq_full:
+<pre>
+":display_seq_full(msg_seq[,preamble]) => {cur}";
+"This is the default message display routine.";
+"Prints the indicated messages on folder to player.  msg_seq is the handle returned 
+by folder:parse_message_seq(...).  Returns the number of the final message in the 
+sequence (to be the new current message number).";
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+endif
+seq = args[1];
+preamble = {@args, ""}[2];
+cur = date = 0;
+while (seq)
+    handle = this._mgr:start(this.messages, seq[1], seq[2] - 1);
+    while (handle)
+        for x in (handle[1])
+            cur = this:_message_num(@x);
+            date = this:_message_date(@x);
+            player:display_message(preamble ? strsub(preamble, "%d", tostr(cur)) 
+| {}, player:msg_text(@this:_message_text(@x)));
+        endfor
+        handle = this._mgr:next(@listdelete(handle, 1));
+        $command_utils:suspend_if_needed(0);
+    endwhile
+    seq = seq[3..length(seq)];
+endwhile
+return {cur, date};
+.
+
+</pre>
+<BR>
+list_rmm:
+<pre>
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+endif
+len = 0;
+getmsg = this.summary_uses_body ? "_message_text" | "_message_hdr";
+going = this.messages_going;
+if (going && ((!going[1]) || (typeof(going[1][2]) == NUM)))
+    kept = {@going[1], $maxint};
+    going = going[2];
+else
+    kept = {$maxint};
+endif
+k = 1;
+mcount = 0;
+for s in (going)
+    if (kept[k] <= (mcount = mcount + s[1]))
+        k = k + 1;
+    endif
+    len = len + s[2][2];
+    handle = this._mgr:start(s[2], 1, s[2][2]);
+    while (handle)
+        for x in (handle[1])
+            if (kept[k] <= (mcount = mcount + 1))
+                k = k + 1;
+            endif
+            player:tell($string_utils:right(this:_message_num(@x), 4), (k % 2) ? 
+":  " | ":= ", this:msg_summary_line(@this:(getmsg)(@x)));
+        endfor
+        handle = this._mgr:next(@listdelete(handle, 1));
+    endwhile
+endfor
+if (len)
+    player:tell("----+");
+endif
+return len;
+.
+
+</pre>
+<BR>
+undo_rmm:
+<pre>
+if (!this:ok_write(caller, caller_perms()))
+    return E_PERM;
+endif
+msgtree = this.messages;
+seq = {};
+last = 0;
+"there are two possible formats here:";
+"OLD: {{n,msgs},{n,msgs},...}";
+"NEW: {kept_seq, {{n,msgs},{n,msgs},...}}";
+going = this.messages_going;
+if (going && ((!going[1]) || (typeof(going[1][2]) == NUM)))
+    kept = going[1];
+    going = going[2];
+else
+    kept = {};
+endif
+for s in (going)
+    msgtree = this._mgr:insert_after(msgtree, s[2], last + s[1]);
+    seq = {@seq, (last + s[1]) + 1, (last = (last + s[1]) + s[2][2]) + 1};
+endfor
+this.messages = msgtree;
+this.messages_going = {};
+this.messages_kept = $seq_utils:union(kept, $seq_utils:expand(this.messages_kept, 
+seq));
+this:_fix_last_msg_date();
+return seq;
+.
+
+</pre>
+<BR>
+expunge_rmm:
+<pre>
+if (!this:ok_write(caller, caller_perms()))
+    return E_PERM;
+endif
+len = 0;
+going = this.messages_going;
+if (going && ((!going[1]) || (typeof(going[1][2]) == NUM)))
+    going = going[2];
+endif
+for s in (going)
+    len = len + s[2][2];
+    this._mgr:kill(s[2], "_killmsg");
+endfor
+this.messages_going = {};
+return len;
+.
+
+</pre>
+<BR>
+rm_message_seq:
+<pre>
+seq = args[1];
+if (!(this:ok_write(caller, caller_perms()) || (this:ok(caller, caller_perms()) && 
+(seq = this:own_messages_filter(caller_perms(), @args)))))
+    return E_PERM;
+endif
+msgtree = this.messages;
+save = nums = {};
+onext = 1;
+rmmed = 0;
+for i in [1..length(seq) / 2]
+    if ($command_utils:suspend_if_needed(0))
+        player:tell("... rmm ", onext);
+        suspend(0);
+    endif
+    start = seq[(2 * i) - 1];
+    next = seq[2 * i];
+    x = this._mgr:extract_range(msgtree, start - rmmed, (next - 1) - rmmed);
+    msgtree = x[1];
+    zmsgs = x[2];
+    save = {@save, {start - onext, zmsgs}};
+    nums = {@nums, this:_message_num(@this._mgr:find_nth(zmsgs, 1)), this:_message_num(@this._mgr:find_nth(zmsgs, 
+zmsgs[2])) + 1};
+    onext = next;
+    rmmed = (rmmed + next) - start;
+endfor
+tmg = this.messages_going;
+save_kept = $seq_utils:intersection(this.messages_kept, seq);
+this.messages_kept = $seq_utils:contract(this.messages_kept, seq);
+this.messages_going = save_kept ? {save_kept, save} | save;
+fork (0)
+    for s in (tmg)
+        this._mgr:kill(s[2], "_killmsg");
+    endfor
+endfork
+this.messages = msgtree;
+this:_fix_last_msg_date();
+return $seq_utils:tostr(nums);
+.
+
+</pre>
+<BR>
+renumber:
+<pre>
+":renumber([cur]) renumbers caller.messages, doing a suspend() if necessary.";
+"  => {number of messages,new cur}.";
+if (!this:ok_write(caller, caller_perms()))
+    return E_PERM;
+endif
+cur = {@args, 0}[1];
+this:expunge_rmm();
+"... blow away @rmm'ed messages since there's no way to tell what their new numbers 
+should be...";
+if (!(msgtree = this.messages))
+    return {0, 0};
+endif
+if (cur)
+    cur = this._mgr:find_ord(msgtree, cur - 1, "_lt_msgnum") + 1;
+endif
+while (1)
+    "...find first out-of-sequence message...";
+    n = 1;
+    subtree = msgtree;
+    if (msgtree[3][1] == 1)
+        while ((node = this.(subtree[1]))[1])
+            "...subtree[3][1]==n...";
+            kids = node[2];
+            n = n + subtree[2];
+            i = length(kids);
+            while ((n = n - kids[i][2]) != kids[i][3][1])
+                i = i - 1;
+            endwhile
+            subtree = kids[i];
+        endwhile
+        leaves = node[2];
+        n = ((firstn = n) + length(leaves)) - 1;
+        while (n != leaves[(n - firstn) + 1][2])
+            n = n - 1;
+        endwhile
+        n = n + 1;
+    endif
+    "... n == first out-of-sequence ...";
+    "...renumber as many messages as we have time for...";
+    while ((n <= msgtree[2]) && (!$command_utils:running_out_of_time()))
+        msg = this._mgr:find_nth(msgtree, n);
+        msgtree = this._mgr:set_nth(msgtree, n, listset(msg, n, 2));
+        n = n + 1;
+    endwhile
+    this.messages = msgtree;
+    if (n > msgtree[2])
+        return {n - 1, cur};
+    endif
+    player:tell("...(renumbering to ", n - 1, ")");
+    suspend(0);
+    "...start over... may have received new mail, rmm'ed stuff, etc...";
+    "...so who knows what's there now?...";
+    if (this.messages_going)
+        player:tell("Renumber aborted.");
+        return;
+    endif
+    msgtree = this.messages;
+endwhile
+.
+
+</pre>
+<BR>
+length_all_msgs:
+<pre>
+return this:ok(caller, caller_perms()) ? this.messages ? this.messages[2] | 0 | E_PERM;
+.
+
+</pre>
+<BR>
+length_num_le:
+<pre>
+return this:ok(caller, caller_perms()) ? this._mgr:find_ord(this.messages, args[1], 
+"_lt_msgnum") | E_PERM;
+.
+
+</pre>
+<BR>
+length_date_le:
+<pre>
+return this:ok(caller, caller_perms()) ? this._mgr:find_ord(this.messages, args[1], 
+"_lt_msgdate") | E_PERM;
+.
+
+</pre>
+<BR>
+exists_num_eq:
+<pre>
+return this:ok(caller, caller_perms()) ? (i = this._mgr:find_ord(this.messages, args[1], 
+"_lt_msgnum")) && ((this:_message_num(@this._mgr:find_nth(this.messages, i)) == args[1]) 
+&& i) | E_PERM;
+.
+
+</pre>
+<BR>
+new_message_num:
+<pre>
+new = (msgtree = this.messages) ? this:_message_num(@this._mgr:find_nth(msgtree, 
+msgtree[2])) + 1 | 1;
+if (rmsgs = this.messages_going)
+    lbrm = rmsgs[length(rmsgs)][2];
+    return max(new, this:_message_num(@this._mgr:find_nth(lbrm, lbrm[2])) + 1);
+else
+    return new;
+endif
+.
+
+</pre>
+<BR>
+from_msg_seq:
+<pre>
+":from_msg_seq(object or list)";
+" => msg_seq of messages from any of these senders";
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+elseif (!this.messages)
+    return {};
+endif
+if (typeof(plist = args[1]) != LIST)
+    plist = {plist};
+endif
+mask = {@args, {1, this.messages[2] + 1}}[2];
+fseq = {};
+for m in [1..length(mask) / 2]
+    handle = this._mgr:start(this.messages, i = mask[(2 * m) - 1], mask[2 * m] - 
+1);
+    while (handle)
+        for msg in (handle[1])
+            fromline = msg[4];
+            if (toobj(fromline[rindex(fromline, "(") + 1..rindex(fromline, ")") - 
+1]) in plist)
+                fseq = $seq_utils:add(fseq, i, i);
+            endif
+            i = i + 1;
+            $command_utils:suspend_if_needed(0);
+        endfor
+        handle = this._mgr:next(@listdelete(handle, 1));
+    endwhile
+endfor
+return fseq || ("%f %<has> no messages from " + $string_utils:english_list($list_utils:map_arg(2, 
+$string_utils, "pronoun_sub", "%n (%#)", plist), "no one", " or "));
+.
+
+</pre>
+<BR>
+%from_msg_seq:
+<pre>
+":%from_msg_seq(string or list of strings)";
+" => msg_seq of messages with one of these strings in the from line";
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+elseif (!this.messages)
+    return {};
+endif
+if (typeof(nlist = args[1]) != LIST)
+    nlist = {nlist};
+endif
+fseq = {};
+mask = {@args, {1, this.messages[2] + 1}}[2];
+for m in [1..length(mask) / 2]
+    handle = this._mgr:start(this.messages, i = mask[(2 * m) - 1], mask[2 * m] - 
+1);
+    while (handle)
+        for msg in (handle[1])
+            fromline = " " + msg[4];
+            for n in (nlist)
+                if (index(fromline, n))
+                    fseq = $seq_utils:add(fseq, i, i);
+                endif
+            endfor
+            i = i + 1;
+            $command_utils:suspend_if_needed(0);
+        endfor
+        handle = this._mgr:next(@listdelete(handle, 1));
+    endwhile
+endfor
+return fseq || ("%f %<has> no messages from " + $string_utils:english_list($list_utils:map_arg($string_utils, 
+"print", nlist), "no one", " or "));
+.
+
+</pre>
+<BR>
+to_msg_seq:
+<pre>
+":to_msg_seq(object or list) => msg_seq of messages to those people";
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+elseif (!this.messages)
+    return {};
+endif
+if (typeof(plist = args[1]) != LIST)
+    plist = {plist};
+endif
+seq = {};
+mask = {@args, {1, this.messages[2] + 1}}[2];
+for m in [1..length(mask) / 2]
+    handle = this._mgr:start(this.messages, i = mask[(2 * m) - 1], mask[2 * m] - 
+1);
+    while (handle)
+        for msg in (handle[1])
+            toline = msg[5];
+            for r in ($mail_agent:parse_address_field(toline))
+                if (r in plist)
+                    seq = $seq_utils:add(seq, i, i);
+                endif
+            endfor
+            i = i + 1;
+            $command_utils:suspend_if_needed(0);
+        endfor
+        handle = this._mgr:next(@listdelete(handle, 1));
+    endwhile
+endfor
+return seq || ("%f %<has> no messages to " + $string_utils:english_list($list_utils:map_arg(2, 
+$string_utils, "pronoun_sub", "%n (%#)", plist), "no one", " or "));
+.
+
+</pre>
+<BR>
+%to_msg_seq:
+<pre>
+":%to_msg_seq(string or list of strings)";
+" => msg_seq of messages containing one of strings in the to line";
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+elseif (!this.messages)
+    return {};
+endif
+if (typeof(nlist = args[1]) != LIST)
+    nlist = {nlist};
+endif
+seq = {};
+mask = {@args, {1, this.messages[2] + 1}}[2];
+for m in [1..length(mask) / 2]
+    handle = this._mgr:start(this.messages, i = mask[(2 * m) - 1], mask[2 * m] - 
+1);
+    while (handle)
+        for msg in (handle[1])
+            toline = " " + msg[5];
+            for n in (nlist)
+                if (index(toline, n))
+                    seq = $seq_utils:add(seq, i, i);
+                endif
+            endfor
+            i = i + 1;
+            $command_utils:suspend_if_needed(0);
+        endfor
+        handle = this._mgr:next(@listdelete(handle, 1));
+    endwhile
+endfor
+return seq || ("%f %<has> no messages to " + $string_utils:english_list($list_utils:map_arg($string_utils, 
+"print", nlist), "no one", " or "));
+.
+
+</pre>
+<BR>
+subject_msg_seq:
+<pre>
+":subject_msg_seq(target) => msg_seq of messages with target in the Subject:";
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+elseif (!this.messages)
+    return {};
+endif
+target = args[1];
+seq = {};
+mask = {@args, {1, this.messages[2] + 1}}[2];
+for m in [1..length(mask) / 2]
+    handle = this._mgr:start(this.messages, i = mask[(2 * m) - 1], mask[2 * m] - 
+1);
+    while (handle)
+        for msg in (handle[1])
+            if (((subject = msg[6]) != " ") && index(subject, target))
+                seq = $seq_utils:add(seq, i, i);
+            endif
+            i = i + 1;
+            $command_utils:suspend_if_needed(0);
+        endfor
+        handle = this._mgr:next(@listdelete(handle, 1));
+    endwhile
+endfor
+return seq || (("%f %<has> no messages with subjects containing `" + target) + "'");
+.
+
+</pre>
+<BR>
+body_msg_seq:
+<pre>
+":body_msg_seq(target) => msg_seq of messages with target in the body";
+if (!this:ok(caller, caller_perms()))
+    return E_PERM;
+elseif (!this.messages)
+    return {};
+endif
+target = args[1];
+seq = {};
+mask = {@args, {1, this.messages[2] + 1}}[2];
+for m in [1..length(mask) / 2]
+    handle = this._mgr:start(this.messages, i = mask[(2 * m) - 1], mask[2 * m] - 
+1);
+    while (handle)
+        for msg in (handle[1])
+            if (msg[1] && (body = this.(msg[1])))
+                l = length(body);
+                while ((!index(body[l], target)) && (l = l - 1))
+                    $command_utils:suspend_if_needed(0);
+                endwhile
+                if (l)
+                    seq = $seq_utils:add(seq, i, i);
+                endif
+            endif
+            i = i + 1;
+            $command_utils:suspend_if_needed(0);
+        endfor
+        handle = this._mgr:next(@listdelete(handle, 1));
+    endwhile
+endfor
+return seq || tostr("%f %<has> no messages containing `", target, "' in the body.");
+.
+
+</pre>
+<BR>
+date_sort:
+<pre>
+return E_VERBNF;
+.
+
+</pre>
+<BR>
+_fix_last_msg_date:
+<pre>
+msgtree = this.messages;
+this.last_msg_date = (msgtree && this:_message_hdr(@this._mgr:find_nth(msgtree, msgtree[2]))[1]) 
+|| 0;
+.
+
+</pre>
+<BR>
+__fix:
+<pre>
+if (!this:ok_write(caller, caller_perms()))
+    return E_PERM;
+endif
+doit = args && args[1];
+msgtree = this.messages;
+for n in [1..msgtree[2]]
+    msg = this._mgr:find_nth(msgtree, n);
+    msg = {@msg[1..2], @$mail_agent:__convert_new(@msg[3..length(msg)])};
+    if (doit)
+        msgtree = this._mgr:set_nth(msgtree, n, msg);
+    endif
+    if ($command_utils:running_out_of_time())
+        suspend(0);
+        if (this.messages != msgtree)
+            player:notify("urk.  someone played with this folder.");
+            return 0;
+        endif
+    endif
+endfor
+return 1;
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    pass();
+    this._mgr = $biglist;
+    this.mowner = $mail_recipient.owner;
+endif
+.
+
+</pre>
+<BR>
+length_date_gt:
+<pre>
+if (this:ok(caller, caller_perms()))
+    date = args[1];
+    return (this.last_msg_date <= date) ? 0 | (this.messages[2] - this._mgr:find_ord(this.messages, 
+args[1], "_lt_msgdate"));
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp summary_uses_body
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp _mgr
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mowner
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp _genprop
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000019.htm">Player-Creation-Log</A> <A HREF="HTM_000313.htm">Player-Requests</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,85 @@
+<HTML>
+<HEAD>
+<TITLE>Coffee Machine</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Coffee Machine (#1370)</H3>
+(an instance of <A HREF="HTM_000008.htm">generic container</A> made by <A HREF="HTM_001358.htm">Johnathon</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe coffee machine is very old and large. Lots of mysterious dials and
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspand levers decorate the front. Various pipes entwine around it, hissing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspsteam from their joints. Occasional burbling noises gloop forth.
+<BR>
+<BR>
+Coffee Machine contains <A HREF="HTM_001371.htm">Coffee Grounds</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001364.htm">Johnathon's basement</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+get t*ake g*et:
+<pre>
+player:tell_lines(this:take_failed_msg());
+player.location:announce(this:otake_failed_msg());
+.
+
+</pre>
+<BR>
+has_coffee:
+<pre>
+if ($object_utils:contains(this, this.grounds) && (this.coffee > 0))
+    return 1;
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+use:
+<pre>
+if (this.coffee)
+    this.coffee = this.coffee - 1;
+else
+    player:tell(this:empty_msg());
+    player.location:annouce(this:oempty_msg());
+endif
+.
+
+</pre>
+<BR>
+empty_msg oempty_msg:
+<pre>
+"Copied from generic thing (#5):take_failed_msg by The_Mayor (#2) Tue Jul 19 11:47:01 
+1994 EDT";
+set_task_perms(caller_perms());
+return $string_utils:pronoun_sub(this.(verb));
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp coffee
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp grounds
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp value
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

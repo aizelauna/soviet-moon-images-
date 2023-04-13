@@ -1,0 +1,783 @@
+<HTML>
+<HEAD>
+<TITLE>Math Utilities</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Math Utilities (#28)</H3>
+(an instance of <A HREF="HTM_000124.htm">Generic Utilities Package</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspTrigonometric/Exponential functions:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sin(a),cos(a),tan(a) -- returns 10000*(the value of the corresponding
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp       trigonometric function) angle a is in degrees.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  arctan([x,]y) -- returns arctan(y/x) in degrees in the range -179..180.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp       x defaults to 10000.  Quadrant is that of (x,y).
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  exp(x[,n]) -- calculates e^x with an nth order taylor polynomial
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspStatistical functions:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  combinations(n,r) -- returns the number of combinations given n objects
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp       taken r at a time.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  permutations(n,r) -- returns the number of permutations possible given
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp       n objects taken r at a time.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspNumber decomposition:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  div(n,d) -- correct version of / (handles negative numbers correctly)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  mod(n,d) -- correct version of  (handles negative numbers correctly)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  divmod(n,d) -- {div(n,d),mod(n,d)}
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  parts(n,q[,i]) -- returns a list of two elements {integer,decimal fraction}
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspOther math functions:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sqrt(x)      -- returns the largest integer n <= the square root of x
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  pow(x,n)     -- returns x^n
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  factorial(x) -- returns x!
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  sum(a,b,c,...) -- returns a+b+c+... (Can be sum({a,b,c,...}) also)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSeries:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  fibonacci(n) -- returns the 1st n fibonacci numbers in a list
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  geometric(x,n) -- returns the value of the nth order geometric series at x
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspInteger Properties:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  gcd(a,b) -- find the greatest common divisor of the two numbers
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  lcm(a,b) -- find the least common multiple of the two numbers
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  are_relatively_prime(a,b) -- return 1 if a and b are relatively prime
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  is_prime(n) -- returns 1 if the number is a prime and 0 otherwise
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspMiscellaneous:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  random(n) -- returns a random number from 0..n if n > 0 or n..0 if n < 0
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  random_range(n[,mean]) -- returns a random number from mean - n..mean + n
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp      with mean defaulting to 0
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  simpson({a,b},{f(a),f((a+b)/2),f(b)}) -- returns the numerical
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp      approximation of an integral using simpson's rule
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  percentage(n,d,[p]) -- returns percent n of d as a string, not number
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp      p, if given, is the amount of decimal places for precision
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspBitwise Arithmetic:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  AND(x,y) -- returns x AND y
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  OR(x,y) -- returns x OR y
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  XOR(x,y) -- returns x XOR y (XOR is the exclusive-or function)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  NOT(x) -- returns the complement of x
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp      All bitwise manipulation is of 32-bit values.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+sin:
+<pre>
+"sin(x) -- given x in degrees, sin(x) will return the value of the sine";
+"function at x times 10000";
+x = ((args[1] + 45) % 360) - 45;
+if (x < 0)
+    return -this:sin(-x);
+elseif (x > 225)
+    return -this:xcos(x - 270);
+elseif (x > 135)
+    return -this:xsin(x - 180);
+elseif (x > 45)
+    return this:xcos(x - 90);
+else
+    return this:xsin(x);
+endif
+.
+
+</pre>
+<BR>
+cos:
+<pre>
+"cos(x) -- given x in degrees, cos(x) will return cosine evaluated at x";
+"times 10000";
+return this:sin(90 - args[1]);
+.
+
+</pre>
+<BR>
+tan:
+<pre>
+"tan(x) -- given x in degrees, tan(x) will calculate the tangent at x";
+"times 10000";
+return (this:sin(args[1]) * 10000) / this:cos(args[1]);
+.
+
+</pre>
+<BR>
+xsin:
+<pre>
+"xsin(x) -- calculates the taylor approximation for the sine function";
+x = args[1];
+if ((x * x) > this.taylor)
+    return ((this:xsin(x / 2) * this:xcos((x + 1) / 2)) + (this:xsin((x + 1) / 2) 
+* this:xcos(x / 2))) / 10000;
+else
+    return (x * (17453000 - ((x * x) * 886))) / 100000;
+endif
+.
+
+</pre>
+<BR>
+xcos:
+<pre>
+"xcos(x) -- calculates the taylor approximation for the cosine function";
+x = args[1];
+if ((x * x) > this.taylor)
+    return ((this:xcos(x / 2) * this:xcos((x + 1) / 2)) - (this:xsin(x / 2) * this:xsin((x 
++ 1) / 2))) / 10000;
+else
+    return (1000000000 - ((x * x) * (152309 + ((4 * x) * x)))) / 100000;
+endif
+.
+
+</pre>
+<BR>
+factorial:
+<pre>
+"factorial(n) -- returns n factorial for 0 <= n (<= 12).";
+if ((number = args[1]) < 0)
+    return E_INVARG;
+endif
+fact = 1;
+for i in [2..number]
+    fact = fact * i;
+endfor
+return fact;
+.
+
+</pre>
+<BR>
+pow:
+<pre>
+"pow(x,n) -- returns x raised to the nth power. n must be >= 0.";
+if ((power = args[2]) < 0)
+    return E_INVARG;
+endif
+n = args[1];
+if (power % 2)
+    ret = n;
+else
+    ret = 1;
+endif
+while (power = power / 2)
+    n = n * n;
+    if (power % 2)
+        ret = ret * n;
+    endif
+endwhile
+return ret;
+.
+
+</pre>
+<BR>
+fibonacci:
+<pre>
+"fibonacci(n) -- calculates the fibonacci numbers to the nth term";
+"and returns them in a list. n must be >= 0.";
+x0 = 0;
+x1 = 1;
+if ((n = args[1]) < 0)
+    return E_INVARG;
+elseif (n == 0)
+    return {x0};
+else
+    x = {x0, x1};
+    for i in [2..n]
+        len = length(x);
+        x = {@x, x[len - 1] + x[len]};
+    endfor
+    return x;
+endif
+.
+
+</pre>
+<BR>
+geometric:
+<pre>
+"geometric(x,n) -- calculates the value of the geometric series at x to ";
+"the nth term. i.e., approximates 1/(1-x) when |x| < 1. this, of course,";
+"is impossible in MOO, but someone may find it useful in some way.";
+"n defaults to 5. n must be >= 0.";
+n = args[1];
+order = (length(args) > 1) ? args[2] | 5;
+x = 1;
+for i in [1..order]
+    x = x + this:pow(n, i);
+endfor
+return x;
+.
+
+</pre>
+<BR>
+divmod:
+<pre>
+"divmod(n,d) => {q,r} such that n = dq + r";
+"  handles negative numbers correctly   0<=r<d if d>0, -d<r<=0 if d<0.";
+n = args[1];
+d = args[2];
+r = ((n % d) + d) % d;
+q = (n - r) / d;
+return {q, r};
+.
+
+</pre>
+<BR>
+combinations:
+<pre>
+"combinations(n,r) -- returns the number of ways one can choose r";
+"objects from n distinct choices.";
+"C(n,r) = n!/[r!(n-r)!]";
+"  overflow may occur if n>29...";
+n = args[1];
+r = args[2];
+if (0 > (r = min(r, n - r)))
+    return 0;
+else
+    c = 1;
+    n = n + 1;
+    for i in [1..r]
+        c = (c * (n - i)) / i;
+    endfor
+    return c;
+endif
+.
+
+</pre>
+<BR>
+permutations:
+<pre>
+"permutations(n,r) -- returns the number of ways possible for one to";
+"order r objects given n distinct locations.";
+"P(n,r) = n!/(n-r)!";
+n = args[1];
+r = args[2];
+return this:factorial(n) / this:factorial(n - r);
+.
+
+</pre>
+<BR>
+simpson:
+<pre>
+"simpson({a,b},{f(a),f((a+b)/2),f(b)}) -- given two endpoints, a and b,";
+"and the functions value at a, (a+b)/2, and b, this will calculate";
+"a numerical approximation of the integral using simpson's rule.";
+"the answer is returned as {integer,fraction}";
+point = args[1];
+fcn = args[2];
+return this:parts((point[2] - point[1]) * ((fcn[1] + (4 * fcn[2])) + fcn[3]), 6);
+.
+
+</pre>
+<BR>
+parts:
+<pre>
+"parts(n,q[,i]) -- returns a decomposition of n by q into integer and";
+"floating point parts with i = the number of digits after the decimal.";
+"i defaults to 5.";
+"warning: it is quite easy to hit maxint which results in unpredictable";
+"         results";
+parts = {(n = args[1]) / (q = args[2]), n % q};
+i = (length(args) > 2) ? args[3] | 5;
+return {parts[1], (parts[2] * this:pow(10, i)) / q};
+.
+
+</pre>
+<BR>
+sqrt:
+<pre>
+return sqrt(args[1]);
+"sqrt(n) => largest integer <= square root of n.  Uses Newton's method.";
+"obsolete now; left for documentation purposes.";
+n = args[1];
+if (n < 0)
+    return E_RANGE;
+elseif (n)
+    x1 = n;
+    while (x1 > (x2 = (x1 + (n / x1)) / 2))
+        x1 = x2;
+    endwhile
+    return x1;
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+arctan:
+<pre>
+"arctan(y/x) == arctan(x,y) => angle in degrees.";
+if (length(args) < 2)
+    sin = args[1];
+    cos = 10000;
+else
+    sin = args[2];
+    cos = args[1];
+endif
+if (sin < 0)
+    return -this:arctan(cos, -sin);
+elseif (cos < 0)
+    return 180 - this:arctan(-cos, sin);
+elseif (sin > cos)
+    return 90 - this:arctan(sin, cos);
+else
+    tan = (sin * 10000) / cos;
+    a = $list_utils:find_insert(this.tangents, tan - 1);
+    if ((this.tangents[a] - tan) < (tan - {0, @this.tangents}[a]))
+        return a;
+    else
+        return a - 1;
+    endif
+endif
+.
+
+</pre>
+<BR>
+div:
+<pre>
+"div(n,d) => q such that n = dq + r and  (0<=r<d if d>0, -d<r<=0 if d<0).";
+return this:divmod(@args)[1];
+.
+
+</pre>
+<BR>
+mod:
+<pre>
+"A correct mod function.";
+"mod(n,d) => r such that n = dq + r and (0<=r<d if d>0 or -d<r<=0 if d<0).";
+n = args[1];
+d = args[2];
+return ((n % d) + d) % d;
+.
+
+</pre>
+<BR>
+aexp:
+<pre>
+"returns 10000 exp (x/10000)";
+"The accuracy seems to be ~0.1% for 0<x<4";
+x = args[1];
+if (x < 0)
+    z = this:(verb)(-x);
+    "#78:tell(\"->\", x, \"  \", z);";
+    return (100000000 + (z / 2)) / z;
+elseif (x > 1000)
+    z = this:(verb)(x / 2);
+    if (z > 1073741823)
+        return $maxint;
+        "maxint for overflows";
+    elseif (z > 460000)
+        z = ((z + 5000) / 10000) * z;
+    elseif (z > 30000)
+        z = ((((z + 50) / 100) * z) + 50) / 100;
+    else
+        z = ((z * z) + 5000) / 10000;
+    endif
+    if (x % 2)
+        return z + ((z + 5000) / 10000);
+    else
+        return z;
+    endif
+else
+    return ((10000 + x) + (((x * x) + 10000) / 20000)) + ((((x * x) * x) + 300000000) 
+/ 600000000);
+endif
+.
+
+</pre>
+<BR>
+random:
+<pre>
+"random(): returns a random number in the following manner:";
+"random(n > 0) will return a number in the range 0 to n";
+"random(n < 0) will return a number in the range n to 0";
+prob = args[1];
+mod = (prob < 0) ? -1 | 1;
+return (mod * random(abs(prob + mod))) - mod;
+.
+
+</pre>
+<BR>
+random_range:
+<pre>
+"random_range(range [,mean]): returns a random number within the given";
+"range from the mean. if the mean isn't given, it defaults to 0";
+"e.g., random_range(10) => -10..10";
+"      random_range(10,4) => -6..14";
+range = args[1];
+mean = (length(args) > 1) ? args[2] | 0;
+return mean + (((random(2) == 1) ? -1 | 1) * this:random(range));
+.
+
+</pre>
+<BR>
+is_prime:
+<pre>
+"is_prime(number) returns 1 if the number is prime or 0 if it isn't.";
+"of course, only positive numbers are candidates for primality.";
+number = args[1];
+if (number == 2)
+    return 1;
+elseif ((number < 2) || ((number % 2) == 0))
+    return 0;
+else
+    choice = 3;
+    while (((denom = choice * choice) <= number) && (denom > 0))
+        if ((seconds_left() < 2) || (ticks_left() < 25))
+            suspend(0);
+        endif
+        if ((number % choice) == 0)
+            return 0;
+        endif
+        choice = choice + 2;
+    endwhile
+endif
+return 1;
+.
+
+</pre>
+<BR>
+AND:
+<pre>
+bl1 = this:BLFromInt(args[1]);
+bl2 = this:BLFromInt(args[2]);
+blOut = {};
+for i in [1..32]
+    blOut = {@blOut, bl1[i] && bl2[i]};
+endfor
+return this:IntFromBL(blOut);
+.
+
+</pre>
+<BR>
+OR:
+<pre>
+bl1 = this:BLFromInt(args[1]);
+bl2 = this:BLFromInt(args[2]);
+blOut = {};
+for i in [1..32]
+    blOut = {@blOut, bl1[i] || bl2[i]};
+endfor
+return this:IntFromBL(blOut);
+.
+
+</pre>
+<BR>
+XOR:
+<pre>
+bl1 = this:BLFromInt(args[1]);
+bl2 = this:BLFromInt(args[2]);
+blOut = {};
+for i in [1..32]
+    blOut = {@blOut, bl1[i] != bl2[i]};
+endfor
+return this:IntFromBL(blOut);
+.
+
+</pre>
+<BR>
+NOT:
+<pre>
+return -(1 + args[1]);
+"";
+"... here's what it used to be ...";
+bl1 = this:BLFromInt(args[1]);
+blOut = {};
+for i in [1..32]
+    blOut = {@blOut, !bl1[i]};
+endfor
+return this:IntFromBL(blOut);
+.
+
+</pre>
+<BR>
+BLFromInt:
+<pre>
+x = args[1];
+l = {};
+firstbit = x < 0;
+if (firstbit)
+    x = x + $minint;
+endif
+for i in [1..31]
+    l = {x % 2, @l};
+    x = x / 2;
+endfor
+return {firstbit, @l};
+.
+
+</pre>
+<BR>
+IntFromBL:
+<pre>
+bl = args[1];
+x = 0;
+for l in (bl)
+    x = x * 2;
+    x = x + l;
+endfor
+return x;
+.
+
+</pre>
+<BR>
+gcd greatest_common_divisor:
+<pre>
+"gcd(num1,num2): find the greatest common divisor of the two numbers";
+"using the division algorithm. the absolute values of num1 and num2 are";
+"used without loss of generality.";
+num1 = abs(args[1]);
+num2 = abs(args[2]);
+max = max(num1, num2);
+min = min(num1, num2);
+if (r1 = max % min)
+    while (r2 = min % r1)
+        min = r1;
+        r1 = r2;
+    endwhile
+    return r1;
+else
+    return min;
+endif
+.
+
+</pre>
+<BR>
+lcm least_common_multiple:
+<pre>
+"lcm(num1,num2): find the least common multiple of the two numbers.";
+"we shall use the positive lcm value without loss of generality.";
+"since we have gcd already, we'll just use lcm*gcd = num1*num2";
+num1 = abs(args[1]);
+num2 = abs(args[2]);
+return (num1 * num2) / this:gcd(num1, num2);
+.
+
+</pre>
+<BR>
+are_rel_prime are_relatively_prime:
+<pre>
+"are_rel_prime(num1,num2): returns 1 if num1 and num2 are relatively";
+"prime.";
+"since we have gcd, this is pretty easy.";
+if (this:gcd(args[1], args[2]) == 1)
+    return 1;
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+base_conversion:
+<pre>
+"Call with first arg either a number or a string, being the number";
+"desired for conversion. capital letters denote values from 10-35;";
+"lowercase letters from 36 to 61. Maximal base is 62.";
+"You will be unable to use the extra 26 lowercases as separate unless";
+"you pass a nonzero fourth argument. Passing zero or none uses the";
+"default value, which is to have AAAA=aaaa.";
+"The second and third arguments should be the base of the number and";
+"the base you want it in, respectively.";
+"Any of the arguments can be strings or nums, but high-base numbers";
+"will need to be strings. This returns a string.";
+"Any problems, talk to Ozymandias.";
+sensitive = 0;
+if (length(args) < 3)
+    return E_INVARG;
+elseif (length(args) == 4)
+    sensitive = tonum(args[4]);
+endif
+result = 0;
+thenum = tostr(args[1]);
+origbase = tonum(args[2]);
+newbase = tonum(args[3]);
+if ((((origbase < 2) || (newbase < 2)) || (origbase > 62)) || (newbase > 62))
+    return E_INVARG;
+endif
+for which in [1..length(thenum)]
+    value = index(this.base_alphabet, thenum[which], sensitive);
+    if ((!value) || (value > origbase))
+        return E_INVARG;
+    endif
+    result = ((result * origbase) + value) - 1;
+endfor
+thestring = "";
+if (result < 0)
+    return E_INVARG;
+endif
+while (result)
+    if ((which = (result % newbase) + 1) <= length(this.base_alphabet))
+        thestring = this.base_alphabet[which] + thestring;
+    else
+        return E_INVARG;
+    endif
+    result = result / newbase;
+endwhile
+return thestring;
+.
+
+</pre>
+<BR>
+exp:
+<pre>
+"exp(x[,n]) -- calculates an nth order taylor approximation for e^x.";
+"n defaults to 5. Any n given must be >= 0. you need to divide the result";
+"the answer will be returned as {integer part,fractional part}";
+x = args[1];
+n = (length(args) > 1) ? args[2] | 5;
+ex = nfact = 1;
+for i in [0..n - 1]
+    j = n - i;
+    ex = (ex * x) + (nfact = nfact * j);
+endfor
+return this:parts(ex, nfact);
+.
+
+</pre>
+<BR>
+norm:
+<pre>
+":norm(a,b,c,d...) => sqrt(a^2+b^2+c^2+...)";
+m = max(max(@args), -min(@args));
+logm = length(tostr(m));
+if (logm <= 4)
+    s = 0;
+    for a in (args)
+        s = s + (a * a);
+    endfor
+    return sqrt(s);
+else
+    factor = tonum("1" + "0000000"[1..logm - 4]);
+    s = 0;
+    for a in (args)
+        a = a / factor;
+        s = s + (a * a);
+    endfor
+    return sqrt(s) * factor;
+endif
+.
+
+</pre>
+<BR>
+sum:
+<pre>
+":sum(num, num, num ...) => Total of all arguments added together.";
+total = 0;
+for number in ((typeof(x = args[1]) == LIST) ? x | args)
+    total = total + number;
+endfor
+return total;
+.
+
+</pre>
+<BR>
+percentage:
+<pre>
+"percentage(NUM numerator, NUM denominator, [NUM precision]) => STR ##.##%";
+"Will give you the percentage of the numerator to the denominator to the precision 
+given in the third argument. If precision is omitted, it is assumed to be 0.";
+" percentage(1, 3)    => \"33%\"";
+" percentage(1, 3, 3) => \"33.333%\"";
+numer = args[1];
+denom = args[2];
+precision = (length(args) > 2) ? args[3] | 0;
+if ((numer == 0) || (denom == 0))
+    return tostr("0", precision ? tostr(".", $string_utils:space(precision, "0")) 
+| "", "%");
+endif
+factor = 100 * this:pow(10, precision);
+"Take down the size if possible by gcd so we don't go over $maxint.";
+if (fgcd = this:gcd(factor, denom))
+    factor = this:div(factor, fgcd);
+    denom = this:div(denom, fgcd);
+endif
+if (gcd = this:gcd(numer, denom))
+    newnumer = this:div(numer, gcd) * factor;
+    denom = this:div(denom, gcd);
+else
+    newnumer = numer * factor;
+endif
+per = tostr(this:div(newnumer, denom));
+if (precision)
+    if ((lp = length(per)) > precision)
+        dec = per[(lp - precision) + 1..lp];
+        whol = per[1..lp - precision];
+    else
+        whol = "0";
+        dec = $string_utils:space(precision - lp, "0") + per;
+    endif
+    return ((whol + ".") + dec) + "%";
+else
+    return per + "%";
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp base_alphabet
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp tangents
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp factor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp taylor
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

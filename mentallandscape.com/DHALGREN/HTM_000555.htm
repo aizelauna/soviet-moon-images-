@@ -1,0 +1,85 @@
+<HTML>
+<HEAD>
+<TITLE>robot</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> robot (#555)</H3>
+(an instance of <A HREF="HTM_000502.htm">Generic Wandering Automaton</A> made by <A HREF="HTM_000103.htm">Zon</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a perfect copy of Rotwang's art-deco robot from _Metropolis_.
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp[ <A HREF="HTM_000555_State1.htm">hit</A> ] hits the robot. It frowns.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp[ <A HREF="HTM_000555_State1.htm">kick</A> ] kicks the robot. It frowns.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp[ <A HREF="HTM_000555.htm">hug</A> ] hugs the robot. It smiles.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp[ <A HREF="HTM_000555.htm">kiss</A> ] kisss the robot. It smiles.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000468.htm">Z</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+find_exits:
+<pre>
+"find_exits() -- return a list of exit object numbers that are valid for the bot 
+to take from the current room.  If the bot doesn't set ways_out, those exits are 
+the obvious_exits() - 'banned exits'.  Otherwise, they are the exits named by ways_out 
+- 'banned exits'.    ";
+exits = {};
+room = this:this_room();
+if (this.ways_out != {})
+    for name in (this.ways_out)
+        exit = room:match_exit(name);
+        if ((valid(exit) && (!(exit in exits))) && (!this:banned(exit.dest)))
+            exits = listappend(exits, exit);
+        endif
+    endfor
+else
+    obvious_exits = room:obvious_exits();
+    for exit in (obvious_exits)
+        if (valid(exit) && (!this:banned(exit.dest)))
+            exits = listappend(exits, exit);
+        endif
+    endfor
+endif
+return exits;
+.
+
+</pre>
+<BR>
+act:
+<pre>
+"act(): the repeating action of the automaton goes here.  It can be a movement, as 
+here, or be overridden to do some other repeating action";
+if (this.should_act && ($object_utils:has_property(this.location, "exits") || is_player(this.location)))
+    exits = this:find_exits();
+    if (length(exits))
+        destination = exits[random(length(exits))];
+        destination:move(this);
+    endif
+else
+    this.should_act = 1;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,307 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Elevator</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Elevator (#1543)</H3>
+(an instance of <A HREF="HTM_000110.htm">Generic Post-Apocalypse Room</A> made by <A HREF="HTM_001460.htm">Gaijin</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001460.htm">Gaijin</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Elevator together with the Generic Elevator Call Button form a general 
+purpose elevator that appears to travel between floors.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Elevator is a child of the Generic Post-Apocalypse Room Class.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspTo construct an elevator with multiple floors, create an instance of the Generic 
+Elevator #1543 using something like:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp    @create #1543 named "M of I Elevator"
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspEach room that has access to the elevator should create a normal exit that enters 
+the elevator, using an appropriate exit word like "enter" or "elevator".  This exit 
+will not be usable unless the elevator is present at this floor and the door is open.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe list of floors that an elevator can reach is given by the .floor_names property. 
+ This property is an array of string values giving, in order, the names of floors 
+that can be selected.  Similarly, the .floor_exits property gives the actual room 
+numbers to be used at each of these floors.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspIn order to call the elevator, place an instance of the Generic Elevator Call Button 
+#1260 in each room:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp    @create #1260 named "a rusted elevator call button"
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspOn each of these call buttons, use the .elevator property to associate this call 
+button with the elevator it is to summon.  Similarly, use the .floor_name property 
+to state the name of the floor where this button can be found.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspProof by example.  The Ministry of Information Elevator is object #1531. It has three 
+floors named "G", "1" and "2".  These floor labels are to the rooms numbered #1493, 
+#1517, and #1524, respectively.  So #1531 has these properties to describe its floor 
+choices:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp	; #1531.floor_names
+&nbsp&nbsp&nbsp&nbsp&nbsp	=> {"G", "1", "2"}
+&nbsp&nbsp&nbsp&nbsp&nbsp	; #1531.floor_exits
+&nbsp&nbsp&nbsp&nbsp&nbsp	=> {#1493, #1517, #1524}
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspFor example, the call button on the "G" floor in room #1493 shows:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp        ; #1508.floor_name
+&nbsp&nbsp&nbsp&nbsp&nbsp        => "G"
+&nbsp&nbsp&nbsp&nbsp&nbsp        #1508.elevator
+&nbsp&nbsp&nbsp&nbsp&nbsp        => #1531  (M of I Elevator)
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe property .floor_delay can be set on the elevator to change the speed of an elevator 
+as it travels from floor to floor.  Currently, the default is 3.  That value is measured 
+in non-blocking suspend() units.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspSimilarly, the length of time a door will remain open before it automatically closes 
+again can be adjusted by setting the .door_delay property.  Currently, the default 
+is 6.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThen, to add local color, one can create the appearance of an unreliable delivery 
+mechanism.  By setting the .reliable property to 0, and the .odds property to a value, 
+n, n > 1, the elevator will then have a 1 in n chance of NOT making it to the next 
+floor.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspLimitations:  Although more than one user may be in the elevator at a time, there 
+can be only one active destination at a time.  I didn't feel like writing the disk-scheduling 
+algorithm.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspIf things look wedged, be sure and kick the control panel...
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+acceptable:
+<pre>
+return (this.door == 1) || (caller == this.owner);
+.
+
+</pre>
+<BR>
+open_door:
+<pre>
+if (this.door != 1)
+    this:announce_all("The doors open.");
+    this.exit:announce_all("The elevator doors open.");
+    this.door = 1;
+    fork dtask (this.door_delay)
+        this:close_door();
+    endfork
+    this.door_task = dtask;
+else
+    player:tell("The doors are already open.");
+endif
+.
+
+</pre>
+<BR>
+close_door:
+<pre>
+if (this.door == 1)
+    this:announce_all("The doors close.");
+    this.exit:announce_all("The elevator doors close.");
+    this.door = 0;
+    kill_task(this.door_task);
+endif
+.
+
+</pre>
+<BR>
+move_to_floor:
+<pre>
+dest_floor = args[1];
+dest_n = dest_floor in this.floor_names;
+cur_n = this.floor in this.floor_names;
+if (dest_n == 0)
+    player:tell("There is no button labeled ", dest_floor, ".");
+    return;
+endif
+if (this.in_use)
+    player:tell("Fried circuitry is only allowing one destination at a time.");
+    return;
+endif
+this.in_use = 1;
+this:close_door();
+player:tell("Whirring and clanking machinery grind into motion...");
+this:announce("Grinding gears and the whine of engines echo in the distance.");
+if (cur_n < dest_n)
+    delta = 1;
+elseif (cur_n > dest_n)
+    delta = -1;
+endif
+stopped = 0;
+while ((!stopped) && (this.floor != dest_floor))
+    suspend(this.floor_delay);
+    cur_n = cur_n + delta;
+    this.floor = this.floor_names[cur_n];
+    this.exit = this.floor_exits[cur_n];
+    this:announce_all(this.floor);
+    if (!this.reliable)
+        stopped = random(this.odds) == 1;
+        if (stopped)
+            this:announce_all("You hear a very strange grinding sound as the elevator 
+lurches to a halt.");
+        endif
+    endif
+endwhile
+suspend(this.floor_delay);
+if (stopped)
+    player:tell("It's unclear if the elevator is at the right floor...");
+endif
+this.in_use = 0;
+this:open_door();
+.
+
+</pre>
+<BR>
+call_elevator:
+<pre>
+calling_floor = args[1];
+if (calling_floor in this.floor_names)
+    if (this.door == 1)
+        player:tell("The elevator is already here and the doors are open.");
+    else
+        if ((!this.being_called) && (!this.in_use))
+            this.being_called = 1;
+            this:move_to_floor(calling_floor);
+            this.being_called = 0;
+            if (this.floor != calling_floor)
+                player:tell("Hmm.  The elevator might not have made it to this floor...");
+            endif
+        else
+            player:tell("Seems the elevator might be in use...");
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+open:
+<pre>
+if ((dobjstr == "") || (dobjstr == "door"))
+    this:open_door();
+else
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+out exit leave:
+<pre>
+if (this.door == 1)
+    dest = this.exit;
+    player:moveto(dest);
+    if (random(4) == 1)
+        fork (this.activity_delay)
+            mystery_call = random(length(this.floor_names));
+            this:call_elevator(this.floor_names[mystery_call]);
+        endfork
+    endif
+else
+    player:tell("The doors are closed.");
+endif
+.
+
+</pre>
+<BR>
+push:
+<pre>
+dest_floor = args[1];
+if (dest_n = dest_floor in this.floor_names)
+    player:tell("You reach out and press the ", dest_floor, " button.");
+    this:announce(player.name, " presses the ", dest_floor, " button.");
+    this:move_to_floor(dest_floor);
+else
+    player:tell("There isn't a button labeled ", dest_floor, ".");
+endif
+.
+
+</pre>
+<BR>
+enterfunc:
+<pre>
+pass(@args);
+player:tell("A panel has buttons labeled: ");
+player:tell_lines(this.floor_names);
+.
+
+</pre>
+<BR>
+kick hit bang smash punch:
+<pre>
+this.in_use = 0;
+this.door = 0;
+player:tell("You seem to have rattled the circuitry some.  Now give it a try.");
+.
+
+</pre>
+<BR>
+look:
+<pre>
+if ((length(args) == 1) && (dobjstr == "panel"))
+    player:tell("A panel has buttons labeled:");
+    player:tell_lines(this.floor_names);
+else
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp reliable
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp odds
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp floor_names
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp floor_exits
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp floor_delay
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp door_delay
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp activity_delay
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp in_use
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp door
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp floor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp exit
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp door_task
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp being_called
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_001531.htm">M of I Elevator</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

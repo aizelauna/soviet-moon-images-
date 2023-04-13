@@ -1,0 +1,75 @@
+<HTML>
+<HEAD>
+<TITLE>Trees_Beatnik</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Trees_Beatnik (#1237)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_001237.htm">Trees_Beatnik</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA shadowy thing.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001530.htm">Electric Godland</A>.
+<BR>
+<BR>
+<BR>
+Trees_Beatnik owns <A HREF="HTM_001237.htm">Trees_Beatnik</A> <A HREF="HTM_001530.htm">Electric Godland</A> <A HREF="HTM_001257.htm">Liquor FO</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+tell:
+<pre>
+nargs = length(args);
+if (nargs < 1)
+    player:notify(tostr("Usage: ", verb, " <player> [with <message>]"));
+    return;
+endif
+who = $string_utils:match_player(args[1]);
+if ($command_utils:player_match_result(who, args[1])[1])
+    return;
+elseif (who in this.gaglist)
+    player:tell("You have ", who:title(), " @gagged.  If you paged ", who.po, ", 
+", who.ps, " wouldn't be able to answer you.");
+    return;
+endif
+"for pronoun_sub's benefit...";
+dobj = who;
+iobj = player;
+text = "";
+if (nargs > 1)
+    if ((args[2] == "with") && (nargs > 2))
+        msg_start = 3;
+    else
+        msg_start = 2;
+    endif
+    msg = $string_utils:from_list(args[msg_start..nargs], " ");
+    text = ((player.name + " tells you \"") + msg) + "\"";
+endif
+result = text ? who:receive_page(text) | who:receive_page(text);
+if (result == 2)
+    "not connected";
+    player:tell((typeof(msg = who:page_absent_msg()) == STR) ? msg | $string_utils:pronoun_sub("%n 
+is not currently logged in.", who));
+else
+    player:tell("Message Sent.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp doomed
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

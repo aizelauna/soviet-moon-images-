@@ -1,0 +1,65 @@
+<HTML>
+<HEAD>
+<TITLE>Steelgrave</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Steelgrave (#2179)</H3>
+(an instance of <A HREF="HTM_001223.htm">Generic Lycanthropic Thespian PC</A> made by <A HREF="HTM_002179.htm">Steelgrave</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspDeadly, in a playful kind of way. Quick movements exhibit a fighter's grace and ferocity. Dark hair, cut caesar style, is touched with grey at the temples. A silver stud pierces one ear. Thin mobile lips tease his words as he speaks. Under arched brows, his brown eyes are almost black - opaque as night, still every emotion, hot or cold, burns through.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspDeadly, in a playful kind of way. Quick movements exhibit a fighter's grace and ferocity. 
+Dark hair, cut caesar style is touched with grey at the temples. A silver stud pierces 
+one ear. Thin mobile lips tease his words as he speaks. Under arched brows, his brown 
+eyes are almost black - opaque as night, still every emotion, hot or cold, burns 
+through. Black leather is a supple armor - black boots rise knee high, black leather 
+pants fit tight and glistening, a black leather cycle jacket is scarred with zippers.
+<BR>
+<BR>
+Steelgrave is carrying <A HREF="HTM_000792.htm">black leathers</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000569.htm">Orientalism</A>.
+<BR>
+<BR>
+<BR>
+Steelgrave owns <A HREF="HTM_002179.htm">Steelgrave</A> <A HREF="HTM_000870.htm">tiramisu</A> <A HREF="HTM_000902.htm">Jaguar</A> <A HREF="HTM_000792.htm">black leathers</A> <A HREF="HTM_000942.htm">Exotica</A> <A HREF="HTM_000985.htm">cassatta alla Siciliana</A> <A HREF="HTM_000984.htm">tartes</A> <A HREF="HTM_000584.htm">Morte Delizioso</A> <A HREF="HTM_000901.htm">a coil of darkness</A> <A HREF="HTM_002420.htm">nw</A> <A HREF="HTM_002421.htm">east</A> <A HREF="HTM_002427.htm">a Menu</A> <A HREF="HTM_002466.htm">a painting</A> <A HREF="HTM_002474.htm">tropical</A> <A HREF="HTM_002477.htm">orchid</A> <A HREF="HTM_002480.htm">alley</A> <A HREF="HTM_002488.htm">black</A> <A HREF="HTM_002499.htm">silver</A> <A HREF="HTM_002500.htm">Bianco</A> <A HREF="HTM_002450.htm">up</A> <A HREF="HTM_001141.htm">door</A> <A HREF="HTM_002495.htm">down</A> <A HREF="HTM_001063.htm">down</A> <A HREF="HTM_000433.htm">gold</A> <A HREF="HTM_000432.htm">pearl</A> <A HREF="HTM_000418.htm">emerald</A> <A HREF="HTM_002555.htm">roulette</A> <A HREF="HTM_000587.htm">agate</A> <A HREF="HTM_000941.htm">amber</A> <A HREF="HTM_000455.htm">crimson</A> <A HREF="HTM_000289.htm">onyx</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+look_self:
+<pre>
+"Copied from Avon (#2177):look_self Mon Feb  6 10:25:57 1995 PST";
+"Copied from Generic Scorpion Player Class (#153):look_Self by Calkins (#150) Sun 
+Feb  5 23:17:36 1995 PST";
+if ((player.location != this.location) && (this.remote_see_msg != "YES"))
+    player:tell("You are too far away to see that player.");
+    return;
+endif
+pass(@args);
+if (this.ooh_msg == "on")
+    player:tell($string_utils:pronoun_sub(this.body_msg));
+endif
+"Lines 6 & 7 by Avon (#2177)";
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ooh_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp body_msg
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

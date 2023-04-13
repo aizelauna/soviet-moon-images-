@@ -1,0 +1,55 @@
+<HTML>
+<HEAD>
+<TITLE>tattoo gun</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> tattoo gun (#2086)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000538.htm">Eclipse</A>)
+<BR>
+<BR>
+<pre>
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_002088.htm">Biker Bob</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+generate_tattoo:
+<pre>
+"syntax: :generate_tattoo(who, name, desc, location)   => tattoo";
+if (caller_perms() != this.owner)
+    return E_PERM;
+endif
+who = args[1];
+name = args[2];
+desc = args[3];
+location = args[4];
+if (typeof(o = $recycler:_create(this.generic_tattoo)) == OBJ)
+    o.tname = name;
+    o.tlocation = location;
+    o:set_description(desc);
+    o:set_name(name + " tattoo");
+    o:moveto(who);
+endif
+return o;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp generic_tattoo
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

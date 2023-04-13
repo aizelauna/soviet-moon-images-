@@ -1,0 +1,71 @@
+<HTML>
+<HEAD>
+<TITLE>Snap</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Snap (#448)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_000448.htm">Snap</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA wire thin young scientist with short mussed hair, thick glasses and a misbuttoned shaggy green jacket. He looks a little lost, and seems to be thinking about something else, as if he has lost his car keys or something. Nevertheless, he seems like he could be quite chatty.
+<BR>
+<BR>
+Snap is carrying <A HREF="HTM_000449.htm">Generic pile of stuff</A>, <A HREF="HTM_000451.htm">generic comic book</A>, <A HREF="HTM_000501.htm">Generic Fart-Bonker with Elvis Song Spoofing</A>, <A HREF="HTM_000450.htm">a %size pile of comic books</A> and <A HREF="HTM_000779.htm">a mirror</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000017.htm">The Body Bag</A>.
+<BR>
+<BR>
+<BR>
+Snap owns <A HREF="HTM_000448.htm">Snap</A> <A HREF="HTM_000449.htm">Generic pile of stuff</A> <A HREF="HTM_000450.htm">a %size pile of comic books</A> <A HREF="HTM_000451.htm">generic comic book</A> <A HREF="HTM_000126.htm">Carrot's Rosette Feature Object</A> <A HREF="HTM_000466.htm">Improved redirected say and whisper</A> <A HREF="HTM_000473.htm">Cyclopath #356</A> <A HREF="HTM_000471.htm">SuperGuy #220</A> <A HREF="HTM_000480.htm">SuperGuy #158</A> <A HREF="HTM_000483.htm">RatMan vs. The Cockroach #526</A> <A HREF="HTM_000484.htm">The Uncanny SilverSkateboarder #367</A> <A HREF="HTM_000501.htm">Generic Fart-Bonker with Elvis Song Spoofing</A> <A HREF="HTM_000779.htm">a mirror</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+moveto:
+<pre>
+"Copied from Carrot's Rosette Feature Object (#126):moveto by Dred (#100) Sun Feb 
+20 12:46:14 1994 EST";
+pass(@args);
+if ($object_utils:has_property(this, "features") && (#126 in this.features))
+    used = $list_utils:assoc(player, #126.read);
+    if ((used != {}) && ("a" in used[3]))
+        rose = #126:genrose(player.location, used[3]);
+        if (typeof(rose) == LIST)
+            player:tell_lines(rose);
+        endif
+    endif
+endif
+return;
+.
+
+</pre>
+<BR>
+!:
+<pre>
+out = "";
+for p in (player.location.contents)
+    if (is_player(p))
+        out = ((out + "(") + $string_utils:english_list(p.aliases, "none", ", ")) 
++ ")";
+    endif
+endfor
+player:tell(out);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp last_chat
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

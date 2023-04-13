@@ -1,0 +1,125 @@
+<HTML>
+<HEAD>
+<TITLE>Builder Options</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Builder Options (#117)</H3>
+(an instance of <A HREF="HTM_000067.htm">Generic Option Package</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspOption package for $builder commands.  See `help @build-options'.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000179.htm">Cluttered Closet</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+check_create_flags:
+<pre>
+value = args[1];
+if (m = match(value, "[^rwf]"))
+    return tostr("Unknown object flag:  ", value[m[1]]);
+else
+    return {tostr(index(value, "r") ? "r" | "", index(value, "w") ? "w" | "", index(value, 
+"f") ? "f" | "")};
+endif
+.
+
+</pre>
+<BR>
+show_create_flags:
+<pre>
+if (value = this:get(@args))
+    return {value, {tostr("Object flags for @create:  ", value)}};
+else
+    return {0, {tostr("@create leaves all object flags reset")}};
+endif
+.
+
+</pre>
+<BR>
+parse_create_flags:
+<pre>
+raw = args[2];
+if (raw == 1)
+    "...+create_flags => create_flags=r";
+    return {args[1], "r"};
+elseif (typeof(raw) == STR)
+    return args[1..2];
+elseif (typeof(raw) != LIST)
+    return "???";
+elseif (length(raw) > 1)
+    return tostr("I don't understand \"", $string_utils:from_list(listdelete(raw, 
+1), " "), "\"");
+else
+    return {args[1], raw[1]};
+endif
+.
+
+</pre>
+<BR>
+show_dig_room show_dig_exit:
+<pre>
+name = args[2];
+what = (verb == "show_dig_room") ? "room" | "exit";
+if ((value = this:get(args[1], name)) == 0)
+    return {0, {tostr("@dig ", what, "s are children of $", what, ".")}};
+else
+    return {value, {tostr("@dig ", what, "s are children of ", value, " (", valid(value) 
+? value.name | "invalid", ").")}};
+endif
+.
+
+</pre>
+<BR>
+parse_dig_room parse_dig_exit:
+<pre>
+oname = args[1];
+raw = args[2];
+if (typeof(raw) == LIST)
+    if (length(raw) > 1)
+        return tostr("I don't understand \"", $string_utils:from_list(listdelete(raw, 
+1), " "), "\".");
+    endif
+    raw = raw[1];
+endif
+if (typeof(raw) != STR)
+    return "You need to give an object id.";
+elseif ($command_utils:object_match_failed(value = player:my_match_object(raw), raw))
+    return "Option unchanged.";
+endif
+what = (verb == "parse_dig_room") ? "room" | "exit";
+generic = #0.(what);
+if (value == generic)
+    return {oname, 0};
+else
+    if (!$object_utils:isa(value, generic))
+        player:tell("Warning: ", value, " is not a descendant of $", what, ".");
+    endif
+    return {oname, value};
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp show_bi_create
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp type_dig_room
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp type_dig_exit
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

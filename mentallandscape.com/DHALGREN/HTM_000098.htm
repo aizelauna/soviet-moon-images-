@@ -1,0 +1,600 @@
+<HTML>
+<HEAD>
+<TITLE>Basic Local PC</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Basic Local PC (#98)</H3>
+(an instance of <A HREF="HTM_000006.htm">generic player</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000179.htm">Cluttered Closet</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+lookup_room:
+<pre>
+"Tries to find the room in this.rooms. If not, then also checks to see if maybe its 
+a room that's in this.location.contents using :match_object";
+room = args[1];
+if (room == "home")
+    return player.home;
+elseif (room == "me")
+    return player;
+elseif (room == "here")
+    return player.location;
+elseif (!room)
+    return $failed_match;
+endif
+index = this:index_room(room);
+if (index)
+    return this.rooms[index][2];
+else
+    source = player.location;
+    if (!$object_utils:isa(source, $room))
+        source = $room;
+    endif
+    return source:match_object(room);
+endif
+.
+
+</pre>
+<BR>
+index_room:
+<pre>
+room = tostr(args[1]);
+size = length(room);
+index = 1;
+match = 0;
+for item in (this.rooms)
+    item_name = item[1];
+    if (room == item_name)
+        return index;
+    elseif ((size && (length(item_name) >= size)) && (room == item_name[1..size]))
+        match = index;
+    endif
+    index = index + 1;
+endfor
+return match;
+.
+
+</pre>
+<BR>
+@rooms:
+<pre>
+"Syntax: @rooms";
+"";
+"Lists all rooms in your personal database that you have saved. Rooms are listed 
+by object number and the personal alias you set for it. For information on adding 
+and removing rooms from this database, see `help @add-room' and `help @rm-room'.";
+if (!dobjstr)
+    who = player;
+else
+    if (!valid(who = $string_utils:match_player(dobjstr)))
+        player:tell("Invalid player.");
+        return;
+    endif
+endif
+neat = (who == player) ? "you" | $string_utils:nn(who);
+if (!(rooms = who.rooms))
+    player:tell("No rooms currently stored for ", neat, ".");
+    return;
+endif
+rl = {};
+for huh in (rooms)
+    rl = {@rl, tostr($string_utils:right(tostr(huh[2]), 5), " ", huh[1])};
+endfor
+player:tell("Rooms currently stored for ", neat, ":");
+player:tell("---");
+player:tell_lines($string_utils:columnize(rl, 3));
+player:tell("---");
+.
+
+</pre>
+<BR>
+@addr*oom @add-r*oom:
+<pre>
+"Syntax: @add-room <alias> [room] - These two forms are equivalent. They add";
+"        @add-room <room> [alias] - the room you specify (by OBJ#) with <alias>";
+"        @add-room <alias>        - Adds the room you are in with <alias>";
+"        @add-room <room>         - Adds room, and uses the room's name";
+"        @add-room                - Adds the room you are in by name";
+"";
+"  This command adds rooms to your database of personal rooms. You can add a personal 
+alias to the room you add, by specifying <alias>. This is useful if the room has 
+a long name. If you don't specify an alias, then the room's full name is used in 
+your database. You can specify the room by using it's object number. Or, if you leave 
+that out, the room you are in is assumed.";
+"";
+"  A rooms database is very useful and works in conjuction with `@go' and `@join'. 
+It will also work with `@move' in some cases. See also `help @rm-room' and help `@rooms'.";
+if (!$perm_utils:controls(player, this))
+    player:tell(E_PERM);
+    return;
+endif
+if (!dobjstr)
+    if (valid(room = this.location))
+        name = room.name;
+    endif
+elseif (command = this:parse_out_room(dobjstr))
+    name = command[1];
+    room = command[2];
+else
+    name = dobjstr;
+    room = this.location;
+endif
+if (!valid(room))
+    player:tell("That is not a valid location.");
+    return E_INVARG;
+endif
+player:tell("Adding ", name, "(", tostr(room), ") to your database of rooms.");
+this.rooms = {@this.rooms, {name, room}};
+.
+
+</pre>
+<BR>
+@rmr*oom @rm-r*oom:
+<pre>
+"Syntax: @rm-room <alias>";
+"        @rm-room";
+"";
+"Removes the room saved in your database of personal rooms under the specified alias. 
+If no such alias is specified (the second form), then it is assumed that you mean 
+the room you are in.";
+if (!$perm_utils:controls(player, this))
+    player:Tell(E_PERM);
+    return;
+endif
+what = dobjstr ? dobjstr | this.location.name;
+if (index = this:index_room(what))
+    player:tell("Removing ", this.rooms[index][1], "(", this.rooms[index][2], ").");
+    this.rooms = listdelete(this.rooms, index);
+else
+    player:tell("That room is not in your database of rooms. Check '@rooms'.");
+endif
+.
+
+</pre>
+<BR>
+@go*to:
+<pre>
+"Usage: @go*to <room>";
+"";
+"<room> can either be an object number of a room, or a room that you've previously 
+added to your rooms database. See help @addroom/@rmroom/@rooms for details on that. 
+For help on the messages displayed when you use @go, see `help teleport-messages'.";
+set_task_perms(this);
+if (!valid(dest = this:lookup_room(dobjstr)))
+    this:tell("That place is not in your personal database.");
+elseif ((from = this.location) == dest)
+    this:tell("You are already there.");
+elseif (!$object_utils:isa(dest, $room))
+    this:tell("That is not a room.");
+else
+    this:teleport(from, dest);
+endif
+.
+
+</pre>
+<BR>
+@join:
+<pre>
+"Usage: @join <player>";
+"";
+"When you use this verb, you will be teleported to the room that <player> is currently 
+in if that room allows you to enter. For help on the messages displayed when you 
+use @join, see `help teleport-messages'.";
+set_task_perms(this);
+if (!valid(who = $string_utils:match_player(dobjstr)))
+    $command_utils:player_match_failed(who, dobjstr);
+elseif (who == this)
+    this:tell("You can't join yourself.");
+elseif ((from = this.location) == (dest = who.location))
+    this:tell("You are already there.");
+elseif (!$object_utils:isa(dest, $room))
+    this:tell("That is not a room.");
+else
+    this:teleport(from, dest);
+endif
+.
+
+</pre>
+<BR>
+self_port_msg oself_port_msg oself_arrive_msg:
+<pre>
+" returns the .message, with regular pronoun subs, and with the sub";
+" %<dest> replaced by the destination room title";
+" %<source> replaced by source room title";
+dest = args ? args[1] | $nothing;
+source = (args && (length(args) > 1)) ? args[2] | $nothing;
+msge = this.(verb) ? this.(verb) | $local.blpc.(verb);
+if (verb[1] == "o")
+    msg1 = $string_utils:subst(msge, {{"%<dest>", valid(dest) ? dest:title() | "Nowhere"}, 
+{"%<source>", valid(source) ? source:title() | "Nowhere"}});
+    msg2 = $string_utils:pronoun_sub(msg1);
+    return index(msg2, this.name) ? msg2 | tostr(this.name, " ", msg2);
+else
+    msg1 = $string_utils:subst(msge, {{"%<dest>", valid(dest) ? dest:title() | "Nowhere"}, 
+{"%<source>", valid(source) ? source:title() | "Nowhere"}});
+    return $string_utils:pronoun_sub(msg1);
+endif
+.
+
+</pre>
+<BR>
+title:
+<pre>
+if ($set_utils:intersection({"tell_contents", "page_echo_msg"}, $list_utils:slice(callers(), 
+2)) && (msg = this:idle_suffix()))
+    return tostr(pass(@args), " (", msg, ")");
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+idle_suffix:
+<pre>
+"Taken from LambdaMOO";
+if (!(this in connected_players()))
+    return "asleep";
+elseif ((z = idle_seconds(this)) > 3600)
+    return ("out on " + this.pp) + " feet";
+elseif (z > 600)
+    return "dozing";
+elseif (z > 180)
+    return "daydreaming";
+elseif (z > 60)
+    return "distracted";
+else
+    return "";
+endif
+.
+
+</pre>
+<BR>
+parse_out_room:
+<pre>
+if (!($perm_utils:controls(caller_perms(), this) || (caller == this)))
+    return E_PERM;
+endif
+words = $string_utils:words(args[1]);
+if (!length(words))
+    return 0;
+endif
+word1 = words[1];
+wordN = words[length(words)];
+if (length(word1) && (word1[1] == "#"))
+    start = 2;
+    finish = length(words);
+    what = toobj(word1);
+elseif (word1 == "here")
+    start = 2;
+    finish = length(words);
+    what = this.location;
+elseif (length(wordN) && (wordN[1] == "#"))
+    start = 1;
+    finish = length(words) - 1;
+    what = toobj(wordN);
+elseif (wordN == "here")
+    start = 1;
+    finish = length(words) - 1;
+    what = this.location;
+else
+    return 0;
+endif
+if (what == #0)
+    what = $nothing;
+endif
+name = $string_utils:from_list(words[start..finish], " ");
+if (!name)
+    name = valid(what) ? what.name | "Nowhere";
+endif
+return {name, what};
+.
+
+</pre>
+<BR>
+@nn:
+<pre>
+"Syntax: @nn";
+"";
+"Goes through the list of all mail recipients you read, including your own mail, 
+and displays the first new message it finds. This verb works well in conjunction 
+with @rn when you have lots of mail to read.";
+set_task_perms(player);
+"@nn  -- reads the first new message on the first mail_recipient (in .current_message) 
+where new mail exists.";
+"Taken from Lambda #5803.";
+cm = this.current_message;
+cm[1..2] = {{this, cm[1], cm[2]}};
+for n in (cm)
+    if (new = n[1]:length_date_gt(n[3]))
+        next = (n[1]:length_all_msgs() - new) + 1;
+        this:set_current_folder(folder = n[1]);
+        this._mail_task = task_id();
+        cur = folder:display_seq_full({next, next + 1}, tostr("Message %d", " on 
+", $mail_agent:name(folder), ":"));
+        this:set_current_message(folder, @cur);
+        return;
+    endif
+endfor
+player:tell("No News (is good news)");
+.
+
+</pre>
+<BR>
+@measure:
+<pre>
+"Syntax:";
+" @measure object <object name>   - Takes a fresh measurement of object";
+" @measure summary [player]       - Tells you about a player's (you) ownership";
+" @measure new                    - Measures the newest of your objects only";
+" @measure breakdown <object name>- Tells you what is taking up space on object";
+"";
+"Measure the new object size and displays the output appropriate to which of the 
+above you executed. An object can be specified by object number or by name if it 
+is nearby. The summary and new option of @measure only apply to a player.";
+if (length(args) < 1)
+    player:tell_lines($code_utils:verb_documentation());
+    return;
+endif
+if (index("object", args[1]) == 1)
+    "Object.";
+    what = player.location:match_object(name = $string_utils:from_list(args[2..length(args)], 
+" "));
+    if (!valid(what))
+        player:tell("Sorry, I didn't understand `", name, "'");
+    else
+        player:tell("Checking size of ", what.name, " (", what, ")...");
+        player:tell("Size of ", what.name, " (", what, ") is ", $quota_utils:object_bytes(what), 
+" bytes.");
+    endif
+elseif (index("summary", args[1]) == 1)
+    "Summarize player.";
+    if (length(args) == 1)
+        what = player;
+    else
+        what = $string_utils:match_player(name = $string_utils:from_list(args[2..length(args)], 
+" "));
+    endif
+    if (!valid(what))
+        player:tell("Sorry, I don't know who you mean by `", name, "'");
+    else
+        $quota_utils:do_summary(what);
+    endif
+elseif (index("new", args[1]) == 1)
+    player:tell("Measuring the sizes of recently created objects...");
+    total = 0;
+    for x in (player.owned_objects)
+        if (!x.object_size[1])
+            player:tell("Measured ", $string_utils:nn(x), ":  ", size = $quota_utils:object_bytes(x), 
+" bytes.");
+            total = total + size;
+        endif
+    endfor
+    player:tell("Total bytes used in new creations: ", total, ".");
+elseif (index("breakdown", args[1]) == 1)
+    what = player.location:match_object(name = $string_utils:from_list(args[2..length(args)], 
+" "));
+    if (!valid(what))
+        player:tell("Sorry, I didn't understand `", name, "'");
+    elseif (!$quota_utils:can_peek(player, what.owner))
+        return player:tell("Sorry, you don't control ", what.name, " (", what, ")");
+    else
+        if (mail = $command_utils:yes_or_no("This might be kinda long.  Want me to 
+mail you the result?"))
+            player:tell("Result will be mailed.");
+        endif
+        info = $quota_utils:do_breakdown(what);
+        if (typeof(info) == ERR)
+            player:tell(info);
+        endif
+        if (mail)
+            $mail_agent:send_message($quota_utils.owner, {player}, tostr("Object 
+breakdown of ", what.name, " (", what, ")"), info);
+        else
+            player:tell_lines_suspended(info);
+        endif
+    endif
+else
+    player:tell("Not a sub-command of @measure: ", args[1]);
+    player:tell_lines($code_utils:verb_documentation());
+endif
+.
+
+</pre>
+<BR>
+my_match_object:
+<pre>
+"Additional matching for rooms held in rooms lists. Dredful 2/18/94";
+if (((f = pass(@args)) == $failed_match) || (f == $ambiguous_match))
+    if (p = this:index_room(@args))
+        return this.rooms[p][2];
+    else
+        return f;
+    endif
+else
+    return f;
+endif
+.
+
+</pre>
+<BR>
+@with:
+<pre>
+"Usage: @with <player>";
+"";
+"Tells you where <player> is at, and who else is there also. Gives names and object 
+numbers, and tells you their idle time in minutes only when it is greater than 5 
+minutes.";
+if (!dobjstr)
+    player:tell("Usage: @with <player>.");
+    return;
+endif
+if (dobjstr[1] == "#")
+    target = toobj(dobjstr);
+    if (!valid(target))
+        player:tell(target, " does not exist.");
+    endif
+else
+    target = $string_utils:match_player(dobjstr);
+    $command_utils:player_match_result(target, dobjstr);
+endif
+if (valid(target))
+    if (target.location == $limbo)
+        player:tell(target.name, " is at The Body Bag (", $limbo, "), and probably 
+disconnected. You don't want to know who else is there, believe me!.");
+    else
+        someone = 0;
+        player:tell($string_utils:nn(target), " is at ", $string_utils:nn(target.location));
+        for isthere in (target.location.contents)
+            if (is_player(isthere))
+                if (isthere in connected_players())
+                    if (idle_seconds(isthere) > 300)
+                        player:tell("  ", $string_utils:nn(isthere), " idle: ", idle_seconds(isthere) 
+/ 60, " min");
+                    else
+                        player:tell("  ", $string_utils:nn(isthere));
+                    endif
+                else
+                    player:tell("  ", $string_utils:nn(isthere), " <not connected>");
+                endif
+                someone = someone + 1;
+            endif
+        endfor
+        player:tell("Total there: ", someone, ".");
+    endif
+endif
+.
+
+</pre>
+<BR>
+last_huh:
+<pre>
+set_task_perms(caller_perms());
+if (pass(@args))
+    return 1;
+endif
+verb = args[1];
+args = args[2];
+if (valid(dobj = $string_utils:literal_object(dobjstr)))
+    return $match_utils:match_verb(verb, dobj, args);
+elseif (valid(iobj = $string_utils:literal_object(iobjstr)))
+    return $match_utils:match_verb(verb, iobj, args);
+endif
+.
+
+</pre>
+<BR>
+teleport:
+<pre>
+"Teleports this, a player, with messages. Can be called by this only. Through @go 
+or @join usually.";
+if (caller != this)
+    return E_PERM;
+endif
+set_task_perms(caller_perms());
+from = args[1];
+dest = args[2];
+this:moveto(dest);
+if (this.location == from)
+    this:tell("It seems that you can't get to ", dest.name, ".");
+    return;
+else
+    dest = (this.location != dest) ? this.location | dest;
+    if (msg = this:self_port_msg(dest))
+        this:tell(msg);
+    endif
+    from:announce(this:oself_port_msg(dest));
+    dest:announce(this:oself_arrive_msg(dest));
+endif
+.
+
+</pre>
+<BR>
+@timezone:
+<pre>
+"Usage: @timezone me is  => with no argument, returns current setting";
+"       @timezone me is E/C/M/P/<hours added to pacific time>";
+"";
+"Examples:    @timezone me is M  => Mountain time, or 1 hour after pacific";
+"             @timezone me is 3  => 3 hours after pacific (Eastern)";
+if ((valid(caller_perms()) ? caller_perms() | player) != this)
+    return E_PERM;
+endif
+if (iobjstr)
+    if (iobjstr == "0")
+        player.timezone = tym = 0;
+    elseif (tym = tonum(iobjstr))
+        player.timezone = tym;
+    elseif (tymlst = $list_utils:assoc(iobjstr, {{"E", 3}, {"C", 2}, {"M", 1}, {"P", 
+0}}))
+        player.timezone = tym = tymlst[2];
+    else
+        player:tell("That is an invalid timezone setting.");
+        return;
+    endif
+    player:tell("Setting your timezone to a difference of ", tym, " from pacific 
+time.");
+else
+    player:tell("Your current timezone is ", (length(d = player:ctime()) >= 28) ? 
+d[26..28] | "---", ", which results in a difference of ", player.timezone, " from 
+pacific time.");
+endif
+.
+
+</pre>
+<BR>
+time ctime english_time:
+<pre>
+"From #12128 by APHiD@LambdaMOO (Or was it from Quinn before the ownership switch?)";
+"Returns time, ctime, or english_time adjusted for the player's .timezone property.";
+who = callers()[1][5];
+tym = (length(args) > 1) ? args[2] | time();
+for x in (args)
+    who = (typeof(x) == OBJ) ? x | who;
+    tym = (typeof(x) == NUM) ? x | tym;
+endfor
+if (((otz = who.timezone) == E_PROPNF) && ((otz = who.time_difference) == E_PROPNF))
+    return (verb == "time") ? tym | (((verb == "ctime") ? ctime(tym) | $time_utils:time_sub("$D, 
+$N $t, $Y $o:$M:$S $p " + ctime(tym)[26..28], tym)) + " (Default)");
+endif
+time = tym + (tz = ((otz < 24) && (otz > -24)) ? otz * 3600 | otz);
+return (verb == "time") ? time | (((verb == "ctime") ? ctime(time)[1..25] | $time_utils:time_sub("$D, 
+$N $t, $Y $o:$M:$S $p ", time)) + ((id = $list_utils:assoc(tz, $time_utils.tz_names)) 
+? strsub(id[2], "%", ctime(time)[27]) | ""));
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp rooms
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp self_port_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oself_port_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oself_arrive_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp timezone
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000033.htm">Generic Guest</A> <A HREF="HTM_000396.htm">Refusals Player Class</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

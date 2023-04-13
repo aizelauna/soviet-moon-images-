@@ -1,0 +1,146 @@
+<HTML>
+<HEAD>
+<TITLE>sick utilities</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> sick utilities (#2293)</H3>
+(an instance of <A HREF="HTM_000001.htm">Root Class</A> made by <A HREF="HTM_000539.htm">Sick</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000539.htm">Sick</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+verb_count:
+<pre>
+"Syntax:  verb_count(obj <object>)  => number of verbs on <object>";
+return valid(o = args[1]) && (o.r ? length(verbs(o)) | ($quota_utils:verb_overhead_bytes(o) 
+/ 20));
+"... if !r, cheat and see if there is overhead (each verb uses 20 bytes)";
+.
+
+</pre>
+<BR>
+generate_table:
+<pre>
+"Syntax:  generate_table(str <format>, list <data> [, num <len>])  => string-list";
+data = args[2];
+linelen = ((length(args) > 2) && args[3]) || player:linelen();
+if (typeof(info = args[1]) != LIST)
+    "... if args[1] is a list, assume it's a result of :parse_table_args";
+    info = this:parse_table_args(info, data, linelen);
+endif
+format = info[1];
+    titles = info[2];
+    indices = info[3];
+    widths = info[4];
+    types = info[5];
+    "... build table";
+    xlen = length(data[1]);
+    dashes = strsub(spaces = $string_utils:space(linelen, " "), " ", "-");
+    hline = dline = format;
+    for xidx in [0..xlen - 1]
+        x = xlen - xidx;
+        hline[i = indices[x]..i - 1] = tostr(titles[x], spaces)[1..widths[x]];
+        dline[i..i - 1] = dashes[1..widths[x]];
+    endfor
+    table = {hline, dline};
+    for ydata in (data)
+        line = format;
+        for xidx in [0..xlen - 1]
+            x = xlen - xidx;
+            s = tostr(ydata[x]);
+            line[i = indices[x]..i - 1] = (types[x] ? spaces[1..widths[x] - length(s)] 
++ s | (s + spaces))[1..widths[x]];
+        endfor
+        table = listappend(table, line);
+    endfor
+    return table;
+.
+
+</pre>
+<BR>
+parse_table_args:
+<pre>
+"Syntax:  parse_table_args(str <format>, list <data>, num <len>)  => list";
+"Used internally by :generate_table() --";
+"Accepts same arguments as :generate_table() and returns {str <newformat>, list <titles>, 
+list <indices>, list <widths>, list <types>}.";
+format = args[1];
+    ylen = length(data = args[2]);
+    linelen = ((length(args) > 2) && args[3]) || player:linelen();
+    newform = "";
+    titles = indices = widths = types = {};
+    totallen = xidx = 0;
+    while (format && (m = match(format, "`%([^']*%)'")))
+        xidx = xidx + 1;
+        newform = tostr(newform, sep = format[1..m[1] - 1]);
+        format[1..m[2]] = "";
+            indices = listappend(indices, length(newform) + 1);
+            if ((title = substitute("%1", m)) && (tm = rmatch(title, ":%([<>]?%)%([0-9]+%)%(R?%)")))
+                title[tm[1]..tm[2]] = "";
+            endif
+            width = tm ? tonum(substitute("%2", tm)) | 0;
+            if ((type = tm ? substitute("%1", tm) | "") || (!width))
+                maxw = ((type == "<") && width) || linelen;
+                (type == "<") && (width = 0);
+                yidx = 0;
+                while ((width < maxw) && ((yidx = yidx + 1) <= ylen))
+                    width = max(width, length(tostr(data[yidx][xidx])));
+                endwhile
+                width = min(width, maxw);
+            endif
+            titles = listappend(titles, title);
+            widths = listappend(widths, width);
+            types = listappend(types, tm && substitute("%3", tm));
+            totallen = (totallen + length(sep)) + width;
+        endwhile
+        if (format)
+            newform = newform + format;
+            totallen = totallen + length(format);
+        endif
+        "... adjust widths to fit in linelen";
+        if (length(widths) == 1)
+            if ((toolong = totallen - linelen) > 0)
+                widths[1] = widths[1] - toolong;
+            endif
+        else
+            while ((toolong = totallen - linelen) > 0)
+                "... decrease longest by the least of `toolong' and";
+                "... the difference in longest - next longest";
+                widths[i = (longest = max(@widths)) in widths] = longest - (less 
+= min(longest - max(@listdelete(widths, i)), toolong) || 1);
+                totallen = totallen - less;
+            endwhile
+        endif
+        return {newform, titles, indices, widths, types};
+.
+
+</pre>
+<BR>
+byte_string:
+<pre>
+"Syntax:  byte_string(99232)  => \"99.2k\"";
+bytes = args[1];
+return (bytes < 1000) ? tostr(bytes, "b") | tostr((s = tostr(bytes, "00"))[1..i = 
+((l = length(s)) % 3) + 1], ".", s[i + 1], "bkMG"[l / 3]);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

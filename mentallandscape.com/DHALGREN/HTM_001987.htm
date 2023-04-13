@@ -1,0 +1,51 @@
+<HTML>
+<HEAD>
+<TITLE>laser gun</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> laser gun (#1987)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000538.htm">Eclipse</A>)
+<BR>
+<BR>
+<pre>
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_002014.htm">Dr. Sass</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+destroy_tattoo:
+<pre>
+if (((o = args[1]).location == this) && (parent(o) == this.generic_tattoo))
+    $recycler:_recycle(o);
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+acceptable:
+<pre>
+return parent(args[1]) == this.generic_tattoo;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp generic_tattoo
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

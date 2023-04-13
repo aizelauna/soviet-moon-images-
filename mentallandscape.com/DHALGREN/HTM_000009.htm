@@ -1,0 +1,213 @@
+<HTML>
+<HEAD>
+<TITLE>generic note</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> generic note (#9)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspThere appears to be some writing on the note ...
+</pre>
+<pre>
+</pre>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+r*ead:
+<pre>
+if (!this:is_readable_by(valid(caller_perms()) ? caller_perms() | player))
+    player:tell("Sorry, but it seems to be written in some code that you can't read.");
+else
+    this:look_self();
+    player:tell();
+    player:tell_lines(this:text());
+    player:tell();
+    player:tell("(You finish reading.)");
+endif
+.
+
+</pre>
+<BR>
+er*ase:
+<pre>
+if (this:is_writable_by(valid(caller_perms()) ? caller_perms() | player))
+    this:set_text({});
+    player:tell("Note erased.");
+else
+    player:tell("You can't erase this note.");
+endif
+.
+
+</pre>
+<BR>
+wr*ite:
+<pre>
+if (this:is_writable_by(valid(caller_perms()) ? caller_perms() | player))
+    this:set_text({@this.text, dobjstr});
+    player:tell("Line added to note.");
+else
+    player:tell("You can't write on this note.");
+endif
+.
+
+</pre>
+<BR>
+del*ete rem*ove:
+<pre>
+if (!this:is_writable_by(player))
+    player:tell("You can't modify this note.");
+elseif (!dobjstr)
+    player:tell("You must tell me which line to delete.");
+else
+    line = tonum(dobjstr);
+    if (line < 0)
+        line = (line + length(this.text)) + 1;
+    endif
+    if ((line <= 0) || (line > length(this.text)))
+        player:tell("Line out of range.");
+    else
+        this:set_text(listdelete(this.text, line));
+        player:tell("Line deleted.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+encrypt:
+<pre>
+set_task_perms(player);
+key = $lock_utils:parse_keyexp(iobjstr, player);
+if (typeof(key) == STR)
+    player:tell("That key expression is malformed:");
+    player:tell("  ", key);
+else
+    res = this.encryption_key = key;
+    if (typeof(res) == ERR)
+        player:tell(res, ".");
+    else
+        player:tell("Encrypted ", this.name, " with this key:");
+        player:tell("  ", $lock_utils:unparse_key(key));
+    endif
+endif
+.
+
+</pre>
+<BR>
+decrypt:
+<pre>
+set_task_perms(player);
+res = dobj.encryption_key = 0;
+if (typeof(res) == ERR)
+    player:tell(res, ".");
+else
+    player:tell("Decrypted ", dobj.name, ".");
+endif
+.
+
+</pre>
+<BR>
+text:
+<pre>
+cp = caller_perms();
+if ($perm_utils:controls(cp, this) || this:is_readable_by(cp))
+    return this.text;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+is_readable_by:
+<pre>
+"Modified to change !key to key==0. Silly !### returns true so fails for single object 
+locks., 2/17/94 Dredful";
+key = this.encryption_key;
+return (key == 0) || $lock_utils:eval_key(key, args[1]);
+.
+
+</pre>
+<BR>
+set_text:
+<pre>
+cp = caller_perms();
+newtext = args[1];
+if ($perm_utils:controls(cp, this) || this:is_writable_by(cp))
+    if (typeof(newtext) == LIST)
+        this.text = newtext;
+    else
+        return E_TYPE;
+    endif
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+is_writable_by:
+<pre>
+who = args[1];
+wr = this.writers;
+if ($perm_utils:controls(who, this))
+    return 1;
+elseif (typeof(wr) == LIST)
+    return who in wr;
+else
+    return wr;
+endif
+.
+
+</pre>
+<BR>
+mailme @mailme:
+<pre>
+"Usage:  mailme <note>";
+"  uses $network to sends the text of this note to your REAL internet email address.";
+if (!this:is_readable_by(player))
+    return player:tell("Sorry, but it seems to be written in some code that you can't 
+read.");
+elseif (!player.email_address)
+    return player:tell("Sorry, you don't have a registered email address.");
+elseif (!$network.active)
+    return player:tell("Sorry, internet mail is disabled.");
+elseif (!(text = this:text()))
+    return player:tell($string_utils:pronoun_sub("%T is empty--there wouldn't be 
+any point to mailing it."));
+endif
+player:tell("Mailing ", this:title(), " to ", player.email_address, ".");
+player:tell("... ", length(text), " lines ...");
+suspend(0);
+$network:sendmail(player.email_address, this:titlec(), @text);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp writers
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp encryption_key
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp text
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000010.htm">a newspaper</A> <A HREF="HTM_000055.htm">generic letter</A> <A HREF="HTM_000326.htm">Switching</A> <A HREF="HTM_000348.htm">sign</A> <A HREF="HTM_000357.htm">sign</A> <A HREF="HTM_000361.htm">sign</A> <A HREF="HTM_000365.htm">sign</A> <A HREF="HTM_000370.htm">sign</A> <A HREF="HTM_000374.htm">sign2</A> <A HREF="HTM_000385.htm">sign2</A> <A HREF="HTM_000389.htm">sign</A> <A HREF="HTM_000394.htm">sign</A> <A HREF="HTM_000395.htm">sign2</A> <A HREF="HTM_000406.htm">map</A> <A HREF="HTM_000415.htm">sign2</A> <A HREF="HTM_000419.htm">sign2</A> <A HREF="HTM_000420.htm">sign3</A> <A HREF="HTM_000508.htm">WhoIsWho</A> <A HREF="HTM_000834.htm">Generic Litter</A> <A HREF="HTM_000872.htm">Pennyroyal Tea</A> <A HREF="HTM_000960.htm">a garage door</A> <A HREF="HTM_001172.htm">Project Proposal</A> <A HREF="HTM_001361.htm">Johnathon's notebook</A> <A HREF="HTM_001397.htm">page ripped out of a book</A> <A HREF="HTM_001420.htm">page ripped from a poetry journal</A> <A HREF="HTM_001430.htm">For_legba</A> <A HREF="HTM_001437.htm">beer_token</A> <A HREF="HTM_001442.htm">Advertisement</A> <A HREF="HTM_001822.htm">For Neschek</A> <A HREF="HTM_001999.htm">Redlance's Syllabus</A> <A HREF="HTM_001502.htm">Danish Lexicon</A> <A HREF="HTM_002154.htm">very little else</A> <A HREF="HTM_002246.htm">scribblings</A> <A HREF="HTM_002149.htm">sign</A> <A HREF="HTM_002206.htm">sign</A> <A HREF="HTM_002203.htm">sign</A> <A HREF="HTM_002414.htm">scratchpad</A> <A HREF="HTM_002519.htm">copy of Been Down So Long It Looks Like Up to Me</A> <A HREF="HTM_000688.htm">Destination sign</A> <A HREF="HTM_002616.htm">birthday card</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,564 @@
+<HTML>
+<HEAD>
+<TITLE>Generics Registry FO</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generics Registry FO (#777)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis is the Generic Feature Object.  It is not meant to be used as a feature object itself, but is handy for making new feature objects.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000096.htm">Dredful</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@add-gen*eric:
+<pre>
+"Usage: @add-generic <object> to <category>";
+"";
+"Adds the object to the category if:";
+"- you are the owner or control the object according to $perm_utils";
+"- the object is fertile so it can have children";
+"- the object is readable. All generics should be readable so that people who make 
+children know what they are making a child of.";
+"Note, no checks are made to see if the object has help. An object should always 
+have help for it before it should be added to the Registry.";
+if (result = this:get_cat(iobjstr, 1))
+    target = player:my_match_object(dobjstr);
+    if (!$command_utils:object_match_failed(target, dobjstr))
+        ntarget = $string_utils:nn(target);
+        if (!$perm_utils:controls(player, target))
+            player:tell("You do not own or control ", ntarget, ". Only the object 
+owner can put the object into the Registry.");
+        elseif (!target.f)
+            player:tell("The object ", ntarget, " is not fertile.");
+        elseif (!target.r)
+            player:tell("The object ", ntarget, " is not readable. Generics should 
+be readable so people know what they are getting into.");
+        else
+            "this.(result[1])[2] = setadd(this.(result[1])[2], target);";
+            name = this.db:find(result)[1];
+            if (this:add_gen(result, target))
+                player:tell("Object ", ntarget, " has been added to the category 
+\"", name, "\".");
+            else
+                player:tell("Object ", ntarget, " was already in the category \"", 
+name, "\".");
+            endif
+        endif
+    endif
+else
+    player:tell("The category \"", iobjstr, "\" doesn't exist.");
+endif
+.
+
+</pre>
+<BR>
+@generic-cat*egories @cat*egories:
+<pre>
+"Usage: @generic-categories [category]";
+"       @categories         [category]";
+"";
+"Lists all categories, and sub categories if they exist, that are present in the 
+Registry. Use these names for the other generic search, add, and remove verbs present 
+on this feature. If the optional [category] is supplied, only that category and subcategories 
+of it will be displayed.";
+if (!argstr)
+    player:tell("Categories present in the ", this.name, ":");
+    for cats in (this.categories)
+        topcat = (clist = this:sort_cat(cats))[1];
+        for cat in (clist)
+            data = this:match_cat(cat, 1);
+            info = this.db:find(data[1]);
+            name = info[1];
+            indent = 2 * (data[2] - 1);
+            prefix = data[3] ? "\\ " | "| ";
+            prefix = (cat == topcat) ? "+ " | prefix;
+            player:tell($string_utils:left(tostr($string_utils:space(indent), prefix, 
+name), 25), " => ", info[2] ? info[2] | "No description.");
+        endfor
+    endfor
+elseif (result = this:match_cat(argstr))
+    if (result[3])
+        topcat = result[1];
+        cats = this.categories;
+        for ind in (result[4][1..length(result[4]) - 1])
+            cats = cats[ind];
+        endfor
+        player:tell("Subcategory listing for \"", topcat, "\":");
+        for cat in (this:sort_cat(cats))
+            data = this:match_cat(cat, 1);
+            info = this.db:find(data[1]);
+            name = info[1];
+            indent = 2 * (data[2] - result[2]);
+            prefix = data[3] ? "\\ " | "| ";
+            prefix = (cat == topcat) ? "+ " | prefix;
+            player:tell($string_utils:left(tostr($string_utils:space(indent), prefix, 
+name), 25), " => ", info[2] ? info[2] | "No description.");
+        endfor
+    else
+        info = this.db:find(result[1]);
+        player:tell($string_utils:left(tostr("+ ", info[1]), 25), " => ", info[2] 
+? info[2] | "No description.");
+    endif
+else
+    player:tell("No such category exists.");
+endif
+player:tell("--------------------");
+.
+
+</pre>
+<BR>
+@rm-gen*eric:
+<pre>
+"Usage: @rm-generic <object> from <category>";
+"";
+"Removes the object from the category. Only the object owner or a wizard can remove 
+the object from the Registry.";
+if (result = this:get_cat(iobjstr, 1))
+    target = player:my_match_object(dobjstr);
+    if (!$command_utils:object_match_failed(target, dobjstr))
+        ntarget = $string_utils:nn(target);
+        if (!$perm_utils:controls(player, target))
+            player:tell("You do not own or control ", ntarget, ". Only the object 
+owner can put the object into the Registry.");
+        else
+            name = this.db:find(result)[1];
+            if (this:rem_gen(result, target))
+                "this.(result[1])[2] = setremove(this.(result[1])[2], target);";
+                player:tell("Object ", ntarget, " has been removed from the category 
+\"", name, "\".");
+            else
+                player:tell(ntarget, " is not in the category \"", name, "\".");
+            endif
+        endif
+    endif
+else
+    player:tell("The category \"", iobjstr, "\" doesn't exist.");
+endif
+.
+
+</pre>
+<BR>
+@gen*erics:
+<pre>
+"Usage: @generics <category>";
+"";
+"Lists out all the generics in the given category.";
+if (result = this:get_cat(dobjstr, 1))
+    data = this.db:find(result);
+    if (data[3])
+        player:tell("Showing all objects in category \"", data[1], "\"");
+        for d in (data[3])
+            player:tell($building_utils:object_audit_string(d));
+        endfor
+        player:tell($string_utils:space(player:linelen(), "-"));
+    else
+        player:tell("The category \"", data[1], "\" is empty.");
+    endif
+else
+    player:tell("The category \"", dobjstr, "\" does not exist.");
+endif
+.
+
+</pre>
+<BR>
+@add-cat*egory:
+<pre>
+"Usage: @add-category <name> with [description]";
+"";
+"Only usable by the feature owner or wizards to add new categories to the Registry. 
+If you think of a new category, send mail to Dredful or *wiz. The description is 
+optional.";
+"*Note: This verb adds a whole new top level category. To add a sub category, use 
+the @add-sub verb which has a slightly different syntax.";
+if (!$perm_utils:controls(player, this))
+    return E_PERM;
+endif
+if (args)
+    pname = dobjstr;
+    pdesc = iobjstr;
+    "add_property(this, pname, {pdesc, {}}, {this.owner, \"r\"});";
+    cat = this:add_cat(pname, pdesc);
+    this.categories = {@this.categories, cat};
+    player:tell("Category \"", pname, "\" added with ", pdesc ? tostr("description 
+\"", pdesc, "\".") | "no description.");
+endif
+.
+
+</pre>
+<BR>
+@rm-cat*egory:
+<pre>
+"Usage: @rm-category <name>";
+"";
+"Only the owner of the Registry or the wizards may remove categories from the Registry. 
+All data associated with the category will be lost. If the category has any sub-categories 
+defined, the operation will abort.";
+if (!$perm_utils:controls(player, this))
+    player:tell(E_PERM);
+    return;
+endif
+catname = args[1];
+if (result = this:match_cat(catname))
+    if (result[3])
+        player:tell("The category \"", catname, "\" has sub-categories defined. Operation 
+aborted.");
+        return;
+    endif
+    parent = result[1];
+    indices = result[4];
+    len = length(indices) - 1;
+    cat = this.categories;
+    for d in (indices[1..len])
+        cat = cat[d];
+    endfor
+    cat = listdelete(cat, indices[length(indices)]);
+    cat = (length(cat) == 1) ? cat[1] | cat;
+    new = cat;
+    for d in ($list_utils:reverse(indices[1..length(indices) - 1]))
+        cat = this.categories;
+        len = len - 1;
+        for f in (indices[1..len])
+            cat = cat[f];
+        endfor
+        cat[d] = new;
+        new = cat;
+    endfor
+    this.categories = cat;
+    "delete_property(this, catname);";
+    player:tell("Category \"", this.db:find(result[1])[1], "\" has been removed. 
+Generics listing for it has been lost!");
+    this:rem_cat(result[1]);
+else
+    player:tell("The category \"", catname, "\" wasn't found.");
+endif
+.
+
+</pre>
+<BR>
+@add-sub*category:
+<pre>
+"Usage: @add-subcategory <name> to <category>";
+"";
+"Adds a new sub-category to the Registry under the given <category>. Use this command 
+to add any new category except for top level categories. For those, use @add-category. 
+The new sub-category will have no description associated with it. To change or add 
+a description, use @add-cat-desc.";
+"*Note: Only the feature owner and wizards can add new categories. If you think of 
+one that you think belongs, send mail to Dredful.";
+if (!$perm_utils:controls(player, this))
+    player:tell(E_PERM);
+    return;
+endif
+if (result = this:match_cat(iobjstr))
+    newsub = this:add_cat(dobjstr, "");
+    parent = result[1];
+    indices = result[4];
+    len = length(indices) - (result[3] ? 1 | 0);
+    cat = this.categories;
+    for d in (indices[1..len])
+        cat = cat[d];
+    endfor
+    if (typeof(cat) == STR)
+        cat = {cat, newsub};
+    else
+        cat = {@cat, newsub};
+    endif
+    new = cat;
+    nlist = result[3] ? listdelete($list_utils:reverse(indices), 1) | $list_utils:reverse(indices);
+    for d in (nlist)
+        cat = this.categories;
+        len = len - 1;
+        for f in (indices[1..len])
+            cat = cat[f];
+        endfor
+        cat[d] = new;
+        new = cat;
+    endfor
+    "add_property(this, dobjstr, {\"\", {}}, {this.owner, \"r\"});";
+    this.categories = cat;
+    player:tell("Sub-category \"", dobjstr, "\" added to category \"", parent, "\" 
+with no description. Use @add-cat-desc to describe it.");
+else
+    player:tell("Category \"", iobjstr, "\" doesn't exist.");
+endif
+.
+
+</pre>
+<BR>
+match_cat:
+<pre>
+"tries to find the given category. Returns:";
+"if args[2] exists and is true, then assume args[1] was taken from .categories and 
+does exist.";
+"{full category name, depth level (1 is top), FLAG, does it have sub-cats, LIST of 
+indexes of the category itself}";
+if (!(cat = ((length(args) > 1) && args[2]) ? args[1] | this:get_cat(args[1], 1)))
+    return 0;
+endif
+curcats = this.categories;
+for d in [1..length(curcats)]
+    maincat = curcats[d];
+    if (typeof(maincat) == STR)
+        if (cat == maincat)
+            return {maincat, 1, 0, {d}};
+        endif
+    else
+        sub = maincat;
+        level = 1;
+        "level will be length(indices), but -1 if the last element of indices is 
+a 1";
+        temp = {};
+        atend = 1;
+        indices = {d};
+        while (atend)
+            result = this:is_end_branch(sub);
+            parent = result[2];
+            if (cat == parent)
+                indices = this:find_ind(parent);
+                if (indices[length(indices)] == 1)
+                    level = length(indices) - 1;
+                else
+                    level = length(indices);
+                endif
+                return {parent, level, !result[1], indices};
+            elseif (result[1])
+                if (temp)
+                    sub = temp[length(temp)];
+                    temp = listdelete(temp, length(temp));
+                else
+                    atend = 0;
+                endif
+            else
+                kids = result[3];
+                if (length(kids) > 1)
+                    temp = {@temp, @kids[2..length(kids)]};
+                    sub = kids[1];
+                else
+                    sub = kids[1];
+                endif
+            endif
+        endwhile
+    endif
+endfor
+.
+
+</pre>
+<BR>
+find_ind:
+<pre>
+find = args[1];
+cats = this.categories;
+for d in [1..length(cats)]
+    maincat = cats[d];
+    if (typeof(maincat) == STR)
+        if (find == maincat)
+            return {d};
+        endif
+    else
+        result = this:in_this_branch(find, maincat);
+        if (result[1])
+            indices = {d, @result[2]};
+            return indices;
+        endif
+    endif
+endfor
+.
+
+</pre>
+<BR>
+is_end_branch:
+<pre>
+"Determines if the input is the end of a branch. Is a string if it is, is a LIST 
+if not.";
+test = args[1];
+if (typeof(test) == STR)
+    return {1, test};
+else
+    return {0, test[1], test[2..length(test)]};
+endif
+.
+
+</pre>
+<BR>
+in_this_branch:
+<pre>
+"Given a string, and a branch, goes through that whole branch and searches for the 
+string, returning indexes if we're lucky.";
+find = args[1];
+branch = args[2];
+result = this:is_end_branch(branch);
+parent = result[2];
+if (find == parent)
+    return {1, result[1] ? {} | {1}};
+endif
+if (result[1])
+    "it's an end branch, so nothing found.";
+    return {0};
+else
+    kids = result[3];
+    for nbran in [1..length(kids)]
+        nres = this:in_this_branch(find, kids[nbran]);
+        if (nres[1])
+            return {1, {nbran + 1, @nres[2]}};
+        endif
+    endfor
+    return {0};
+endif
+.
+
+</pre>
+<BR>
+@add-cat-desc:
+<pre>
+"Usage: @add-cat-desc <category> as [description]";
+"";
+"Sets the description for the given category as the string given. If you omit [description] 
+on the command line, you will be prompted for a -single- string to fill in. Keep 
+descriptions relatively short.";
+if (!$perm_utils:controls(player, this))
+    player:tell(E_PERM);
+    return;
+endif
+if (result = this:match_cat(dobjstr))
+    old = this.db:find(result[1]);
+    old[2] = iobjstr ? iobjstr | $command_utils:read("in category description");
+    this.db:insert(result[1], old);
+    player:tell("Description set for category \"", old[1], "\".");
+else
+    player:tell("There is no such category \"", dobjstr, "\".");
+endif
+.
+
+</pre>
+<BR>
+sort_cat:
+<pre>
+"sort_cat(LIST|STR branch) => given a list of categories, returns a list of names 
+sorted all nice";
+cats = args[1];
+if (typeof(cats) == STR)
+    return {cats};
+endif
+subs = {};
+for cat in (cats)
+    subs = {@subs, @this:sort_cat(cat)};
+endfor
+return subs;
+.
+
+</pre>
+<BR>
+add_gen:
+<pre>
+":add_gen(STR key, OBJ new object) => adds the new object to the category stored 
+at the key. Returns 1 if object was really added, 0 if already there.";
+if (caller != this)
+    return E_PERM;
+endif
+catkey = args[1];
+target = args[2];
+data = this.db:find(catkey);
+if (target in data[3])
+    return 0;
+else
+    data[3] = setadd(data[3], target);
+    this.db:insert(catkey, data);
+    return 1;
+endif
+.
+
+</pre>
+<BR>
+rem_gen:
+<pre>
+":rem_gen(STR catkey, OBJ old object) => removes the object from the category at 
+the catkey. Returns 1 if object removed, returns 0 if object wasn't in there to begin 
+with.";
+if (caller != this)
+    return E_PERM;
+endif
+catkey = args[1];
+target = args[2];
+data = this.db:find(catkey);
+if (target in data[3])
+    data[3] = setremove(data[3], target);
+    this.db:insert(catkey, data);
+    return 1;
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+add_cat:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+name = args[1];
+desc = args[2];
+next = tostr(this.last = this.last + 1);
+this.db:insert(next, {name, desc, {}});
+return next;
+.
+
+</pre>
+<BR>
+rem_cat:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+cat = args[1];
+if (tonum(cat) == this.last)
+    this.last = this.last - 1;
+endif
+return this.db:delete(cat);
+.
+
+</pre>
+<BR>
+get_cat:
+<pre>
+"Given a full name, return either the data (args[2] false) or the keyname (args[2] 
+true). Args[2] is optional, will be false if not included.";
+if (caller != this)
+    return E_PERM;
+endif
+catname = args[1];
+for d in ($list_utils:flatten(this.categories))
+    if (match((data = this.db:find(d))[1], catname))
+        return ((length(args) > 1) && args[2]) ? d | data;
+    endif
+endfor
+return 0;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp categories
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp db
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp last
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

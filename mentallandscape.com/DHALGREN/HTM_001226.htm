@@ -1,0 +1,170 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Costume</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Costume (#1226)</H3>
+(an instance of <A HREF="HTM_000826.htm">Generic Scripted Object</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA suit of clothes.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000120.htm">wooden box</A>.
+<BR>
+<BR>
+After a moment, something begins to happen...
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe Generic Costume is the costume with a difference.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIf you are a descendant of the Thespian (#1223), you can wear costumes. They change your description.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspGeneric Costumes, however, are also scripted objects...you can write your performances directly on them (use @notedit <yourcostume>.script).
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspCostumes are fun to make, play with, and share with your friends.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSee help #1226 for more information...
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspCostumes, descendants of #1226, are scriptable objects in which you may dress yourself 
+in order to appear differently. In order to wear them you must be a Thespian (a descendent 
+of #1223).
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAs the creator of a costume, you have two properties to set:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp.role_msg (use @role costume is "<name>") -- the name of the role, which will appended 
+to the Thespian's name or substitute for it under certain conditions.
+&nbsp&nbsp&nbsp&nbsp&nbsp.role_desc_msg (use @role_desc costume is "<description>" or @notedit costume.role_desc_msg) 
+-- the description of the costumed Thespian, to be substituted for eir usual one. 
+This description will accept the usual name and pronoun substitutions (Visitor, he 
+etc.; see help pronouns).
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe costume also has a script which you may use to perform works of drama or pathos 
+or spam your friends. To write it use @notedit costume.script. (You should at least 
+save yourself @quota and delete the advertising copy currently scripted.)
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+dress:
+<pre>
+if ($string_utils:match_player(dobjstr) == player)
+    if ($object_utils:has_callable_verb(player, "costume"))
+        if (valid(player.costume))
+            player:tell("You have a costume on. Can't wear two.");
+        elseif (this.location != player)
+            player:tell($string_utils:pronoun_sub(this.cant_wear_msg));
+        else
+            player:costume(this);
+        endif
+    else
+        player:tell("Sorry, you have to be a Thespian to dress in costumes like this 
+one. See #1223...");
+    endif
+else
+    player:tell("Sorry, you can only dress yourself.");
+endif
+.
+
+</pre>
+<BR>
+dress_msg odress_msg remove_msg oremove_msg:
+<pre>
+msg = this.(verb);
+return msg ? $string_utils:pronoun_sub(msg, @args) | "";
+.
+
+</pre>
+<BR>
+doff shed:
+<pre>
+$object_utils:has_property(player, "costume") ? costume = player.costume | (costume 
+= $nothing);
+(this == costume) ? player:uncostume(this) | player:tell("You're not dressed in ", 
+this.name);
+.
+
+</pre>
+<BR>
+play perf*orm:
+<pre>
+if (this.script)
+    if ($object_utils:has_property(player, "costume"))
+        if (player.costume == this)
+            pass(@args);
+        else
+            player:tell("Memory fails you. You might have to dress yourself in ", 
+this:title(), " if you want to play its script.");
+        endif
+    else
+        player:tell("Just playing with ", this:title(), " is no good. You have to 
+dress yourself in it.");
+    endif
+else
+    player:tell(this:titlec(), " has no script to play.");
+endif
+.
+
+</pre>
+<BR>
+d*rop th*row:
+<pre>
+if ($object_utils:has_callable_verb(player, "uncostume"))
+    if (player.costume == this)
+        player:uncostume(this);
+    endif
+endif
+pass(@args);
+.
+
+</pre>
+<BR>
+title:
+<pre>
+title = pass(@args);
+if ($object_utils:has_property(this.location, "costume"))
+    if (this.location.costume == this)
+        title = tostr(title, " [worn]");
+    endif
+endif
+return title;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp odress_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dress_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp cant_wear_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp remove_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oremove_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp role_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp role_desc_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_001230.htm">Critic Costume</A> <A HREF="HTM_001232.htm">The Other Polar Bear Costume</A> <A HREF="HTM_001239.htm">Chorus Costume</A> <A HREF="HTM_001616.htm">Coyote costume</A> <A HREF="HTM_001634.htm">Polar Bear costume</A> <A HREF="HTM_002035.htm">a sewing pattern</A> <A HREF="HTM_002062.htm">Costume</A> <A HREF="HTM_002151.htm">clothes</A> <A HREF="HTM_001456.htm">Hermeticus costume</A> <A HREF="HTM_001448.htm">costume</A> <A HREF="HTM_000902.htm">Jaguar</A> <A HREF="HTM_001968.htm">Inanna costume</A> <A HREF="HTM_002023.htm">Text for Tara</A> <A HREF="HTM_002205.htm">Lupercus</A> <A HREF="HTM_000792.htm">black leathers</A> <A HREF="HTM_000993.htm">leathers</A> <A HREF="HTM_001972.htm">Willfulness</A> <A HREF="HTM_002428.htm">Anacreon costume</A> <A HREF="HTM_002499.htm">silver</A> <A HREF="HTM_002477.htm">orchid</A> <A HREF="HTM_000433.htm">gold</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

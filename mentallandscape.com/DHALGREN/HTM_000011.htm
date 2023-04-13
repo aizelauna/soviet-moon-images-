@@ -1,0 +1,146 @@
+<HTML>
+<HEAD>
+<TITLE>River bank</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> River bank (#11)</H3>
+(an instance of <A HREF="HTM_000003.htm">generic room</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspYou are standing on the grassy banks of a wide river.  A steel suspension bridge spans the river, leading to the eastern bank.  Across the water, the city of Bellona flickers.  On its dockfront, down half a mile, flames roil smoke on the sky and reflections on the river.  Here, not one car comes off the bridge.  Not one goes on.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspTo the west is the mouth of a cave, where newcomers can find a MOO tutorial.  To the east is the bridge into the city.  There is also a taxi here, which can take you to places of special interest.
+<BR>
+<BR>
+You see <A HREF="HTM_000010.htm">a newspaper</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp You see the pylons of the bridge, and beyond across the water, the city.
+[ bridge ] <A HREF="HTM_000080.htm">Bridge</A>.
+You pass smashed toll boothes and walk east about half way across the river.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp You see a cave entrance in an outcroping of rock.
+[ west ] <A HREF="HTM_000343.htm">Cave Entrance</A>.
+You walk west into the cave entrance.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ taxi ] <A HREF="HTM_000687.htm">Taxi</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+keep_clean:
+<pre>
+junk = {};
+while (1)
+    for x in (junk)
+        $command_utils:suspend_if_needed(0);
+        if (x in this.contents)
+            "This is old junk that's still around five minutes later.  Clean it up.";
+            if (!valid(x.owner))
+                move(x, $nothing);
+                #2:tell(">**> Cleaned up orphan object `", x.name, "' (", x, "), 
+owned by ", x.owner, ", to #-1.");
+            elseif (!$object_utils:contains(x, x.owner))
+                move(x, x.owner);
+                x.owner:tell("You shouldn't leave junk in ", this.name, "; ", x.name, 
+" (", x, ") has been moved to your inventory.");
+                #2:tell(">**> Cleaned up `", x.name, "' (", x, "), owned by `", x.owner.name, 
+"' (", x.owner, "), to ", x.owner, ".");
+            endif
+        endif
+    endfor
+    junk = {};
+    for x in (this.contents)
+        if ((seconds_left() < 2) || (ticks_left() < 1000))
+            suspend(0);
+        endif
+        if (!is_player(x))
+            junk = {@junk, x};
+        endif
+    endfor
+    suspend(5 * 60);
+endwhile
+.
+
+</pre>
+<BR>
+disfunc:
+<pre>
+who = args[1];
+if (who.home == this)
+    move(who, $limbo);
+    this:announce("You hear a quiet popping sound; ", who.name, " has disconnected.");
+else
+    pass(who);
+endif
+.
+
+</pre>
+<BR>
+enterfunc:
+<pre>
+who = args[1];
+if ($limbo:acceptable(who))
+    move(who, $limbo);
+else
+    pass(who);
+endif
+.
+
+</pre>
+<BR>
+match:
+<pre>
+m = pass(@args);
+if (m == $failed_match)
+    "... it might be a player off in the body bag...";
+    m = $string_utils:match_player(args[1]);
+    if (valid(m) && (!(m.location in {this, this.body_bag})))
+        return $failed_match;
+    endif
+endif
+return m;
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+endif
+for v in ({"turn", "open"})
+    delete_verb($player_start, v);
+endfor
+for p in ({"out"})
+    delete_property($player_start, p);
+endfor
+for p in ($object_utils:all_properties($room))
+    clear_property($player_start, p);
+endfor
+$player_start.name = "The First Room";
+$player_start.aliases = {};
+$player_start.description = "This is all there is right now.";
+$player_start.exits = $player_start.entrances = {};
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp body_bag
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,229 @@
+<HTML>
+<HEAD>
+<TITLE>Switching</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Switching (#326)</H3>
+(an instance of <A HREF="HTM_000009.htm">generic note</A> made by <A HREF="HTM_000096.htm">Dredful</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000179.htm">Cluttered Closet</A>.
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspMessage 1 on *Documentation (#33586):
+&nbsp&nbsp&nbsp&nbsp&nbspDate:    Thu Feb  3 16:37:13 1994 EST
+&nbsp&nbsp&nbsp&nbsp&nbspFrom:    Blackbriar (#30119)
+&nbsp&nbsp&nbsp&nbsp&nbspTo:      *Documentation (#33586) and yduJ (#68)
+&nbsp&nbsp&nbsp&nbsp&nbspSubject: Quota Utilities Porting Documentation
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspPorting the Byte-Based Quota Utilities from LambdaMOO:
+&nbsp&nbsp&nbsp&nbsp&nbsp=====================================================
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspFrom LambdaMOO, there are two objects to be ported:
+&nbsp&nbsp&nbsp&nbsp&nbsp  $quota_utils -- byte-based quota utilities
+&nbsp&nbsp&nbsp&nbsp&nbsp  $alt_quota_utils -- object-based quota utilities
+&nbsp&nbsp&nbsp&nbsp&nbspYou'll also want to make a character named Quota and give Quota ownership of
+&nbsp&nbsp&nbsp&nbsp&nbspthose objects (this is optional; you can use Hacker, or whoever).  Also, change
+&nbsp&nbsp&nbsp&nbsp&nbspthe ownership of $player.ownership_quota (and its kids) to Quota, and add a
+&nbsp&nbsp&nbsp&nbsp&nbspproperty on $player called size_quota, with initial value {0,0,0,0}.  Perms ""
+&nbsp&nbsp&nbsp&nbsp&nbsp(or, at worst, "r").  Quota must be a programmer, but need not (and should not)
+&nbsp&nbsp&nbsp&nbsp&nbspbe a wizard.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspYou also want a property on $root_class called .object_size, which is owned by
+&nbsp&nbsp&nbsp&nbsp&nbspQuota and has perms "r".  Default value here should be {0,0}.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspWhen you port these, the first things you will want to do is change the names
+&nbsp&nbsp&nbsp&nbsp&nbspso they don't call themselves LambdaMOO Utilities and such.  Call them
+&nbsp&nbsp&nbsp&nbsp&nbspobject-based quota utilities and byte-based quota utilities, so you don't get
+&nbsp&nbsp&nbsp&nbsp&nbspconfused later.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAlso, and this is important, -switch- the pointers on #0.  In other words, make
+&nbsp&nbsp&nbsp&nbsp&nbsp$quota_utils point to the object-based utilities and $alt_quota_utils to the
+&nbsp&nbsp&nbsp&nbsp&nbspbyte-based utilities (the opposite of LambdaMOO).
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspVerbs you want to be sure to modify [this list is taken from yduJ's
+&nbsp&nbsp&nbsp&nbsp&nbspdocumentation on porting the byte-based utilities] follow.  It might be good to
+&nbsp&nbsp&nbsp&nbsp&nbsplook at the LambdaMOO versions of these verbs; in many cases, the changes are
+&nbsp&nbsp&nbsp&nbsp&nbspvery small.
+&nbsp&nbsp&nbsp&nbsp&nbsp  $prog:@property
+&nbsp&nbsp&nbsp&nbsp&nbsp    check $quota_utils:verb_addition_permitted
+&nbsp&nbsp&nbsp&nbsp&nbsp  $prog:@verb
+&nbsp&nbsp&nbsp&nbsp&nbsp    check $quota_utils:property_addition_permitted
+&nbsp&nbsp&nbsp&nbsp&nbsp  $prog:@copy
+&nbsp&nbsp&nbsp&nbsp&nbsp    LambdaMOO has a modified version which moves verbs while copying;
+&nbsp&nbsp&nbsp&nbsp&nbsp    this allows for verbs to be copied when a user is out of quota
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp  $wiz:@programmer 
+&nbsp&nbsp&nbsp&nbsp&nbsp    use $quota_utils to display current quota, instead of having that
+&nbsp&nbsp&nbsp&nbsp&nbsp    information grabbed directly from the property
+&nbsp&nbsp&nbsp&nbsp&nbsp  $wiz:@quota
+&nbsp&nbsp&nbsp&nbsp&nbsp    use $quota_utils:set_quota instead of raw munging on the property
+&nbsp&nbsp&nbsp&nbsp&nbsp    in addition, LambdaMOO has a 'public' option; this is probably
+&nbsp&nbsp&nbsp&nbsp&nbsp    unnecessary
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp  $wiz_utils:set_programmer 
+&nbsp&nbsp&nbsp&nbsp&nbsp    use $quota_utils:adjust_quota_for_programmer to give additional
+&nbsp&nbsp&nbsp&nbsp&nbsp    quota upon @programmer'ing
+&nbsp&nbsp&nbsp&nbsp&nbsp  $wiz_utils:set_owner 
+&nbsp&nbsp&nbsp&nbsp&nbsp    use $quota_utils to handle quota transfer when an object's ownership
+&nbsp&nbsp&nbsp&nbsp&nbsp    changes
+&nbsp&nbsp&nbsp&nbsp&nbsp  $wiz_utils:make_player
+&nbsp&nbsp&nbsp&nbsp&nbsp    use $quota_utils:initialize_quota to set the player's default
+&nbsp&nbsp&nbsp&nbsp&nbsp    quota.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp  $builder:@quota 
+&nbsp&nbsp&nbsp&nbsp&nbsp    use $quota_utils:display_quota
+&nbsp&nbsp&nbsp&nbsp&nbsp  $builder:_create
+&nbsp&nbsp&nbsp&nbsp&nbsp    use $quota_utils:bi_create instead of the create() call
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp  [$builder:@measure]
+&nbsp&nbsp&nbsp&nbsp&nbsp    this is a verb you will likely want to install
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp  $recycler:_recycle 
+&nbsp&nbsp&nbsp&nbsp&nbsp  $recycler:_create 
+&nbsp&nbsp&nbsp&nbsp&nbsp  $recycler:setup_toad
+&nbsp&nbsp&nbsp&nbsp&nbsp    these need to use $quota_utils as well
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp  $login:create
+&nbsp&nbsp&nbsp&nbsp&nbsp    similar to $wiz_utils:make_player
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe next thing you want to do is switch all remaining references to
+&nbsp&nbsp&nbsp&nbsp&nbsp.ownership_quota.  Do this:
+&nbsp&nbsp&nbsp&nbsp&nbsp  @grep ownership_quota
+&nbsp&nbsp&nbsp&nbsp&nbspThis will give you all the references to ownership_quota.  You will want to
+&nbsp&nbsp&nbsp&nbsp&nbspmodify those references (here, you need to be a bit clever) so that they use
+&nbsp&nbsp&nbsp&nbsp&nbspverbs on $quota_utils.  Specifically, bear in mind
+&nbsp&nbsp&nbsp&nbsp&nbsp$quota_utils:creation_permitted and $quota_utils:quota_remaining.  Everywhere
+&nbsp&nbsp&nbsp&nbsp&nbspyou use a raw create(), you want to use $quota_utils:bi_create [standing for
+&nbsp&nbsp&nbsp&nbsp&nbspbuiltin-create(), nothing sexual or political].
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNow that these changes are made, and object-based quota is installed, let it
+&nbsp&nbsp&nbsp&nbsp&nbspsit a while.  Try building, creating, recycling, mucking with your quota,
+&nbsp&nbsp&nbsp&nbsp&nbspeverything.  Look for places you didn't make changes.  Peek through code all
+&nbsp&nbsp&nbsp&nbsp&nbspover the place.  Once you're comfortable that everything relevant is going
+&nbsp&nbsp&nbsp&nbsp&nbspthrough $quota_utils, you're ready for the next step.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThat next step is deciding on a translation factor.  Sample code from OpalMOO
+&nbsp&nbsp&nbsp&nbsp&nbspwas this:
+&nbsp&nbsp&nbsp&nbsp&nbsp  "Set up the byte-based stuff.  Give every player 20000 bytes for eir own
+&nbsp&nbsp&nbsp&nbsp&nbspcharacter, plus 5000 bytes per original quota point.";
+&nbsp&nbsp&nbsp&nbsp&nbsp  set_task_perms(player);
+&nbsp&nbsp&nbsp&nbsp&nbsp  for x in (players())
+&nbsp&nbsp&nbsp&nbsp&nbsp    x.size_quota = {20000 + 5000 * x.ownership_quota, 0, 0, 0};
+&nbsp&nbsp&nbsp&nbsp&nbsp  endfor
+&nbsp&nbsp&nbsp&nbsp&nbsp  x = 0;
+&nbsp&nbsp&nbsp&nbsp&nbsp  while (x <= tonum(max_object()))
+&nbsp&nbsp&nbsp&nbsp&nbsp    o = toobj(x);
+&nbsp&nbsp&nbsp&nbsp&nbsp    if (valid(o))
+&nbsp&nbsp&nbsp&nbsp&nbsp      o.owner.size_quota = o.owner.size_quota;
+&nbsp&nbsp&nbsp&nbsp&nbsp      o.owner.size_quota[1] = o.owner.size_quota[1] + 2000;
+&nbsp&nbsp&nbsp&nbsp&nbsp      $quota_utils:recent_object_bytes(o, 1);
+&nbsp&nbsp&nbsp&nbsp&nbsp      $alt_quota_utils:charge_quota(o.owner, o);
+&nbsp&nbsp&nbsp&nbsp&nbsp    endif
+&nbsp&nbsp&nbsp&nbsp&nbsp    $command_utils:suspend_if_needed(0, tostr("...#", x));
+&nbsp&nbsp&nbsp&nbsp&nbsp    x = x + 1;
+&nbsp&nbsp&nbsp&nbsp&nbsp    endwhile
+&nbsp&nbsp&nbsp&nbsp&nbsp    overs = {};
+&nbsp&nbsp&nbsp&nbsp&nbsp    for x in (players())
+&nbsp&nbsp&nbsp&nbsp&nbsp      if (x.size_quota[2] > x.size_quota[1])
+&nbsp&nbsp&nbsp&nbsp&nbsp        overs = setadd(overs, x);
+&nbsp&nbsp&nbsp&nbsp&nbsp      endif
+&nbsp&nbsp&nbsp&nbsp&nbsp      $command_utils:suspend_if_needed(0, tostr("...", x));
+&nbsp&nbsp&nbsp&nbsp&nbsp    endfor
+&nbsp&nbsp&nbsp&nbsp&nbsp    player:tell($string_utils:english_number(length(overs)), " players are
+&nbsp&nbsp&nbsp&nbsp&nbspover.");
+&nbsp&nbsp&nbsp&nbsp&nbsp    player:tell($string_utils:names_of(overs));
+&nbsp&nbsp&nbsp&nbsp&nbspThat code is kinda stingy.  You might want to be more generous.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspOnce everyone is initialized to what you feel to be comfortable, and you want
+&nbsp&nbsp&nbsp&nbsp&nbspto switch to byte-based quota, set everyone's .ownership_quota to -10000:
+&nbsp&nbsp&nbsp&nbsp&nbsp  ;for x in (players()) x.ownership_quota=-10000; endfor;
+&nbsp&nbsp&nbsp&nbsp&nbspand swap the quota utilities:
+&nbsp&nbsp&nbsp&nbsp&nbsp  ;;temp=$quota_utils;$quota_utils=$alt_quota_utils;$alt_quota_utils=temp;
+&nbsp&nbsp&nbsp&nbsp&nbspand watch it go.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe last thing you'll want to do is start up $quota_utils:measurement_task,
+&nbsp&nbsp&nbsp&nbsp&nbspwhich will periodically plod through the database, measuring objects and fixing
+&nbsp&nbsp&nbsp&nbsp&nbsppeople's quota.  You'll want to modify this code to suit your own DB, however,
+&nbsp&nbsp&nbsp&nbsp&nbspsince the timing is based on a -huge- database like LambdaMOO's.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNote: The byte-based implementation does allow anyone to see anyone else's
+&nbsp&nbsp&nbsp&nbsp&nbspquota.  You may want to fix this, in :display_quota.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNote: In the byte-based implementation, characters with "second" characters
+&nbsp&nbsp&nbsp&nbsp&nbspwill have quota pooled, if there exists $local.second_character_registry such
+&nbsp&nbsp&nbsp&nbsp&nbspas on LambdaMOO.
+&nbsp&nbsp&nbsp&nbsp&nbsp--------------------------
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspSubject: Additional notes re: quota porting
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspAlso remember to set $no_one and all Guest quotas to 0.
+&nbsp&nbsp&nbsp&nbsp&nbsp--------------------------
+</pre>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+init_it:
+<pre>
+if (player == this)
+    set_task_perms(player);
+    for who in (setremove(players(), $hacker))
+        who.size_quota = $alt_quota_utils.default_quota;
+        if ((g = who.ownership_quota + length(who.owned_objects)) > 8)
+            "Gives everyone who has more than 7 quota 5k per unused quota point";
+            who.size_quota[1] = who.size_quota[1] + ((g - 8) * 2000);
+        elseif ((who.ownership_quota == 0) && (length(who.owned_objects) == 1))
+            who.size_quota = {0, 0, 0, 1};
+        endif
+    endfor
+    x = 0;
+    while (x <= tonum(max_object()))
+        o = toobj(x);
+        if (valid(o))
+            $alt_quota_utils:recent_object_bytes(o, 1);
+            $alt_quota_utils:charge_quota(o.owner, o);
+        endif
+        $command_utils:suspend_if_needed(0);
+        x = x + 1;
+    endwhile
+    player:tell("Done.");
+endif
+.
+
+</pre>
+<BR>
+show_init:
+<pre>
+if (!(player.wizard || (player == #78)))
+    return E_PERM;
+endif
+player:tell("All players initial quota:");
+info = {};
+for d in (players())
+    info = {@info, {$string_utils:nn(d), d.ownership_quota, (typeof(d.owned_objects) 
+== LIST) ? length(d.owned_objects) | d.owned_objects, $string_utils:print(d.size_quota)}};
+endfor
+for f in (info)
+    player:tell_lines($string_utils:columnize(f, 4, 75));
+endfor
+player:tell("-- Finished");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

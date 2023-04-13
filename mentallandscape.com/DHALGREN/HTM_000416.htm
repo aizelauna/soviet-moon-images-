@@ -1,0 +1,77 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Message</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Message (#416)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA message that may or may not be meaningful.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000556.htm">Steamer Trunk</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+verify:
+<pre>
+if (this.message == this.digest)
+    player:tell("CERT: message ", this.name, " has a valid signature.");
+else
+    player:tell("CERT: message ", this.name, " has an INVALID signature.");
+endif
+.
+
+</pre>
+<BR>
+sign:
+<pre>
+if (player == this.owner)
+    this.digest = this.message;
+else
+    player:tell(E_PERM);
+endif
+.
+
+</pre>
+<BR>
+write:
+<pre>
+if (player == this.owner)
+    this.message = dobjstr;
+    player:tell("(written)");
+else
+    player:tell(E_PERM);
+endif
+.
+
+</pre>
+<BR>
+read:
+<pre>
+player:tell(this.message);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp message
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp digest
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

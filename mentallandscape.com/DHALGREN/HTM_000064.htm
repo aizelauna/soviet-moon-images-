@@ -1,0 +1,270 @@
+<HTML>
+<HEAD>
+<TITLE>Mail Options</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Mail Options (#64)</H3>
+(an instance of <A HREF="HTM_000067.htm">Generic Option Package</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspOptions for mailing
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+actual:
+<pre>
+if (i = args[1] in {"noinclude", "sender"})
+    return {{{"include", "all"}[i], !args[2]}};
+else
+    return {args};
+endif
+.
+
+</pre>
+<BR>
+parse_@mail:
+<pre>
+"... we'll take anything...";
+raw = args[2];
+if (raw == 1)
+    "...+@mail => @mailo=new";
+    return {args[1], "new"};
+else
+    return args[1..2];
+endif
+.
+
+</pre>
+<BR>
+parse_sticky parse_manymsgs:
+<pre>
+oname = args[1];
+raw = args[2];
+if (typeof(raw) == LIST)
+    if (length(raw) > 1)
+        return "Too many arguments.";
+    endif
+    raw = raw[1];
+elseif (typeof(raw) == NUM)
+    return {oname, raw && ((oname == "manymsgs") ? 20 | 1)};
+endif
+if ((value = $code_utils:tonum(raw)) == E_TYPE)
+    return tostr("`", raw, "'?  Number expected.");
+endif
+return {oname, value};
+.
+
+</pre>
+<BR>
+parse_replyto:
+<pre>
+oname = args[1];
+raw = args[2];
+if (typeof(raw) == STR)
+    raw = $string_utils:explode(raw, ",");
+elseif (typeof(raw) == NUM)
+    return raw ? "You need to give one or more recipients." | {oname, 0};
+endif
+value = $mail_editor:parse_recipients({}, raw);
+if (value)
+    return {oname, value};
+else
+    return "No valid recipients in list.";
+endif
+.
+
+</pre>
+<BR>
+show_manymsgs:
+<pre>
+value = this:get(@args);
+if (value)
+    return {tostr(value), {tostr("Query when asking for ", value, " or more messages.")}};
+else
+    return {0, {"Willing to be spammed with arbitrarily many messages/headers"}};
+endif
+.
+
+</pre>
+<BR>
+show_sticky:
+<pre>
+value = this:get(@args);
+if (value)
+    return {value, {"Sticky folders:  mail commands default to whatever", "mail collection 
+the previous successful command looked at."}};
+else
+    return {0, {"Teflon folders:  mail commands always default to `on me'."}};
+endif
+.
+
+</pre>
+<BR>
+show_@mail:
+<pre>
+if (value = this:get(@args))
+    return {"", {tostr("Default message sequence for @mail:  ", (typeof(value) == 
+STR) ? value | $string_utils:from_list(value, " "))}};
+else
+    default = $mail_agent.("player_default_@mail");
+    return {0, {tostr("Default message sequence for @mail:  ", (typeof(default) == 
+STR) ? default | $string_utils:from_list(default, " "))}};
+endif
+.
+
+</pre>
+<BR>
+show_replyto:
+<pre>
+if (value = this:get(@args))
+    return {"", {tostr("Default Reply-to:  ", $mail_agent:name_list(@value))}};
+else
+    return {0, {"No default Reply-to: field"}};
+endif
+.
+
+</pre>
+<BR>
+show:
+<pre>
+if (o = (name = args[2]) in {"sender", "noinclude"})
+    args[2] = {"all", "include"}[o];
+    return {@pass(@args), tostr("(", name, " is a synonym for -", args[2], ")")};
+else
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+check_replyto:
+<pre>
+"... must be object, list of objects, or false...";
+value = args[1];
+if (typeof(value) == OBJ)
+    return {{value}};
+elseif (!this:istype(value, {{OBJ}}))
+    return $string_utils:capitalize("Object or list of objects expected.");
+else
+    return {value};
+endif
+.
+
+</pre>
+<BR>
+show_netmail:
+<pre>
+if (value = this:get(@args))
+    return {value, {"Have MOO-mail automatically forwarded to me at", "my registered 
+email-address."}};
+else
+    return {value, {"Receive MOO-mail here on the MOO."}};
+endif
+"Last modified Tue Jun  1 02:10:08 1993 EDT by Edison@OpalMOO (#200).";
+.
+
+</pre>
+<BR>
+check_netmail:
+<pre>
+":check_netmail(value) => Makes sure the email-address is one that can actually be 
+used by $network:sendmail().";
+"The actual value sent is not checked since it can only be a boolean flag.  The player's 
+.email_address property is what is checked.";
+"Possible situations where the address would be unusable are when the address is 
+invalid or we can't connect to the site to send mail.";
+"Returns a string error message if unusable or {value} otherwise.";
+if (caller != this)
+    return E_PERM;
+endif
+if (args[1] && (reason = $network:email_will_fail(player.email_address)))
+    return tostr("Invalid registered .email_address: ", reason);
+endif
+return args;
+.
+
+</pre>
+<BR>
+show_expire:
+<pre>
+value = this:get(args[1], "expire");
+if (value < 0)
+    return {1, {"Messages will not expire."}};
+else
+    return {value, {tostr("Unkept messages expire in ", $time_utils:english_time(value 
+|| $mail_agent.player_expire_time), value ? "" | " (default)")}};
+endif
+.
+
+</pre>
+<BR>
+parse_expire:
+<pre>
+oname = args[1];
+value = args[2];
+if ((typeof(value) == STR) && index(value, " "))
+    value = $string_utils:explode(value, " ");
+    if (!value)
+        return {oname, 0};
+    endif
+endif
+if (value == 1)
+    return {oname, -1};
+elseif (typeof(value) == LIST)
+    if (length(value) > 1)
+        nval = $time_utils:parse_english_time_interval(@value);
+        if (typeof(nval) == ERR)
+            return "Time interval should be of a form like \"30 days, 10 hours and 
+43 minutes\".";
+        else
+            return {oname, nval};
+        endif
+    endif
+    value = value[1];
+endif
+if ((nval = $code_utils:tonum(value)) || (nval == 0))
+    return {oname, (nval < 0) ? -1 | nval};
+elseif (value == "Never")
+    return {oname, -1};
+else
+    return "Number, time interval (e.g., \"30 days\"), or \"Never\" expected";
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp show_include
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp show_all
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp show_nosubject
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp show_expert
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp show_enter
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp type_manymsgs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp type_@mail
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp type_replyto
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp type_expire
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp show_followup
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

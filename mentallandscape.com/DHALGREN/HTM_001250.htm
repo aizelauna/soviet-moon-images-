@@ -1,0 +1,104 @@
+<HTML>
+<HEAD>
+<TITLE>Fantasy</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Fantasy (#1250)</H3>
+(an instance of <A HREF="HTM_000834.htm">Generic Litter</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA Fantasy is a magnificent sailing ship,
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                sails aloft oceans of sky... 
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001261.htm">Entry</A>.
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbsp           THE PIRATES' PLANET
+&nbsp&nbsp&nbsp&nbsp&nbspNow their journey was nearing its happy end,
+&nbsp&nbsp&nbsp&nbsp&nbsp  for the Air Sprite pointed out to them,
+&nbsp&nbsp&nbsp&nbsp&nbsp    through an opportune gap in the encircling stars,
+&nbsp&nbsp&nbsp&nbsp&nbsp     the tiny Orb that was the Wonder World of Mars;
+&nbsp&nbsp&nbsp&nbsp&nbsp     and he named them the planets as they journeyed.
+&nbsp&nbsp&nbsp&nbsp&nbsp    There the sinister cruel world of Chinese legend,
+&nbsp&nbsp&nbsp&nbsp&nbsp   and beyond that the beautiful Star of DreamsComeTrue,
+&nbsp&nbsp&nbsp&nbsp&nbsp  till for curiosity they landed on the Pirates Planet,
+&nbsp&nbsp&nbsp&nbsp&nbspwhich is very famed amongst all the outer worlds.
+&nbsp&nbsp&nbsp&nbsp&nbsp  (... the fantasy continues ...)
+&nbsp&nbsp&nbsp&nbsp&nbspThere they saw the hardy spirits of all the Buccaneers
+&nbsp&nbsp&nbsp&nbsp&nbsp and Pirates who sailed the fabled mains.
+&nbsp&nbsp&nbsp&nbsp&nbspTheir ships were there also, and on the curving beach
+&nbsp&nbsp&nbsp&nbsp&nbsp fronting the sunny seas they buried again
+&nbsp&nbsp&nbsp&nbsp&nbsp their gleaming treasures.
+&nbsp&nbsp&nbsp&nbsp&nbsp  (... the fantasy continues ...)
+&nbsp&nbsp&nbsp&nbsp&nbspAnd the sea was filled with the glory of their ships,
+&nbsp&nbsp&nbsp&nbsp&nbspand the land with the splendour of their jewels;
+&nbsp&nbsp&nbsp&nbsp&nbspand they fought their ancient and dishonourable battles over again.
+&nbsp&nbsp&nbsp&nbsp&nbspBut harmless were these joys,
+&nbsp&nbsp&nbsp&nbsp&nbspfor nothing here was real,
+&nbsp&nbsp&nbsp&nbsp&nbspand all was dim and mystic,
+&nbsp&nbsp&nbsp&nbsp&nbspand not more clear than the romantic memory that our Earth holds
+&nbsp&nbsp&nbsp&nbsp&nbsp of all those desperate men.
+&nbsp&nbsp&nbsp&nbsp&nbsp    [William Timlin, THE SHIP THAT SAILED TO MARS, 1923]
+</pre>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+sail:
+<pre>
+if (!this:is_readable_by(valid(caller_perms()) ? caller_perms() | player))
+    player:tell(this.not_play_msg);
+else
+    player:tell(this.play_msg);
+    count = 1;
+    this:look_self();
+    suspend(this.pause);
+    for l in [1..length(this.stanzas_msg)]
+        lines = tonum(this.stanzas_msg[l]) - 1;
+        stanza = this:text()[count..count + lines];
+        player:tell_lines(stanza);
+        count = (count + lines) + 1;
+        suspend(this.pause);
+    endfor
+    player:tell(this.end_play_msg);
+endif
+.
+
+</pre>
+<BR>
+read:
+<pre>
+this:look_self();
+player:tell_lines(this.read);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp stanzas_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp not_play_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp play_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp end_play_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp pause
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp read
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

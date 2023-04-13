@@ -1,0 +1,235 @@
+<HTML>
+<HEAD>
+<TITLE>Mama Hunch</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Mama Hunch (#997)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_002177.htm">Avon</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA little old Italian lady who walks slowly, supporting herself on a cane. The hunchback 
+is apparent, though the long black dress hides most of the heavy-soled boot of her 
+club foot. Her long, jowled face is dolorous, her pouchy eyes shrewd, sad and faintly 
+malevolent.  Her skinny talons clutch her cane as if daring you to try stealing it 
+from her.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000584.htm">Morte Delizioso</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+drink order:
+<pre>
+yum = dobjstr;
+if ((((((dobjstr == "coffee") || (dobjstr == "tea")) || (dobjstr == "mint tea")) 
+|| (dobjstr == "espresso")) || (dobjstr == "latte")) || (dobjstr == "capuccino"))
+    player:tell(this.name, " grumbles under her breath at being disturbed.  Tapping 
+with her cane, she limps to the espresso machine and is lost in a cloud of steam 
+and a fierce rush of heat.  Fixing her beady eye on you, she hobbles over with your 
+", yum, " and plunks it down in front of you.");
+    player.location:announce("Muttering malevolently, ", this.name, " hobbles to 
+the espresso machine.  A whoosh of steam obscures her, until like a witch from some 
+unholy concoction of her brew she emerges and plunks down a steaming hot ", yum, 
+" in front of ", player.name, ".");
+    t1 = ("You try a sip of your " + yum) + ".  Its steam is fragrant, its taste 
+refreshing.";
+    t2 = ("You try your " + yum) + " and find it tasty and bracing.";
+    tastemsg = {t1, t2}[random(2)];
+    suspend(random(2) + 4);
+    player:tell(tastemsg);
+    y1 = ("%N sips %p " + yum) + ".";
+    y2 = ("%N inhales the steam from %p " + yum) + " and savors a slow swallow.";
+    y3 = ("%N drinks from %p steaming hot " + yum) + ".";
+    y4 = ("%N drinks thoughtfully from %p " + yum) + ".";
+    y5 = ("%N sips delicately from %p " + yum) + ".";
+    y6 = ("%N turns %p " + yum) + " on the table, then lifts it and drinks.";
+    y7 = ("%N rolls %p " + yum) + " on %p tongue, then %s slowly swallows.";
+    y8 = ("Raising %p " + yum) + ", %N blows lightly to cool it, and drinks.";
+    y9 = ("With an attentive face %N sips %p " + yum) + ".";
+    v1 = ("You sip at your " + yum) + ".";
+    v2 = ("You have a swallow of your good " + yum) + ".";
+    v3 = ("The hot " + yum) + " rolls delightfully over your tongue.";
+    v4 = ("You taste your " + yum) + ".  It's so good you immediately have a little 
+more.";
+    v5 = ("You toy abstractedly with your " + yum) + " then lift it and sip.";
+    v6 = ("You look thoughtfully into the depths of your " + yum) + ".  You savor 
+another taste.";
+    v7 = ("The " + yum) + " goes down smoothly. You lick your lips.";
+    v8 = ("With gusto you swallow some " + yum) + ".";
+    v9 = ("You muse on the oddities of life, sipping your " + yum) + ".";
+    yummsg1 = {y1, y2, y3}[random(3)];
+    yummsg2 = {y4, y5, y6, y7}[random(4)];
+    yummsg3 = {y8, y9, y2, y6, y4}[random(5)];
+    vinmsg1 = {v1, v2}[random(2)];
+    vinmsg2 = {v3, v4, v5, v6, v7, v8}[random(6)];
+    vinmsg3 = {v9, v5, v1}[random(3)];
+    finishmsg = ("%N finishes %p " + yum) + ".";
+    if (player.location == this.location)
+        player.location:announce($string_utils:pronoun_sub(yummsg1));
+        suspend(random(20) + 55);
+    endif
+    if (player.location == this.location)
+        player:tell(vinmsg1);
+        player.location:announce($string_utils:pronoun_sub(yummsg2));
+        suspend(random(20) + 40);
+    endif
+    if (player.location == this.location)
+        player:tell(vinmsg3);
+        suspend(random(4) + 20);
+    endif
+    if (player.location == this.location)
+        player:tell(vinmsg2);
+        player.location:announce($string_utils:pronoun_sub(yummsg3));
+        suspend(random(10) + 70);
+    endif
+    if (player.location == this.location)
+        player:tell(vinmsg3);
+        player.location:announce($string_utils:pronoun_sub(yummsg2));
+        suspend(random(5) + 30);
+    endif
+    if (player.location == this.location)
+        player:tell(vinmsg2);
+        suspend(random(20) + 55);
+    endif
+    if (player.location == this.location)
+        player:tell(vinmsg1);
+        suspend(random(5) + 10);
+    endif
+    if (player.location == this.location)
+        player:tell("You finish your ", yum, ".");
+        player.location:announce($string_utils:pronoun_sub(finishmsg));
+    endif
+elseif (((((((((dobjstr == "truffle") || (dobjstr == "truffles")) || (dobjstr == 
+"chocolate truffles")) || (dobjstr == "tiramisu")) || (dobjstr == "cassata")) || 
+(dobjstr == "cassata alla siciliana")) || (dobjstr == "tartes")) || (dobjstr == "tarts")) 
+|| (dobjstr == "tart"))
+    player:tell(this.name, " glares.  `What do you think I am, punk, a relay runner? 
+ The desserts are in the case, get your damn ", yum, " your damn self!'");
+else
+    player:tell(this.name, " fixes you with her beady little eye, muttering derision 
+of `", yum, "' and all its kin.  You decide to avoid more embarassment by reading 
+the menu.");
+    player.location:announce(player.name, " ventures to make an order.  ", this.name, 
+" ridicules ", player.po, " for not looking at the menu.");
+endif
+.
+
+</pre>
+<BR>
+steal:
+<pre>
+if (dobjstr == "cane")
+    player:tell("You sneak up on ", this.name, " and try to grab her cane.");
+    player.location:announce(player.name, " creeps silently up behind ", this.name, 
+" and tries to snatch her cane.");
+    suspend(random(2) + 5);
+    player:tell(this.name, " wheels.  The light of battle glints in her greedy little 
+eyes.  She swings her cane with vicious glee, cracking your shins painfully.");
+    player.location:announce(this.name, " spins, cursing like a sailor.  With malevolent 
+delight she lays into ", player.name, " with the cane and gives ", player.pp, " shins 
+a merciless whacking.");
+else
+    player:tell("What?  What?  You can't take no ", dobjstr, " from Mama!");
+endif
+.
+
+</pre>
+<BR>
+xdrink:
+<pre>
+yum = dobjstr;
+if ((((((dobjstr == "coffee") || (dobjstr == "tea")) || (dobjstr == "mint tea")) 
+|| (dobjstr == "espresso")) || (dobjstr == "latte")) || (dobjstr == "capuccino"))
+    player:tell(this.name, " grumbles under her breath at being disturbed.  Tapping 
+with her cane, she limps to the espresso machine and is lost in a cloud of steam 
+and a fierce rush of heat.  Fixing her beady eye on you, she hobbles over with your 
+", yum, " and plunks it down in front of you.");
+    player.location:announce("Muttering malevolently, ", this.name, " hobbles to 
+the espresso machine.  A whoosh of steam obscures her, until like a witch from some 
+unholy concoction of her brew she emerges and plunks down a steaming hot ", yum, 
+" in front of ", player.name, ".");
+    t1 = ("You try a sip of your " + yum) + ".  Its steam is fragrant, its taste 
+refreshing.";
+    t2 = ("You try your " + yum) + " and find it tasty and bracing.";
+    tastemsg = {t1, t2}[random(2)];
+    suspend(random(2) + 4);
+    player:tell(tastemsg);
+    y1 = ("%N sips %p " + yum) + ".";
+    y2 = ("%N inhales the steam from %p " + yum) + " and savors a slow swallow.";
+    y3 = ("%N drinks from %p steaming hot " + yum) + ".";
+    y4 = ("%N drinks thoughtfully from %p " + yum) + ".";
+    y5 = ("%N sips delicately from %p " + yum) + ".";
+    y6 = ("%N turns %p " + yum) + " on the table, then lifts it and drinks.";
+    y7 = ("%N rolls %p " + yum) + " on %p tongue, then %s slowly swallows.";
+    y8 = ("Raising %p " + yum) + ", %N blows lightly to cool it, and drinks.";
+    y9 = ("With an attentive face %N sips %p " + yum) + ".";
+    v1 = ("You sip at your " + yum) + ".";
+    v2 = ("You have a swallow of your good " + yum) + ".";
+    v3 = ("The hot " + yum) + " rolls delightfully over your tongue.";
+    v4 = ("You taste your " + yum) + ".  It's so good you immediately have a little 
+more.";
+    v5 = ("You toy abstractedly with your " + yum) + " then lift it and sip.";
+    v6 = ("You look thoughtfully into the depths of your " + yum) + ".  You savor 
+another taste.";
+    v7 = ("The " + yum) + " goes down smoothly. You lick your lips.";
+    v8 = ("With gusto you swallow some " + yum) + ".";
+    v9 = ("You muse on the oddities of life, sipping your " + yum) + ".";
+    yummsg1 = {y1, y2, y3}[random(3)];
+    yummsg2 = {y4, y5, y6, y7}[random(4)];
+    yummsg3 = {y8, y9, y2, y6, y4}[random(5)];
+    vinmsg1 = {v1, v2}[random(2)];
+    vinmsg2 = {v3, v4, v5, v6, v7, v8}[random(6)];
+    vinmsg3 = {v9, v5, v1}[random(3)];
+    finishmsg = ("%N finishes %p " + yum) + ".";
+    player.location:announce($string_utils:pronoun_sub(yummsg1));
+    suspend(random(20) + 55);
+    player:tell(vinmsg1);
+    player.location:announce($string_utils:pronoun_sub(yummsg2));
+    suspend(random(20) + 40);
+    player:tell(vinmsg3);
+    suspend(random(4) + 20);
+    player:tell(vinmsg2);
+    player.location:announce($string_utils:pronoun_sub(yummsg3));
+    suspend(random(10) + 70);
+    player:tell(vinmsg3);
+    player.location:announce($string_utils:pronoun_sub(yummsg2));
+    suspend(random(5) + 30);
+    player:tell(vinmsg2);
+    suspend(random(20) + 55);
+    player:tell(vinmsg1);
+    suspend(random(5) + 10);
+    player:tell("You finish your ", yum, ".");
+    player.location:announce($string_utils:pronoun_sub(finishmsg));
+elseif (((((((((dobjstr == "truffle") || (dobjstr == "truffles")) || (dobjstr == 
+"chocolate truffles")) || (dobjstr == "tiramisu")) || (dobjstr == "cassata")) || 
+(dobjstr == "cassata alla siciliana")) || (dobjstr == "tartes")) || (dobjstr == "tarts")) 
+|| (dobjstr == "tart"))
+    player:tell(this.name, " glares.  `What do you think I am, punk, a relay runner? 
+ The desserts are in the case, get your damn ", yum, " your damn self!'");
+else
+    player:tell(this.name, " fixes you with her beady little eye, muttering derision 
+of `", yum, "' and all its kin.  You decide to avoid more embarassment by reading 
+the menu.");
+    player.location:announce(player.name, " ventures to make an order.  ", this.name, 
+" ridicules ", player.po, " for not looking at the menu.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

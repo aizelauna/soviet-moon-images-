@@ -1,0 +1,160 @@
+<HTML>
+<HEAD>
+<TITLE>generic thing</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> generic thing (#5)</H3>
+(an instance of <A HREF="HTM_000001.htm">Root Class</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+g*et t*ake:
+<pre>
+set_task_perms(callers() ? caller_perms() | player);
+if (this.location == player)
+    player:tell("You already have that!");
+elseif (this.location != player.location)
+    player:tell("I don't see that here.");
+else
+    this:moveto(player);
+    if (this.location == player)
+        player:tell(this:take_succeeded_msg() || "Taken.");
+        if (msg = this:otake_succeeded_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    else
+        player:tell(this:take_failed_msg() || "You can't pick that up.");
+        if (msg = this:otake_failed_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+d*rop th*row:
+<pre>
+set_task_perms(callers() ? caller_perms() | player);
+if (this.location != player)
+    player:tell("You don't have that.");
+elseif (!player.location:acceptable(this))
+    player:tell("You can't drop that here.");
+else
+    this:moveto(player.location);
+    if (this.location == player.location)
+        player:tell_lines(this:drop_succeeded_msg() || "Dropped.");
+        if (msg = this:odrop_succeeded_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    else
+        player:tell_lines(this:drop_failed_msg() || "You can't seem to drop that 
+here.");
+        if (msg = this:odrop_failed_msg())
+            player.location:announce(player.name, " ", msg);
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+moveto:
+<pre>
+where = args[1];
+"if (!valid(where) || this:is_unlocked_for(where))";
+if (this:is_unlocked_for(where))
+    pass(where);
+endif
+.
+
+</pre>
+<BR>
+take_failed_msg take_succeeded_msg otake_failed_msg otake_succeeded_msg drop_failed_msg 
+drop_succeeded_msg odrop_failed_msg odrop_succeeded_msg:
+<pre>
+set_task_perms(caller_perms());
+return $string_utils:pronoun_sub(this.(verb));
+.
+
+</pre>
+<BR>
+gi*ve ha*nd:
+<pre>
+set_task_perms(callers() ? caller_perms() | player);
+if (this.location != player)
+    player:tell("You don't have that!");
+elseif (!valid(player.location))
+    player:tell("I see no \"", iobjstr, "\" here.");
+elseif ($command_utils:object_match_failed(who = player.location:match_object(iobjstr), 
+iobjstr))
+elseif (who.location != player.location)
+    player:tell("I see no \"", iobjstr, "\" here.");
+elseif (who == player)
+    player:tell("Give it to yourself?");
+else
+    this:moveto(who);
+    if (this.location == who)
+        player:tell("You hand ", this:title(), " to ", who:title(), ".");
+        who:tell(player:titlec(), " ", $gender_utils:get_conj("hands/hand", player), 
+" you ", this:title(), ".");
+    else
+        player:tell(who:titlec(), " ", $gender_utils:get_conj("does/do", who), " 
+not want that item.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+examine_key:
+<pre>
+"examine_key(examiner)";
+"return a list of strings to be told to the player, indicating what the key on this 
+type of object means, and what this object's key is set to.";
+"the default will only tell the key to a wizard or this object's owner.";
+who = args[1];
+if (((caller == this) && $perm_utils:controls(who, this)) && (this.key != 0))
+    return {tostr(this:title(), " can only be moved to locations matching this key:"), 
+tostr("  ", $lock_utils:unparse_key(this.key))};
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp drop_failed_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp drop_succeeded_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp odrop_failed_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp odrop_succeeded_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp otake_succeeded_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp otake_failed_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp take_succeeded_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp take_failed_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000008.htm">generic container</A> <A HREF="HTM_000009.htm">generic note</A> <A HREF="HTM_000062.htm">Recycling Center</A> <A HREF="HTM_000074.htm">Generic Feature Object</A> <A HREF="HTM_000122.htm">dbMeter</A> <A HREF="HTM_000123.htm">Core Updater</A> <A HREF="HTM_000160.htm">Generic Light Shield</A> <A HREF="HTM_000192.htm">Generic Automaton</A> <A HREF="HTM_000203.htm">Twisted Oak Tree</A> <A HREF="HTM_000208.htm">generic candle</A> <A HREF="HTM_000261.htm">Generic Boomerang Thing</A> <A HREF="HTM_000414.htm">medal</A> <A HREF="HTM_000416.htm">Generic Message</A> <A HREF="HTM_000426.htm">Player Request Board</A> <A HREF="HTM_000449.htm">Generic pile of stuff</A> <A HREF="HTM_000451.htm">generic comic book</A> <A HREF="HTM_000469.htm">clothes</A> <A HREF="HTM_000501.htm">Generic Fart-Bonker with Elvis Song Spoofing</A> <A HREF="HTM_000512.htm">map</A> <A HREF="HTM_000520.htm">Slot Machine</A> <A HREF="HTM_000550.htm">Generic Wearable Thing</A> <A HREF="HTM_000577.htm">a bench</A> <A HREF="HTM_000600.htm">thing600</A> <A HREF="HTM_000624.htm">rummagesale</A> <A HREF="HTM_000711.htm">legs</A> <A HREF="HTM_000779.htm">a mirror</A> <A HREF="HTM_000802.htm">palm frond</A> <A HREF="HTM_000803.htm">young angel feather</A> <A HREF="HTM_000804.htm">microphone</A> <A HREF="HTM_000840.htm">a flute</A> <A HREF="HTM_000842.htm">Fly on the Wall</A> <A HREF="HTM_000826.htm">Generic Scripted Object</A> <A HREF="HTM_000858.htm">medal</A> <A HREF="HTM_000881.htm">Gothic Bed</A> <A HREF="HTM_000882.htm">Wrist Cuffs</A> <A HREF="HTM_000909.htm">skull</A> <A HREF="HTM_000916.htm">salt</A> <A HREF="HTM_000917.htm">certified freeze-dried badger repellent</A> <A HREF="HTM_000918.htm">weirdness magnet</A> <A HREF="HTM_000932.htm">the moon</A> <A HREF="HTM_000999.htm">Object999</A> <A HREF="HTM_001000.htm">Dhalgren_utils</A> <A HREF="HTM_001022.htm">Thatcher's Grave</A> <A HREF="HTM_000815.htm">Key to the World</A> <A HREF="HTM_001037.htm">Plutonium</A> <A HREF="HTM_001035.htm">Map of Africa</A> <A HREF="HTM_001097.htm">Camels</A> <A HREF="HTM_001110.htm">hoarded magic number1</A> <A HREF="HTM_001111.htm">hoarded magic number2</A> <A HREF="HTM_001125.htm">a cuppa joe</A> <A HREF="HTM_000790.htm">Trevor</A> <A HREF="HTM_000844.htm">calliope</A> <A HREF="HTM_001203.htm">broken pieces of stained glass</A> <A HREF="HTM_001204.htm">big steel barrel</A> <A HREF="HTM_001212.htm">Self_Fulfilling_Prophecy</A> <A HREF="HTM_001270.htm">Bose Acoustimass-7 speakers</A> <A HREF="HTM_001271.htm">Technics turntable player</A> <A HREF="HTM_001272.htm">Pioneer 18-disc c.d. changer</A> <A HREF="HTM_001273.htm">Pioneer dual cassette recorder</A> <A HREF="HTM_001288.htm">plum</A> <A HREF="HTM_001251.htm">Jupiter</A> <A HREF="HTM_001371.htm">Coffee Grounds</A> <A HREF="HTM_001372.htm">Coffee Flask</A> <A HREF="HTM_001244.htm">Shotgun</A> <A HREF="HTM_001386.htm">Bullet</A> <A HREF="HTM_001413.htm">Shield of Achilles</A> <A HREF="HTM_001436.htm">pint_of_Guinness</A> <A HREF="HTM_001438.htm">Pint_of_Guinness</A> <A HREF="HTM_001260.htm">Generic Elevator Call Button</A> <A HREF="HTM_001488.htm">Generic Dispenser</A> <A HREF="HTM_001472.htm">Generic Music Machine</A> <A HREF="HTM_001779.htm">Super Chicken</A> <A HREF="HTM_001786.htm">Torch</A> <A HREF="HTM_001809.htm">a ki-rin</A> <A HREF="HTM_001810.htm">a unicorn</A> <A HREF="HTM_001811.htm">an eagle</A> <A HREF="HTM_001812.htm">a gryphon</A> <A HREF="HTM_001813.htm">a dragon</A> <A HREF="HTM_001827.htm">A sign for newcomers</A> <A HREF="HTM_001828.htm">A sign for builders</A> <A HREF="HTM_001829.htm">A sign about waste disposal</A> <A HREF="HTM_001831.htm">A welcome banner</A> <A HREF="HTM_001830.htm">A signpost</A> <A HREF="HTM_001832.htm">shrubs</A> <A HREF="HTM_001841.htm">Encyclopedia of the TinyWorld</A> <A HREF="HTM_001842.htm">up recycling</A> <A HREF="HTM_001843.htm">up killing</A> <A HREF="HTM_001844.htm">up gender</A> <A HREF="HTM_001845.htm">up pennies</A> <A HREF="HTM_001846.htm">up strings</A> <A HREF="HTM_001847.htm">up objects</A> <A HREF="HTM_001848.htm">Dictionary of Commands</A> <A HREF="HTM_001849.htm">up look</A> <A HREF="HTM_001850.htm">up goto</A> <A HREF="HTM_001851.htm">up say</A> <A HREF="HTM_001852.htm">up @dig</A> <A HREF="HTM_001853.htm">up linking</A> <A HREF="HTM_001854.htm">up @create</A> <A HREF="HTM_001855.htm">up @lock</A> <A HREF="HTM_001036.htm">treestump</A> <A HREF="HTM_001901.htm">ash tree</A> <A HREF="HTM_001907.htm">A gold plaque inset into the rock</A> <A HREF="HTM_001908.htm">Statue of Lynx</A> <A HREF="HTM_001909.htm">Statue of Three</A> <A HREF="HTM_001910.htm">Statue of Garrett</A> <A HREF="HTM_001911.htm">Statue of Nightfall</A> <A HREF="HTM_001912.htm">Statue of Chrysalis</A> <A HREF="HTM_001913.htm">A robot with a Darth Vader helmet</A> <A HREF="HTM_001969.htm">How to Send Mail</A> <A HREF="HTM_001970.htm">How to Create a Mailbox</A> <A HREF="HTM_001971.htm">How to Read Mail</A> <A HREF="HTM_001479.htm">Generic Implement of Fiery Destruction</A> <A HREF="HTM_001975.htm">log braces over a BOG</A> <A HREF="HTM_002002.htm">Generic Flammable Object</A> <A HREF="HTM_002015.htm">a plastic sign</A> <A HREF="HTM_001039.htm">Generic Wind-Up Toy</A> <A HREF="HTM_002029.htm">Newborn</A> <A HREF="HTM_002034.htm">ga</A> <A HREF="HTM_002044.htm">Tourist Information Sign</A> <A HREF="HTM_002054.htm">shyguy</A> <A HREF="HTM_002056.htm">gold ring</A> <A HREF="HTM_002057.htm">scantily clad helpless virgin</A> <A HREF="HTM_002058.htm">Beldin's Alchemy set.</A> <A HREF="HTM_002059.htm">zeron</A> <A HREF="HTM_002052.htm">Star Crystal</A> <A HREF="HTM_002060.htm">Staff of DEATH</A> <A HREF="HTM_002064.htm">plaster cow</A> <A HREF="HTM_002065.htm">Black Rose</A> <A HREF="HTM_002066.htm">D.E.A.T.H.</A> <A HREF="HTM_002067.htm">slime mold</A> <A HREF="HTM_002068.htm">used_up condom</A> <A HREF="HTM_002072.htm">icky thing</A> <A HREF="HTM_002079.htm">Cirdan</A> <A HREF="HTM_002085.htm">Lynx</A> <A HREF="HTM_002092.htm">Vixie</A> <A HREF="HTM_002091.htm">soap-on-a-rope</A> <A HREF="HTM_002108.htm">a hanger inside an old wardrobe</A> <A HREF="HTM_002086.htm">tattoo gun</A> <A HREF="HTM_001987.htm">laser gun</A> <A HREF="HTM_002133.htm">some pins</A> <A HREF="HTM_000930.htm">cotton candy</A> <A HREF="HTM_001483.htm">a gargoyle</A> <A HREF="HTM_002152.htm">Generic Phone</A> <A HREF="HTM_002153.htm">Generic Phone Switch</A> <A HREF="HTM_002156.htm">silver anklet</A> <A HREF="HTM_001500.htm">a seed</A> <A HREF="HTM_002171.htm">Can of Hair Spray</A> <A HREF="HTM_002195.htm">small pile of leaves</A> <A HREF="HTM_001991.htm">a metal crate</A> <A HREF="HTM_001147.htm">a rose for Zenith</A> <A HREF="HTM_002009.htm">HAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHAHA</A> <A HREF="HTM_002135.htm">djembe</A> <A HREF="HTM_002194.htm">old dildoes</A> <A HREF="HTM_002221.htm">blankets</A> <A HREF="HTM_002008.htm">Big 'ol poster of Jon Bon Jovi</A> <A HREF="HTM_001146.htm">extra kisses</A> <A HREF="HTM_002223.htm">bubbles</A> <A HREF="HTM_002007.htm">Mein Hertzen</A> <A HREF="HTM_002213.htm">a tubful of water</A> <A HREF="HTM_001553.htm">Bob</A> <A HREF="HTM_000570.htm">a virtual Sybarite expiring of a surfeit of textual chocolate</A> <A HREF="HTM_001060.htm">My So-Called Knife</A> <A HREF="HTM_001977.htm">Insanity</A> <A HREF="HTM_001010.htm">Hex</A> <A HREF="HTM_002284.htm">soap-on-a-rope</A> <A HREF="HTM_002301.htm">Tenant Directory</A> <A HREF="HTM_000911.htm">#911</A> <A HREF="HTM_000910.htm">11001001</A> <A HREF="HTM_000997.htm">Mama Hunch</A> <A HREF="HTM_000943.htm">quarter</A> <A HREF="HTM_001993.htm">feather bed</A> <A HREF="HTM_002369.htm">rolled up blanket</A> <A HREF="HTM_001989.htm">Hohner harmonica</A> <A HREF="HTM_002188.htm">key</A> <A HREF="HTM_001207.htm">toy</A> <A HREF="HTM_002389.htm">glass couch</A> <A HREF="HTM_002394.htm">booger</A> <A HREF="HTM_000989.htm">a Hallucination of Cioccolato</A> <A HREF="HTM_002409.htm">Candle</A> <A HREF="HTM_002427.htm">a Menu</A> <A HREF="HTM_000373.htm">green leather thongs thongs</A> <A HREF="HTM_002344.htm">blanket</A> <A HREF="HTM_002451.htm">a fancy case with fractured glass</A> <A HREF="HTM_002343.htm">Fascinating Thing</A> <A HREF="HTM_002470.htm">holder</A> <A HREF="HTM_002306.htm">a laser probe</A> <A HREF="HTM_002506.htm">[wilted daisy] flower</A> <A HREF="HTM_000441.htm">b</A> <A HREF="HTM_000436.htm">c</A> <A HREF="HTM_002424.htm">f</A> <A HREF="HTM_000432.htm">pearl</A> <A HREF="HTM_000418.htm">emerald</A> <A HREF="HTM_002555.htm">roulette</A> <A HREF="HTM_002572.htm">glasses</A> <A HREF="HTM_002575.htm">bookshelf</A> <A HREF="HTM_000587.htm">agate</A> <A HREF="HTM_002625.htm">Gouda</A> <A HREF="HTM_002303.htm">delicate_web</A> <A HREF="HTM_002413.htm">cock</A> <A HREF="HTM_002586.htm">Post Holocaust Daisy</A> <A HREF="HTM_002635.htm">Please No more NUKES button.</A> <A HREF="HTM_002419.htm">thing</A> <A HREF="HTM_002637.htm">radioactive tongue stud</A> <A HREF="HTM_000941.htm">amber</A> <A HREF="HTM_000455.htm">crimson</A> <A HREF="HTM_000289.htm">onyx</A> <A HREF="HTM_002418.htm">The Bedai Hammock</A> <A HREF="HTM_002646.htm">Crusader the Cat!</A> <A HREF="HTM_002650.htm">Orange</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

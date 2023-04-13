@@ -1,0 +1,43 @@
+<HTML>
+<HEAD>
+<TITLE>Lag Feature</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Lag Feature (#536)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA simple feature with one verb on it. @lag displays the lag as computed by the login mechanism.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000111.htm">Features Feature Object</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@lag:
+<pre>
+"Syntax: @lag";
+"";
+"Prints out the lag as computed by the login mechanism. If the lag is less than one 
+second, it will tell you that the lag is low, otherwise it will tell you how large 
+the lag is in seconds.";
+$login:maybe_print_lag();
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

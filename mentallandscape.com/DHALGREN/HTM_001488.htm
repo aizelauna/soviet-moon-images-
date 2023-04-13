@@ -1,0 +1,253 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Dispenser</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Dispenser (#1488)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000096.htm">Dredful</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspA really generic dispensing parent. A child of this parent can be set up to thematically 
+create new objects for people who use it. For instance, a vending machine could be 
+set up which gives the player who inserts money and presses the button a child of 
+some candy bar generic. One that they own and can do what they like with. This may 
+be a more interesting way for someone to create new objects instead of using @create. 
+See `help #1488' for instructions. Note: some programming will be necessary on the 
+child.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000179.htm">Cluttered Closet</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspHere are step by step instructions for setting up a child of this parent to dispense 
+some item:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp- First @create #1488 named MyChildDispenser
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp- Decide on what generic your dispenser will dispense to people. Then type:
+&nbsp&nbsp&nbsp&nbsp&nbsp      @set MyChildDispenser.dispenses to MyGeneric
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp- Next, you will need to decide on the syntax for the command the player will type 
+to get the dispenser to dispense. For instance, on a candy machine, they may need 
+to press a button. This part is perhaps what gives this generic the most flexibility. 
+You can give it almost any syntax. But note that you'll need the `this' argument 
+in there somewhere. Programmers should understand this.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspFor the example, lets try for this syntax: "press push any on this"
+&nbsp&nbsp&nbsp&nbsp&nbspSo someone could type: push button on MyChildDispenser or press tab on MyChildDispenser.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNow, to set up this syntax you'll need to type:
+&nbsp&nbsp&nbsp&nbsp&nbsp      @set MyChildDispenser.verb_name to "press push"
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp      @set MyChildDispenser.verb_args to {"any", "on", "this"}
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNote that the name must be a string and the arguments a list of strings.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp- Now simply type: @setup MyChildDispenser
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe barest essentials are now complete. You can even test it now and press button 
+on MyChildDispenser. You should get a child of MyGeneric which is identical in all 
+respects to the parent in name, alias, and description.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspYou can customize your dispenser to create children which are unique, however. But 
+first, you can set a couple of messages:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@dispense MyChildDispenser is "You get a brand new cotton candy from the Generic 
+Dispenser."
+&nbsp&nbsp&nbsp&nbsp&nbsp@odispense MyChildDispenser is "Visitor pushes a button and gets a new cotton candy 
+from the Generic Dispenser."
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNote that cotton candy refers to the new child and Generic Dispenser to the MyChildDispenser.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNow, for further customization, you'll need to program some verbs.
+&nbsp&nbsp&nbsp&nbsp&nbspAfter a player invokes the dispenser with your defined command, :dispense_item is 
+called. This verb does the following in order:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp1) calls :check_dispenses (which you can override and customize) to see if the dispenser 
+has a valid and fertile .dispenses.
+&nbsp&nbsp&nbsp&nbsp&nbsp2) calls :pre_dispense and passes all arguments. This verb is useful for setting 
+up the new objects name, aliases and description via the provided :set_new_name :set_new_aliases 
+:set_new_desc verb. You can override this verb and do your own behavior, including 
+parsing the arguments any way you like.
+&nbsp&nbsp&nbsp&nbsp&nbsp3) creates the new object and calls :prepare_obj. Do NOT override :prepare_obj. This 
+verb simply loads in the new name, alias, and description set via :pre_dispense and 
+moves the object to the player.
+&nbsp&nbsp&nbsp&nbsp&nbsp4) calls :post_dispense which you can override. This verb simply displays messages.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspDo not override :dispense_item with your own verb. It won't work.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspFurther documentation can be found in each verb. Also, you can ask Dredful.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+dispense_item:
+<pre>
+"Does the actual work of creating the new object. Do not override this verb on your 
+dispenser, otherwise caller_perms() will be your verb and you'll end up owning the 
+new object, not the person who used the dispenser.";
+"Do your work in :check_dispenses, :pre_dispense, :post_dispense on children dispensers.";
+set_task_perms(whom = caller_perms());
+if (!(why = this:check_dispenses(whom, @args)))
+    this:pre_dispense(whom, @args);
+    if (typeof(object = whom:_create(this.dispenses)) == ERR)
+        whom:notify(tostr(object));
+    else
+        this:prepare_obj(whom, object);
+    endif
+    this:post_dispense(whom, object, @args);
+else
+    whom:tell(why);
+endif
+.
+
+</pre>
+<BR>
+check_dispenses:
+<pre>
+whom = args[1];
+if (!valid(dis = this.dispenses))
+    return tostr(this.name, " doesn't have a valid parent object set for dispensing.");
+elseif (!dis.f)
+    return tostr(this.name, " dispenses ", $string_utils:nn(dis), " which is not 
+fertile at this time.");
+else
+    return 0;
+endif
+.
+
+</pre>
+<BR>
+pre_dispense:
+<pre>
+"This verb can do special effects before the object is dispensed. But more importantly, 
+the dispenser should set up .new_name, .new_aliases, and .new_desc for the new object. 
+Default just sets name and aliases the same as parent's. Leaves description clear.";
+this:set_new_name(this.dispenses.name);
+this:set_new_aliases(this.dispenses.aliases);
+.
+
+</pre>
+<BR>
+post_dispense:
+<pre>
+"Displays messages. Kids can do their own thing.";
+whom = args[1];
+object = args[2];
+whom:tell(this:dispense_msg(whom, object));
+whom:room_announce(this:odispense_msg(whom, object));
+.
+
+</pre>
+<BR>
+dispense_msg odispense_msg:
+<pre>
+dobj = args[2];
+return $string_utils:pronoun_sub(this.(verb), args[1], this);
+.
+
+</pre>
+<BR>
+prepare_obj:
+<pre>
+"Sets description, name, aliases of new object from .new_desc, .new_name, .new_aliases. 
+These props should have been set by :pre_dispense. Do not overrride this verb on 
+a child dispenser since caller_perms() will be your verb instead of the player who 
+got the item.";
+set_task_perms(caller_perms());
+whom = args[1];
+object = args[2];
+if (this.new_name)
+    object:set_name(this.new_name);
+endif
+if (this.new_aliases)
+    object:set_aliases(this.new_aliases);
+endif
+if (this.new_desc)
+    object:set_description(this.new_desc);
+endif
+move(object, whom);
+.
+
+</pre>
+<BR>
+set_new_name set_new_aliases set_new_desc:
+<pre>
+if ((!$perm_utils:controls(caller_perms(), this)) && (caller != this))
+    return E_PERM;
+elseif (args)
+    prop = verb[5..length(verb)];
+    return this.(prop) = args[1];
+else
+    return E_INVARG;
+endif
+.
+
+</pre>
+<BR>
+@setup:
+<pre>
+if (!$perm_utils:controls(player, this))
+    player:tell(E_PERM);
+    return;
+endif
+if ((!this.verb_name) || (!this.verb_args))
+    player:tell("You need to set the .verb_name to a string as the verb name for 
+the dispenser, and the .verb_args to a list of three arguments.");
+elseif ($object_utils:has_verb(this, nv = strsub($string_utils:words(this.verb_name)[1], 
+"*", "")))
+    player:tell("You seem to have already used @setup. You'll need to contact Dredful 
+if you need to redo it.");
+else
+    add_verb(this, {#96, "rd", this.verb_name}, this.verb_args);
+    set_verb_code(this, nv, this.verb_code);
+    player:tell("Your ", this.name, " is now set up to work with the command: \"", 
+this.verb_name, " ", $string_utils:from_list(this.verb_args, " "), "\"");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dispenses
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dispense_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp odispense_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp new_name
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp new_aliases
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp new_desc
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp verb_name
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp verb_args
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp verb_code
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp help_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000848.htm">test dispenser</A> <A HREF="HTM_000933.htm">cotton candy machine</A> <A HREF="HTM_001978.htm">a pile of gas cans</A> <A HREF="HTM_002033.htm">Coat Rack</A> <A HREF="HTM_002036.htm">a sewing machine</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

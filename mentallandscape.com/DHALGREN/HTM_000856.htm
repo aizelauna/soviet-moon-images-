@@ -1,0 +1,97 @@
+<HTML>
+<HEAD>
+<TITLE>PostModern Player Class</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> PostModern Player Class (#856)</H3>
+(an instance of <A HREF="HTM_000099.htm">Useful Utilitarian PC</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe post-modern player class contains experimental features related to embodiment in virtual reality.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000556.htm">Steamer Trunk</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+spoof:
+<pre>
+this.location:announce_all("(", argstr, ")");
+.
+
+</pre>
+<BR>
+moveto:
+<pre>
+if ((player != this.owner) && (this.movable_msg == "NO"))
+    this:tell(player.name, " tried to move you.");
+    player:tell(E_PERM);
+else
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+home:
+<pre>
+"Copied from generic player (#6):home by The_Mayor (#2) Sun Feb  6 17:47:03 1994 
+EST";
+"modifed to use the usual player teleport messages like @go or @join";
+start = this.location;
+if (start == this.home)
+    player:tell("You're already home!");
+    return;
+elseif (typeof(this.home) != OBJ)
+    player:tell("You've got a weird home, pal.  I've reset it to the default one.");
+    this.home = $player_start;
+elseif (!valid(this.home))
+    player:tell("Oh no!  Your home's been recycled.  Time to look around for a new 
+one.");
+    this.home = $player_start;
+endif
+this:moveto(this.home);
+if (!valid(start))
+elseif (start == this.location)
+    start:announce(player.name, " learns that you can never go home...");
+else
+    start:announce(player:oself_port_msg(this.home));
+endif
+if (this.location == this.home)
+    if (msg = this:self_port_msg(this.home))
+        player:tell(msg);
+    endif
+    this.location:announce(player:oself_arrive_msg(this.home));
+elseif (this.location == start)
+    player:tell("Either home doesn't want you, or you don't really want to go.");
+else
+    player:tell("Wait a minute!  This isn't your home...");
+    if (valid(this.location))
+        this.location:announce(player.name, " arrives, looking quite bewildered.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp movable_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_001595.htm">Robin</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

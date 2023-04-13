@@ -1,0 +1,142 @@
+<HTML>
+<HEAD>
+<TITLE>Size-Prospectus FO</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Size-Prospectus FO (#542)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_000100.htm">Dred</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA feature for @auditing players including the sizes of each objects, the number of verbs, and whether they have kids.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000111.htm">Features Feature Object</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspSimple feature, one verb: @ps <person> shows an audit of them including object sizes.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+@size-prospectus @sp @sp-sum @ps:
+<pre>
+"@sp <player>";
+"@sp-sum <player>";
+"  an elaborate 'prospectus' of a player's objects, including their sizes:";
+"  The first column is the size of the each object in kilobytes (rounded)";
+"  See `help @prospectus' for what the rest of the columns mean.";
+"The last line shows the total size of the player's objects.";
+"Sizes aren't recomputed, rather it just shows the oldest time.";
+"@sp <player> <n>";
+"  will update any size information <n> or more days old, so";
+"   @sp <player> 1";
+"  will give recent size information";
+"@sp-sum is an abbreviated display which only shows totals of objects that have no 
+verbs or children.";
+if (!args)
+    who = player;
+else
+    who = $string_utils:match_player(args[1]);
+    if ($command_utils:player_match_result(who, args[1])[1])
+        return;
+    endif
+endif
+if (length(args) > 1)
+    days = tonum(args[2]) || 5;
+else
+    days = 100;
+endif
+player:tell("Objects owned by ", who.name, ": ");
+count = 0;
+sum = 0;
+minage = $maxint;
+ecounts = {};
+summary = verb == "@sp-sum";
+ll = player:linelen();
+for o in (who.owned_objects)
+    $command_utils:suspend_if_needed(3);
+    sz = $quota_utils:recent_object_bytes(o, days);
+    count = count + 1;
+    sum = sum + sz;
+    if (summary && this:ignorable(o))
+        if (which = $list_utils:iassoc(parent(o), ecounts))
+            ecounts[which][2] = ecounts[which][2] + 1;
+            ecounts[which][3] = ecounts[which][3] + sz;
+        else
+            ecounts[0..0] = {{parent(o), 1, sz}};
+        endif
+    else
+        oas = $building_utils:object_audit_string(o, 1);
+        szstr = $string_utils:right((sz + 500) / 1000, 4);
+        minage = min(((o.object_size[2] + 1) || 1) - 1, minage);
+        if (length(oas) >= (ll - 5))
+            oas = oas[1..ll - 5];
+        endif
+        player:tell(szstr, " ", oas);
+    endif
+endfor
+if (ecounts)
+    player:tell("- sz - cnt -- children of these objects --");
+    for x in (ecounts)
+        $command_utils:suspend_if_needed(3);
+        player:tell($string_utils:right((x[3] + 500) / 1000, 4), $string_utils:right(x[2], 
+4), " ", $string_utils:nn(x[1]));
+    endfor
+endif
+player:tell($string_utils:left(tostr("-- ", count, " object", (count == 1) ? ", " 
+| "s, ", (sum + 500) / 1000, "K (", (((time() - minage) / 60) / 60) / 24, " max days 
+old size info)"), ll - 1, "-"));
+.
+
+</pre>
+<BR>
+ignorable:
+<pre>
+what = args[1];
+return ((((!children(what)) && (!what.r)) && (!what.f)) && (!verbs(what))) && ((!properties(what)) 
+&& (length(children(parent(what))) > 2));
+.
+
+</pre>
+<BR>
+@kidsizes:
+<pre>
+sum = 0;
+if ((!valid(dobj)) && (!valid(dobj = player:match_oject(dobjstr))))
+    player:tell("I don't know what ", dobjstr, " is.");
+    return;
+endif
+if (!(objs = $object_utils:descendents_suspended(dobj)))
+    player:tell($string_utils:nn(dobj), " has no kids.");
+else
+    for x in (objs)
+        $command_utils:suspend_if_needed(0);
+        sum = sum + $quota_utils:recent_object_bytes(x, 14);
+    endfor
+    player:tell("The ", length(objs), " kids of ", $string_utils:nn(dobj), " take 
+", sum, " bytes");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp exceptions
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

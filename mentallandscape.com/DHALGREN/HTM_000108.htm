@@ -1,0 +1,402 @@
+<HTML>
+<HEAD>
+<TITLE>Core-Updates</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Core-Updates (#108)</H3>
+(an instance of <A HREF="HTM_000046.htm">Generic Mail Recipient</A> made by <A HREF="HTM_000096.htm">Dredful</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis mail list is used to keep track of changes made to the core. People can also report bugs and other suggestions related to core objects here.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000047.htm">Mail Distribution Center</A>.
+<BR>
+<BR>
+MAIL MESSAGES:
+<BR>
+<BR>
+<BR>
+Date: 1994 Jan 24, 10:17:46 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Core-Updates (#108)
+<BR>
+Subj: This list
+<BR>
+
+<BR>
+One of the problems with the LambdaCore system is that once you get it and start building on it, you can't easily incorporate new updates that come along to the original.
+<BR>
+
+<BR>
+I have been working on ways of getting around this. There are lots of changes that come about on Lambda, and I would like to port them over here.
+<BR>
+
+<BR>
+In addition, we may find that we will want to do different things to our core that Lambda does to theirs in any event. 
+<BR>
+
+<BR>
+Such things should be announced here on this list. 
+<BR>
+
+<BR>
+This list is public, so you all can mail here about bugs, suggestions, etc.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Jan 25, 11:16:40 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Core-Updates (#108)
+<BR>
+Subj: Integrating exit update
+<BR>
+
+<BR>
+I've just added exit integration into the core $exit and $room.
+<BR>
+
+<BR>
+So, for every room and exit, you can set it up just about any way you like.
+<BR>
+
+<BR>
+On $exit, you can set .look_msg to be the message appended to the rooms description. There are substitutions you can make as well. However, the exits .look_msg will only be appended if exit.obvious=2.
+<BR>
+
+<BR>
+On $room, you can set .look_sep_msg to be the space between integrated exit messages. Usually the default is fine. But you could do whatever you want. You can also set .exit_display. When this property is true, not only will exits with .obvious=2 be put in the description, but those with obvious=1 will be displayed in this format:
+<BR>
+
+<BR>
+Obvious exits: north, south, etc.
+<BR>
+
+<BR>
+Tagged onto the end of the description. Maybe not very VR, but useful at times.
+<BR>
+
+<BR>
+Of course, all this information can be found by:
+<BR>
+
+<BR>
+help $room   AND   help $exit
+<BR>
+
+<BR>
+Dredful
+<BR>
+
+<BR>
+<BR>
+Date: 1994 Jan 25, 12:36:29 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Core-Updates (#108)
+<BR>
+Subj: Builder Options
+<BR>
+
+<BR>
+I've just finished porting over the Building Options. I'm surprised that it wasn't in this particular Lambdacore.
+<BR>
+
+<BR>
+Anyway. These will allow you to customize your building somewhat. Like set what default parent is used for your @digging and such.
+<BR>
+
+<BR>
+Type @builder-options to see. Help will be installed soon.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Jan 25, 08:40:00 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Core-Updates (#108)
+<BR>
+Subj: Ack
+<BR>
+
+<BR>
+There was a big bug in $player :confunc and :disfunc. I just fixed it. Sorry for the inconvenience.
+<BR>
+
+<BR>
+You should see all the neat info when you connect now.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Jan 26, 12:00:07 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Core-Updates (#108)
+<BR>
+Subj: Exit integration
+<BR>
+
+<BR>
+I have moved all the exit integration from :look_self to :description.
+<BR>
+
+<BR>
+It makes more sense this way. The whole system was kludgy and runs much nicer now. You can make use of 
+<BR>
+
+<BR>
+$room:obvious_exits(FLAG) now too. See the verb for documentation on its behavior.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Jan 26, 12:01:18 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Core-Updates (#108)
+<BR>
+Subj: Programmer Options
+<BR>
+
+<BR>
+I finished porting over the Programmer Options from LambdaCore.
+<BR>
+
+<BR>
+These are some neat options you can set that will help programmers out.
+<BR>
+
+<BR>
+Type @prog-options to see what they are. Help is on the way..
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Jan 31, 01:01:03 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Core-Updates (#108)
+<BR>
+Subj: $player
+<BR>
+
+<BR>
+I've basically finished updating $player.
+<BR>
+
+<BR>
+There were a lot of little things that got changed. Probably not a whole lot that you'd notice. Also too much for me to remember. 
+<BR>
+
+<BR>
+Mostly niceties in the code.
+<BR>
+
+<BR>
+Unfortunately, the mail system could be broken until I finish porting over the changes to $mail_agent et al.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Feb  7, 11:50:08 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Core-Updates (#108)
+<BR>
+Subj: Mail system!
+<BR>
+
+<BR>
+Well, after much work, I've finished porting over the latest updates made to the mail system by Rog over at Lambda.
+<BR>
+
+<BR>
+Unfortunately, I think he was in the middle of a new addition there so I may have to do all this over again. (Sheesh, oh well)
+<BR>
+
+<BR>
+Here's what I had to update:
+<BR>
+
+<BR>
+$player
+<BR>
+$seq_utils
+<BR>
+$mail_recipient
+<BR>
+$mail_agent
+<BR>
+$mail_name_db <- this is a new object, part of the new stuff Rog is doing.
+<BR>
+$biglist
+<BR>
+$big_mail_recipient
+<BR>
+$mail_editor
+<BR>
+$mail_options
+<BR>
+
+<BR>
+Quite a lot of stuff. The changes are too much to go into. Lots of little things here and there. Kept messages, expirations, naming schemes, etc.
+<BR>
+
+<BR>
+Direct questions and bug reports here.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Feb 10, 11:10:35 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Core-Updates (#108)
+<BR>
+Subj: $generic_utils
+<BR>
+
+<BR>
+I just ported over the $generic_utils object from Lambda.
+<BR>
+
+<BR>
+I like this setup. It's really just a placeholder object that has all the $*_utils objects as children.
+<BR>
+
+<BR>
+So you can easily see what utils are out there with @kids $generic_utils.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Feb 23, 01:19:37 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *graffiti (#107) and *Core-Updates (#108)
+<BR>
+Subj: Responsible Paranoid Data
+<BR>
+
+<BR>
+I've ported over the $paranoid_db from LambdaMOO. This object will keep track of everyone's anti-spoofer data so that it won't cost against their quota.
+<BR>
+
+<BR>
+If you had @paranoid on before, you'll need to reset it again so that the database will know to keep track of you. See `help @paranoid' for details.
+<BR>
+
+<BR>
+All responsible data is cleared when you log out.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Mar  1, 09:37:28 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Core-Updates (#108)
+<BR>
+Subj: Edit Option
+<BR>
+
+<BR>
+Okay, so like I updated the Edit Options to include the `no parens' option.
+<BR>
+
+<BR>
+So when you have it off, when you enter the verb editor, you'll see every parentheses that is in the verb code. When you have the option on, you'll see only those parentheses which are actually necessary to the running of the verb.
+<BR>
+
+<BR>
+Type: `@edit-options' to see what you have set.
+<BR>
+
+<BR>
+Dredful
+<BR>
+<BR>
+Date: 1994 Mar  9, 06:32:53 p.m. PST
+<BR>
+From: Spatula (#299)
+<BR>
+To:&nbsp&nbsp *Core-Updates (#108)
+<BR>
+Subj: $gopher_utils (?)
+<BR>
+
+<BR>
+Are there, currently, any sort of utilities which could connect to gopher sites, etc?  Just curious.
+<BR>
+
+<BR>
+--
+<BR>
+Spat
+<BR>
+<BR>
+Date: 1994 Mar  9, 08:15:02 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp Spatula (#299) and *Core-Updates (#108)
+<BR>
+Subj: Re: $gopher_utils (?)
+<BR>
+
+<BR>
+Well, we do have $gopher, but I haven't touched it since we started up the core. It will probably need to get updated and set up for our site.
+<BR>
+
+<BR>
+But we don't have any slates or anything like Gru's on Lambda. We could port them (After asking him of course).
+<BR>
+
+<BR>
+So we have the capability, but it hasn't been installed yet.
+<BR>
+
+<BR>
+Dredful
+<BR>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

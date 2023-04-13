@@ -1,0 +1,87 @@
+<HTML>
+<HEAD>
+<TITLE>Flower</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Flower (#2254)</H3>
+(an instance of <A HREF="HTM_001044.htm">Generic Speaking Wandering Automaton</A> made by <A HREF="HTM_000538.htm">Eclipse</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspEverything about this 20-something chick says "60's", from the marijuana-patchouli-incense smell she emits to the button on her rainbow patchwork cardigan that reads, "War is not healthy for children and other living things".
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspFlower wears little jewelry other than a nose ring, daisy-blossom earrings, and a silver toe-ring, and never wears makeup.  Her mostly shaven head is tattooed with an ivy and rose motif, and she is constantly blowing her long blond bangs out of her eyes.  Green eyes sparkle above a freckle-spattered nose and small, pink lips.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspShe is comfortably dressed in oversized, ratty overalls, a moth-eaten, faded cardigan, and well-worn birkenstocks which usually lie empty on the floor while her bare feet rest on the desk.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspFlower always looks happy, if somewhat spacey, and tends to leave the mouthpiece of her sneak-a-toke peeking out of the front chest pocket of her overalls.  An eye-catching mushroom is embroidered on the knee of her overalls in bright oranges, pinks, blues and purples. 
+<BR>
+<BR>
+Flower has some things to say:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Hey dude, if you gotta question, ask it. Don't just stand there and gibber, man.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_002130.htm">Tattoo Den (waiting room)</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+return_msg tattoo_msg removal_msg:
+<pre>
+msg = this.(verb);
+return msg;
+.
+
+</pre>
+<BR>
+ask:
+<pre>
+(player.location != this.location) ? player:tell("You can't ask ", this.name, " anything 
+from here.") | ((!this.talkative) ? $you:say_action("%N %<tries> to talk to %t, but 
+%t %<t:shakes> her head, %<t:sighs>, and %<t:waves> %n away.") | ((iobjstr == "tattoo") 
+? {$you:say_action("%N %<asks> %t about getting a tattoo."), this.location:announce_all(this.name, 
+" ", this:return_msg(), ". \"", this:tattoo_msg(), "\""), $you:say_action("%T %<t:points> 
+%n to the northern door, without looking up from her magazine.")} | ((iobjstr == 
+"removal") ? {$you:say_action("%N %<asks> %t about getting a tattoo removed."), this.location:announce_all(this.name, 
+" ", this:return_msg(), ". \"", this:removal_msg(), "\""), $you:say_action("%T %<t:points> 
+%n to the southern door, without looking up from her magazine."), this.location:announce(this.name, 
+" snickers, and mutters, \"Sucker.\"")} | {player:tell(this.name, " looks at you 
+blankly.  Perhaps you should ask her about something, like a tattoo, or a removal."), 
+this.location:announce(player.name, " asks ", this.name, " for something, but ", 
+this.name, " just looks at ", player.name, " blankly.")})));
+.
+
+</pre>
+<BR>
+examine_verbs:
+<pre>
+if (caller == this)
+    ((verbs = pass(@args)) && (i = $string_utils:find_prefix("  ask", verbs))) && 
+(verbs[i] = strsub(verbs[i], " for ", " about "));
+    return verbs;
+endif
+return E_PERM;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp tattoo_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp removal_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp return_msg
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

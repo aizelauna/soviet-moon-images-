@@ -1,0 +1,255 @@
+<HTML>
+<HEAD>
+<TITLE>generic exit</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> generic exit (#7)</H3>
+(an instance of <A HREF="HTM_000001.htm">Root Class</A> made by <A HREF="HTM_000002.htm">The_Mayor</A>)
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+invoke:
+<pre>
+this:move(player);
+.
+
+</pre>
+<BR>
+move:
+<pre>
+"Copied from generic exit (#7):move(new) by Haakon (#2) Sat Aug 14 12:54:22 1993 
+PDT";
+"Copied from generic exit (#7):move by Haakon (#2) Sat Aug 14 12:43:38 1993 PDT";
+what = args[1];
+"if (what.location != this.source)";
+"  player:tell(\"You can't go that way.\")";
+"  return";
+"endif";
+unlocked = this:is_unlocked_for(what);
+if (unlocked)
+    this.dest:bless_for_entry(what);
+endif
+if (unlocked && this.dest:acceptable(what))
+    start = what.location;
+    if (msg = this:leave_msg(what))
+        what:tell_lines(msg);
+    endif
+    what:moveto(this.dest);
+    if (what.location != start)
+        "Don't print oleave messages if WHAT didn't actually go anywhere...";
+        this:announce_msg(start, what, (this:oleave_msg(what) || this:defaulting_oleave_msg(what)) 
+|| "has left.");
+    endif
+    if (what.location == this.dest)
+        "Don't print arrive messages if WHAT didn't really end up there...";
+        if (msg = this:arrive_msg(what))
+            what:tell_lines(msg);
+        endif
+        this:announce_msg(what.location, what, this:oarrive_msg(what) || "has arrived.");
+    endif
+else
+    if (msg = this:nogo_msg(what))
+        what:tell_lines(msg);
+    else
+        what:tell("You can't go that way.");
+    endif
+    if (msg = this:onogo_msg(what))
+        this:announce_msg(what.location, what, msg);
+    endif
+endif
+.
+
+</pre>
+<BR>
+recycle:
+<pre>
+if ((caller == this) || $perm_utils:controls(caller_perms(), this))
+    "... relies on -d...";
+    this.source:remove_exit(this);
+    this.dest:remove_entrance(this);
+    return pass(@args);
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+leave_msg oleave_msg arrive_msg oarrive_msg nogo_msg onogo_msg:
+<pre>
+msg = this.(verb);
+return msg ? $string_utils:pronoun_sub(msg, @args) | "";
+.
+
+</pre>
+<BR>
+set_name:
+<pre>
+if ($perm_utils:controls(cp = caller_perms(), this) || (valid(this.source) && (this.source.owner 
+== cp)))
+    return (typeof(e = this.name = args[1]) != ERR) || e;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+set_aliases:
+<pre>
+if ($perm_utils:controls(cp = caller_perms(), this) || (valid(this.source) && (this.source.owner 
+== cp)))
+    if (typeof(e = this.aliases = args[1]) == ERR)
+        return e;
+    else
+        return 1;
+    endif
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+announce_all_but:
+<pre>
+"This is intended to be called only by exits, for announcing various oxxx messages. 
+ First argument is room to announce in.  Second argument is as in $room:announce_all_but's 
+first arg, who not to announce to.  Rest args are what to say.  If the final arg 
+is a list, prepends all the other rest args to the first line and emits the lines 
+separately.";
+where = args[1];
+whobut = args[2];
+nargs = length(args);
+last = args[nargs];
+if (typeof(last) == LIST)
+    where:announce_all_but(whobut, @args[3..nargs - 1], last[1]);
+    for line in (last[2..length(last)])
+        where:announce_all_but(whobut, line);
+    endfor
+else
+    where:announce_all_but(@args[3..nargs]);
+endif
+.
+
+</pre>
+<BR>
+defaulting_oleave_msg:
+<pre>
+for k in ({this.name, @this.aliases})
+    if (k in {"east", "west", "south", "north", "northeast", "southeast", "southwest", 
+"northwest", "out", "up", "down", "nw", "sw", "ne", "se", "in"})
+        return ("goes " + k) + ".";
+    elseif (k in {"leave", "out", "exit"})
+        return "leaves";
+    endif
+endfor
+if ((index(this.name, "an ") == 1) || (index(this.name, "a ") == 1))
+    return ("leaves for " + this.name) + ".";
+else
+    return ("leaves for the " + this.name) + ".";
+endif
+.
+
+</pre>
+<BR>
+moveto:
+<pre>
+if ((caller in {this, this.owner}) || $perm_utils:controls(caller_perms(), this))
+    return pass(@args);
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+examine_key:
+<pre>
+"examine_key(examiner)";
+"return a list of strings to be told to the player, indicating what the key on this 
+type of object means, and what this object's key is set to.";
+"the default will only tell the key to a wizard or this object's owner.";
+who = args[1];
+if (((caller == this) && $perm_utils:controls(who, this)) && (this.key != 0))
+    return {tostr(this:title(), " will only transport objects matching this key:"), 
+tostr("  ", $lock_utils:unparse_key(this.key))};
+endif
+.
+
+</pre>
+<BR>
+announce_msg:
+<pre>
+":announce_msg(place, what, msg)";
+"  announce msg in place (except to what). Prepend with what:title if it isn't part 
+of the string";
+msg = args[3];
+what = args[2];
+title = what:titlec();
+if (!$string_utils:index_delimited(msg, title))
+    msg = tostr(title, " ", msg);
+endif
+args[1]:announce_all_but({what}, msg);
+.
+
+</pre>
+<BR>
+look_msg:
+<pre>
+"returns .look_msg with this additional substitutions besides regular pronouns:";
+"  %dest - substituted for the exit's destination name";
+"  %source - substituted for the exit's source name";
+return $string_utils:pronoun_sub($string_utils:substitute(this.(verb), {{"%source", 
+this.source:title()}, {"%dest", this.dest:title()}}));
+.
+
+</pre>
+<BR>
+obvious:
+<pre>
+return this.obvious;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp obvious
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp source
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dest
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp nogo_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp onogo_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp arrive_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oarrive_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oleave_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp leave_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp look_msg
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000081.htm">bridge</A> <A HREF="HTM_000082.htm">west</A> <A HREF="HTM_000084.htm">east</A> <A HREF="HTM_000085.htm">west</A> <A HREF="HTM_000091.htm">east</A> <A HREF="HTM_000114.htm">north</A> <A HREF="HTM_000115.htm">south</A> <A HREF="HTM_000092.htm">west</A> <A HREF="HTM_000129.htm">northwest</A> <A HREF="HTM_000130.htm">southeast</A> <A HREF="HTM_000133.htm">jump</A> <A HREF="HTM_000135.htm">north</A> <A HREF="HTM_000136.htm">jump</A> <A HREF="HTM_000140.htm">open</A> <A HREF="HTM_000137.htm">up</A> <A HREF="HTM_000138.htm">down</A> <A HREF="HTM_000141.htm">east</A> <A HREF="HTM_000142.htm">west</A> <A HREF="HTM_000143.htm">stairs</A> <A HREF="HTM_000144.htm">stairs</A> <A HREF="HTM_000149.htm">out</A> <A HREF="HTM_000151.htm">southeast</A> <A HREF="HTM_000152.htm">nw</A> <A HREF="HTM_000162.htm">north</A> <A HREF="HTM_000163.htm">south</A> <A HREF="HTM_000165.htm">north</A> <A HREF="HTM_000166.htm">south</A> <A HREF="HTM_000168.htm">north</A> <A HREF="HTM_000169.htm">south</A> <A HREF="HTM_000171.htm">northwest</A> <A HREF="HTM_000172.htm">southeast</A> <A HREF="HTM_000174.htm">north</A> <A HREF="HTM_000175.htm">south</A> <A HREF="HTM_000181.htm">east</A> <A HREF="HTM_000182.htm">west</A> <A HREF="HTM_000184.htm">west</A> <A HREF="HTM_000185.htm">east</A> <A HREF="HTM_000187.htm">up</A> <A HREF="HTM_000188.htm">elevator</A> <A HREF="HTM_000190.htm">east</A> <A HREF="HTM_000191.htm">west</A> <A HREF="HTM_000200.htm">northeast</A> <A HREF="HTM_000201.htm">southwest</A> <A HREF="HTM_000194.htm">nw</A> <A HREF="HTM_000202.htm">se</A> <A HREF="HTM_000087.htm">north</A> <A HREF="HTM_000216.htm">south</A> <A HREF="HTM_000088.htm">south</A> <A HREF="HTM_000217.htm">north</A> <A HREF="HTM_000145.htm">down</A> <A HREF="HTM_000146.htm">up</A> <A HREF="HTM_000220.htm">up</A> <A HREF="HTM_000221.htm">down</A> <A HREF="HTM_000224.htm">west</A> <A HREF="HTM_000225.htm">east</A> <A HREF="HTM_000227.htm">north</A> <A HREF="HTM_000228.htm">south</A> <A HREF="HTM_000230.htm">east</A> <A HREF="HTM_000231.htm">west</A> <A HREF="HTM_000233.htm">north</A> <A HREF="HTM_000234.htm">south</A> <A HREF="HTM_000236.htm">east</A> <A HREF="HTM_000237.htm">west</A> <A HREF="HTM_000238.htm">west</A> <A HREF="HTM_000239.htm">east</A> <A HREF="HTM_000244.htm">south</A> <A HREF="HTM_000245.htm">north</A> <A HREF="HTM_000256.htm">up</A> <A HREF="HTM_000257.htm">down</A> <A HREF="HTM_000266.htm">down</A> <A HREF="HTM_000267.htm">up</A> <A HREF="HTM_000269.htm">s</A> <A HREF="HTM_000270.htm">n</A> <A HREF="HTM_000273.htm">west</A> <A HREF="HTM_000306.htm">south</A> <A HREF="HTM_000307.htm">north</A> <A HREF="HTM_000316.htm">east</A> <A HREF="HTM_000317.htm">west</A> <A HREF="HTM_000318.htm">north</A> <A HREF="HTM_000324.htm">south</A> <A HREF="HTM_000336.htm">south</A> <A HREF="HTM_000337.htm">north</A> <A HREF="HTM_000339.htm">down</A> <A HREF="HTM_000340.htm">up</A> <A HREF="HTM_000342.htm">e</A> <A HREF="HTM_000345.htm">w</A> <A HREF="HTM_000346.htm">s</A> <A HREF="HTM_000347.htm">n</A> <A HREF="HTM_000350.htm">west</A> <A HREF="HTM_000351.htm">east</A> <A HREF="HTM_000353.htm">west</A> <A HREF="HTM_000354.htm">east</A> <A HREF="HTM_000359.htm">up</A> <A HREF="HTM_000360.htm">down</A> <A HREF="HTM_000363.htm">north</A> <A HREF="HTM_000364.htm">south</A> <A HREF="HTM_000367.htm">north</A> <A HREF="HTM_000368.htm">back</A> <A HREF="HTM_000376.htm">east</A> <A HREF="HTM_000377.htm">west</A> <A HREF="HTM_000379.htm">west</A> <A HREF="HTM_000380.htm">east</A> <A HREF="HTM_000383.htm">east</A> <A HREF="HTM_000384.htm">west</A> <A HREF="HTM_000391.htm">chant</A> <A HREF="HTM_000392.htm">back</A> <A HREF="HTM_000393.htm">east</A> <A HREF="HTM_000329.htm">southeast</A> <A HREF="HTM_000331.htm">north</A> <A HREF="HTM_000332.htm">up</A> <A HREF="HTM_000334.htm">down</A> <A HREF="HTM_000322.htm">Generic Breakable Exit</A> <A HREF="HTM_000400.htm">north</A> <A HREF="HTM_000401.htm">south</A> <A HREF="HTM_000413.htm">north</A> <A HREF="HTM_000412.htm">south</A> <A HREF="HTM_000424.htm">south</A> <A HREF="HTM_000425.htm">north</A> <A HREF="HTM_000428.htm">south</A> <A HREF="HTM_000442.htm">east</A> <A HREF="HTM_000440.htm">west</A> <A HREF="HTM_000438.htm">nw</A> <A HREF="HTM_000437.htm">se</A> <A HREF="HTM_000460.htm">out</A> <A HREF="HTM_000461.htm">truck</A> <A HREF="HTM_000467.htm">north</A> <A HREF="HTM_000403.htm">east</A> <A HREF="HTM_000454.htm">west</A> <A HREF="HTM_000490.htm">west</A> <A HREF="HTM_000491.htm">east</A> <A HREF="HTM_000496.htm">east</A> <A HREF="HTM_000497.htm">west</A> <A HREF="HTM_000505.htm">up</A> <A HREF="HTM_000506.htm">down</A> <A HREF="HTM_000518.htm">east</A> <A HREF="HTM_000519.htm">west</A> <A HREF="HTM_000528.htm">north</A> <A HREF="HTM_000529.htm">south</A> <A HREF="HTM_000540.htm">up</A> <A HREF="HTM_000541.htm">down</A> <A HREF="HTM_000545.htm">north</A> <A HREF="HTM_000546.htm">south</A> <A HREF="HTM_000560.htm">northeast</A> <A HREF="HTM_000561.htm">southwest</A> <A HREF="HTM_000581.htm">north</A> <A HREF="HTM_000582.htm">south</A> <A HREF="HTM_000595.htm">east</A> <A HREF="HTM_000596.htm">west</A> <A HREF="HTM_000598.htm">north</A> <A HREF="HTM_000599.htm">south</A> <A HREF="HTM_000601.htm">southeast</A> <A HREF="HTM_000602.htm">northwest</A> <A HREF="HTM_000604.htm">north</A> <A HREF="HTM_000605.htm">south</A> <A HREF="HTM_000607.htm">south</A> <A HREF="HTM_000608.htm">north</A> <A HREF="HTM_000610.htm">east</A> <A HREF="HTM_000611.htm">west</A> <A HREF="HTM_000612.htm">east</A> <A HREF="HTM_000613.htm">west</A> <A HREF="HTM_000618.htm">north</A> <A HREF="HTM_000620.htm">east</A> <A HREF="HTM_000622.htm">south</A> <A HREF="HTM_000623.htm">west</A> <A HREF="HTM_000631.htm">northwest</A> <A HREF="HTM_000633.htm">north</A> <A HREF="HTM_000635.htm">north</A> <A HREF="HTM_000637.htm">north</A> <A HREF="HTM_000639.htm">north</A> <A HREF="HTM_000641.htm">north</A> <A HREF="HTM_000643.htm">north</A> <A HREF="HTM_000645.htm">north</A> <A HREF="HTM_000647.htm">north</A> <A HREF="HTM_000649.htm">north</A> <A HREF="HTM_000651.htm">north</A> <A HREF="HTM_000653.htm">north</A> <A HREF="HTM_000655.htm">north</A> <A HREF="HTM_000657.htm">north</A> <A HREF="HTM_000659.htm">north</A> <A HREF="HTM_000661.htm">north</A> <A HREF="HTM_000663.htm">north</A> <A HREF="HTM_000664.htm">north</A> <A HREF="HTM_000668.htm">north</A> <A HREF="HTM_000670.htm">north</A> <A HREF="HTM_000672.htm">north</A> <A HREF="HTM_000674.htm">north</A> <A HREF="HTM_000675.htm">north</A> <A HREF="HTM_000677.htm">up</A> <A HREF="HTM_000678.htm">down</A> <A HREF="HTM_000439.htm">southwest</A> <A HREF="HTM_000462.htm">northeast</A> <A HREF="HTM_000679.htm">south</A> <A HREF="HTM_000680.htm">north</A> <A HREF="HTM_000683.htm">east</A> <A HREF="HTM_000684.htm">west</A> <A HREF="HTM_000685.htm">north</A> <A HREF="HTM_000686.htm">south</A> <A HREF="HTM_000694.htm">Taxi Exit</A> <A HREF="HTM_000695.htm">Taxi Entrance</A> <A HREF="HTM_000708.htm">west</A> <A HREF="HTM_000709.htm">east</A> <A HREF="HTM_000721.htm">east</A> <A HREF="HTM_000722.htm">west</A> <A HREF="HTM_000723.htm">east</A> <A HREF="HTM_000724.htm">west</A> <A HREF="HTM_000248.htm">east</A> <A HREF="HTM_000250.htm">west</A> <A HREF="HTM_000251.htm">north</A> <A HREF="HTM_000253.htm">south</A> <A HREF="HTM_000254.htm">south</A> <A HREF="HTM_000405.htm">north</A> <A HREF="HTM_000725.htm">east</A> <A HREF="HTM_000726.htm">west</A> <A HREF="HTM_000728.htm">north</A> <A HREF="HTM_000729.htm">south</A> <A HREF="HTM_000731.htm">south</A> <A HREF="HTM_000732.htm">north</A> <A HREF="HTM_000733.htm">west</A> <A HREF="HTM_000734.htm">east</A> <A HREF="HTM_000735.htm">west</A> <A HREF="HTM_000736.htm">east</A> <A HREF="HTM_000737.htm">east</A> <A HREF="HTM_000738.htm">west</A> <A HREF="HTM_000740.htm">east</A> <A HREF="HTM_000741.htm">west</A> <A HREF="HTM_000743.htm">east</A> <A HREF="HTM_000744.htm">west</A> <A HREF="HTM_000745.htm">north</A> <A HREF="HTM_000746.htm">south</A> <A HREF="HTM_000747.htm">Library</A> <A HREF="HTM_000748.htm">Parlour</A> <A HREF="HTM_000749.htm">Disciple's</A> <A HREF="HTM_000750.htm">Kitchen</A> <A HREF="HTM_000751.htm">Dining</A> <A HREF="HTM_000752.htm">Ave</A> <A HREF="HTM_000754.htm">east</A> <A HREF="HTM_000755.htm">west</A> <A HREF="HTM_000756.htm">northwest</A> <A HREF="HTM_000757.htm">east</A> <A HREF="HTM_000758.htm">southwest</A> <A HREF="HTM_000759.htm">east</A> <A HREF="HTM_000760.htm">veranda</A> <A HREF="HTM_000762.htm">east</A> <A HREF="HTM_000764.htm">east</A> <A HREF="HTM_000766.htm">north</A> <A HREF="HTM_000768.htm">south</A> <A HREF="HTM_000770.htm">north</A> <A HREF="HTM_000771.htm">south</A> <A HREF="HTM_000773.htm">south</A> <A HREF="HTM_000774.htm">north</A> <A HREF="HTM_000776.htm">east</A> <A HREF="HTM_000780.htm">east</A> <A HREF="HTM_000781.htm">east</A> <A HREF="HTM_000782.htm">east</A> <A HREF="HTM_000783.htm">east</A> <A HREF="HTM_000784.htm">east</A> <A HREF="HTM_000785.htm">north</A> <A HREF="HTM_000786.htm">south</A> <A HREF="HTM_000787.htm">north</A> <A HREF="HTM_000788.htm">south</A> <A HREF="HTM_000789.htm">west</A> <A HREF="HTM_000809.htm">northwest</A> <A HREF="HTM_000810.htm">southeast</A> <A HREF="HTM_000821.htm">stage</A> <A HREF="HTM_000822.htm">theater</A> <A HREF="HTM_000824.htm">backstage</A> <A HREF="HTM_000825.htm">stage</A> <A HREF="HTM_000832.htm">Enter</A> <A HREF="HTM_000833.htm">Exit</A> <A HREF="HTM_000837.htm">northeast</A> <A HREF="HTM_000838.htm">southwest</A> <A HREF="HTM_000866.htm">w</A> <A HREF="HTM_000868.htm">e</A> <A HREF="HTM_000880.htm">theater</A> <A HREF="HTM_000890.htm">w</A> <A HREF="HTM_000892.htm">e</A> <A HREF="HTM_000891.htm">e</A> <A HREF="HTM_000894.htm">nw</A> <A HREF="HTM_000895.htm">se</A> <A HREF="HTM_000899.htm">office</A> <A HREF="HTM_000900.htm">out</A> <A HREF="HTM_000914.htm">north</A> <A HREF="HTM_000915.htm">south</A> <A HREF="HTM_000921.htm">east</A> <A HREF="HTM_000922.htm">west</A> <A HREF="HTM_000924.htm">northwest</A> <A HREF="HTM_000925.htm">southeast</A> <A HREF="HTM_000927.htm">outside</A> <A HREF="HTM_000928.htm">theater</A> <A HREF="HTM_000948.htm">northeast</A> <A HREF="HTM_000949.htm">Screen Door</A> <A HREF="HTM_000952.htm">southeast</A> <A HREF="HTM_000957.htm">street</A> <A HREF="HTM_000958.htm">lot</A> <A HREF="HTM_000959.htm">Generic Post-Apocalypse Exit</A> <A HREF="HTM_000951.htm">northwest</A> <A HREF="HTM_000970.htm">south</A> <A HREF="HTM_000971.htm">northwest</A> <A HREF="HTM_000972.htm">gate</A> <A HREF="HTM_000973.htm">east</A> <A HREF="HTM_000974.htm">south</A> <A HREF="HTM_000975.htm">north</A> <A HREF="HTM_000980.htm">north</A> <A HREF="HTM_000981.htm">south</A> <A HREF="HTM_000990.htm">up</A> <A HREF="HTM_000994.htm">down</A> <A HREF="HTM_000897.htm">down</A> <A HREF="HTM_000976.htm">up</A> <A HREF="HTM_000978.htm">east</A> <A HREF="HTM_000814.htm">west</A> <A HREF="HTM_000465.htm">down</A> <A HREF="HTM_000532.htm">up</A> <A HREF="HTM_000488.htm">west</A> <A HREF="HTM_001001.htm">east</A> <A HREF="HTM_001003.htm">north</A> <A HREF="HTM_001004.htm">south</A> <A HREF="HTM_001012.htm">west</A> <A HREF="HTM_001013.htm">gate</A> <A HREF="HTM_001019.htm">east</A> <A HREF="HTM_001020.htm">west</A> <A HREF="HTM_001051.htm">step</A> <A HREF="HTM_001038.htm">hut</A> <A HREF="HTM_001052.htm">out</A> <A HREF="HTM_001071.htm">northeast</A> <A HREF="HTM_001073.htm">next</A> <A HREF="HTM_001075.htm">next</A> <A HREF="HTM_001077.htm">next</A> <A HREF="HTM_001078.htm">next</A> <A HREF="HTM_001083.htm">north</A> <A HREF="HTM_001084.htm">south</A> <A HREF="HTM_001086.htm">north</A> <A HREF="HTM_001087.htm">south</A> <A HREF="HTM_001088.htm">east</A> <A HREF="HTM_001089.htm">west</A> <A HREF="HTM_001091.htm">up</A> <A HREF="HTM_001092.htm">down</A> <A HREF="HTM_001093.htm">east</A> <A HREF="HTM_001095.htm">south</A> <A HREF="HTM_001096.htm">north</A> <A HREF="HTM_001099.htm">west</A> <A HREF="HTM_001100.htm">east</A> <A HREF="HTM_001102.htm">south</A> <A HREF="HTM_001103.htm">north</A> <A HREF="HTM_001105.htm">south</A> <A HREF="HTM_001106.htm">north</A> <A HREF="HTM_001108.htm">west</A> <A HREF="HTM_001107.htm">east</A> <A HREF="HTM_001112.htm">west</A> <A HREF="HTM_001114.htm">east</A> <A HREF="HTM_001115.htm">west</A> <A HREF="HTM_001117.htm">east</A> <A HREF="HTM_001118.htm">west</A> <A HREF="HTM_001120.htm">east</A> <A HREF="HTM_001121.htm">west</A> <A HREF="HTM_001124.htm">sw</A> <A HREF="HTM_001128.htm">w</A> <A HREF="HTM_001129.htm">e</A> <A HREF="HTM_001135.htm">ne</A> <A HREF="HTM_001136.htm">sw</A> <A HREF="HTM_001137.htm">ne</A> <A HREF="HTM_001126.htm">sw</A> <A HREF="HTM_001163.htm">o</A> <A HREF="HTM_001164.htm">enter</A> <A HREF="HTM_001165.htm">w</A> <A HREF="HTM_001166.htm">e</A> <A HREF="HTM_000524.htm">north</A> <A HREF="HTM_000855.htm">south</A> <A HREF="HTM_001158.htm">north</A> <A HREF="HTM_001167.htm">south</A> <A HREF="HTM_001068.htm">east</A> <A HREF="HTM_001175.htm">north</A> <A HREF="HTM_001176.htm">south</A> <A HREF="HTM_001177.htm">east</A> <A HREF="HTM_001179.htm">up</A> <A HREF="HTM_001180.htm">down</A> <A HREF="HTM_001181.htm">separation</A> <A HREF="HTM_001182.htm">combination</A> <A HREF="HTM_001191.htm">ne</A> <A HREF="HTM_001193.htm">w</A> <A HREF="HTM_000481.htm">n</A> <A HREF="HTM_001198.htm">s</A> <A HREF="HTM_001217.htm">carnival</A> <A HREF="HTM_001219.htm">an ancient statue of Icarus</A> <A HREF="HTM_001220.htm">up</A> <A HREF="HTM_000936.htm">sw</A> <A HREF="HTM_000939.htm">eye</A> <A HREF="HTM_000935.htm">mouth</A> <A HREF="HTM_001227.htm">up</A> <A HREF="HTM_001224.htm">northeast</A> <A HREF="HTM_001229.htm">southwest</A> <A HREF="HTM_001254.htm">east</A> <A HREF="HTM_001255.htm">west</A> <A HREF="HTM_001263.htm">enter</A> <A HREF="HTM_001264.htm">back</A> <A HREF="HTM_001283.htm">up</A> <A HREF="HTM_001284.htm">down</A> <A HREF="HTM_001293.htm">grey door</A> <A HREF="HTM_001294.htm">grey door</A> <A HREF="HTM_001296.htm">trash</A> <A HREF="HTM_001291.htm">brown door</A> <A HREF="HTM_001285.htm">brown door</A> <A HREF="HTM_001236.htm">Falltuer</A> <A HREF="HTM_001307.htm">south</A> <A HREF="HTM_001308.htm">north</A> <A HREF="HTM_001314.htm">out</A> <A HREF="HTM_001315.htm">southeast</A> <A HREF="HTM_001317.htm">down</A> <A HREF="HTM_001318.htm">Woody</A> <A HREF="HTM_001305.htm">south</A> <A HREF="HTM_001320.htm">north</A> <A HREF="HTM_001322.htm">south</A> <A HREF="HTM_001323.htm">north</A> <A HREF="HTM_001325.htm">west</A> <A HREF="HTM_001326.htm">east</A> <A HREF="HTM_001328.htm">ww</A> <A HREF="HTM_001330.htm">west</A> <A HREF="HTM_001332.htm">north</A> <A HREF="HTM_001333.htm">east</A> <A HREF="HTM_001335.htm">west</A> <A HREF="HTM_001336.htm">north</A> <A HREF="HTM_001338.htm">south</A> <A HREF="HTM_001339.htm">west</A> <A HREF="HTM_001340.htm">east</A> <A HREF="HTM_001342.htm">north</A> <A HREF="HTM_001343.htm">south</A> <A HREF="HTM_001346.htm">south</A> <A HREF="HTM_001347.htm">north</A> <A HREF="HTM_001348.htm">east</A> <A HREF="HTM_001349.htm">west</A> <A HREF="HTM_001344.htm">south</A> <A HREF="HTM_001345.htm">east</A> <A HREF="HTM_001350.htm">west</A> <A HREF="HTM_001351.htm">east</A> <A HREF="HTM_001355.htm">street</A> <A HREF="HTM_001356.htm">Unmarked</A> <A HREF="HTM_001357.htm">taxi</A> <A HREF="HTM_001366.htm">stairs</A> <A HREF="HTM_001367.htm">down</A> <A HREF="HTM_001368.htm">grate</A> <A HREF="HTM_001374.htm">curtain</A> <A HREF="HTM_001199.htm">out</A> <A HREF="HTM_001062.htm">west</A> <A HREF="HTM_001382.htm">east</A> <A HREF="HTM_001383.htm">south</A> <A HREF="HTM_001384.htm">north</A> <A HREF="HTM_001388.htm">cage</A> <A HREF="HTM_001389.htm">up</A> <A HREF="HTM_001393.htm">southwest</A> <A HREF="HTM_001394.htm">northeast</A> <A HREF="HTM_001395.htm">west</A> <A HREF="HTM_001396.htm">east</A> <A HREF="HTM_001032.htm">dream</A> <A HREF="HTM_001405.htm">use</A> <A HREF="HTM_001409.htm">topoi</A> <A HREF="HTM_001417.htm">next</A> <A HREF="HTM_001418.htm">back</A> <A HREF="HTM_001423.htm">up</A> <A HREF="HTM_001424.htm">back</A> <A HREF="HTM_001311.htm">red door</A> <A HREF="HTM_001467.htm">black</A> <A HREF="HTM_001468.htm">black door</A> <A HREF="HTM_001469.htm">curtained archway</A> <A HREF="HTM_001470.htm">archway</A> <A HREF="HTM_001492.htm">east</A> <A HREF="HTM_001494.htm">enter</A> <A HREF="HTM_001495.htm">leave</A> <A HREF="HTM_001535.htm">Stairs</A> <A HREF="HTM_001536.htm">Stairs</A> <A HREF="HTM_001538.htm">Door</A> <A HREF="HTM_001534.htm">Door</A> <A HREF="HTM_001532.htm">elevator</A> <A HREF="HTM_001527.htm">elevator</A> <A HREF="HTM_001542.htm">elevator</A> <A HREF="HTM_001545.htm">white door</A> <A HREF="HTM_001546.htm">white door</A> <A HREF="HTM_001401.htm">southwest</A> <A HREF="HTM_001400.htm">northeast</A> <A HREF="HTM_000710.htm">red door</A> <A HREF="HTM_001007.htm">down</A> <A HREF="HTM_000906.htm">up</A> <A HREF="HTM_001487.htm">up</A> <A HREF="HTM_001537.htm">down</A> <A HREF="HTM_001514.htm">up</A> <A HREF="HTM_001521.htm">down</A> <A HREF="HTM_001516.htm">west</A> <A HREF="HTM_001518.htm">east</A> <A HREF="HTM_001522.htm">north</A> <A HREF="HTM_001523.htm">south</A> <A HREF="HTM_001554.htm">south</A> <A HREF="HTM_001555.htm">north</A> <A HREF="HTM_001564.htm">south</A> <A HREF="HTM_001565.htm">north</A> <A HREF="HTM_001572.htm">north</A> <A HREF="HTM_001590.htm">north</A> <A HREF="HTM_001600.htm">south</A> <A HREF="HTM_001602.htm">river</A> <A HREF="HTM_001604.htm">south</A> <A HREF="HTM_001605.htm">north</A> <A HREF="HTM_001606.htm">north</A> <A HREF="HTM_001609.htm">BambooCurtain</A> <A HREF="HTM_001610.htm">BambooCurtain</A> <A HREF="HTM_001614.htm">Hatch</A> <A HREF="HTM_001615.htm">Hatch</A> <A HREF="HTM_001624.htm">south</A> <A HREF="HTM_001625.htm">north</A> <A HREF="HTM_001627.htm">down</A> <A HREF="HTM_001628.htm">up</A> <A HREF="HTM_001630.htm">up</A> <A HREF="HTM_001631.htm">down</A> <A HREF="HTM_001632.htm">west</A> <A HREF="HTM_001633.htm">east</A> <A HREF="HTM_001636.htm">east</A> <A HREF="HTM_001637.htm">west</A> <A HREF="HTM_001639.htm">south</A> <A HREF="HTM_001640.htm">north</A> <A HREF="HTM_001642.htm">ss</A> <A HREF="HTM_001643.htm">nn</A> <A HREF="HTM_001645.htm">ss</A> <A HREF="HTM_001646.htm">nn</A> <A HREF="HTM_001648.htm">west</A> <A HREF="HTM_001649.htm">east</A> <A HREF="HTM_001651.htm">northwest</A> <A HREF="HTM_001652.htm">southeast</A> <A HREF="HTM_001654.htm">north</A> <A HREF="HTM_001655.htm">south</A> <A HREF="HTM_001656.htm">south</A> <A HREF="HTM_001659.htm">east</A> <A HREF="HTM_001660.htm">west</A> <A HREF="HTM_001662.htm">west</A> <A HREF="HTM_001663.htm">east</A> <A HREF="HTM_001667.htm">north</A> <A HREF="HTM_001668.htm">south</A> <A HREF="HTM_001669.htm">shower</A> <A HREF="HTM_001671.htm">tub</A> <A HREF="HTM_001672.htm">out</A> <A HREF="HTM_001678.htm">up</A> <A HREF="HTM_001680.htm">splash</A> <A HREF="HTM_001682.htm">swim</A> <A HREF="HTM_001684.htm">pool</A> <A HREF="HTM_001685.htm">out</A> <A HREF="HTM_001687.htm">swim</A> <A HREF="HTM_001689.htm">north</A> <A HREF="HTM_001690.htm">south</A> <A HREF="HTM_001692.htm">southwest</A> <A HREF="HTM_001693.htm">northeast</A> <A HREF="HTM_001697.htm">southeast</A> <A HREF="HTM_001698.htm">northwest</A> <A HREF="HTM_001700.htm">northeast</A> <A HREF="HTM_001701.htm">southwest</A> <A HREF="HTM_001703.htm">east</A> <A HREF="HTM_001704.htm">west</A> <A HREF="HTM_001705.htm">north</A> <A HREF="HTM_001706.htm">south</A> <A HREF="HTM_001708.htm">east</A> <A HREF="HTM_001709.htm">west</A> <A HREF="HTM_001711.htm">north</A> <A HREF="HTM_001712.htm">south</A> <A HREF="HTM_001714.htm">south</A> <A HREF="HTM_001715.htm">north</A> <A HREF="HTM_001717.htm">south</A> <A HREF="HTM_001718.htm">north</A> <A HREF="HTM_001720.htm">escape</A> <A HREF="HTM_001722.htm">east</A> <A HREF="HTM_001723.htm">west</A> <A HREF="HTM_001724.htm">ww</A> <A HREF="HTM_001726.htm">east</A> <A HREF="HTM_001727.htm">west</A> <A HREF="HTM_001729.htm">coral</A> <A HREF="HTM_001731.htm">east</A> <A HREF="HTM_001732.htm">south</A> <A HREF="HTM_001733.htm">ee</A> <A HREF="HTM_001734.htm">south</A> <A HREF="HTM_001735.htm">north</A> <A HREF="HTM_001737.htm">east</A> <A HREF="HTM_001738.htm">north</A> <A HREF="HTM_001739.htm">south</A> <A HREF="HTM_001740.htm">west</A> <A HREF="HTM_001742.htm">north</A> <A HREF="HTM_001743.htm">south</A> <A HREF="HTM_001745.htm">south</A> <A HREF="HTM_001746.htm">north</A> <A HREF="HTM_001748.htm">east</A> <A HREF="HTM_001749.htm">west</A> <A HREF="HTM_001751.htm">south</A> <A HREF="HTM_001752.htm">north</A> <A HREF="HTM_001754.htm">south</A> <A HREF="HTM_001755.htm">north</A> <A HREF="HTM_001757.htm">southeast</A> <A HREF="HTM_001758.htm">northwest</A> <A HREF="HTM_001760.htm">east</A> <A HREF="HTM_001761.htm">west</A> <A HREF="HTM_001763.htm">east</A> <A HREF="HTM_001764.htm">west</A> <A HREF="HTM_001766.htm">north</A> <A HREF="HTM_001767.htm">south</A> <A HREF="HTM_001769.htm">west</A> <A HREF="HTM_001770.htm">shelf</A> <A HREF="HTM_001772.htm">out</A> <A HREF="HTM_001773.htm">south</A> <A HREF="HTM_001774.htm">east</A> <A HREF="HTM_001775.htm">west</A> <A HREF="HTM_001777.htm">down</A> <A HREF="HTM_001778.htm">up</A> <A HREF="HTM_001781.htm">north</A> <A HREF="HTM_001782.htm">south</A> <A HREF="HTM_001784.htm">scaffold</A> <A HREF="HTM_001785.htm">down</A> <A HREF="HTM_001788.htm">enter</A> <A HREF="HTM_001789.htm">southeast</A> <A HREF="HTM_001790.htm">west</A> <A HREF="HTM_001791.htm">east</A> <A HREF="HTM_001793.htm">east</A> <A HREF="HTM_001794.htm">west</A> <A HREF="HTM_001796.htm">north</A> <A HREF="HTM_001797.htm">south</A> <A HREF="HTM_001799.htm">nn</A> <A HREF="HTM_001800.htm">ss</A> <A HREF="HTM_001801.htm">ss</A> <A HREF="HTM_001802.htm">nn</A> <A HREF="HTM_001804.htm">west</A> <A HREF="HTM_001805.htm">east</A> <A HREF="HTM_001807.htm">gazebo</A> <A HREF="HTM_001808.htm">out</A> <A HREF="HTM_001815.htm">nn</A> <A HREF="HTM_001816.htm">ss</A> <A HREF="HTM_001818.htm">jump</A> <A HREF="HTM_001819.htm">down</A> <A HREF="HTM_001825.htm">enter</A> <A HREF="HTM_001826.htm">out</A> <A HREF="HTM_001834.htm">sit</A> <A HREF="HTM_001836.htm">north</A> <A HREF="HTM_001837.htm">south</A> <A HREF="HTM_001839.htm">north</A> <A HREF="HTM_001840.htm">south</A> <A HREF="HTM_001857.htm">west</A> <A HREF="HTM_001858.htm">east</A> <A HREF="HTM_001860.htm">begger</A> <A HREF="HTM_001862.htm">down</A> <A HREF="HTM_001863.htm">up</A> <A HREF="HTM_001865.htm">water</A> <A HREF="HTM_001867.htm">mermaid</A> <A HREF="HTM_001869.htm">west</A> <A HREF="HTM_001870.htm">east</A> <A HREF="HTM_001871.htm">pay</A> <A HREF="HTM_001873.htm">jester</A> <A HREF="HTM_001875.htm">south</A> <A HREF="HTM_001876.htm">north</A> <A HREF="HTM_001879.htm">south</A> <A HREF="HTM_001881.htm">gypsies</A> <A HREF="HTM_001674.htm">fortune</A> <A HREF="HTM_001882.htm">west</A> <A HREF="HTM_001883.htm">east</A> <A HREF="HTM_001885.htm">rob</A> <A HREF="HTM_001887.htm">kill</A> <A HREF="HTM_001889.htm">magician</A> <A HREF="HTM_001891.htm">mime</A> <A HREF="HTM_001893.htm">shop</A> <A HREF="HTM_001895.htm">north</A> <A HREF="HTM_001896.htm">south</A> <A HREF="HTM_001898.htm">sca</A> <A HREF="HTM_001900.htm">cars</A> <A HREF="HTM_001903.htm">down</A> <A HREF="HTM_001904.htm">up</A> <A HREF="HTM_001906.htm">sea</A> <A HREF="HTM_001915.htm">tubs</A> <A HREF="HTM_001917.htm">fount</A> <A HREF="HTM_001919.htm">jet</A> <A HREF="HTM_001921.htm">bub</A> <A HREF="HTM_001923.htm">control</A> <A HREF="HTM_001925.htm">down</A> <A HREF="HTM_001927.htm">splash</A> <A HREF="HTM_001929.htm">down</A> <A HREF="HTM_001931.htm">climb</A> <A HREF="HTM_001933.htm">faces</A> <A HREF="HTM_001935.htm">statue</A> <A HREF="HTM_001937.htm">ledge</A> <A HREF="HTM_001939.htm">path</A> <A HREF="HTM_001941.htm">north</A> <A HREF="HTM_001942.htm">south</A> <A HREF="HTM_001944.htm">pit</A> <A HREF="HTM_001946.htm">west</A> <A HREF="HTM_001947.htm">east</A> <A HREF="HTM_001949.htm">north</A> <A HREF="HTM_001950.htm">east</A> <A HREF="HTM_001952.htm">south</A> <A HREF="HTM_001953.htm">east</A> <A HREF="HTM_001954.htm">down</A> <A HREF="HTM_001955.htm">down</A> <A HREF="HTM_001957.htm">east</A> <A HREF="HTM_001958.htm">west</A> <A HREF="HTM_001960.htm">east</A> <A HREF="HTM_001962.htm">boat</A> <A HREF="HTM_001963.htm">west</A> <A HREF="HTM_001695.htm">down</A> <A HREF="HTM_001964.htm">climb</A> <A HREF="HTM_001967.htm">beach</A> <A HREF="HTM_001599.htm">down</A> <A HREF="HTM_001504.htm">down</A> <A HREF="HTM_001464.htm">signs</A> <A HREF="HTM_001465.htm">posters</A> <A HREF="HTM_001985.htm">west</A> <A HREF="HTM_002017.htm">west</A> <A HREF="HTM_002018.htm">east</A> <A HREF="HTM_002003.htm">east</A> <A HREF="HTM_002004.htm">northeast</A> <A HREF="HTM_002000.htm">southwest</A> <A HREF="HTM_001486.htm">west</A> <A HREF="HTM_002031.htm">L&R</A> <A HREF="HTM_002032.htm">Tank</A> <A HREF="HTM_002038.htm">east</A> <A HREF="HTM_002039.htm">west</A> <A HREF="HTM_002041.htm">dive</A> <A HREF="HTM_002042.htm">climb</A> <A HREF="HTM_002046.htm">north</A> <A HREF="HTM_002047.htm">south</A> <A HREF="HTM_002050.htm">down</A> <A HREF="HTM_002051.htm">up</A> <A HREF="HTM_002071.htm">north</A> <A HREF="HTM_002075.htm">bath</A> <A HREF="HTM_002076.htm">rec</A> <A HREF="HTM_002094.htm">play</A> <A HREF="HTM_002096.htm">down</A> <A HREF="HTM_002098.htm">swim</A> <A HREF="HTM_002100.htm">splash</A> <A HREF="HTM_002102.htm">relax</A> <A HREF="HTM_002105.htm">sing</A> <A HREF="HTM_002109.htm">backstage</A> <A HREF="HTM_002114.htm">east</A> <A HREF="HTM_002115.htm">west</A> <A HREF="HTM_002116.htm">east</A> <A HREF="HTM_002117.htm">west</A> <A HREF="HTM_002120.htm">east</A> <A HREF="HTM_002124.htm">east</A> <A HREF="HTM_002125.htm">west</A> <A HREF="HTM_002127.htm">up</A> <A HREF="HTM_002122.htm">up</A> <A HREF="HTM_002121.htm">west</A> <A HREF="HTM_002024.htm">stairs</A> <A HREF="HTM_002107.htm">backstage</A> <A HREF="HTM_002131.htm">west</A> <A HREF="HTM_002132.htm">east</A> <A HREF="HTM_002142.htm">pen</A> <A HREF="HTM_002144.htm">out</A> <A HREF="HTM_002166.htm">out</A> <A HREF="HTM_002167.htm">in</A> <A HREF="HTM_002168.htm">path</A> <A HREF="HTM_002169.htm">path</A> <A HREF="HTM_002211.htm">s</A> <A HREF="HTM_002209.htm">n</A> <A HREF="HTM_002172.htm">oak</A> <A HREF="HTM_002214.htm">oak</A> <A HREF="HTM_000979.htm">s</A> <A HREF="HTM_001666.htm">stare</A> <A HREF="HTM_001235.htm">through</A> <A HREF="HTM_001287.htm">continue</A> <A HREF="HTM_001480.htm">continue</A> <A HREF="HTM_001509.htm">in</A> <A HREF="HTM_001973.htm">out</A> <A HREF="HTM_001974.htm">return</A> <A HREF="HTM_001976.htm">return</A> <A HREF="HTM_001594.htm">n</A> <A HREF="HTM_001379.htm">s</A> <A HREF="HTM_000846.htm">east</A> <A HREF="HTM_000845.htm">west</A> <A HREF="HTM_002250.htm">north</A> <A HREF="HTM_002251.htm">south</A> <A HREF="HTM_002185.htm">u</A> <A HREF="HTM_002225.htm">d</A> <A HREF="HTM_001026.htm">d</A> <A HREF="HTM_002197.htm">north</A> <A HREF="HTM_002198.htm">south</A> <A HREF="HTM_002196.htm">south</A> <A HREF="HTM_001245.htm">north</A> <A HREF="HTM_002257.htm">south</A> <A HREF="HTM_002258.htm">up</A> <A HREF="HTM_002262.htm">east</A> <A HREF="HTM_002263.htm">west</A> <A HREF="HTM_002265.htm">up</A> <A HREF="HTM_002266.htm">down</A> <A HREF="HTM_002268.htm">west</A> <A HREF="HTM_002269.htm">east</A> <A HREF="HTM_002270.htm">south</A> <A HREF="HTM_002272.htm">up</A> <A HREF="HTM_002273.htm">down</A> <A HREF="HTM_002275.htm">west</A> <A HREF="HTM_002276.htm">east</A> <A HREF="HTM_002277.htm">south</A> <A HREF="HTM_002279.htm">ne</A> <A HREF="HTM_002280.htm">sw</A> <A HREF="HTM_002281.htm">d</A> <A HREF="HTM_002282.htm">u</A> <A HREF="HTM_002310.htm">northeast</A> <A HREF="HTM_002311.htm">southwest</A> <A HREF="HTM_002312.htm">north</A> <A HREF="HTM_002313.htm">south</A> <A HREF="HTM_000983.htm">north</A> <A HREF="HTM_002011.htm">mouth</A> <A HREF="HTM_002323.htm">booth</A> <A HREF="HTM_002324.htm">exit</A> <A HREF="HTM_002326.htm">southeast</A> <A HREF="HTM_002327.htm">northeast</A> <A HREF="HTM_002334.htm">east</A> <A HREF="HTM_002335.htm">west</A> <A HREF="HTM_002337.htm">n</A> <A HREF="HTM_002362.htm">burn</A> <A HREF="HTM_002363.htm">enough</A> <A HREF="HTM_002346.htm">southwest</A> <A HREF="HTM_002388.htm">northeast</A> <A HREF="HTM_002395.htm">east</A> <A HREF="HTM_002396.htm">west</A> <A HREF="HTM_001489.htm">Tibet</A> <A HREF="HTM_002406.htm">Lotus</A> <A HREF="HTM_002410.htm">down</A> <A HREF="HTM_002411.htm">up</A> <A HREF="HTM_002420.htm">nw</A> <A HREF="HTM_002421.htm">east</A> <A HREF="HTM_002342.htm">north</A> <A HREF="HTM_002232.htm">south</A> <A HREF="HTM_002492.htm">east</A> <A HREF="HTM_002493.htm">west</A> <A HREF="HTM_002450.htm">up</A> <A HREF="HTM_001141.htm">door</A> <A HREF="HTM_002495.htm">down</A> <A HREF="HTM_001063.htm">down</A> <A HREF="HTM_002496.htm">east</A> <A HREF="HTM_002170.htm">NorthEase</A> <A HREF="HTM_002514.htm">enter</A> <A HREF="HTM_002515.htm">out</A> <A HREF="HTM_002521.htm">nibble</A> <A HREF="HTM_002524.htm">mirror</A> <A HREF="HTM_002518.htm">back</A> <A HREF="HTM_002526.htm">back</A> <A HREF="HTM_002472.htm">NorthWest</A> <A HREF="HTM_002295.htm">South</A> <A HREF="HTM_002532.htm">South</A> <A HREF="HTM_002533.htm">North</A> <A HREF="HTM_002534.htm">North</A> <A HREF="HTM_002535.htm">Ease</A> <A HREF="HTM_002536.htm">SouthEast</A> <A HREF="HTM_002537.htm">East</A> <A HREF="HTM_002540.htm">north</A> <A HREF="HTM_002548.htm">west</A> <A HREF="HTM_002549.htm">southeast</A> <A HREF="HTM_002476.htm">west</A> <A HREF="HTM_002449.htm">east</A> <A HREF="HTM_002556.htm">west</A> <A HREF="HTM_001398.htm">east</A> <A HREF="HTM_002569.htm">northwest</A> <A HREF="HTM_002570.htm">southeast</A> <A HREF="HTM_002573.htm">north</A> <A HREF="HTM_002574.htm">south</A> <A HREF="HTM_002588.htm">west</A> <A HREF="HTM_002589.htm">east</A> <A HREF="HTM_002600.htm">southeast</A> <A HREF="HTM_002601.htm">northwest</A> <A HREF="HTM_002479.htm">d</A> <A HREF="HTM_002613.htm">u</A> <A HREF="HTM_000884.htm">south</A> <A HREF="HTM_002664.htm">out</A> <A HREF="HTM_002665.htm">in</A> <A HREF="HTM_002670.htm">w</A> <A HREF="HTM_002671.htm">e</A> <A HREF="HTM_002468.htm">d</A> <A HREF="HTM_002673.htm">u</A> <A HREF="HTM_002674.htm">ne</A> <A HREF="HTM_002675.htm">sw</A> <A HREF="HTM_002680.htm">enter</A> <A HREF="HTM_002681.htm">out</A> <A HREF="HTM_002682.htm">east</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

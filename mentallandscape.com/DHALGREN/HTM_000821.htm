@@ -1,0 +1,57 @@
+<HTML>
+<HEAD>
+<TITLE>stage</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> stage (#821)</H3>
+(an instance of <A HREF="HTM_000007.htm">generic exit</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp      prosceniumarchreachingoverhead
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp      drop                      ping
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp      gi                          lt
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp      b                            i
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp      t                            s
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp      ASTAGEBROADENOUGHFORALLTOSTAND
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp      stepsYOUSEEGHOSTS?UPTHEREstage
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+look_self:
+<pre>
+pass(@args);
+if (#820.curtain)
+    player:tell("The curtains are closed.");
+else
+    player:tell_lines(#820.stageset);
+    #820:tell_contents(#820:contents(), #820.ctype);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

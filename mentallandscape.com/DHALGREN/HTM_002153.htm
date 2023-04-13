@@ -1,0 +1,371 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Phone Switch</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Phone Switch (#2153)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_001460.htm">Gaijin</A>)
+<BR>
+<BR>
+<pre>
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_001460.htm">Gaijin</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+lookup_phone:
+<pre>
+if (args[1] in this.known_phones)
+    return args[1];
+endif
+phone = $string_utils:match(args[1], this.known_phones, "aliases");
+if (phone in this.known_phones)
+    return phone;
+endif
+phone = $string_utils:match(args[1], this.known_phones, "caller_id");
+if (phone in this.known_phones)
+    return phone;
+endif
+return 0;
+.
+
+</pre>
+<BR>
+register_phone:
+<pre>
+this.known_phones = setadd(this.known_phones, caller);
+.
+
+</pre>
+<BR>
+circuit_id_alloc:
+<pre>
+len = length(this.circuits);
+for cid in [1..len]
+    if (this.circuits[cid] == {})
+        this.circuits[cid] = {{"state", "initial"}};
+        return cid;
+    endif
+endfor
+cid = len + 1;
+this.circuits = {@this.circuits, {{"state", "initial"}}};
+return cid;
+.
+
+</pre>
+<BR>
+circuit_id_free:
+<pre>
+cid = args[1];
+if ((0 < cid) && (cid <= length(this.circuits)))
+    this.circuits[cid] = {};
+endif
+.
+
+</pre>
+<BR>
+circuit_lookup:
+<pre>
+"Determine if callee phone is being called on any circuit.";
+callee_phone = caller;
+len = length(this.circuits);
+for cid in [1..len]
+    circuit = this.circuits[cid];
+    if (circuit != {})
+        iringing = $list_utils:iassoc("ringing", circuit);
+        if (iringing > 0)
+            ringing = $list_utils:assoc("ringing", circuit)[2];
+            if (callee_phone in ringing)
+                return cid;
+            endif
+        endif
+    endif
+endfor
+return 0;
+.
+
+</pre>
+<BR>
+circuit_online_add:
+<pre>
+cid = args[1];
+phone = args[2];
+if ((0 < cid) && (cid <= length(this.circuits)))
+    circuit = this.circuits[cid];
+    ionline = $list_utils:iassoc("online", circuit);
+    if (ionline > 0)
+        online = $list_utils:assoc("online", circuit)[2];
+        for p in (online)
+            p:line_noise("[Now ", phone.name, " is on the line.]");
+        endfor
+        online = setadd(online, phone);
+        circuit = listset(circuit, {"online", online}, ionline);
+    else
+        circuit = {@circuit, {"online", {phone}}};
+    endif
+    this.circuits[cid] = circuit;
+else
+    player:tell("This phone appears to have the wrong long distance carrier.");
+endif
+.
+
+</pre>
+<BR>
+circuit_online_drop:
+<pre>
+cid = args[1];
+phone = args[2];
+circuit = this.circuits[cid];
+ionline = $list_utils:iassoc("online", circuit);
+if (ionline > 0)
+    online = $list_utils:assoc("online", circuit)[2];
+    online = setremove(online, phone);
+    circuit = listset(circuit, {"online", online}, ionline);
+else
+    online = {};
+endif
+this.circuits[cid] = circuit;
+for p in (online)
+    phone:line_noise("[It appears ", phone.name, " hung up.]");
+endfor
+return length(online);
+.
+
+</pre>
+<BR>
+circuit_ring_add:
+<pre>
+cid = args[1];
+phone = args[2];
+circuit = this.circuits[cid];
+iringing = $list_utils:iassoc("ringing", circuit);
+if (iringing > 0)
+    ringing = $list_utils:assoc("ringing", circuit)[2];
+    ringing = setadd(ringing, phone);
+    circuit = listset(circuit, {"ringing", ringing}, iringing);
+else
+    circuit = {@circuit, {"ringing", {phone}}};
+endif
+this.circuits[cid] = circuit;
+this.n_needs_ringing = this.n_needs_ringing + 1;
+this:ring_check();
+.
+
+</pre>
+<BR>
+circuit_ring_drop:
+<pre>
+cid = args[1];
+phone = args[2];
+circuit = this.circuits[cid];
+iringing = $list_utils:iassoc("ringing", circuit);
+if (iringing != 0)
+    ringing = $list_utils:assoc("ringing", circuit)[2];
+    ringing = setremove(ringing, phone);
+    circuit = listset(circuit, {"ringing", ringing}, iringing);
+endif
+this.circuits[cid] = circuit;
+this.n_needs_ringing = this.n_needs_ringing - 1;
+.
+
+</pre>
+<BR>
+ring_check:
+<pre>
+while (this.n_needs_ringing > 0)
+    this:circuit_ring_all();
+    suspend(this.ring_delay);
+endwhile
+this.ring_task = 0;
+.
+
+</pre>
+<BR>
+circuit_ring_all:
+<pre>
+len = length(this.circuits);
+for cid in [1..len]
+    circuit = this.circuits[cid];
+    if (circuit != {})
+        ringing = $list_utils:assoc("ringing", circuit);
+        if (ringing != {})
+            ringing = ringing[2];
+            online = $list_utils:assoc("online", circuit)[2];
+            for phone in (online)
+                for ringer in (ringing)
+                    phone:line_noise("[", ringer.name, " is ringing.]");
+                    ringer:ring();
+                endfor
+            endfor
+        endif
+    endif
+endfor
+.
+
+</pre>
+<BR>
+circuit_connect_party:
+<pre>
+"Transition a party from ringing to online.";
+cid = args[1];
+callee_phone = caller;
+this:circuit_ring_drop(cid, callee_phone);
+this:circuit_online_add(cid, callee_phone);
+circuit = this.circuits[cid];
+istate = $list_utils:iassoc("state", circuit);
+this.circuits[cid] = listset(circuit, {"state", "connected"}, istate);
+.
+
+</pre>
+<BR>
+circuit_drop:
+<pre>
+cid = args[1];
+if ((cid > 0) && (cid <= length(this.circuits)))
+    circuit = this.circuits[cid];
+    ringing = $list_utils:iassoc("ringing", circuit);
+    if (ringing > 0)
+        ringing = $list_utils:assoc("ringing", circuit)[2];
+        for ringer in (ringing)
+            this:circuit_ring_drop(cid, ringer);
+        endfor
+    endif
+    this.circuits[cid] = {{"state", "dead"}};
+endif
+.
+
+</pre>
+<BR>
+place_call:
+<pre>
+cid = args[1];
+callee_phone = args[2];
+caller_phone = caller;
+if ((0 < cid) && (cid <= length(this.circuits)))
+    circuit = this.circuits[cid];
+    online = $list_utils:assoc("online", circuit);
+    if (callee_phone in online)
+        player:tell("That party is already online!");
+    else
+        state = $list_utils:assoc("state", circuit)[2];
+        if (state == "initial")
+            player:tell("The other phone is ringing now.");
+            this:circuit_online_add(cid, caller_phone);
+            this:circuit_ring_add(cid, callee_phone);
+        elseif (state == "connected")
+            player:tell("The other phone is ringing now.");
+            this:circuit_ring_add(cid, callee_phone);
+        else
+            player:tell("Your attempt to place a call did not go through.");
+        endif
+    endif
+else
+    player:tell("The line went dead?");
+endif
+.
+
+</pre>
+<BR>
+pass_msg:
+<pre>
+cid = args[1];
+msg = args[2];
+circuit = this.circuits[cid];
+online = $list_utils:assoc("online", circuit)[2];
+for phone in (setremove(online, caller))
+    phone:hear(caller.caller_id, msg);
+endfor
+.
+
+</pre>
+<BR>
+hangup:
+<pre>
+cid = args[1];
+phone = caller;
+if ((0 < cid) && (cid <= length(this.circuits)))
+    n_online = this:circuit_online_drop(cid, phone);
+    if (n_online == 1)
+        online = $list_utils:assoc("online", this.circuits[cid])[2];
+        phone:line_noise("Don't forget to hangup!");
+        this:circuit_drop(cid);
+    else
+        if (n_online == 0)
+            this:circuit_drop(cid);
+            this:circuit_id_free(cid);
+            phone.circuit_id = 0;
+        endif
+    endif
+endif
+.
+
+</pre>
+<BR>
+reset:
+<pre>
+this.ring_task = 0;
+this.n_needs_ringing = 0;
+this.circuits = {};
+player:tell("In a brave move, you reach out and reset the phone switch.");
+player:announce("You see ", player:title(), " timidly reach out and press a large 
+red button on the ", this.name, ".");
+for phone in (this.known_phones)
+    phone:reset_phone();
+endfor
+.
+
+</pre>
+<BR>
+unregister_phone:
+<pre>
+this.known_phones = setremove(this.known_phones, caller);
+.
+
+</pre>
+<BR>
+dir*ectory:
+<pre>
+player:tell((($string_utils:left("Phone", 10) + $string_utils:left("Caller Id", 25)) 
++ $string_utils:left("Phone Name", 15)) + "Location");
+player:tell($string_utils:left("", 75, "-"));
+for phone in (this.known_phones)
+    name = phone:title();
+    line = (($string_utils:left(tostr(phone), 10) + $string_utils:left(phone.caller_id[1..min(length(phone.caller_id), 
+23)], 25)) + $string_utils:left(name[1..min(length(name), 13)], 15)) + phone.location.name[1..min(length(phone.location.name), 
+20)];
+    player:tell(line);
+endfor
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp known_phones
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp circuits
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ring_delay
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp n_needs_ringing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ring_task
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_002553.htm">M of I Phone Switch</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,91 @@
+<HTML>
+<HEAD>
+<TITLE>The Club</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> The Club (#1289)</H3>
+(an instance of <A HREF="HTM_000262.htm">Generic Secured Post-Apocalypse Room</A> made by <A HREF="HTM_001286.htm">Drummer</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis is the main room of the Club.  It is an underground room, dimly lit, with benches, chairs and sofas, all upholstered in black leather, the rich smell of which enters your nostrils and makes your juices flow.    In the center of the room is a large granite monolith carved to look like an erect penis, complete with two large, round boulders at its base, suggesting testicles.  It is dark grey, and has a large brass band or ring encircling its shaft, which reads:  "HIC HABITAT FELICITAS." 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp 
+<BR>
+<BR>
+You see <A HREF="HTM_001548.htm">pulse</A>, <A HREF="HTM_002034.htm">ga</A> and <A HREF="HTM_001286.htm">Drummer</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ grey door ] <A HREF="HTM_001274.htm">Riesenheim</A>.
+You open the grey door, and close it behind Dir. You begin to aufsteigen a lange Tunnel, in which die Atmospaere ist getting ein bisschen stickig. At the Ende du finally kommst zu einem anderen grauen Tor. Du oeffnest es un gelangst hinein.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ brown door ] <A HREF="HTM_001290.htm">the Shithouse</A>.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ street ] <A HREF="HTM_001354.htm">a dark, unnamed alley</A>.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ black ] <A HREF="HTM_001466.htm">FCS</A>.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ red door ] <A HREF="HTM_001221.htm">Strap's Lockerroom</A>.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp A curtain of gently swinging threaded bamboo pieces leads to the Danish Bar. It looks cozy and inviting in there.
+[ BambooCurtain ] <A HREF="HTM_001525.htm">Danish Bar</A>.
+The beaded strings of bamboo caress you gently as you pass through, like the long hair of a Danish lover.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ oak ] <A HREF="HTM_002174.htm">boardroom</A>.
+A handsome young steward opens the door and says, Good evening, sir. You're early, but John, Jeff and Eric thank you for attending their punishment. Please make yourself comfortable.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+announce*_all_but:
+<pre>
+if (!this.owner:gag_p())
+    return pass(@args);
+endif
+.
+
+</pre>
+<BR>
+accept:
+<pre>
+return ((!is_player(args[1])) || (args[1].gender == "male")) ? pass(@args) | 0;
+.
+
+</pre>
+<BR>
+title:
+<pre>
+if (valid(player))
+    if (valid(player.location))
+        return ((player.location == #1289) || (parent(player.location) == #1289)) 
+? this.name | "The Club";
+    endif
+endif
+return "The Club";
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp accepted
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_001466.htm">FCS</A> <A HREF="HTM_001507.htm">Bedroom</A> <A HREF="HTM_001544.htm">The Showers</A> <A HREF="HTM_001525.htm">Danish Bar</A> <A HREF="HTM_001611.htm">Old Giant Shoe</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

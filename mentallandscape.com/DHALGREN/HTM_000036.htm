@@ -1,0 +1,1372 @@
+<HTML>
+<HEAD>
+<TITLE>Quota-Log</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Quota-Log (#36)</H3>
+(an instance of <A HREF="HTM_000046.htm">Generic Mail Recipient</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspRecord of whose quota has been messed with and why.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000047.htm">Mail Distribution Center</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+init_for_core:
+<pre>
+if (caller_perms().wizard)
+    pass();
+    delete_verb(this, "is_readable_by");
+    delete_verb(this, "is_usable_by");
+    delete_verb(this, "mail_notify");
+    "...remove references to ARB...";
+    this:rm_message_seq({1, 1 + this:length_all_msgs()});
+    this:expunge_rmm();
+    this.mail_forward = {player, this};
+    this.mail_notify = {player};
+    for p in ({"moderator_forward", "moderator_notify", "writers", "readers", "expire_period", 
+"last_used_time"})
+        this.(p) = $mail_recipient.(p);
+    endfor
+    this.moderated = 1;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+<BR>
+MAIL MESSAGES:
+<BR>
+<BR>
+<BR>
+Date: 1994 Jan 21, 07:31:51 p.m. PST
+<BR>
+From: Wizard (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Patroclus (#78) 1000 (from 13)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Jan 23, 05:36:20 p.m. PST
+<BR>
+From: Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota legba (#95) 1000 (from 13)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Jan 23, 05:50:33 p.m. PST
+<BR>
+From: Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Dred (#96) 1000 (from 13)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Jan 24, 03:11:02 p.m. PST
+<BR>
+From: legba (#95)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Bakunin (#116) 500 (from 13)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Jan 26, 02:01:12 p.m. PST
+<BR>
+From: Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Patroclus (#78) 13 (from 997)
+<BR>
+
+<BR>
+Reason for quota decrease: (none).
+<BR>
+<BR>
+Date: 1994 Jan 26, 02:01:40 p.m. PST
+<BR>
+From: Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Calkins (#150) 1000 (from 13)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Jan 27, 08:46:33 p.m. PST
+<BR>
+From: Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota BuilderBob (#195) 8 (from 0)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb  2, 03:08:57 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Chay (#215) 20 (from 6)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb  2, 07:37:57 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Pierce (#241) 8 (from 0)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb  2, 07:59:54 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Pierce (#241) 16 (from 1)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb  3, 10:23:20 a.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota quentin (#258) 16 (from 0)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb  4, 02:51:27 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Mineral (#277) 16 (from 0)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb  4, 02:51:44 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota DrBenway (#276) 16 (from 0)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb  4, 02:56:56 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Zon (#103) 8 (from 0)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb  9, 01:48:40 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Amber-Jessica (#277) 6 (from 0)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 10, 02:57:51 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Klaatu (#296) 10 (from -1)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 11, 02:20:21 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Fig (#352) 10 (from 0)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 13, 05:51:05 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Gru (#381) 20 (from 0)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 13, 06:33:13 p.m. PST
+<BR>
+From: Bakunin (#116)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Deleuze (#213) 20 (from -7)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 15, 03:00:48 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Zon (#103) 20 (from 8)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 15, 03:06:44 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Hilshire (#198) 7 (from 0)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 15, 03:07:24 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Vampy (#118) 7 (from 0)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 15, 10:55:04 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Steve (#300) 0 (from 7)
+<BR>
+
+<BR>
+Reason for quota decrease: (none).
+<BR>
+<BR>
+Date: 1994 Feb 16, 07:54:15 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Patro (#78) 21 (from 7)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 17, 01:07:24 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota cinnamon (#301) 18 (from 6)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 18, 06:23:52 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Tarquin (#445) 20 (from 7)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 19, 06:46:22 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Carrot (#448) 20 (from 7)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 20, 07:17:18 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Jafaar (#458) 20 (from 7)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 21, 01:42:58 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Catwoman (#429) 20 (from 7)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 21, 05:10:33 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Quixote (#479) 0 (from 7)
+<BR>
+
+<BR>
+Reason for quota decrease: (none).
+<BR>
+<BR>
+Date: 1994 Feb 22, 12:23:08 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Malquist (#463) 20 (from 7)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 22, 02:53:37 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Amber-Jessica (#277) 8 (from 4)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 23, 09:51:25 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Hacker (#38) 1000000 (from 50000)
+<BR>
+
+<BR>
+Reason for quota increase: Everything will break if I don't give him more quota.
+<BR>
+<BR>
+Date: 1994 Feb 23, 09:51:57 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Hacker (#38) 10000000 (from 1000000)
+<BR>
+
+<BR>
+Reason for quota increase: Oops. Needed another zero.
+<BR>
+<BR>
+Date: 1994 Feb 23, 09:55:41 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Quota (#34) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: We need him for our quota maintenance.
+<BR>
+<BR>
+Date: 1994 Feb 23, 10:27:06 a.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Snap (#448) 100000 (from 51000)
+<BR>
+
+<BR>
+Reason for quota increase: Because we need a big fat carrot sitting around here.
+<BR>
+<BR>
+Date: 1994 Feb 23, 08:45:42 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Obvious (#513) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 24, 04:19:46 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Saffron (#510) 27500 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 24, 04:20:52 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Saffron (#510) 50000 (from 27500)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 27, 06:57:05 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Sadao (#195) 51000 (from 27000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Feb 28, 07:52:07 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Jean-Michelle (#569) 0 (from 25000)
+<BR>
+
+<BR>
+Reason for quota decrease: Possible second char of Pierce.
+<BR>
+<BR>
+Date: 1994 Mar  2, 08:07:31 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Fig (#352) 50000 (from 31000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Mar  2, 08:11:02 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Klaatu (#296) 50000 (from 33000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Mar  5, 10:30:45 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Sick (#539) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Mar  5, 10:39:33 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Eclipse (#538) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Mar  6, 03:27:35 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Karl (#585) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Mar 16, 02:12:47 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Doug (#778) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Mar 24, 05:30:03 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Jander (#806) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Apr 10, 01:24:27 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota El (#299) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: For his VALIS project.
+<BR>
+<BR>
+Date: 1994 Apr 10, 01:25:35 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Marcus (#812) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: To continue work on his theater productions.
+<BR>
+<BR>
+Date: 1994 Apr 17, 07:52:00 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Rebis (#875) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Apr 20, 06:11:03 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Marcus (#812) 75000 (from 50000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Apr 28, 07:49:59 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota melusina (#907) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 May  8, 06:41:45 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Marcus (#812) 100000 (from 75000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 May  8, 06:42:11 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota genna (#352) 75000 (from 50000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Jun  9, 05:58:40 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Marcus (#812) 150000 (from 100000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Jun 13, 06:37:33 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota zenith (#887) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Jul 20, 08:33:51 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota zenith (#887) 75000 (from 50000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Jul 22, 06:45:41 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota melusina (#907) 125000 (from 50000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Jul 22, 06:47:31 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota melusina (#907) 75000 (from 125000)
+<BR>
+
+<BR>
+Reason for quota decrease: (none).
+<BR>
+<BR>
+Date: 1994 Jul 26, 07:35:54 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Palace (#1400) 0 (from 25000)
+<BR>
+
+<BR>
+Reason for quota decrease: (none).
+<BR>
+<BR>
+Date: 1994 Aug  9, 03:46:19 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Marcus (#812) 200000 (from 150000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Aug 29, 06:10:24 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Trismegistos (#1457) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Sep  8, 06:51:24 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota melusina (#907) 100 (from 75000)
+<BR>
+
+<BR>
+Reason for quota decrease: Request looks okay.
+<BR>
+<BR>
+Date: 1994 Sep  8, 06:51:38 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota melusina (#907) 100000 (from 100)
+<BR>
+
+<BR>
+Reason for quota increase: Duh.
+<BR>
+<BR>
+Date: 1994 Sep  9, 08:36:24 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Eclipse (#538) 75000 (from 50000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Sep 10, 06:36:12 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Trismegistos (#1457) 75000 (from 50000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Sep 16, 08:22:39 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Trismegistos (#1457) 100000 (from 75000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Oct  4, 09:07:18 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Kalessin (#1551) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Oct  5, 02:18:44 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota melusina (#907) 150000 (from 100000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Oct  5, 04:39:28 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Eclipse (#538) 100000 (from 75000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Oct 27, 06:48:13 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Trismegistos (#1457) 25000 (from 100000)
+<BR>
+
+<BR>
+Reason for quota decrease: (none).
+<BR>
+<BR>
+Date: 1994 Oct 27, 06:48:45 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Trismegistos (#1457) 125000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Oct 29, 06:08:27 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Marcus (#812) 250000 (from 200000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Nov  6, 04:57:18 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Gaijin (#1460) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Nov 13, 06:56:15 p.m. PST
+<BR>
+From: Dredful (#96)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota polyhymnia (#905) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: I think poly and mel are working on some cool stuff. We're pretty liberal with the first increase to 50k and I think she will do good with it.
+<BR>
+<BR>
+Date: 1994 Nov 21, 04:44:03 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Kit (#2296) 0 (from 25000)
+<BR>
+
+<BR>
+Reason for quota decrease: (none).
+<BR>
+<BR>
+Date: 1994 Nov 21, 04:47:14 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Kit (#2296) 5 (from 0)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Nov 21, 06:47:14 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Karina (#1380) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Nov 21, 09:59:08 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Kit (#2296) 10 (from 5)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Nov 22, 10:22:15 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Cass (#2296) 50000 (from 10)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Nov 23, 10:51:38 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Cass (#2296) 25000 (from 50000)
+<BR>
+
+<BR>
+Reason for quota decrease: (none).
+<BR>
+<BR>
+Date: 1994 Nov 23, 10:51:49 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota melusina (#907) 175000 (from 150000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1994 Dec 21, 12:17:47 p.m. PST
+<BR>
+From: The_Mayor (#2)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota kp (#585) 100000 (from 50000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 Jan 25, 09:06:13 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Uptown (#2112) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 Jan 27, 04:53:22 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Trismegistos (#1457) 150000 (from 125000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 Jan 26, 08:21:39 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Arc (#2145) 75000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 Jan 27, 02:00:07 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota dried (#2372) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 Jan 30, 10:45:04 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Boudicea (#1021) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 Mar  9, 09:26:22 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Steelgrave (#2179) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 Mar 21, 04:31:26 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Avon (#2177) 75000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 Mar 21, 04:31:59 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Steelgrave (#2179) 75000 (from 50000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 Apr 11, 01:22:09 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Zenith (#887) 100000 (from 75000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 Apr 18, 01:13:54 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Taniak (#2289) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 May 17, 10:00:19 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Marcus (#812) 350000 (from 250000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 May 17, 10:11:10 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota melusina (#907) 300000 (from 175000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 May 17, 10:11:30 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota melusina (#907) 350000 (from 300000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 May 17, 10:12:39 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Brit (#2562) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 May 18, 03:06:14 p.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Eclipse (#538) 150000 (from 100000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 May 19, 10:42:33 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Sick (#539) 150000 (from 50000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+<BR>
+Date: 1995 Jun 26, 10:48:28 a.m. PST
+<BR>
+From: horse (#106)
+<BR>
+To:&nbsp&nbsp *Quota-Log (#36)
+<BR>
+Subj: @quota Pokey (#797) 50000 (from 25000)
+<BR>
+
+<BR>
+Reason for quota increase: (none).
+<BR>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

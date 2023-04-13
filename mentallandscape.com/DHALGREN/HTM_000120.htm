@@ -1,0 +1,48 @@
+<HTML>
+<HEAD>
+<TITLE>wooden box</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> wooden box (#120)</H3>
+(an instance of <A HREF="HTM_000008.htm">generic container</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAn old wooden box with a broken lid.
+<BR>
+<BR>
+wooden box contains <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A>, <A HREF="HTM_000110.htm">Generic Post-Apocalypse Room</A>, <A HREF="HTM_000192.htm">Generic Automaton</A>, <A HREF="HTM_000101.htm">Generic Edible Object</A>, <A HREF="HTM_000261.htm">Generic Boomerang Thing</A>, <A HREF="HTM_000262.htm">Generic Secured Post-Apocalypse Room</A>, <A HREF="HTM_000563.htm">Generic Room with Stacking</A>, <A HREF="HTM_000502.htm">Generic Wandering Automaton</A>, <A HREF="HTM_000562.htm">Generic Auditorium</A>, <A HREF="HTM_000959.htm">Generic Post-Apocalypse Exit</A>, <A HREF="HTM_000955.htm">Generic Room with Seats</A>, <A HREF="HTM_000160.htm">Generic Light Shield</A>, <A HREF="HTM_001472.htm">Generic Music Machine</A>, <A HREF="HTM_000826.htm">Generic Scripted Object</A>, <A HREF="HTM_001053.htm">Generic Transparent Exit</A>, <A HREF="HTM_000859.htm">Generic Moon-phased Wearable</A>, <A HREF="HTM_001998.htm">Generic Performance Room</A>, <A HREF="HTM_001223.htm">Generic Lycanthropic Thespian PC</A>, <A HREF="HTM_002061.htm">Generic Room with Surfaces</A>, <A HREF="HTM_001226.htm">Generic Costume</A>, <A HREF="HTM_001044.htm">Generic Speaking Wandering Automaton</A> and <A HREF="HTM_000834.htm">Generic Litter</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000131.htm">Narrow Alley</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+tell_contents:
+<pre>
+if (this.contents)
+    player:tell("Contents:");
+    for thing in (this.contents)
+        player:tell("  ", thing.name, " (", thing, ")");
+    endfor
+elseif (msg = this:empty_msg())
+    player:tell(msg);
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,80 @@
+<HTML>
+<HEAD>
+<TITLE>Bakunin</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Bakunin (#116)</H3>
+(an instance of <A HREF="HTM_000058.htm">generic wizard</A> made by <A HREF="HTM_000116.htm">Bakunin</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAll in your mind, where it all began.
+<BR>
+<BR>
+Bakunin is carrying <A HREF="HTM_000322.htm">Generic Breakable Exit</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000121.htm">The Loft</A>.
+<BR>
+<BR>
+<BR>
+Bakunin owns <A HREF="HTM_000116.htm">Bakunin</A> <A HREF="HTM_000127.htm">Thinking Feature</A> <A HREF="HTM_000321.htm">Always Already</A> <A HREF="HTM_000397.htm">window</A> <A HREF="HTM_000404.htm">window</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+kick:
+<pre>
+player:tell("You kick ", this.name, ".");
+this:tell(player.name, " just kicked you.");
+.
+
+</pre>
+<BR>
+@paste:
+<pre>
+"Usage: @paste <prefix> <suffix>";
+"Announce a series of entered lines to the room the player is in.";
+"Before the lines are quoted, player.paste_header is run through";
+"$string_utils:pronoun_sub(), and if the result contains the player's";
+"name, it is used as a header.  Otherwise player.name centered in a";
+"line of dashes is used.";
+"A footer comes afterwards, likewise derived from player.paste_footer.";
+"<prefix> and <suffix> are placed before and after each line.";
+"";
+"This verb is, as one might guess, designed for pasting text to MOO using";
+"GnuEmacs or a windowing system.  You should remember that after you";
+"have pasted the lines in, you must type . on a line by itself, or you'll";
+"sit around waiting for $command_utils:read_lines() to finish _forever_.";
+len = length(args);
+prefix = len ? args[1] | "";
+suffix = (len > 1) ? args[2] | "";
+lines = $command_utils:read_lines();
+to_tell = {$string_utils:pronoun_sub_secure("", "") || $string_utils:center(player.name, 
+75, "-")};
+for line in (lines)
+    to_tell = listappend(to_tell, (prefix + line) + suffix);
+endfor
+if (this.paste_footer)
+    to_tell = listappend(to_tell, $string_utils:pronoun_sub(this.paste_footer));
+endif
+for thing in (player.location.contents)
+    $command_utils:suspend_if_needed(0);
+    thing:tell_lines(to_tell);
+endfor
+player:tell("Done @pasting.");
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

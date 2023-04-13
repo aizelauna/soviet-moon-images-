@@ -1,0 +1,103 @@
+<HTML>
+<HEAD>
+<TITLE>cotton candy machine</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> cotton candy machine (#933)</H3>
+(an instance of <A HREF="HTM_001488.htm">Generic Dispenser</A> made by <A HREF="HTM_000907.htm">melusina</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA bit rickety, but recognizable. The chamber of the loudly rattling machine is filled with webs of spun sugar. The operator is nowhere to be seen. Do you dare help yourself to a sugar rush?
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000919.htm">Dying Moon Carnival</A>.
+<BR>
+<BR>
+<BR>
+HELP MANUAL:
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspHere are step by step instructions for setting up a child of this parent to dispense 
+some item:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp- First @create #1488 named MyChildDispenser
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp- Decide on what generic your dispenser will dispense to people. Then type:
+&nbsp&nbsp&nbsp&nbsp&nbsp      @set MyChildDispenser.dispenses to MyGeneric
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp- Next, you will need to decide on the syntax for the command the player will type 
+to get the dispenser to dispense. For instance, on a candy machine, they may need 
+to press a button. This part is perhaps what gives this generic the most flexibility. 
+You can give it almost any syntax. But note that you'll need the `this' argument 
+in there somewhere. Programmers should understand this.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspFor the example, lets try for this syntax: "press push any on this"
+&nbsp&nbsp&nbsp&nbsp&nbspSo someone could type: push button on MyChildDispenser or press tab on MyChildDispenser.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNow, to set up this syntax you'll need to type:
+&nbsp&nbsp&nbsp&nbsp&nbsp      @set MyChildDispenser.verb_name to "press push"
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp      @set MyChildDispenser.verb_args to {"any", "on", "this"}
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNote that the name must be a string and the arguments a list of strings.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp- Now simply type: @setup MyChildDispenser
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspThe barest essentials are now complete. You can even test it now and press button 
+on MyChildDispenser. You should get a child of MyGeneric which is identical in all 
+respects to the parent in name, alias, and description.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspYou can customize your dispenser to create children which are unique, however. But 
+first, you can set a couple of messages:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp@dispense MyChildDispenser is "You get a brand new cotton candy from the cotton candy 
+machine."
+&nbsp&nbsp&nbsp&nbsp&nbsp@odispense MyChildDispenser is "Visitor pushes a button and gets a new cotton candy 
+from the cotton candy machine."
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNote that cotton candy refers to the new child and cotton candy machine to the MyChildDispenser.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspNow, for further customization, you'll need to program some verbs.
+&nbsp&nbsp&nbsp&nbsp&nbspAfter a player invokes the dispenser with your defined command, :dispense_item is 
+called. This verb does the following in order:
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbsp1) calls :check_dispenses (which you can override and customize) to see if the dispenser 
+has a valid and fertile .dispenses.
+&nbsp&nbsp&nbsp&nbsp&nbsp2) calls :pre_dispense and passes all arguments. This verb is useful for setting 
+up the new objects name, aliases and description via the provided :set_new_name :set_new_aliases 
+:set_new_desc verb. You can override this verb and do your own behavior, including 
+parsing the arguments any way you like.
+&nbsp&nbsp&nbsp&nbsp&nbsp3) creates the new object and calls :prepare_obj. Do NOT override :prepare_obj. This 
+verb simply loads in the new name, alias, and description set via :pre_dispense and 
+moves the object to the player.
+&nbsp&nbsp&nbsp&nbsp&nbsp4) calls :post_dispense which you can override. This verb simply displays messages.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspDo not override :dispense_item with your own verb. It won't work.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspFurther documentation can be found in each verb. Also, you can ask Dredful.
+</pre>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+grab steal:
+<pre>
+set_task_perms(player);
+this:dispense_item(argstr);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

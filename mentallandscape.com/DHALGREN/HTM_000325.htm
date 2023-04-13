@@ -1,0 +1,194 @@
+<HTML>
+<HEAD>
+<TITLE>Core Object-Quota Utilities</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Core Object-Quota Utilities (#325)</H3>
+(an instance of <A HREF="HTM_000124.htm">Generic Utilities Package</A> made by <A HREF="HTM_000034.htm">Quota</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis is the default package that interfaces to the $player/$prog quota manipulation verbs.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000034.htm">Quota</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+initialize_quota:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+else
+    args[1].ownership_quota = $wiz_utils.default_player_quota;
+endif
+.
+
+</pre>
+<BR>
+init_for_core:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+else
+    $quota_utils = this;
+endif
+.
+
+</pre>
+<BR>
+adjust_quota_for_programmer:
+<pre>
+if (!caller_perms().wizard)
+    return E_PERM;
+else
+    victim = args[1];
+    oldquota = victim.ownership_quota;
+    if ($object_utils:has_property($local, "second_char_registry") && $local.second_char_registry:is_second_char(victim))
+        "don't increment quota for 2nd chars when programmering";
+        victim.ownership_quota = oldquota;
+    else
+        victim.ownership_quota = oldquota + ($wiz_utils.default_programmer_quota 
+- $wiz_utils.default_player_quota);
+    endif
+endif
+.
+
+</pre>
+<BR>
+bi_create:
+<pre>
+"Calls built-in create.";
+set_task_perms(caller_perms());
+return create(@args);
+.
+
+</pre>
+<BR>
+creation_permitted:
+<pre>
+return args[1].ownership_quota > 0;
+.
+
+</pre>
+<BR>
+verb_addition_permitted property_addition_permitted:
+<pre>
+return 1;
+.
+
+</pre>
+<BR>
+display_quota:
+<pre>
+who = args[1];
+if (caller_perms() == who)
+    q = who.ownership_quota;
+    total = (typeof(who.owned_objects) == LIST) ? length(setremove(who.owned_objects, 
+who)) | 0;
+    if (q == 0)
+        player:tell(tostr("You can't create any more objects", (total < 1) ? "." 
+| tostr(" until you recycle some of the ", total, " you already own.")));
+    else
+        player:tell(tostr("You can create ", q, " new object", (q == 1) ? "" | "s", 
+(total == 0) ? "." | tostr(" without recycling any of the ", total, " that you already 
+own.")));
+    endif
+else
+    if ($perm_utils:controls(caller_perms(), who))
+        player:tell(tostr(who.name, "'s quota is currently ", who.ownership_quota, 
+"."));
+    else
+        player:tell("Permission denied.");
+    endif
+endif
+.
+
+</pre>
+<BR>
+get_quota quota_remaining:
+<pre>
+if ($perm_utils:controls(caller_perms(), args[1]) || (caller == this))
+    return args[1].ownership_quota;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+charge_quota:
+<pre>
+"Charge args[1] for the quota required to own args[2]";
+if ((caller == this) || caller_perms().wizard)
+    args[1].ownership_quota = args[1].ownership_quota - 1;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+reimburse_quota:
+<pre>
+"Reimburse args[1] for the quota required to own args[2]";
+if ((caller == this) || caller_perms().wizard)
+    args[1].ownership_quota = args[1].ownership_quota + 1;
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+set_quota:
+<pre>
+"Set args[1]'s quota to args[2]";
+if (caller_perms().wizard || (caller == this))
+    return args[1].ownership_quota = args[2];
+else
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+preliminary_reimburse_quota:
+<pre>
+return 0;
+.
+
+</pre>
+<BR>
+can_peek:
+<pre>
+"Is args[1] permitted to examine args[2]'s quota information?";
+return $perm_utils:controls(args[1], args[2]);
+.
+
+</pre>
+<BR>
+can_touch:
+<pre>
+"Is args[1] permitted to examine args[2]'s quota information?";
+return args[1].wizard;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp byte_based
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,46 @@
+<HTML>
+<HEAD>
+<TITLE>sign</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> sign (#370)</H3>
+(an instance of <A HREF="HTM_000009.htm">generic note</A> made by <A HREF="HTM_000150.htm">Calkins</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA sign titled: "OBJECT ORIENTED SYSTEMS".  Type "read sign".
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000366.htm">Stalactite Chamber</A>.
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspOn this MUD if a player types "take Red Hat", it is actually the hat itself which 
+decides how to react.  Every object can have its own individual response, usually 
+to move itself to you.  Such a scheme is called OBJECT ORIENTED, as opposed to operating 
+systems where a single, complicated "take" function (e.g. in /usr/bin) must handle 
+all types of objects.
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspRoot --+-- $player -- Useful PC -- Scorpion PC
+&nbsp&nbsp&nbsp&nbsp&nbsp       |
+&nbsp&nbsp&nbsp&nbsp&nbsp       +-- $room -- Noisy RC -- Post-Apocalypse RC -- Secure RC
+&nbsp&nbsp&nbsp&nbsp&nbsp       |
+&nbsp&nbsp&nbsp&nbsp&nbsp       +-- $thing --+-- Automaton --+-- Street Hustler
+&nbsp&nbsp&nbsp&nbsp&nbsp                    |               |
+&nbsp&nbsp&nbsp&nbsp&nbsp                    |               +-- Caveman
+&nbsp&nbsp&nbsp&nbsp&nbsp                    |
+&nbsp&nbsp&nbsp&nbsp&nbsp                    +-- Boomerang Thing --+-- Edible Object
+&nbsp&nbsp&nbsp&nbsp&nbsp                    |                     |
+&nbsp&nbsp&nbsp&nbsp&nbsp                    +-- Light Shield      +-- Miner's Hat
+&nbsp&nbsp&nbsp&nbsp&nbsp
+&nbsp&nbsp&nbsp&nbsp&nbspObjects are created with some parent, and they INHERIT the properties and verbs of 
+their ancesters.  So in fact, the "take" verb on the Miner's Hat is inherited from 
+its grandparent, $thing.  The hat's ability to fly back to the Cave Entrance is inherited 
+from its parent, Boomerang Thing.  
+</pre>
+<BR>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

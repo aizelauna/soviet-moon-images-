@@ -1,0 +1,103 @@
+<HTML>
+<HEAD>
+<TITLE>Generic Wearable Thing</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic Wearable Thing (#550)</H3>
+(an instance of <A HREF="HTM_000005.htm">generic thing</A> made by <A HREF="HTM_000078.htm">Patroclus</A>)
+<BR>
+<BR>
+<pre>
+&nbsp&nbsp&nbsp&nbsp&nbspYou see a tatty, but cozy pink sweatshirt, all nicely stretched out and faded.
+</pre>
+<BR>
+Go to location of this object, <A HREF="HTM_000121.htm">The Loft</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+dress_msg odress_msg dress_fail_msg odress_fail_msg undress_msg oundress_msg undress_fail_msg 
+oundress_fail_msg:
+<pre>
+return $string_utils:pronoun_sub(this.(verb));
+.
+
+</pre>
+<BR>
+pre_dress_effects:
+<pre>
+player:tell((msg = this:dress_msg()) ? msg | this.root:dress_msg());
+.
+
+</pre>
+<BR>
+pre_undress_effects:
+<pre>
+player:tell((msg = this:undress_msg()) ? msg | this.root:undress_msg());
+.
+
+</pre>
+<BR>
+post_dress_effects:
+<pre>
+player:room_announce((msg = this:odress_msg()) ? msg | this.root:odress_msg());
+.
+
+</pre>
+<BR>
+post_undress_effects:
+<pre>
+player:room_announce((msg = this:oundress_msg()) ? msg | this.root:oundress_msg());
+.
+
+</pre>
+<BR>
+worn_msg:
+<pre>
+"%N, %o, %s, %p, %r, %q all refer to whoever is wearing the clothing, assuming they 
+are carrying it (which should be the case). %d refers to the player who looked. %t 
+refers to the clothing itself";
+dobj = player;
+return $string_utils:pronoun_sub(this.(verb), this.location, this);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp worn_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dress_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp odress_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp dress_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp odress_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp undress_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oundress_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp undress_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp oundress_fail_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp root
+<BR>
+<RB>
+<BR>
+CHILDREN:
+<BR>
+<A HREF="HTM_000551.htm">T-Shirt</A> <A HREF="HTM_000553.htm">Kilt</A> <A HREF="HTM_000554.htm">Sandals</A> <A HREF="HTM_000552.htm">a silver torc</A> <A HREF="HTM_000574.htm">Black T-shirt</A> <A HREF="HTM_000586.htm">Brass Orchid</A> <A HREF="HTM_000904.htm">t-shirt</A> <A HREF="HTM_000945.htm">knucklebones</A> <A HREF="HTM_001130.htm">t-shirt with the words RL HAPPENS emblazoned on it in big blue letters</A> <A HREF="HTM_001131.htm">a gold torc</A> <A HREF="HTM_001132.htm">bracelets</A> <A HREF="HTM_001133.htm">toe-rings</A> <A HREF="HTM_001169.htm">copper ring</A> <A HREF="HTM_001225.htm">leather bracelet</A> <A HREF="HTM_000859.htm">Generic Moon-phased Wearable</A> <A HREF="HTM_001123.htm">nosering</A> <A HREF="HTM_001391.htm">kickme</A> <A HREF="HTM_001304.htm">Tail</A> <A HREF="HTM_001231.htm">Legs</A> <A HREF="HTM_001403.htm">strapon</A> <A HREF="HTM_001497.htm">a suit</A> <A HREF="HTM_001201.htm">a top hat</A> <A HREF="HTM_001298.htm">coat</A> <A HREF="HTM_001995.htm">silver ring</A> <A HREF="HTM_002022.htm">a dress</A> <A HREF="HTM_001478.htm">Unix-Weenie Button</A> <A HREF="HTM_002187.htm">Squirrel Tail</A> <A HREF="HTM_001983.htm">a tatty pink sweatshirt</A> <A HREF="HTM_002283.htm">sweater</A> <A HREF="HTM_002182.htm">Pasty-White Clown Makeup</A> <A HREF="HTM_000987.htm">t-shirt</A> <A HREF="HTM_001608.htm">generic personalized belly-button ring</A> <A HREF="HTM_002345.htm">helpful wearable thing</A> <A HREF="HTM_002433.htm">collar</A> <A HREF="HTM_002474.htm">tropical</A> <A HREF="HTM_002488.htm">black</A> <A HREF="HTM_002463.htm">a thick soft robe</A> <A HREF="HTM_002497.htm">a luxurious kaftan</A> <RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

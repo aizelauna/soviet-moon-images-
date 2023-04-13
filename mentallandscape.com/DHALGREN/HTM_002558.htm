@@ -1,0 +1,111 @@
+<HTML>
+<HEAD>
+<TITLE>a Clock</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a Clock (#2558)</H3>
+(an instance of <A HREF="HTM_001998.htm">Generic Performance Room</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA grandfather clock, precise as time itself.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspIt shows it's now --
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                     #### a Clockime o'clock ####
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp in the daytime --
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp (that's in MOO-time....)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp The cow chomps happy all frisking.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000896.htm">a peregrination</A>.
+<BR>
+<BR>
+This place has a certain ambiance...
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp BONG! It's a Clockime.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ticktock!
+<BR>
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+telltime:
+<pre>
+" This routine returns a string giving the present MOO-time ";
+" (In 12-hour time, no seconds or date) ";
+" On the clock, the verb is called by :description and :get_amb ";
+time = ctime(time());
+hour = tonum(time[12..13]);
+(hour > 12) ? hour = hour - 12 | hour;
+return tostr(hour, time[14..16]);
+.
+
+</pre>
+<BR>
+description:
+<pre>
+(typeof(description = pass(@args)) == LIST) ? description | {description};
+for l in [1..length(description)]
+    line = #932:moon_phase(description[l], this);
+    description[l] = strsub(line, "%time", this:telltime());
+endfor
+return description;
+.
+
+</pre>
+<BR>
+get_amb:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+time = this:telltime();
+minute = time[length(time) - 1..length(time)];
+(minute == "00") ? amb = this.amb_noise[1] | (amb = this.amb_noise[2]);
+return strsub(amb, "%time", time);
+.
+
+</pre>
+<BR>
+start_amb:
+<pre>
+this.initial_amb_delay = this.ring_interval - (time() % this.ring_interval);
+pass(@args);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp full_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp new_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp half_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp gibbous_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp crescent_moon_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp moon_waxing_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp moon_waning_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp ring_interval
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

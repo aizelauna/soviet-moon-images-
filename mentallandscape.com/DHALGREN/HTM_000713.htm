@@ -1,0 +1,60 @@
+<HTML>
+<HEAD>
+<TITLE>a brush</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> a brush (#713)</H3>
+(an instance of <A HREF="HTM_000261.htm">Generic Boomerang Thing</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001377.htm">a bathtub</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+brush:
+<pre>
+times = this.times + random(this.times);
+for i in [1..times]
+    (i % 2) ? indent1 = "" | (indent1 = "    ");
+    for n in [1..3]
+        (n % 2) ? indent = indent1 + "" | (indent = indent1 + "  ");
+        brushtime = tostr(indent, this:brush_msg());
+        if ($object_utils:isa(where = this.location, $room))
+            where:announce_all(brushtime);
+        elseif ($object_utils:isa(where.location, $room))
+            where.location:announce_all(brushtime);
+        endif
+    endfor
+    suspend(1);
+endfor
+.
+
+</pre>
+<BR>
+brush_msg:
+<pre>
+return $string_utils:pronoun_sub(this.(verb));
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp times
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp brush_msg
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,148 @@
+<HTML>
+<HEAD>
+<TITLE>CASaNova</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> CASaNova (#2291)</H3>
+(an instance of <A HREF="HTM_000153.htm">Generic Scorpion Player Class</A> made by <A HREF="HTM_002291.htm">CASaNova</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspWho else? That famous theif of young girls hearts. Dressed in loose attire with resounding colors, he glances back at you with his amiable smile through his dangling dark brown bangs, framing his face. He seems to be anticipating for you to speak to him, and you start to expect the same.
+<BR>
+<BR>
+CASaNova is carrying <A HREF="HTM_002294.htm">cotton candy</A>.
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_000017.htm">The Body Bag</A>.
+<BR>
+<BR>
+<BR>
+CASaNova owns <A HREF="HTM_002291.htm">CASaNova</A> <A HREF="HTM_002294.htm">cotton candy</A><BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+features*x:
+<pre>
+"Features -- prints out a list of all features, or matches features.";
+features = $object_utils:leaves($feature);
+if (features)
+    matched = 0;
+    for feature in (features)
+        feature_match = (verb == "featuresx") ? length(args) | (!length(args));
+        for a in (args)
+            cond = (a in {feature.name, @feature.aliases, feature.owner.name, @feature.owner.aliases}) 
+|| ($object_utils:has_callable_verb(feature, a) == {feature});
+            feature_match = (verb == "featuresx") ? feature_match && cond | (feature_match 
+|| cond);
+        endfor
+        if (feature_match)
+            if (matched == 0)
+                this:notify("Features");
+                this:notify("=====================================");
+            endif
+            have_it = (feature in player.features) ? "-->" | "   ";
+            this:notify(tostr(have_it, $string_utils:nn(feature), ",created by ", 
+feature.owner.name, "."));
+            matched = matched + 1;
+        endif
+    endfor
+    if (matched > 0)
+        this:notify(tostr("Found ", tostr(matched), " feature(s). "));
+    else
+        this:notify("Found no features matching that pattern. ");
+    endif
+else
+    this:notify("No features found. ");
+endif
+.
+
+</pre>
+<BR>
+description:
+<pre>
+if (player != this)
+    this:tell(($string_utils:nn(player) + " just looked at you from ") + $string_utils:nn(player.location));
+endif
+return pass(@args);
+.
+
+</pre>
+<BR>
+rancap:
+<pre>
+"Copied from Wabbit (#7338):rancap Thu Nov 10 23:52:44 1994 EST";
+":randomize_capitalization(STR)";
+"This verb returns a the string in args[1], randomly capitialized on each element. 
+So:  'Casanova' may become 'CaSAnOvA', or another possible combination.";
+name = args[1];
+upname = $string_utils:uppercase(name);
+downname = $string_utils:lowercase(name);
+for n in [1..length(name)]
+    name[n] = (random(2) - 1) ? upname[n] | downname[n];
+endfor
+return name;
+.
+
+</pre>
+<BR>
+page_echo_msg:
+<pre>
+if (player.gender == "male")
+    m = this.male_echo_msg;
+elseif (player.gender == "female")
+    m = this.female_echo_msg;
+else
+    return pass(@args);
+endif
+return $string_utils:pronoun_sub(m, this);
+.
+
+</pre>
+<BR>
+page_origin_msg:
+<pre>
+who = $string_utils:words(argstr)[1];
+user = $string_utils:match_player($string_utils:strip_chars(who, "="));
+if (!valid(user))
+    return pass(@args);
+elseif (user.gender == "male")
+    m = this.male_origin_msg;
+elseif (user.gender == "female")
+    m = this.female_origin_msg;
+else
+    return pass(@args);
+endif
+return $string_utils:pronoun_sub(m, this);
+.
+
+</pre>
+<BR>
+title*c:
+<pre>
+this:set_name(this:rancap(this.name));
+return pass(@args);
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp male_origin_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp female_origin_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp male_echo_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp female_echo_msg
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

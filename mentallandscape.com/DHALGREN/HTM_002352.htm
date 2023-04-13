@@ -1,0 +1,46 @@
+<HTML>
+<HEAD>
+<TITLE>Suave Delanyesque Pickup FO</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Suave Delanyesque Pickup FO (#2352)</H3>
+(an instance of <A HREF="HTM_000074.htm">Generic Feature Object</A> made by <A HREF="HTM_001457.htm">Trismegistos</A>)
+<BR>
+<BR>
+<BR>
+Go to location of this object, <A HREF="HTM_001457.htm">Trismegistos</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+stars:
+<pre>
+if (!valid(dobj))
+    player:tell("Can't do it. Sorry.");
+else
+    player:tell("You suavely approach ", dobj.name, ", whispering the pickup line 
+that Lorq Von Ray used on Ruby Red in Delany's _Nova_.");
+    dobj:tell(player.name, " approaches you and whispers, \"Don't the configurations 
+of the stars bore you from here? I know a world where the constellations are called 
+the Mad Sow's Litter, the Greater and Lesser Lynx, the Eye of Vadhamin.\"");
+    dobj.location:announce_all_but({player, dobj}, player.name, " propositions ", 
+dobj.name, " in a suave, Delanyesque kind of way.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,142 @@
+<HTML>
+<HEAD>
+<TITLE>Johnathon's room</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Johnathon's room (#1365)</H3>
+(an instance of <A HREF="HTM_000110.htm">Generic Post-Apocalypse Room</A> made by <A HREF="HTM_001358.htm">Johnathon</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis room looks as if it has been taken over recently. Peeling and
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspfaded floral wallpaper is mostly covered by hanging folds of black cloth,
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspon which a half finished fire mural is being painted. Cans of paint
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsplie on the floor next to the mural. A camp bed has been set in the 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspcorner of the room, and a pile of ( black ) clothes is dumped at the
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspfoot of it. A trestle table holds a primus and a cardboard box of 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsptins etc.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspA door leads onto the street, but it is barracaded shut. Stairs lead down.
+<BR>
+<BR>
+You notice some details:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Lots of tin cans of various types.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Several cans of paint, mostly red and yellow, currently being used to paint a mural on the black cloth.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp Several meters of black cloth hanging from nails in the floor and ceiling. There is a mural being painted on it.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp A pile of black jeans and T-shirts. Several socks are nestin here as well. Prominent is a black canvas jacket with lots of pockets.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp A camp bed with an new sleeping bag on it. The sleeping bag has a shop security tag on it, and look to have been slept in recently.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp A new primus stove. There is a bottle of fluid for it and some matches.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp The stove is a primus.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp A large and rugged cardboard box full of food. Keep off !
+<BR>
+<BR>
+You see <A HREF="HTM_001358.htm">Johnathon</A> here.
+<BR>
+<BR>
+EXITS:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp [ down ] <A HREF="HTM_001364.htm">Johnathon's basement</A>.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+l*ook:
+<pre>
+if ((length(args) > 0) && $string_utils:match_stringlist(args[1], {"mural", "cloth"}))
+    player:tell(this:mural_msg());
+    figures = "";
+    found_one = 0;
+    for item in (connected_players())
+        if ((item != player) && (item.location != this))
+            figures = (item.name + " ") + figures;
+            found_one = 1;
+        endif
+    endfor
+    if (found_one)
+        player:tell(this:figures_msg());
+        player:tell(figures);
+    endif
+else
+    if (length(args) > 0)
+        for item in (connected_players())
+            if ((args[1] == item.name) && (item.location != player.location))
+                dobj = item;
+                player:tell($string_utils:pronoun_sub(this.torments[random(length(this.torments))]));
+                return;
+            endif
+        endfor
+    endif
+    pass(@args);
+endif
+.
+
+</pre>
+<BR>
+mural_msg figures_msg:
+<pre>
+return $string_utils:pronoun_sub(this.(verb));
+.
+
+</pre>
+<BR>
+touch:
+<pre>
+if (length(args) < 1)
+    player:tell("Touch which figure ?");
+else
+    for item in (connected_players())
+        if (((item != player) && (item.name == args[1])) && (item.location != player.location))
+            old_loc = player.location;
+            player:tell("You feel dizzy, then very hot. You feel a falling sensation.");
+            player:tell("You fall though a vortex of flame....");
+            player.location:announce(player.name, " rashly touches the mural, and 
+is drawn in...");
+            player:moveto(item.location);
+            if (player.location == old_loc)
+                player:tell("...back to where you were.");
+            else
+                player.location:announce(player.name, " suddenly falls from the sky 
+in a ball of flame. Fortunately, the flame dissipates quickly.");
+            endif
+            return;
+        endif
+    endfor
+    player:tell("You touch the tapestry, but nothing special happens.");
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp mural_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp figures_msg
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp torments
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

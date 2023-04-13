@@ -1,0 +1,47 @@
+<HTML>
+<HEAD>
+<TITLE>theater</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> theater (#822)</H3>
+(an instance of <A HREF="HTM_000007.htm">generic exit</A> made by <A HREF="HTM_000812.htm">Marcus</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe curtains are closed. You can squeeze through them and descend to the theater.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+look_self:
+<pre>
+if (#820.curtain)
+    player:tell_lines(this.description);
+else
+    player:tell_lines(this.house_desc);
+    if (#819.dark)
+        player:tell("The curtain is open. The house is dark.");
+    else
+        player:tell("The curtain is open and the house lights are on. In the house...");
+        #819:tell_contents(#819:contents(), #819.ctype);
+    endif
+endif
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp house_desc
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,801 @@
+<HTML>
+<HEAD>
+<TITLE>Generic BigList Utilities</TITLE>
+</HEAD>
+
+<BODY bgcolor=#000000 text=#FF9966 link=#FF6600 vlink=#FFCC99 alink=#FFCC99><CENTER> <TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0> <TR>
+<TD ALIGN="left" VALIGN="top" WIDTH=550><BR>
+<H3> Generic BigList Utilities (#15)</H3>
+(an instance of <A HREF="HTM_000124.htm">Generic Utilities Package</A> made by <A HREF="HTM_000038.htm">Hacker</A>)
+<BR>
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspGeneric BigList Utilities
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp----------------------------
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThis is a package for maintaining huge persistent (sorted) lists in a format that is less likely to spam the server (which runs into a certain amount of trouble dealing with long ordinary lists --- btw we use `biglist' to refer to the huge data structure we're about to describe and `list' to refer to ordinary MOO lists {...}).  The biglist in question lives on a particular object, to which we will refer in the discussion below as the `home' object, and its various elements appear as leaves of a tree whose nodes are kept in properties of the home object.  It should be noted that the home object does not need to be (and in fact should *not* be) a descendant of this one; this object merely provides utilities for manipulating the properties on the home object that are used in a particular biglist manipulation.  
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspAll of the utilities below refer to `caller' to locate the home object.  Thus verbs to manipulate a given biglist must be located on or inherited by its home object itself.  The home object needs to define the following verbs
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :_make(@args)     => new property on home object with value args
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :_kill(prop)      delete a given property that was created by :_make
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :_get(prop)       => home.prop
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :_put(prop,@args) set home.prop = args
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :_ord(element)    given something that is of the form of a biglist element
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                    return the corresponding ordinal (for sorting purposes).
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                    If you never intend to use :find_ord, then this can be a 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp                    routine that always returns 0 or some other random value.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspSee #5546 (Generic Biglist Resident) or $big_mail_recipient
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspfor examples.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThose of the following routines that take a biglist argument are expecting
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspeither {} (empty biglist) or some biglist returned by one of the other routines
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :length(biglist)          => length(biglist) (i.e., number of elements)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :find_nth(biglist,n)      => biglist[n]
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :find_ord(biglist,k,comp) => n where n is
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     the largest such that home:(comp)(k,home:_ord(biglist[n])) is false, or
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     the smallest such that home:(comp)(k,home:_ord(biglist[n+1])) is true.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     Always returns a value between 0 and length(biglist) inclusive.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     This assumes biglist to be sorted in order of increasing :_ord values 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     with respect to home:(comp)().
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     Standard situation is :_ord returns a number and comp is a < verb.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :start(biglist,s,e)  => {biglist[s..?],@handle} or {}
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :next(@handle)       => {biglist[?+1..??],@newhandle} or {}
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     These two are used for iterating over a range of elements of a biglist
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     The canonical incantation for doing
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        for elt in (biglist[first..last])
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp          ...
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        endfor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     is
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        handle = :start(biglist,first,last);
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        while(handle)
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp          for elt in (handle[1])
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp            ...
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp          endfor
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp          handle = :next(@listdelete(handle,1));
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp        endwhile
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbspThe following all destructively modify their biglist argument(s) L (and M).
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :set_nth(L,n,value)  =>  L[n] = value
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     replaces the indicated element
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :insert_before(L,M,n) => {@L[1..n-1],@M,@L[n..length(L)]}
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :insert_after (L,M,n) => {@L[1..n],  @M,@L[n+1..length(L)]}
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     takes two distinct biglists, inserts one into the other at the given point
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     returns the resulting consolidated biglist
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :extract_range(L,m,n) => {{@L[1..m-1],@L[n+1..]}, L[m..n]} 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     breaks the given biglist into two distinct biglists.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :delete_range(L,m,n[,leafkiller]) => {@L[1..m-1],@L[n+1..]}
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :keep_range  (L,m,n[,leafkiller]) => L[m..n]
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     like extract_range only we destroy what we don't want.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :insertlast(L,value)  => {@L,value}
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     inserts a new element at the end of biglist.  
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     If find_ord is to continue to work properly, it is assumed that the 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     home:_ord(elt) is greater (comp-wise) than all of the :_ord values
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     of elements currently in the biglist.
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp  :kill(L[,leafkiller]) 
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     destroys all nodes used by biglist.  
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp     Calls home:leafkiller on each element.
+<BR>
+<BR>
+<BR>
+<BR>
+VERB SOURCE CODE:
+<BR>
+<BR>
+length:
+<pre>
+":length(tree) => number of leaves in tree.";
+return args[1] ? args[1][2] | 0;
+.
+
+</pre>
+<BR>
+find_nth:
+<pre>
+":find_nth(tree,n) => nth leaf of tree.  Assumes n in [1..tree[2]]";
+return this:_find_nth(caller, @args);
+.
+
+</pre>
+<BR>
+find_ord:
+<pre>
+":_find_ord(tree,n,comp) ";
+" => index of rightmost leaf for which :(comp)(n,:_ord(leaf)) is false.";
+"returns 0 if true for all leaves.";
+return args[1] ? this:_find_ord(caller, @args) | 0;
+.
+
+</pre>
+<BR>
+set_nth:
+<pre>
+":set_nth(tree,n,value) => tree";
+"modifies tree so that nth leaf == value";
+if (((n = args[2]) < 1) || ((!(tree = args[1])) || (tree[2] < n)))
+    return E_RANGE;
+else
+    this:_set_nth(caller, @args);
+    return (n != 1) ? tree | listset(tree, caller:_ord(args[3]), 3);
+endif
+.
+
+</pre>
+<BR>
+kill:
+<pre>
+":kill(tree[,leafverb]) deletes tree and _kills all of the nodes that it uses.";
+"if leafverb is given, caller:leafverb is called on all leaves in tree.";
+if (tree = args[1])
+    lverb = {@args, ""}[2];
+    this:_skill(caller, (typeof(tree) == LIST) ? tree[1] | tree, lverb);
+endif
+"... otherwise nothing to do...";
+.
+
+</pre>
+<BR>
+insert_after insert_before:
+<pre>
+":insert_after(tree,subtree,n)";
+":insert_before(tree,subtree,n)";
+"  inserts subtree after (before) the nth leaf of tree,";
+"  returning the resulting tree.";
+subtree = args[2];
+if (tree = args[1])
+    if (subtree)
+        where = args[3] - (verb == "insert_before");
+        if (where <= 0)
+            return this:_merge(caller, subtree, tree);
+        elseif (where >= tree[2])
+            return this:_merge(caller, tree, subtree);
+        else
+            s = this:_split(caller, caller:_get(tree[1])[1], where, tree);
+            return this:_merge(caller, this:_merge(caller, s[1], subtree), s[2]);
+        endif
+    else
+        return tree;
+    endif
+else
+    return subtree;
+endif
+.
+
+</pre>
+<BR>
+extract_range:
+<pre>
+":extract_range(tree,first,last) => {newtree,extraction}";
+return this:_extract(caller, @args);
+.
+
+</pre>
+<BR>
+delete_range:
+<pre>
+":delete_range(tree,first,last[,leafkill]) => newtree";
+extract = this:_extract(caller, @args);
+if (die = extract[2])
+    this:_skill(caller, die[1], {@args, ""}[4]);
+endif
+return extract[1];
+.
+
+</pre>
+<BR>
+keep_range:
+<pre>
+":keep_range(tree,first,last[,leafkill]) => range";
+extract = this:_extract(caller, @args);
+if (die = extract[1])
+    this:_skill(caller, die[1], {@args, ""}[4]);
+endif
+return extract[2];
+.
+
+</pre>
+<BR>
+insert_last:
+<pre>
+":insert_last(tree,insert) => newtree";
+"insert a new leaf to be inserted at the righthand end of the tree";
+tree = args[1];
+insert = args[2];
+if (!tree)
+    return {caller:_make(0, {insert}), 1, caller:_ord(insert)};
+endif
+hgt = caller:_get(tree[1]);
+rspine = {{tree, plen = length(kids = hgt[2])}};
+for i in [1..hgt[1]]
+    parent = kids[plen];
+    kids = caller:_get(parent[1])[2];
+    plen = length(kids);
+    rspine = {{parent, plen}, @rspine};
+endfor
+iord = caller:_ord(insert);
+for h in [1..length(rspine)]
+    "... tree is the plen'th (rightmost) child of parent...";
+    if (rspine[h][2] < this.maxfanout)
+        parent = rspine[h][1];
+        hgp = caller:_get(parent[1]);
+        caller:_put(parent[1], @listset(hgp, {@hgp[2], insert}, 2));
+        for p in (rspine[h + 1..length(rspine)])
+            rkid = listset(parent, parent[2] + 1, 2);
+            parent = p[1];
+            hgp = caller:_get(parent[1]);
+            caller:_put(parent[1], @listset(hgp, listset(hgp[2], rkid, p[2]), 2));
+        endfor
+        return listset(tree, tree[2] + 1, 2);
+    endif
+    insert = {caller:_make(h - 1, {insert}), 1, iord};
+endfor
+return {caller:_make(length(rspine), {tree, insert}), tree[2] + 1, tree[3]};
+.
+
+</pre>
+<BR>
+start:
+<pre>
+":start(tree,first,last) => {list of leaf nodes, @handle}";
+"handle is of the form {{node,next,size}...}";
+if (tree = args[1])
+    before = max(0, args[2] - 1);
+    howmany = min(args[3], tree[2]) - before;
+    if (howmany <= 0)
+        return {};
+    else
+        spine = {};
+        for h in [1..caller:_get(tree[1])[1]]
+            ik = this:_listfind_nth(kids = caller:_get(tree[1])[2], before);
+            newh = kids[ik[1]][2] - ik[2];
+            if (newh < howmany)
+                spine = {{tree[1], ik[1] + 1, howmany - newh}, @spine};
+                howmany = newh;
+            endif
+            tree = kids[ik[1]];
+            before = ik[2];
+        endfor
+        return {caller:_get(tree[1])[2][before + 1..before + howmany], @spine};
+    endif
+else
+    return {};
+endif
+.
+
+</pre>
+<BR>
+next:
+<pre>
+":next(@handle) => {list of more leaf nodes, @newhandle}";
+if (args)
+    spine = listdelete(args, 1);
+    node = args[1][1];
+    n = args[1][2];
+    size = args[1][3];
+    for h in [1..caller:_get(node)[1]]
+        nnode = caller:_get(node)[2][n];
+        if (size > nnode[2])
+            spine = {{node, n + 1, size - nnode[2]}, @spine};
+            size = nnode[2];
+        endif
+        n = 1;
+        node = nnode[1];
+    endfor
+    return {caller:_get(node)[2][n..size], @spine};
+else
+    return {};
+endif
+.
+
+</pre>
+<BR>
+_find_nth:
+<pre>
+":_find_nth(home,tree,n) => nth leaf of tree.";
+"...Assumes n in [1..tree[2]]";
+if (caller != this)
+    return E_PERM;
+endif
+home = args[1];
+tree = args[2];
+n = args[3];
+if ((p = home:_get(tree[1]))[1])
+    for k in (p[2])
+        if (n > k[2])
+            n = n - k[2];
+        else
+            return this:_find_nth(home, k, n);
+        endif
+    endfor
+    return E_RANGE;
+else
+    return p[2][n];
+endif
+.
+
+</pre>
+<BR>
+_find_ord:
+<pre>
+":_find_ord(home,tree,n,comp) ";
+" => index of rightmost leaf for which :(comp)(n,:_ord(leaf)) is false.";
+"returns 0 if true for all leaves.";
+if (caller != this)
+    return E_PERM;
+endif
+home = args[1];
+tree = args[2];
+n = args[3];
+comp = args[4];
+if ((p = home:_get(tree[1]))[1])
+    sz = tree[2];
+    for i in [-length(p[2])..-1]
+        k = p[2][-i];
+        sz = sz - k[2];
+        if (!home:(comp)(n, k[3]))
+            return sz + this:_find_ord(home, k, n, comp);
+        endif
+    endfor
+    return 0;
+else
+    for i in [1..r = length(p[2])]
+        if (home:(comp)(n, home:_ord(p[2][i])))
+            return i - 1;
+        endif
+    endfor
+    return r;
+endif
+.
+
+</pre>
+<BR>
+_set_nth:
+<pre>
+":_set_nth(home,tree,n,value) => tree[n] = value";
+"Assumes n in [1..tree[2]]";
+if (caller != this)
+    return E_PERM;
+endif
+home = args[1];
+tree = args[2];
+n = args[3];
+value = args[4];
+if ((p = home:_get(tree[1]))[1])
+    ik = this:_listfind_nth(p[2], n - 1);
+    this:_set_nth(home, p[2][ik[1]], ik[2] + 1, value);
+    if (!ik[2])
+        p[2][ik[1]][3] = home:_ord(value);
+        home:_put(tree[1], @p);
+    endif
+else
+    p[2][n] = value;
+    home:_put(tree[1], @p);
+endif
+.
+
+</pre>
+<BR>
+_skill:
+<pre>
+":_skill(home,node,leafverb)";
+"home:_kill's node and all descendants, home:(leafverb)'s all leaves";
+if (caller != this)
+    return E_PERM;
+endif
+home = args[1];
+hgn = home:_get(node = args[2]) || {0, {}};
+lverb = args[3];
+if (hgn[1])
+    for kid in (hgn[2])
+        this:_skill(home, kid[1], lverb);
+    endfor
+elseif (lverb)
+    for kid in (hgn[2])
+        home:(lverb)(kid);
+    endfor
+endif
+home:_kill(node);
+.
+
+</pre>
+<BR>
+_extract:
+<pre>
+":_extract(home,tree,first,last) => {newtree,extraction}";
+if (caller != this)
+    return E_PERM;
+endif
+home = args[1];
+if (!(tree = args[2]))
+    return {{}, {}};
+endif
+before = max(0, args[3] - 1);
+end = min(tree[2], args[4]);
+if ((end <= 0) || (before >= end))
+return {tree, {}};
+endif
+height = home:_get(tree[1])[1];
+if (end < tree[2])
+r = this:_split(home, height, end, tree);
+if (before)
+    l = this:_split(home, height, before, r[1]);
+    extract = l[2];
+    newtree = this:_merge(home, l[1], r[2]);
+else
+    extract = r[1];
+    newtree = r[2];
+endif
+elseif (before)
+l = this:_split(home, height, before, tree);
+extract = l[2];
+newtree = l[1];
+else
+return {{}, tree};
+endif
+return {this:_scrunch(home, newtree), this:_scrunch(home, extract)};
+.
+
+</pre>
+<BR>
+_merge:
+<pre>
+"_merge(home,ltree,rtree) => newtree";
+"assumes ltree and rtree to be nonempty.";
+if (caller != this)
+    return E_PERM;
+endif
+home = args[1];
+lnode = args[2];
+rnode = args[3];
+lh = home:_get(lnode[1])[1];
+rh = home:_get(rnode[1])[1];
+if (lh > rh)
+    return this:_rmerge(home, lnode, rnode);
+endif
+for h in [lh + 1..rh]
+    lnode[1] = home:_make(h, {lnode});
+endfor
+m = this:_smerge(home, rh, lnode, rnode);
+return (length(m) <= 1) ? m[1] | {home:_make(rh + 1, m), m[1][2] + m[2][2], m[1][3]};
+.
+
+</pre>
+<BR>
+_smerge:
+<pre>
+"_smerge(home, height, ltree, rtree) =>{ltree[,rtree]}";
+"assumes ltree and rtree are at the given height.";
+"merges the trees if the combined number of children is <= maxfanout";
+"otherwise returns two trees where ltree is guaranteed minfanout children and rtree 
+is guaranteed the minimum of minfanout and however many children it started with.";
+if (caller != this)
+    return E_PERM;
+endif
+home = args[1];
+height = args[2];
+ltree = args[3];
+rtree = args[4];
+llen = length(lkids = home:_get(ltree[1])[2]);
+rlen = length(rkids = home:_get(rtree[1])[2]);
+if (height)
+    m = this:_smerge(home, height - 1, lkids[llen], rkids[1]);
+    mlen = length(mkids = {@listdelete(lkids, llen), @m, @listdelete(rkids, 1)});
+    if (mlen <= this.maxfanout)
+        home:_put(ltree[1], height, mkids);
+        home:_kill(rtree[1]);
+        ltree[2] = ltree[2] + rtree[2];
+        return {ltree};
+    else
+        S = max(llen - 1, (mlen + 1) / 2);
+        home:_put(ltree[1], height, mkids[1..S]);
+        home:_put(rtree[1], height, mkids[S + 1..length(mkids)]);
+        xfer = -lkids[llen][2];
+        for k in (mkids[llen..S])
+            xfer = xfer + k[2];
+        endfor
+        ltree[2] = ltree[2] + xfer;
+        rtree[2] = rtree[2] - xfer;
+        rtree[3] = mkids[S + 1][3];
+        return {ltree, rtree};
+    endif
+elseif ((llen * 2) >= this.maxfanout)
+    return {ltree, rtree};
+elseif (this.maxfanout < (llen + rlen))
+    T = ((rlen - llen) + 1) / 2;
+    home:_put(ltree[1], 0, {@lkids, @rkids[1..T]});
+    home:_put(rtree[1], 0, rkids[T + 1..rlen]);
+    ltree[2] = ltree[2] + T;
+    rtree[2] = rtree[2] - T;
+    rtree[3] = home:_ord(rkids[T + 1]);
+    return {ltree, rtree};
+else
+    home:_put(ltree[1], 0, {@lkids, @rkids});
+    home:_kill(rtree[1]);
+    ltree[2] = ltree[2] + rtree[2];
+    return {ltree};
+endif
+.
+
+</pre>
+<BR>
+_split:
+<pre>
+"_split(home, height,lmax,ltree[,@rtrees]}) => {ltree,[mtree,]@rtrees}";
+"ltree is split after the lmax'th leaf, the righthand portion grafted onto the leftmost 
+of the rtrees, if possible.  Otherwise we create a new tree mtree, stealing from 
+rtrees[1] if necessary.";
+"Assumes 1<=lmax<ltree[2]";
+if (caller != this)
+    return E_PERM;
+endif
+home = args[1];
+height = args[2];
+lmax = args[3];
+ltree = args[4];
+rtrees = args[5..length(args)];
+llen = length(lkids = home:_get(ltree[1])[2]);
+rlen = length(rkids = rtrees ? home:_get(rtrees[1][1])[2] | {});
+if (height)
+    ik = this:_listfind_nth(lkids, lmax);
+    if (ik[2])
+        llast = ik[1];
+        m = this:_split(home, height - 1, ik[2], lkids[llast], @lkids[llast + 1..llen], 
+@rkids);
+        lkids[llast] = m[1];
+        mkids = listdelete(m, 1);
+    else
+        llast = ik[1] - 1;
+        mkids = {@lkids[ik[1]..llen], @rkids};
+    endif
+    home:_put(ltree[1], height, lkids[1..llast]);
+    mlen = length(mkids);
+    if ((((mlen - rlen) * 2) >= this.maxfanout) || (!rtrees))
+        "...residue left over from splitting ltree can stand by itself...";
+        return {listset(ltree, lmax, 2), {home:_make(height, mkids[1..mlen - rlen]), 
+ltree[2] - lmax, mkids[1][3]}, @rtrees};
+    elseif (mlen <= this.maxfanout)
+        "...residue left over from splitting ltree fits in rtrees[1]...";
+        home:_put(rtrees[1][1], height, mkids);
+        rtrees[1][2] = (ltree[2] - lmax) + rtrees[1][2];
+        rtrees[1][3] = mkids[1][3];
+        return {listset(ltree, lmax, 2), @rtrees};
+    else
+        "...need to steal from rtrees[1]...";
+        if (llast < llen)
+            msize = ltree[2] - lmax;
+            R = (mlen - rlen) + 1;
+        else
+            msize = 0;
+            R = 1;
+        endif
+        for k in (mkids[R..mlen / 2])
+            msize = msize + k[2];
+        endfor
+        home:_put(rtrees[1][1], height, mkids[(mlen / 2) + 1..mlen]);
+        rtrees[1][2] = (rtrees[1][2] + ltree[2]) - (lmax + msize);
+        rtrees[1][3] = mkids[(mlen / 2) + 1][3];
+        return {listset(ltree, lmax, 2), {home:_make(height, mkids[1..mlen / 2]), 
+msize, mkids[1][3]}, @rtrees};
+    endif
+else
+    home:_put(ltree[1], 0, lkids[1..lmax]);
+    if ((((llen - lmax) * 2) >= this.maxfanout) || (!rtrees))
+        "...residue left over from splitting ltree can stand by itself...";
+        return {listset(ltree, lmax, 2), {home:_make(0, lkids[lmax + 1..llen]), llen 
+- lmax, home:_ord(lkids[lmax + 1])}, @rtrees};
+    elseif ((mlen = (rlen + llen) - lmax) <= this.maxfanout)
+        "...residue left over from splitting ltree fits in rtrees[1]...";
+        home:_put(rtrees[1][1], 0, {@lkids[lmax + 1..llen], @rkids});
+        rtrees[1][2] = mlen;
+        rtrees[1][3] = home:_ord(lkids[lmax + 1]);
+        return {listset(ltree, lmax, 2), @rtrees};
+    else
+        "...need to steal from rtrees[1]...";
+        home:_put(rtrees[1][1], 0, rkids[(R = ((rlen - llen) + lmax) / 2) + 1..rlen]);
+        rtrees[1][2] = (mlen + 1) / 2;
+        rtrees[1][3] = home:_ord(rkids[R + 1]);
+        return {listset(ltree, lmax, 2), {home:_make(0, {@lkids[lmax + 1..llen], 
+@rkids[1..R]}), mlen / 2, home:_ord(lkids[lmax + 1])}, @rtrees};
+    endif
+endif
+.
+
+</pre>
+<BR>
+_rmerge:
+<pre>
+":_rmerge(home, tree, insertree) => newtree ";
+"(newtree is tree with insertree appended to the right)";
+"insertree is assumed to be of height < tree";
+if (caller != this)
+    return E_PERM;
+endif
+home = args[1];
+tree = args[2];
+insert = args[3];
+if (!tree)
+    return insert;
+elseif (!insert)
+    return tree;
+endif
+iheight = home:_get(insert[1])[1];
+rspine = {};
+for i in [iheight + 1..home:_get(tree[1])[1]]
+    kids = home:_get(tree[1])[2];
+    tlen = length(kids);
+    rspine = {{tree, tlen}, @rspine};
+    tree = kids[tlen];
+endfor
+isize = insert[2];
+m = this:_smerge(home, iheight, tree, insert);
+for h in [1..length(rspine)]
+    plen = rspine[h][2];
+    parent = rspine[h][1];
+    hgp = home:_get(parent[1]);
+    if (((length(m) - 1) + plen) > this.maxfanout)
+        home:_put(parent[1], @listset(hgp, listset(hgp[2], m[1], plen), 2));
+        parent[2] = (parent[2] + isize) - m[2][2];
+        m = {parent, listset(m[2], home:_make(h + iheight, {m[2]}), 1)};
+    else
+        home:_put(parent[1], @listset(hgp, {@hgp[2][1..plen - 1], @m}, 2));
+        for p in (rspine[h + 1..length(rspine)])
+            parent[2] = parent[2] + isize;
+            tree = parent;
+            parent = p[1];
+            hgp = home:_get(parent[1]);
+            home:_put(parent[1], @listset(hgp, listset(hgp[2], tree, p[2]), 2));
+        endfor
+        return listset(parent, parent[2] + isize, 2);
+    endif
+endfor
+return {home:_make((length(rspine) + iheight) + 1, m), m[1][2] + m[2][2], m[1][3]};
+.
+
+</pre>
+<BR>
+_scrunch:
+<pre>
+":_scrunch(home,tree) => newtree";
+"decapitates single-child nodes from the top of the tree, returns new root.";
+if (caller != this)
+    return E_PERM;
+endif
+if (tree = args[2])
+    home = args[1];
+    while ((n = home:_get(tree[1]))[1] && (length(n[2]) == 1))
+        home:_kill(tree[1]);
+        tree = n[2][1];
+    endwhile
+endif
+return tree;
+.
+
+</pre>
+<BR>
+_listfind_nth:
+<pre>
+"_listfind_nth(nodelist,key) => {i,k} where i is the smallest i such that the sum 
+of the first i elements of intlist is > key, and k==key - sum(first i-1 elements).";
+"1 <= i <= length(intlist)+1";
+lst = args[1];
+key = args[2];
+for i in [1..length(lst)]
+    key = key - lst[i][2];
+    if (0 > key)
+        return {i, key + lst[i][2]};
+    endif
+endfor
+return {length(lst) + 1, key};
+.
+
+</pre>
+<BR>
+_insertfirst:
+<pre>
+if (caller != this)
+    return E_PERM;
+endif
+.
+
+</pre>
+<BR>
+debug:
+<pre>
+return $perm_utils:controls(caller_perms(), this) ? this:(args[1])(@listdelete(args, 
+1)) | E_PERM;
+.
+
+</pre>
+<BR>
+<BR>
+PROPERTY DATA:
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp about
+<BR>
+&nbsp&nbsp&nbsp&nbsp&nbsp maxfanout
+<BR>
+<RB>
+</TR>
+</TABLE>
+</CENTER>
+</BODY>
+</HTML>
